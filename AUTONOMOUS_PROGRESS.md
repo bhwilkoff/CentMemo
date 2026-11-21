@@ -75,6 +75,10 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
     - The device-harness lessons from docs/PROVENANCE.md.
 11b. ⏳ Web: static pages (privacy, terms, connect) set headings in system
     sans, not Newsreader (DESIGN T1). Found tick 9.
+11c. ⏳ Opt: DECISIONS.md is 1,476 lines, mostly the template's 001-053;
+    AUTONOMOUS-LOOPS says it stays context-sized. Archive the inherited ones
+    the app does not lean on to docs/DECISIONS-ARCHIVE.md (one line each
+    left behind). Found tick 10.
 12. 🔮 Shared stories at a public URL (opt-in per story).
 13. 🔮 macOS through the universal target.
 
@@ -292,3 +296,23 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
 - **Found:** static-page headings use system sans, not Newsreader (new
   backlog item 11b).
 - **Next:** tick 10 (opt): net-remove lines.
+
+### Tick 10 — 2026-11-21 — opt: true Current State, superseded 059 trimmed
+- **Context:** opt tick (net-remove lines). Confirmed tick 9 live:
+  centmemo.com/connect/ 200 with the Wallet sentence.
+- **Implementation:**
+  - SCRATCHPAD Current State (printed at every session start) rewritten to
+    what is true now. It still said email-code sign-in, HTTPS pending, and
+    the OAuth and FinanceKit steps blocked.
+  - Decision 059 trimmed to what still holds (sanguine, the six colors
+    stored per person, the Twitter-distance reason, how to add a color),
+    marked "placement superseded by 060".
+  - Audits found nothing dead in code: every `API.*` export is called, and
+    every once-referenced Swift function is a test or protocol method.
+- **Lines:** SCRATCHPAD 68 to 61, DECISIONS 1487 to 1476 (−18).
+- **Found:** DECISIONS.md is far past context-sized (new item 11c).
+- **Verification:** `tools/test_all.sh` ALL PASS; the session-start hook
+  prints the new state.
+- **Next:** tick 11 (iOS). The top iOS item is 10 (attachments by
+  reference), but Ben's iPad readable-width answer and the static-page font
+  (11b, web) are pending; take item 10.

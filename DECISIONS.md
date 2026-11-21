@@ -1400,36 +1400,25 @@ devices.
 
 ---
 
-## 059: A sanguine pencil on a ground the person chooses; aqua by default
+## 059: A sanguine pencil and a color the person chooses; aqua by default (placement superseded by 060)
 *Date: 2026-11-21*
 
-The pencil, meaning text, marks, and actions, is sanguine `#4A1520`. The
-page is a bold ground the person picks in Settings: Aqua (the default), Sky,
-Salmon, Apricot, Citron, or Pistachio. The choice is stored in `profiles`,
-so it follows them across web and iPhone. Type is editorial: Newsreader on
-the web and New York (the system serif) on Apple, for headings and memos.
-The pencil appears as drawn marks (a circled count, wavy rules), never as a
-handwriting font.
+The pencil (text, marks, actions) is sanguine `#4A1520`. The person picks
+their color in Settings: Aqua (default), Sky, Salmon, Apricot, Citron, or
+Pistachio, stored in `profiles` so it follows them across web and iPhone.
+Type: Newsreader on the web, New York on Apple. The pencil is drawn marks,
+never a handwriting font. **Where** the color goes is Decision 060.
 
 **Why**: Ben: "I like the sanguine color a lot and the background color(s)
 should be able to be chosen by the user, but I like the aqua as a default as
-long as it isn't too close to the old Twitter bird color."
-- Aqua is 16 to 21 CIEDE2000 from Twitter's blues, so it is clearly distinct.
-- Every ground pairs with sanguine in a way no brand uses
-  (docs/research/color-search.md). Lavender was left out because it reads as
-  Human Shaped's sibling.
-- The usual green, red, and amber fail on bold grounds, so the semantic
-  colors are deeper in light mode.
-- Dark grounds stay near neutral, so the pale sanguine never sits on its
-  near-opposite hue (Human Shaped's October 9 lesson).
+long as it isn't too close to the old Twitter bird color." Aqua is 16 to 21
+CIEDE2000 from Twitter's blues; every color pairs with sanguine in a way no
+brand uses (docs/research/color-search.md); lavender was left out as Human
+Shaped's sibling.
 
-**How to apply**:
-- A new ground needs four things: a `grounds` entry in design-tokens.json, a
-  CSS rule in all three blocks, a case in `apple/Core/Ground.swift`, and the
-  `profiles` check constraint.
-- `node tools/test_grounds.mjs` fails on any contrast or parity miss.
-- Long reading and writing (memos, the story) sit on paper (surface), not
-  directly on the ground.
+**How to apply**: a new color needs a `grounds` entry in design-tokens.json,
+a CSS rule in all three blocks, a case in `apple/Core/Ground.swift`, and the
+`profiles` check constraint; `node tools/test_grounds.mjs` fails on any miss.
 
 ---
 
