@@ -13,22 +13,21 @@
 
 ## Current state
 
-- **Status**: CentMemo (was Duet Connect), 2026-11-21. Bundle `com.learningischange.centmemo`, team Learning is Change, Inc. (`L2G756LY8N`). Ben's words: `docs/WHAT-CENTMEMO-IS.md`. Decisions 054-057.
-- **Active milestone**: M1 (plan: memory file `~/.claude/plans/mighty-percolating-simon-*.md`): backend, connector, web app, skills, infrastructure.
-- **Built (unverified end to end yet)**:
-  - Supabase project `centmemo` (`qucsmmazfalbyduxlavl`, free tier). Migrations in `supabase/migrations/` applied. Edge Function `mcp` deployed; unauthenticated POST returns 401 + `resource_metadata` (verified). OAuth server NOT yet enabled (dashboard).
-  - Money core `js/money/money.js` + goldens `node --test tests/*.test.mjs` (5 pass; golden seen failing first).
-  - Web app (index.html, js/app.js, js/api.js, css), consent page, privacy, terms. Sign-in screen verified at 375px dark; signed-in views not yet seen.
-  - Skills: `claude-connector-mcp`, `finance-app-foundations`, `money-story-design`.
-- **Supabase slot**: free tier allows 2 active projects. boba-card-app was paused for CentMemo; Ben unpaused it 2026-11-21 to export BOBA data, and CentMemo is PAUSED until he is done.
-- **Next actions**:
-  1. When Ben's BOBA export is done: pause boba, restore centmemo.
-  2. Dashboard (Chrome): enable OAuth server (authorization path `/oauth/consent/`), Site URL `https://centmemo.com`, redirect URLs, email template.
-  3. Seed two synthetic test users + sample ledger; run `node tools/test_rls.mjs`; run `supabase/tests/agents_cannot_write.sql`.
-  4. Repo rename to CentMemo, Pages at centmemo.com, DNS at the registrar.
-  5. See signed-in views at 375 and 1440, light and dark; connect MCP in Claude Code and call every tool.
-  6. Register bundle ID; prefill FinanceKit request for Ben to submit.
-  7. Email: privacy@ and hello@centmemo.com are named on the site but don't exist yet.
+- **Status**: CentMemo (was Duet Connect), 2026-11-21. Bundle `com.learningischange.centmemo` (registered in ASC, id HF5UVXKG59), team Learning is Change, Inc. (`L2G756LY8N`). Repo `bhwilkoff/CentMemo` (public). Ben's words: `docs/WHAT-CENTMEMO-IS.md`. Decisions 054-057.
+- **Active milestone**: M1: backend, connector, web app, skills, infrastructure.
+- **Verified**:
+  - Supabase `centmemo` (`qucsmmazfalbyduxlavl`, free tier) live; boba-card-app paused (BOBA exported, being shut down).
+  - `node tools/test_rls.mjs` PASS on the deployed project; negative control FAILS as expected (read-only control).
+  - Agent rule (SQL, rolled back): person writes; client_id token reads 22 rows, insert refused, update touches 0.
+  - `node tools/seed_demo.mjs` idempotent (22 new, then 0). Synthetic users in `~/.centmemo/test-users.json` (owner = directory reviewer account).
+  - Web views seen live at 1440 and 375 dark: Unexamined, Ledger (totals hand-checked), Story with values, memo save through the UI.
+  - MCP function: unauthenticated POST returns 401 + resource_metadata.
+  - Pages builds (`.nojekyll`); DNS at WordPress.com: 4 GitHub A records, `www` CNAME to bhwilkoff.github.io. HTTPS certificate pending, then Enforce HTTPS.
+- **Blocked on Ben**:
+  1. Chrome is signed in to the Minerva Supabase account; sign in as the Learning is Change owner so the agent can enable the OAuth server (path `/oauth/consent/`), Site URL `https://centmemo.com`, redirect URLs. Or create an org-wide Supabase access token at `~/.centmemo/supabase-token`.
+  2. Apple Developer sign-in in Chrome, then the agent prefills the FinanceKit form and Ben presses Submit.
+  3. Optional: allow routine Supabase MCP tools in `/permissions` (the agent may not edit its own permissions).
+- **Next after unblock**: connect MCP in Claude Code through OAuth and call all six tools; Ben adds the connector on claude.ai and runs the Duet live + scheduled test; email forwarding for privacy@ and hello@centmemo.com; M2 iOS app.
 - **Open questions**: end of `docs/research/apple-card-financekit-connector.md`.
 
 ---
