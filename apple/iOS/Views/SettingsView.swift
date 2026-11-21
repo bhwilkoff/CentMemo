@@ -43,10 +43,20 @@ struct SettingsView: View {
                 }
                 .onDelete { idx in Task { await remove(idx) } }
             }
-            Section("Money in") {
+            Section {
                 ImportButton()
                 if let reason = finance.unavailableReason {
                     LabeledContent("Apple Wallet") { Text(reason).font(TypeRamp.caption).multilineTextAlignment(.trailing) }
+                } else {
+                    WalletSyncButton(finance: finance)
+                }
+            } header: {
+                Text("Money in")
+            } footer: {
+                // FinanceKit Addendum 3.3: what is read, how it is used, and the policy,
+                // shown before the person is asked for access.
+                if finance.unavailableReason == nil {
+                    Text("CentMemo reads your Apple Card, Apple Cash, and Savings accounts and transactions and keeps them in your CentMemo account, so you can write memos on any device. Claude never sees them. [Privacy](https://centmemo.com/privacy/)")
                 }
             }
             Section {
@@ -126,6 +136,52 @@ struct ImportButton: View {
             let rows = try Money.parseAppleCardCSV(try String(contentsOf: url, encoding: .utf8))
             let r = try await APIClient.shared.importAppleCard(rows, filename: url.lastPathComponent)
             result = "\(r.inserted) new" + (r.skipped > 0 ? ", \(r.skipped) already in CentMemo." : ".")
+            session.didChangeData()
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        } catch {
+            result = session.handle(error)
+            UINotificationFeedbackGenerator().notificationOccurred(.error)
+        }
+    }
+}
+
+
+/// Connect Apple Wallet: asks FinanceKit for access, then syncs changes since
+/// the saved history token (Decision 057). DEBUG builds can use the sample
+/// source (APP_SAMPLE_FINANCE=1) because the simulator and an unentitled build
+/// have no Wallet data.
+struct WalletSyncButton: View {
+    let finance: FinanceSource
+    @Environment(SessionStore.self) private var session
+    @State private var working = false
+    @State private var result: String?
+
+    private var tokenKey: String { "financeToken-" + (session.email ?? "anon") }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Spacing.s1) {
+            Button(working ? "Syncing…" : "Connect Apple Wallet") { Task { await sync() } }
+                .disabled(working)
+                .accessibilityIdentifier("wallet-sync")
+            if let result {
+                Text(result).font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
+                    .accessibilityIdentifier("wallet-result")
+            }
+        }
+    }
+
+    private func sync() async {
+        working = true
+        defer { working = false }
+        do {
+            guard try await finance.requestAccess() else {
+                result = "Apple Wallet access wasn't allowed. You can change this in Settings, Privacy & Security, Financial Data."
+                return
+            }
+            let changes = try await finance.changes(since: UserDefaults.standard.data(forKey: tokenKey))
+            let r = try await APIClient.shared.syncFinance(changes)
+            if let token = changes.newToken { UserDefaults.standard.set(token, forKey: tokenKey) }
+            result = "Synced \(r.inserted) transaction\(r.inserted == 1 ? "" : "s") from \(changes.accounts.count) account\(changes.accounts.count == 1 ? "" : "s")."
             session.didChangeData()
             UINotificationFeedbackGenerator().notificationOccurred(.success)
         } catch {

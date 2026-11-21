@@ -57,7 +57,7 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
    - Record the results.
 6. ⏳ Connector documentation page on centmemo.com. The Connectors Directory
    requires public docs and a privacy policy (the policy exists).
-7. ⏳ iOS FinanceKit sync path wired end to end with the DEBUG sample source:
+7. ✅ (tick 6) iOS FinanceKit sync path wired end to end with the DEBUG sample source:
    - Settings: Connect Apple Wallet.
    - Accounts and transactions upsert as `source = 'financekit'`.
    - History tokens are kept per account.
@@ -194,3 +194,28 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
 - **Next:** tick 6 (iOS), backlog item 7, the FinanceKit sync path with the
   DEBUG sample source. Item 6, connector docs, goes to the next
   infrastructure tick.
+
+### Tick 6 — 2026-11-21 — iOS: Connect Apple Wallet (FinanceKit sync path, DEBUG sample source)
+- **Context:** backlog item 7.
+- **Implementation:**
+  - `APIClient.syncFinance`: accounts upserted on `(user_id, source, source_id)`,
+    transactions upserted as `source = 'financekit'` in chunks of 500, each on
+    its own account (`accountSourceID`, never sent as a column), and FinanceKit
+    deletions applied. History tokens stay per account (FinanceSource).
+  - Settings, Money in: "Connect Apple Wallet" with the Addendum 3.3
+    disclosure (what is read, how it is kept, that Claude never sees it,
+    the privacy link) shown before access is asked. Haptics success/error.
+  - `WalletSyncUITests`: sample sync, second sync, then removes the sample
+    account as the synthetic owner so data is left as found.
+  - Build 1.0 (3).
+- **Verification:**
+  - iPhone 12: `WalletSyncUITests` PASS, no crash logs; frame shows the
+    result line and the disclosure.
+  - Server after the run: 0 FinanceKit accounts, 0 FinanceKit transactions
+    (cleanup confirmed directly, not from the test's word).
+  - `tools/test_all.sh` ALL PASS.
+- **Honest limit:** the second-sync check only shows the upsert succeeded
+  again; no-duplicates rests on the table's unique constraint, not on this
+  test. Real FinanceKit stays unverified until Apple grants the entitlement.
+- **Next:** tick 7 (web), backlog item 8, deletion and the empty, error,
+  and offline states at 375px.

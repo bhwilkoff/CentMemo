@@ -292,6 +292,57 @@ final class APIClient {
         return ImportResult(inserted: inserted, skipped: rows.count - inserted)
     }
 
+    // MARK: - FinanceKit sync (Decision 057: idempotent on source_id)
+
+    /// Writes one batch of FinanceKit changes: accounts upserted by their
+    /// FinanceKit id, transactions upserted as `source = 'financekit'`, and
+    /// deletions applied. The connector never reads these rows (Addendum 3.2).
+    func syncFinance(_ changes: FinanceChanges) async throws -> ImportResult {
+        struct IDRow: Decodable { let id: String; let source_id: String }
+        struct AccountRow: Encodable {
+            let source = "financekit"; let source_id: String; let kind: String; let display_name: String
+            let institution: String; let currency: String; let credit_limit_minor: Int?
+        }
+        var accountIDs: [String: String] = [:]
+        if !changes.accounts.isEmpty {
+            let data = try await raw("rest/v1/accounts", query: [.init(name: "on_conflict", value: "user_id,source,source_id"),
+                                                                 .init(name: "select", value: "id,source_id")], method: "POST",
+                                     body: changes.accounts.map { AccountRow(source_id: $0.sourceID, kind: $0.kind, display_name: $0.displayName,
+                                                                              institution: $0.institution, currency: $0.currency,
+                                                                              credit_limit_minor: $0.creditLimitMinor) },
+                                     prefer: "return=representation,resolution=merge-duplicates")
+            for r in try JSONDecoder().decode([IDRow].self, from: data) { accountIDs[r.source_id] = r.id }
+        }
+        guard let fallback = changes.accounts.first.flatMap({ accountIDs[$0.sourceID] }) ?? accountIDs.values.first else {
+            return ImportResult(inserted: 0, skipped: 0)
+        }
+        var inserted = 0
+        if !changes.inserted.isEmpty {
+            struct Row: Encodable {
+                let row: ImportRow, accountID: String
+                enum K: String, CodingKey { case account_id, source }
+                func encode(to e: Encoder) throws {
+                    try row.encode(to: e); var c = e.container(keyedBy: K.self)
+                    try c.encode(accountID, forKey: .account_id); try c.encode("financekit", forKey: .source)
+                }
+            }
+            for start in stride(from: 0, to: changes.inserted.count, by: 500) {
+                let chunk = changes.inserted[start..<min(start + 500, changes.inserted.count)]
+                    .map { Row(row: $0, accountID: $0.accountSourceID.flatMap { accountIDs[$0] } ?? fallback) }
+                let got = try await raw("rest/v1/transactions", query: [.init(name: "on_conflict", value: "user_id,source,source_id"),
+                                                                        .init(name: "select", value: "id,source_id")], method: "POST",
+                                        body: chunk, prefer: "return=representation,resolution=merge-duplicates")
+                inserted += try JSONDecoder().decode([IDRow].self, from: got).count
+            }
+        }
+        if !changes.deletedSourceIDs.isEmpty {
+            try await raw("rest/v1/transactions", query: [.init(name: "source", value: "eq.financekit"),
+                                                          .init(name: "source_id", value: "in.(\(changes.deletedSourceIDs.joined(separator: ",")))")],
+                          method: "DELETE")
+        }
+        return ImportResult(inserted: inserted, skipped: 0)
+    }
+
     private struct ImportBatch: Encodable { let source: String; let filename: String; let row_count: Int }
     private struct UpsertRow: Encodable {
         let row: ImportRow, accountID: String, batchID: String

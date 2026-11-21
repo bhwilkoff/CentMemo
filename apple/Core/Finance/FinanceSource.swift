@@ -70,7 +70,8 @@ struct SampleFinanceSource: FinanceSource {
                                       institution: "Apple", currency: "USD", creditLimitMinor: 1_000_000)],
             inserted: rows.map { ImportRow(sourceID: $0.0, txnDate: $0.1, postedDate: $0.1, amountMinor: $0.2, currency: "USD",
                                            description: $0.3, merchant: $0.3, category: $0.4,
-                                           txnType: $0.2 < 0 ? "pointOfSale" : "billPayment", status: "booked", mcc: nil) },
+                                           txnType: $0.2 < 0 ? "pointOfSale" : "billPayment", status: "booked", mcc: nil,
+                                           accountSourceID: "sample-card") },
             newToken: Data("sample".utf8))
     }
 }
@@ -146,7 +147,8 @@ struct FinanceKitSource: FinanceSource {
                          description: String(t.transactionDescription.prefix(500)),
                          merchant: String((t.merchantName ?? "").prefix(200)), category: "",
                          txnType: String(describing: t.transactionType).prefix(40).description, status: status,
-                         mcc: t.merchantCategoryCode.map { Int($0.rawValue) })
+                         mcc: t.merchantCategoryCode.map { Int($0.rawValue) },
+                         accountSourceID: t.accountID.uuidString)
     }
 
     private static func minor(_ d: Decimal) -> Int {

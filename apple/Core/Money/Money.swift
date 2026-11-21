@@ -133,6 +133,8 @@ struct ImportRow: Codable, Equatable, Sendable {
     var txnType: String
     var status: String
     var mcc: Int?
+    /// FinanceKit only: which account the row belongs to (not sent as a column).
+    var accountSourceID: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case sourceID = "source_id", txnDate = "txn_date", postedDate = "posted_date", amountMinor = "amount_minor"
