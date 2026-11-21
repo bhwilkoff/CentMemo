@@ -92,10 +92,10 @@ When shipping any user-facing feature:
 
 | Verb | Web | iOS | macOS | tvOS | Android | Notes |
 |---|---|---|---|---|---|---|
-| Unexamined (home) | 🚧 | ⏳ | ⏳ | 🚫 | 🚫 | Purchases with no memo, newest first |
-| Ledger by month | 🚧 | ⏳ | ⏳ | 🚫 | 🚫 | |
-| Story (month or value) | 🚧 | ⏳ | ⏳ | 🚫 | 🚫 | |
-| Settings (values, connect Claude, account) | 🚧 | ⏳ | ⏳ | 🚫 | 🚫 | |
+| Unexamined (home) | 🚧 | 🚧 | ⏳ | 🚫 | 🚫 | Purchases with no memo, newest first |
+| Ledger by month | 🚧 | 🚧 | ⏳ | 🚫 | 🚫 | |
+| Story (month or value) | 🚧 | 🚧 | ⏳ | 🚫 | 🚫 | |
+| Settings (values, connect Claude, account) | 🚧 | 🚧 | ⏳ | 🚫 | 🚫 | |
 
 ---
 
@@ -103,8 +103,8 @@ When shipping any user-facing feature:
 
 | Feature | Web | iOS | macOS | tvOS | Android | Notes |
 |---|---|---|---|---|---|---|
-| Import Apple Card CSV export | 🚧 | ⏳ | ⏳ | 🚫 | 🚫 | `js/money/money.js`; iOS ports the same goldens |
-| FinanceKit sync (history tokens) | n/a | ⏳ | n/a | n/a | n/a | No FinanceKit on web, Mac, TV, Android; waits on Apple's entitlement grant |
+| Import Apple Card CSV export | 🚧 | 🚧 | ⏳ | 🚫 | 🚫 | `js/money/money.js`; iOS ports the same goldens |
+| FinanceKit sync (history tokens) | n/a | 🚧 | n/a | n/a | n/a | No FinanceKit on web, Mac, TV, Android; waits on Apple's entitlement grant |
 | FinanceKit background delivery | n/a | ⏳ | n/a | n/a | n/a | iOS 26 extension |
 
 ---
@@ -113,12 +113,12 @@ When shipping any user-facing feature:
 
 | Feature | Web | iOS | macOS | tvOS | Android | Notes |
 |---|---|---|---|---|---|---|
-| Write a memo on a purchase | 🚧 | ⏳ | ⏳ | 🚫 | 🚫 | Only the person writes (Decision 056) |
-| Values the person names, tagged on memos | 🚧 | ⏳ | ⏳ | 🚫 | 🚫 | |
+| Write a memo on a purchase | 🚧 | 🚧 | ⏳ | 🚫 | 🚫 | Only the person writes (Decision 056) |
+| Values the person names, tagged on memos | 🚧 | 🚧 | ⏳ | 🚫 | 🚫 | |
 | Attach a photo or file | 🔮 | ⏳ | ⏳ | 🚫 | 🚫 | By device reference first; upload is opt-in |
 | Share one story | 🔮 | 🔮 | 🔮 | 🚫 | 🚫 | Opt-in, per story |
 | Claude connector (read-only MCP) | 🚧 | n/a | n/a | n/a | n/a | Server-side; every platform's data is readable once synced |
-| Delete account | 🚧 | ⏳ | ⏳ | 🚫 | 🚫 | Decision 035 |
+| Delete account | 🚧 | 🚧 | ⏳ | 🚫 | 🚫 | Decision 035 |
 
 ---
 

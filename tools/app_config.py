@@ -22,10 +22,10 @@ from pathlib import Path
 
 # --- App identity -------------------------------------------------------------
 APPLE_BUNDLE_ID = "com.learningischange.centmemo"           # iOS / iPadOS / tvOS / macOS
-APPLE_APP_NAME = "AppName"                        # the .app / scheme name
+APPLE_APP_NAME = "CentMemo"                       # the .app / scheme name
 # The executable inside the .app — what `devicectl device info processes` prints
 # (an executable PATH, never the bundle id). Usually the same as the app name.
-APPLE_EXECUTABLE = "AppName"
+APPLE_EXECUTABLE = "CentMemo"
 ANDROID_PACKAGE = "com.learningischange.centmemo"
 ANDROID_PACKAGE_DEBUG = "com.learningischange.centmemo.debug"
 ANDROID_MAIN_ACTIVITY = "com.example.appname.MainActivity"

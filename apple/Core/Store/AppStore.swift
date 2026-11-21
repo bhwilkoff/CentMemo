@@ -5,7 +5,7 @@ import SwiftUI
 @Observable
 final class AppStore {
     var navigationPath = NavigationPath()
-    var selectedTab: String? = "home"
+    var selectedTab: String? = "unexamined"
 
     /// Player-level mute. A door launch sets it (APP_MUTE); every player reads
     /// it, so a harness run on someone's TV is silent unless it opts in.

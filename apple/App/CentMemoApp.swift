@@ -2,10 +2,11 @@ import SwiftUI
 import SwiftData
 
 @main
-struct AppNameApp: App {
+struct CentMemoApp: App {
     // Owned here (not `.environment(AppStore())` inline) so a re-evaluated
     // Scene body never swaps in a fresh store and drops navigation state.
     @State private var store = AppStore()
+    @State private var session = SessionStore()
 
     init() {
         // 100 MB memory / 500 MB disk — mirrors Android's Coil 3 config
@@ -20,7 +21,7 @@ struct AppNameApp: App {
         WindowGroup {
             RootView()
                 .environment(store)
-                // .environment(AuthManager())  // FILL IN: your auth manager
+                .environment(session)
                 // Universal Links + custom-scheme dispatch.
                 // On iOS 17+, .onOpenURL fires for BOTH Universal Links
                 // AND custom schemes — do NOT use .onContinueUserActivity,
@@ -71,6 +72,7 @@ struct AppNameApp: App {
 /// a new platform the iOS view.
 struct RootView: View {
     @Environment(AppStore.self) private var store
+    @Environment(SessionStore.self) private var session
 
     var body: some View {
         platformRoot
@@ -82,6 +84,14 @@ struct RootView: View {
             // Test doors (DEBUG builds only; LaunchDoors.current is empty in
             // Release). APP_DOOR_SECONDS bounds the door's activity.
             .task {
+                #if DEBUG
+                // Harness door: sign the synthetic test account in (never a real one).
+                let env = ProcessInfo.processInfo.environment
+                if !session.isSignedIn, let email = env["APP_TEST_EMAIL"], let password = env["APP_TEST_PASSWORD"] {
+                    try? await APIClient.shared.signInForTesting(email: email, password: password)
+                    session.didSignIn()
+                }
+                #endif
                 let doors = LaunchDoors.current
                 guard !doors.isEmpty, store.openDoorsOnce(doors) else { return }
                 if let seconds = doors.doorSeconds {

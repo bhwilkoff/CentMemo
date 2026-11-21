@@ -1,59 +1,297 @@
 import Foundation
 
-/// Shared API client — ALL network calls go through this singleton.
-/// Views never call URLSession directly. Same architectural rule as
-/// `js/api.js` (web) and `ApiClient.kt` (Android).
+/// The one client every view goes through (AGENTS.md hard rule), the Swift twin
+/// of js/api.js. Talks to Supabase's REST endpoints directly with URLSession
+/// (no third-party packages). Row-level security does the scoping.
+/// Money stays integer minor units end to end (Decision 057).
 ///
-/// `refreshIfNeeded()` is the cross-platform contract: every call
-/// that hits a Cloudflare Worker, Supabase Storage, or any
-/// Edge Function MUST refresh the JWT first. Auth-SDK auto-refresh
-/// only covers the SDK's own HTTP path; external endpoints bypass it.
-/// Symptom of skipping: 401s — or worse, 400s with "exp claim" in the
-/// body — on Worker calls that look like generic backend bugs.
-actor APIClient {
+/// The JWT is refreshed before every call that is about to expire, and once
+/// more on a 401 (Decision 011).
+final class APIClient {
     static let shared = APIClient()
 
-    // FILL IN: Your API base URL
-    private let baseURL = ""
+    static let projectURL = URL(string: "https://qucsmmazfalbyduxlavl.supabase.co")!
+    /// Publishable key: safe in the app; RLS is the guard.
+    static let publishableKey = "sb_publishable_XuubuEBTUKXkzttN2MUdzw_Aq7-q6YT"
+    static var mcpURL: String { projectURL.absoluteString + "/functions/v1/mcp" }
 
-    private func authHeaders() -> [String: String] {
-        // FILL IN: Return auth headers
-        [:]
+    struct Session: Codable {
+        var accessToken: String
+        var refreshToken: String
+        var expiresAt: Double
+        var userID: String
+        var email: String?
     }
 
-    /// Call BEFORE any request to a Worker / Storage / Edge Function.
-    /// Implementation depends on your auth manager — typically:
-    ///   if let exp = session.expiresAt, exp < Date().addingTimeInterval(60) {
-    ///       try await AuthManager.shared.refresh()
-    ///   }
-    func refreshIfNeeded() async throws {
-        // FILL IN
-    }
-
-    func get<T: Decodable>(_ endpoint: String, params: [String: String] = [:]) async throws -> T {
-        try await refreshIfNeeded()
-        var components = URLComponents(string: baseURL + endpoint)!
-        components.queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
-        var request = URLRequest(url: components.url!)
-        for (k, v) in authHeaders() { request.setValue(v, forHTTPHeaderField: k) }
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse, 200...299 ~= http.statusCode else {
-            throw URLError(.badServerResponse)
+    enum APIError: Error, LocalizedError {
+        case server(String), signedOut, decoding(String)
+        var errorDescription: String? {
+            switch self {
+            case .server(let m): m
+            case .signedOut: "You're signed out. Sign in again."
+            case .decoding(let m): "CentMemo couldn't read the answer: \(m)"
+            }
         }
-        return try JSONDecoder().decode(T.self, from: data)
     }
 
-    func post<T: Decodable>(_ endpoint: String, body: Encodable) async throws -> T {
-        try await refreshIfNeeded()
-        var request = URLRequest(url: URL(string: baseURL + endpoint)!)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        for (k, v) in authHeaders() { request.setValue(v, forHTTPHeaderField: k) }
-        request.httpBody = try JSONEncoder().encode(body)
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse, 200...299 ~= http.statusCode else {
-            throw URLError(.badServerResponse)
+    private(set) var session: Session? {
+        didSet {
+            if let session, let data = try? JSONEncoder().encode(session) { Keychain.save(data, account: "session") }
+            else { Keychain.delete(account: "session") }
         }
-        return try JSONDecoder().decode(T.self, from: data)
+    }
+
+    private init() {
+        session = Keychain.load(account: "session").flatMap { try? JSONDecoder().decode(Session.self, from: $0) }
+    }
+
+    var isSignedIn: Bool { session != nil }
+    var email: String? { session?.email }
+
+    // MARK: - Auth
+
+    /// Sends a six-digit sign-in code (and link) to the address.
+    func sendCode(to email: String) async throws {
+        struct OTP: Encodable { let email: String; let create_user = true }
+        _ = try await raw("auth/v1/otp", method: "POST", body: OTP(email: email), authed: false)
+    }
+
+    func verify(email: String, code: String) async throws {
+        let data = try await raw("auth/v1/verify", method: "POST",
+                                 body: ["type": "email", "email": email, "token": code], authed: false)
+        try adoptAuthResponse(data)
+    }
+
+    #if DEBUG
+    /// DEBUG only: the synthetic test accounts sign in with a password so the
+    /// simulator harness can reach signed-in screens (APP_TEST_EMAIL/PASSWORD).
+    func signInForTesting(email: String, password: String) async throws {
+        let data = try await raw("auth/v1/token", query: [URLQueryItem(name: "grant_type", value: "password")],
+                                 method: "POST", body: ["email": email, "password": password], authed: false)
+        try adoptAuthResponse(data)
+    }
+    #endif
+
+    func signOut() async {
+        _ = try? await raw("auth/v1/logout", method: "POST", body: [String: String](), authed: true)
+        session = nil
+    }
+
+    /// In-app account deletion (Decision 035): every row cascades.
+    func deleteAccount() async throws {
+        _ = try await raw("rest/v1/rpc/delete_my_account", method: "POST", body: [String: String]())
+        session = nil
+    }
+
+    private func refreshIfNeeded(force: Bool = false) async throws {
+        guard let s = session else { throw APIError.signedOut }
+        guard force || s.expiresAt < Date().timeIntervalSince1970 + 60 else { return }
+        do {
+            let data = try await raw("auth/v1/token", query: [URLQueryItem(name: "grant_type", value: "refresh_token")],
+                                     method: "POST", body: ["refresh_token": s.refreshToken], authed: false)
+            try adoptAuthResponse(data)
+        } catch {
+            session = nil
+            throw APIError.signedOut
+        }
+    }
+
+    private func adoptAuthResponse(_ data: Data) throws {
+        struct AuthResponse: Decodable {
+            let access_token: String, refresh_token: String, expires_in: Double
+            let user: User
+            struct User: Decodable { let id: String; let email: String? }
+        }
+        guard let r = try? JSONDecoder().decode(AuthResponse.self, from: data) else {
+            throw APIError.decoding("sign-in response")
+        }
+        session = Session(accessToken: r.access_token, refreshToken: r.refresh_token,
+                          expiresAt: Date().timeIntervalSince1970 + r.expires_in, userID: r.user.id, email: r.user.email)
+    }
+
+    // MARK: - Transport
+
+    @discardableResult
+    private func raw(_ path: String, query: [URLQueryItem] = [], method: String = "GET",
+                     body: (any Encodable)? = nil, prefer: String? = nil, authed: Bool = true,
+                     retried: Bool = false) async throws -> Data {
+        if authed { try await refreshIfNeeded() }
+        var comps = URLComponents(url: Self.projectURL.appending(path: path), resolvingAgainstBaseURL: false)!
+        if !query.isEmpty { comps.queryItems = query }
+        var req = URLRequest(url: comps.url!)
+        req.httpMethod = method
+        req.setValue(Self.publishableKey, forHTTPHeaderField: "apikey")
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if authed, let token = session?.accessToken { req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
+        if let prefer { req.setValue(prefer, forHTTPHeaderField: "Prefer") }
+        if let body { req.httpBody = try JSONEncoder().encode(body) }
+        let (data, response) = try await URLSession.shared.data(for: req)
+        let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+        if code == 401, authed, !retried {
+            try await refreshIfNeeded(force: true)
+            return try await raw(path, query: query, method: method, body: body, prefer: prefer, authed: authed, retried: true)
+        }
+        guard (200..<300).contains(code) else { throw APIError.server(Self.message(from: data, code: code)) }
+        return data
+    }
+
+    private static func message(from data: Data, code: Int) -> String {
+        if let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            for key in ["msg", "message", "error_description", "error"] {
+                if let m = obj[key] as? String { return m }
+            }
+        }
+        return "The server answered \(code)."
+    }
+
+    private func rest<T: Decodable>(_ table: String, _ query: [URLQueryItem]) async throws -> T {
+        let data = try await raw("rest/v1/" + table, query: query)
+        do { return try JSONDecoder().decode(T.self, from: data) }
+        catch { throw APIError.decoding(String(describing: error)) }
+    }
+
+    // MARK: - Reading
+
+    private static let txnColumns = "id,account_id,txn_date,posted_date,amount_minor,currency,description,merchant,category,txn_type,status"
+
+    func unexamined(limit: Int = 200) async throws -> [LedgerEntry] {
+        try await rest("unexamined_transactions", [.init(name: "select", value: Self.txnColumns),
+                                                   .init(name: "order", value: "txn_date.desc"),
+                                                   .init(name: "limit", value: String(limit))])
+    }
+
+    func hasAnyTransactions() async throws -> Bool {
+        let rows: [[String: String]] = try await rest("transactions", [.init(name: "select", value: "id"), .init(name: "limit", value: "1")])
+        return !rows.isEmpty
+    }
+
+    func latestMonth() async throws -> String? {
+        let rows: [[String: String]] = try await rest("transactions", [.init(name: "select", value: "txn_date"),
+                                                                      .init(name: "order", value: "txn_date.desc"),
+                                                                      .init(name: "limit", value: "1")])
+        return rows.first?["txn_date"].map { String($0.prefix(7)) }
+    }
+
+    func month(_ ym: String) async throws -> [LedgerEntry] {
+        try await rest("transactions", [.init(name: "select", value: Self.txnColumns + ",memos(body)"),
+                                        .init(name: "txn_date", value: "gte.\(ym)-01"),
+                                        .init(name: "txn_date", value: "lte.\(LedgerDate.lastDay(ym))"),
+                                        .init(name: "order", value: "txn_date.desc"),
+                                        .init(name: "limit", value: "2000")])
+    }
+
+    func transaction(_ id: String) async throws -> LedgerEntry? {
+        let rows: [LedgerEntry] = try await rest("transactions", [
+            .init(name: "select", value: Self.txnColumns + ",accounts(display_name),memos(body,memo_values(value_id))"),
+            .init(name: "id", value: "eq.\(id)"), .init(name: "limit", value: "1")])
+        return rows.first
+    }
+
+    enum StoryScope: Hashable { case month(String), value(String) }
+
+    func stories(_ scope: StoryScope) async throws -> [LedgerEntry] {
+        var q: [URLQueryItem] = [.init(name: "select", value: Self.txnColumns + ",memos!inner(body,memo_values(value_id,life_values(name)))"),
+                                 .init(name: "order", value: "txn_date.asc"), .init(name: "limit", value: "1000")]
+        switch scope {
+        case .month(let ym):
+            q += [.init(name: "txn_date", value: "gte.\(ym)-01"), .init(name: "txn_date", value: "lte.\(LedgerDate.lastDay(ym))")]
+        case .value(let valueID):
+            struct Link: Decodable { let transaction_id: String }
+            let links: [Link] = try await rest("memo_values", [.init(name: "select", value: "transaction_id"),
+                                                               .init(name: "value_id", value: "eq.\(valueID)")])
+            if links.isEmpty { return [] }
+            q.append(.init(name: "id", value: "in.(\(links.map(\.transaction_id).joined(separator: ",")))"))
+        }
+        return try await rest("transactions", q)
+    }
+
+    // MARK: - Values the person names
+
+    func values() async throws -> [LifeValue] {
+        try await rest("life_values", [.init(name: "select", value: "id,name"), .init(name: "order", value: "name")])
+    }
+
+    func addValue(_ name: String) async throws -> LifeValue {
+        let data = try await raw("rest/v1/life_values", query: [.init(name: "select", value: "id,name")], method: "POST",
+                                 body: ["name": name.trimmingCharacters(in: .whitespaces)], prefer: "return=representation")
+        guard let v = try JSONDecoder().decode([LifeValue].self, from: data).first else { throw APIError.decoding("new value") }
+        return v
+    }
+
+    func renameValue(_ id: String, to name: String) async throws {
+        try await raw("rest/v1/life_values", query: [.init(name: "id", value: "eq.\(id)")], method: "PATCH",
+                      body: ["name": name.trimmingCharacters(in: .whitespaces)])
+    }
+
+    func deleteValue(_ id: String) async throws {
+        try await raw("rest/v1/life_values", query: [.init(name: "id", value: "eq.\(id)")], method: "DELETE")
+    }
+
+    // MARK: - Writing the memo (only the person; agents are refused in SQL)
+
+    func saveMemo(transactionID: String, body: String, valueIDs: [String]) async throws {
+        let text = body.trimmingCharacters(in: .whitespacesAndNewlines)
+        if text.isEmpty {
+            try await raw("rest/v1/memos", query: [.init(name: "transaction_id", value: "eq.\(transactionID)")], method: "DELETE")
+            return
+        }
+        try await raw("rest/v1/memos", query: [.init(name: "on_conflict", value: "transaction_id")], method: "POST",
+                      body: ["transaction_id": transactionID, "body": text], prefer: "resolution=merge-duplicates")
+        struct Link: Decodable { let value_id: String }
+        let have: [Link] = try await rest("memo_values", [.init(name: "select", value: "value_id"),
+                                                          .init(name: "transaction_id", value: "eq.\(transactionID)")])
+        let haveIDs = Set(have.map(\.value_id)), want = Set(valueIDs)
+        let drop = haveIDs.subtracting(want), add = want.subtracting(haveIDs)
+        if !drop.isEmpty {
+            try await raw("rest/v1/memo_values", query: [.init(name: "transaction_id", value: "eq.\(transactionID)"),
+                                                         .init(name: "value_id", value: "in.(\(drop.joined(separator: ",")))")],
+                          method: "DELETE")
+        }
+        if !add.isEmpty {
+            try await raw("rest/v1/memo_values", method: "POST",
+                          body: add.map { ["transaction_id": transactionID, "value_id": $0] })
+        }
+    }
+
+    // MARK: - Import (idempotent on source_id, Decision 057)
+
+    struct ImportResult { let inserted: Int; let skipped: Int }
+
+    func importAppleCard(_ rows: [ImportRow], filename: String) async throws -> ImportResult {
+        struct IDRow: Decodable { let id: String }
+        let accountData = try await raw("rest/v1/accounts", query: [.init(name: "on_conflict", value: "user_id,source,source_id"),
+                                                                    .init(name: "select", value: "id")], method: "POST",
+                                        body: ["source": "csv", "source_id": "applecard", "kind": "liability",
+                                               "display_name": "Apple Card", "institution": "Apple"],
+                                        prefer: "return=representation,resolution=merge-duplicates")
+        guard let account = try JSONDecoder().decode([IDRow].self, from: accountData).first else { throw APIError.decoding("account") }
+        let batchData = try await raw("rest/v1/import_batches", query: [.init(name: "select", value: "id")], method: "POST",
+                                      body: ImportBatch(source: "csv", filename: String(filename.prefix(255)), row_count: rows.count),
+                                      prefer: "return=representation")
+        guard let batch = try JSONDecoder().decode([IDRow].self, from: batchData).first else { throw APIError.decoding("batch") }
+        var inserted = 0
+        for start in stride(from: 0, to: rows.count, by: 500) {
+            let chunk = rows[start..<min(start + 500, rows.count)].map { UpsertRow(row: $0, accountID: account.id, batchID: batch.id) }
+            let got = try await raw("rest/v1/transactions", query: [.init(name: "on_conflict", value: "user_id,source,source_id"),
+                                                                    .init(name: "select", value: "id")], method: "POST",
+                                    body: chunk, prefer: "return=representation,resolution=ignore-duplicates")
+            inserted += try JSONDecoder().decode([IDRow].self, from: got).count
+        }
+        try await raw("rest/v1/import_batches", query: [.init(name: "id", value: "eq.\(batch.id)")], method: "PATCH",
+                      body: ["inserted_count": inserted])
+        return ImportResult(inserted: inserted, skipped: rows.count - inserted)
+    }
+
+    private struct ImportBatch: Encodable { let source: String; let filename: String; let row_count: Int }
+    private struct UpsertRow: Encodable {
+        let row: ImportRow, accountID: String, batchID: String
+        enum K: String, CodingKey { case account_id, import_batch_id, source }
+        func encode(to encoder: Encoder) throws {
+            try row.encode(to: encoder)
+            var c = encoder.container(keyedBy: K.self)
+            try c.encode(accountID, forKey: .account_id)
+            try c.encode(batchID, forKey: .import_batch_id)
+            try c.encode("csv", forKey: .source)
+        }
     }
 }
