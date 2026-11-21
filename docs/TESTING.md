@@ -68,3 +68,20 @@ signed in as the synthetic owner, at 375px (`tools/phone-frame.html`) and
 - The "Saved." confirmation was off-screen. It now sits under the memo.
 - The first RLS negative control wrote to the owner's rows. Controls are now
   read-only.
+
+## Lessons from the bench (2026-11-21, tick 11)
+
+- **An unanswered permission prompt outlives the test.** If a run ends while a
+  system prompt (Photos) is up, iOS shows it again at the next launch, before
+  the app asks for anything. A later "prompt appeared too early" failure can
+  be that leftover, not the code. Answer prompts in the test that causes them.
+- **Never place a caret by tapping text.** On the iPhone 12 a tap put the
+  caret at the start or mid-text, so backspaces deleted nothing and leftover
+  test memos grew. Select instead (`tap(withNumberOfTaps: 3, ...)` on the
+  element), then delete.
+- **The floating tab bar takes taps** in the bottom ~80 pt, including over
+  form content. Tap above it.
+- **A Form renders lazily**: swipe the Form's collection view, not the app,
+  until the element exists.
+- **A test that fails mid-way leaves data.** Check the server after a failure
+  (memos, attachments) and clean it before the next run.

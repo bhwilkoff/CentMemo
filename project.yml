@@ -70,6 +70,7 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: "CentMemo"
         # Shown in Apple's account picker when the person connects Wallet.
+        INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "CentMemo shows the photos you attached to your memos. It keeps only a reference; your photos stay in your library."
         INFOPLIST_KEY_NSFinancialDataUsageDescription: "CentMemo shows your Apple Card, Apple Cash, and Savings transactions so you can write the story of each purchase."
         # Standard HTTPS only: skips the export-compliance question on every
         # TestFlight / App Store build.

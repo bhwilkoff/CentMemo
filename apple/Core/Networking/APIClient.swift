@@ -292,6 +292,34 @@ final class APIClient {
         return ImportResult(inserted: inserted, skipped: rows.count - inserted)
     }
 
+    // MARK: - Attachments (by reference; money-story-design)
+
+    struct Attachment: Decodable, Identifiable, Hashable {
+        let id: String
+        let kind: String
+        let deviceRef: String?
+        enum CodingKeys: String, CodingKey { case id, kind, deviceRef = "device_ref" }
+    }
+
+    func attachments(for transactionID: String) async throws -> [Attachment] {
+        try await rest("attachments", [.init(name: "transaction_id", value: "eq." + transactionID),
+                                      .init(name: "select", value: "id,kind,device_ref"),
+                                      .init(name: "order", value: "created_at")])
+    }
+
+    /// Records a photo by its PhotoKit identifier only; no copy of the image leaves the device.
+    func attachPhoto(transactionID: String, deviceRef: String) async throws -> Attachment {
+        struct Row: Encodable { let transaction_id: String; let kind = "photo"; let device_ref: String }
+        let data = try await raw("rest/v1/attachments", query: [.init(name: "select", value: "id,kind,device_ref")], method: "POST",
+                                 body: Row(transaction_id: transactionID, device_ref: deviceRef), prefer: "return=representation")
+        guard let made = try JSONDecoder().decode([Attachment].self, from: data).first else { throw APIError.decoding("no attachment returned") }
+        return made
+    }
+
+    func removeAttachment(_ id: String) async throws {
+        try await raw("rest/v1/attachments", query: [.init(name: "id", value: "eq." + id)], method: "DELETE")
+    }
+
     // MARK: - FinanceKit sync (Decision 057: idempotent on source_id)
 
     /// Writes one batch of FinanceKit changes: accounts upserted by their

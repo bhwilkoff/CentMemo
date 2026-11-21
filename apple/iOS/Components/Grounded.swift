@@ -54,3 +54,51 @@ nonisolated struct PencilCircle: Shape {
     }
 }
 #endif
+
+#if os(iOS)
+import Photos
+
+/// A photo attached by reference: drawn from this device's library when the
+/// asset is here and the person has allowed access; otherwise a plain tile
+/// that says why it can't be shown (the photo may live on another device).
+struct AttachedPhoto: View {
+    let ref: String
+    @State private var image: UIImage?
+    @State private var note: String?
+
+    var body: some View {
+        ZStack {
+            Rectangle().fill(Color.brandSurface)
+            if let image {
+                Image(uiImage: image).resizable().scaledToFill()
+            } else if let note {
+                Text(note).font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
+                    .multilineTextAlignment(.center).padding(6)
+            } else {
+                ProgressView()
+            }
+        }
+        .frame(width: 96, height: 96)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .accessibilityLabel(image != nil ? "Attached photo" : (note ?? "Attached photo"))
+        .task(id: ref) { await load() }
+    }
+
+    private func load() async {
+        var status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        if status == .notDetermined { status = await PHPhotoLibrary.requestAuthorization(for: .readWrite) }
+        guard status == .authorized || status == .limited else { note = "Allow Photos access to show it"; return }
+        guard let asset = PHAsset.fetchAssets(withLocalIdentifiers: [ref], options: nil).firstObject else {
+            note = "On another device"; return
+        }
+        let opts = PHImageRequestOptions()
+        opts.deliveryMode = .highQualityFormat
+        opts.isNetworkAccessAllowed = true
+        image = await withCheckedContinuation { done in
+            PHImageManager.default().requestImage(for: asset, targetSize: CGSize(width: 288, height: 288),
+                                                  contentMode: .aspectFill, options: opts) { img, _ in done.resume(returning: img) }
+        }
+        if image == nil { note = "Couldn't load it" }
+    }
+}
+#endif

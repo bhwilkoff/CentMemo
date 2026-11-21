@@ -1,5 +1,7 @@
 #if os(iOS)
 import SwiftUI
+import PhotosUI
+import Photos
 
 /// One purchase: what the bank says, then the memo in the person's own words
 /// and the values they name. Only the person writes here (Decision 056).
@@ -16,6 +18,9 @@ struct EntryDetailView: View {
     @State private var loading = true
     @State private var saving = false
     @FocusState private var writing: Bool
+    @State private var photos: [APIClient.Attachment] = []
+    @State private var picked: PhotosPickerItem?
+    @State private var picking = false
 
     var body: some View {
         LoadState(isLoading: loading, error: entry == nil ? error : nil, retry: load) {
@@ -65,6 +70,23 @@ struct EntryDetailView: View {
                             Button("Add") { Task { await addValue() } }.disabled(newValue.trimmingCharacters(in: .whitespaces).isEmpty)
                         }
                     }
+                    Section("Photos") {
+                        if !photos.isEmpty {
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: 8)], spacing: 8) {
+                                ForEach(photos) { a in
+                                    AttachedPhoto(ref: a.deviceRef ?? "")
+                                        .contextMenu {
+                                            Button("Remove from this memo", role: .destructive) { Task { await remove(a) } }
+                                        }
+                                }
+                            }
+                            .accessibilityIdentifier("attached-photos")
+                        }
+                        Button { Task { await openPicker() } } label: {
+                            Label("Add a photo", systemImage: "photo.badge.plus")
+                        }
+                        .accessibilityIdentifier("add-photo")
+                    }
                     if let error { Section { Text(error).foregroundStyle(Color.semanticError) } }
 
                 }
@@ -93,6 +115,23 @@ struct EntryDetailView: View {
             }
         }
         .task { await load() }
+        // The picker exists only while this sheet is up: created with the shared
+        // library it asks for Photos access as soon as it appears, so it must not
+        // sit in the form (the iPhone 12 tap tier caught the prompt on scroll).
+        // The shared library is what makes it return the asset's identifier, all
+        // CentMemo keeps (money-story-design: by reference).
+        .sheet(isPresented: $picking) {
+            PhotosPicker(selection: $picked, matching: .images, photoLibrary: .shared()) { EmptyView() }
+                .photosPickerStyle(.inline)
+                .photosPickerDisabledCapabilities(.selectionActions)
+                .ignoresSafeArea()
+        }
+        .onChange(of: picked) { _, item in
+            guard let ref = item?.itemIdentifier else { return }
+            picked = nil
+            picking = false
+            Task { await attach(ref) }
+        }
     }
 
     private func toggle(_ id: String) {
@@ -105,13 +144,39 @@ struct EntryDetailView: View {
         do {
             async let e = APIClient.shared.transaction(entryID)
             async let v = APIClient.shared.values()
+            async let p = APIClient.shared.attachments(for: entryID)
             entry = try await e
             values = try await v
+            photos = try await p
             memo = entry?.memo?.body ?? ""
             chosen = Set(entry?.memo?.valueIDs ?? [])
             error = nil
         } catch { self.error = session.handle(error) }
         loading = false
+    }
+
+    /// Asks for Photos access when the person chooses to add one, with the reason in
+    /// NSPhotoLibraryUsageDescription. Declining still lets them attach by reference.
+    private func openPicker() async {
+        if PHPhotoLibrary.authorizationStatus(for: .readWrite) == .notDetermined {
+            _ = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
+        }
+        picking = true
+    }
+
+    private func attach(_ ref: String) async {
+        do {
+            photos.append(try await APIClient.shared.attachPhoto(transactionID: entryID, deviceRef: ref))
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        } catch {
+            self.error = session.handle(error)
+            UINotificationFeedbackGenerator().notificationOccurred(.error)
+        }
+    }
+
+    private func remove(_ a: APIClient.Attachment) async {
+        do { try await APIClient.shared.removeAttachment(a.id); photos.removeAll { $0.id == a.id } }
+        catch { self.error = session.handle(error) }
     }
 
     private func addValue() async {

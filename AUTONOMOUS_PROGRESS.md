@@ -66,7 +66,7 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
    states at 375px.
 9. 🟡 (tick 8: glass tier 5/5; tap tier blocked on Ben) The iPad Pro on the bench: run the tap tier there (the stand-in
    device, never yet run).
-10. ⏳ Photos and files attached to a memo by reference (M2, Decision 055
+10. 🟡 (tick 11: iOS photos by reference ✅; files, upload, web ⏳) Photos and files attached to a memo by reference (M2, Decision 055
     attachments table; `money-story-design`).
 11. ⏳ Upstream to UniversalAppTemplate:
     - The three new skills.
@@ -316,3 +316,40 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
 - **Next:** tick 11 (iOS). The top iOS item is 10 (attachments by
   reference), but Ben's iPad readable-width answer and the static-page font
   (11b, web) are pending; take item 10.
+
+### Tick 11 — 2026-11-21 — iOS: attach a photo to a memo by reference (build 1.0 (5))
+- **Context:** backlog item 10. money-story-design: "by reference
+  (PhotoKit local identifier) first; uploading a copy is a separate,
+  explicit choice." Four-question test: passes (the person picks, nothing
+  automated, native picker).
+- **Implementation:**
+  - `APIClient` attachments: list, `attachPhoto` (stores only `device_ref`),
+    remove.
+  - Detail view "Photos": thumbnails (`AttachedPhoto`, a tile that says "On
+    another device" or "Allow Photos access to show it" when it can't draw
+    the photo), long-press "Remove from this memo", and "Add a photo".
+  - Photos access is asked when the person taps Add a photo (with
+    `NSPhotoLibraryUsageDescription`). The picker lives in a sheet, so it
+    exists only then.
+  - `PhotoAttachUITests`. Builds 4 and 5.
+- **Verification:**
+  - iPhone 12 full tap tier 10/10, no crash logs; the server holds 0
+    attachments and no test memos afterward.
+  - The photo test declines Photos access on purpose (Ben's phone), so the
+    denied path is the one verified. **CentMemo now has Photos access
+    "None" on the iPhone 12**; Ben can change it in Settings.
+  - `tools/test_all.sh` ALL PASS.
+- **Honest notes:**
+  - The early Photos prompt I first blamed on the picker sitting in the form
+    was most likely a leftover prompt from an interrupted run (see
+    docs/TESTING.md). The sheet design stays (it asks at intent), but the
+    "bug" is unproven.
+  - `testWriteThenRemoveMemo` was failing: taps placed the caret at the
+    start of the text, so cleanup deleted nothing and leftover memos grew.
+    Fixed with a triple-tap select, after four evidence-led attempts; one
+    run in between covered nothing because the test didn't compile.
+    Leftover test memos were removed from the synthetic owner each time.
+- **Not done:** files, opt-in upload, and the web showing that a photo is
+  attached (PARITY ⏳).
+- **Next:** tick 12 (web), 11b (static-page headings in Newsreader) or the
+  web side of attachments.

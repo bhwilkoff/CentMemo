@@ -22,7 +22,7 @@ final class MemoUITests: DeviceTestCase {
         let editor = app.textViews["memo-editor"]
         XCTAssertTrue(editor.waitForExistence(timeout: 25), "memo editor")
         let note = "UI test memo \(Int(Date().timeIntervalSince1970))"
-        editor.tap()
+        editor.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.6)).tap()
         editor.typeText(note)
         // Save is in the navigation bar, reachable with the keyboard up.
         let save = app.buttons["save-memo"]
@@ -40,10 +40,12 @@ final class MemoUITests: DeviceTestCase {
         XCTAssertTrue((editor2.value as? String ?? "").contains(note), "memo survives a relaunch")
 
         // Put it back: clear and save.
-        editor2.tap()
-        editor2.press(forDuration: 1.2)
-        if again.menuItems["Select All"].waitForExistence(timeout: 3) { again.menuItems["Select All"].tap() }
+        // Clear it by selecting, not by placing a caret: taps put the caret at the
+        // start or mid-text on the iPhone 12 (seen in frames), and the edit menu's
+        // "Select All" did not reliably appear. A triple tap selects the paragraph.
+        editor2.tap(withNumberOfTaps: 3, numberOfTouches: 1)
         editor2.typeText(XCUIKeyboardKey.delete.rawValue)
+        XCTAssertEqual((editor2.value as? String ?? "").trimmingCharacters(in: .whitespacesAndNewlines), "", "memo cleared")
         again.buttons["save-memo"].tap()
         XCTAssertTrue(again.staticTexts["memo-status"].waitForExistence(timeout: 15))
         XCTAssertEqual(again.staticTexts["memo-status"].label, "Memo removed.")

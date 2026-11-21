@@ -115,7 +115,7 @@ When shipping any user-facing feature:
 |---|---|---|---|---|---|---|
 | Write a memo on a purchase | 🚧 | 🚧 | ⏳ | 🚫 | 🚫 | Only the person writes (Decision 056) |
 | Values the person names, tagged on memos | 🚧 | 🚧 | ⏳ | 🚫 | 🚫 | |
-| Attach a photo or file | 🔮 | ⏳ | ⏳ | 🚫 | 🚫 | By device reference first; upload is opt-in |
+| Attach a photo or file | ⏳ | ✅ | ⏳ | 🚫 | 🚫 | iOS: photo by PhotoKit reference (tick 11); files and opt-in upload later. Web cannot show a device photo; it should say one is attached |
 | Share one story | 🔮 | 🔮 | 🔮 | 🚫 | 🚫 | Opt-in, per story |
 | Claude connector (read-only MCP) | 🚧 | n/a | n/a | n/a | n/a | Server-side; every platform's data is readable once synced |
 | Delete account | 🚧 | 🚧 | ⏳ | 🚫 | 🚫 | Decision 035 |
