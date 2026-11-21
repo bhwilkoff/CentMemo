@@ -49,7 +49,7 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
 ### Documented work
 4. ✅ (tick 3) iOS parity with the web's drawn marks: the circled Unexamined count and
    the Ledger rule (PARITY / DESIGN M1).
-5. ⏳ Connector end to end:
+5. ✅ (tick 4) Connector end to end:
    - Connect the MCP server in Claude Code through the real OAuth consent
      page as the synthetic owner.
    - Call all six tools.
@@ -149,3 +149,27 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
   wants more of a hand-drawn feel.
 - **Next:** tick 4 (infrastructure), backlog item 5, the connector end to
   end through OAuth.
+
+### Tick 4 — 2026-11-21 — infra: the Claude connector end to end (OAuth, six tools, read-only)
+- **Context:** backlog item 5.
+- **Implementation:** `tools/test_connector.mjs` drives the connector the
+  way Claude's client does:
+  - Discovery from the 401 and `resource_metadata`, plus the authorization
+    server metadata (S256).
+  - Dynamic client registration, then authorization with PKCE. Supabase
+    redirects to centmemo.com/oauth/consent.
+  - Consent approved through the same calls `js/consent.js` makes, as the
+    synthetic owner. Done in Node so Ben's own browser session stays
+    signed in.
+  - Code exchange (the token carries `client_id`), then initialize,
+    tools/list (six tools, all titled and read-only), and each tool called
+    with its expected answer.
+  - The agent token reads through REST, gets 403 on insert, and changes no
+    memo. The owner's own token can insert, which shows the 403 comes from
+    being an agent.
+  - Refresh works.
+  - Added to `tools/test_all.sh`.
+- **Verification:** 24/24 checks pass against the deployed project.
+- **Note:** each run registers one OAuth client named "CentMemo connector
+  test" (Supabase lists them under OAuth Apps).
+- **Next:** tick 5 (opt): net-remove lines.

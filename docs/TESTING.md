@@ -15,6 +15,7 @@ One command, about two minutes, no device needed:
 | `tests/connector_guard.test.mjs` | The Claude connector never reads FinanceKit rows (Addendum 3.2) |
 | `tools/test_design_tokens.mjs` | Every platform's tokens match the JSON; text pairs pass AA |
 | `tools/test_grounds.mjs` | Every color a person can choose: ink reads on it, it is never a page background, web and Apple agree |
+| `tools/test_connector.mjs` | The Claude connector end to end, as Claude drives it: discovery, registration, PKCE, consent, token, all six tools, refresh. The agent token gets 403 on writes; a control shows the owner's token can write |
 | `tools/test_rls.mjs` | Deployed row-level security: a stranger sees and changes nothing; a read-only control proves the test can fail |
 | `CentMemoTests` (Swift) | The same money goldens as the web, plus calendar dates in any time zone |
 | iOS build | The app and its UI tests compile |
