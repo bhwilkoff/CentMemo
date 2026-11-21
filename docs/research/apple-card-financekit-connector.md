@@ -341,3 +341,23 @@ Fields:
   app personalization?"
 - Expected users in 12 months (bands).
 - The addendum, with an **Agree** button.
+
+### Precedent: FinanceKit apps with AI connectors (researched November 21, 2026)
+
+- **YNAB, Monarch, and Copilot** (the FinanceKit launch partners) all ship
+  official MCP connectors for Claude and ChatGPT, scoped to "everything" in
+  the account, with no Apple exclusion **[documented]**. They hold FinanceKit
+  data on their servers, so Apple Card rows almost certainly reach those AI
+  tools **[inferred]**.
+- Monarch carves out data providers whose terms require it (Finicity) and
+  reports AI access to others, but names no Apple carve-out **[documented]**.
+- My AI Fin explicitly keeps Apple Wallet data away from assistants
+  **[documented]**.
+- No public source shows whether any of them holds Apple's written
+  permission under 3.2. Launch partners may have signed bespoke terms
+  **[unknowable from outside]**.
+- **What CentMemo did**: the entitlement request discloses the connector
+  and asks Apple for written permission. Until Apple grants it, the
+  connector excludes FinanceKit rows in code (`SHARE_FINANCEKIT = false`,
+  guarded by `tests/connector_guard.test.mjs`) and in SQL
+  (`spending_summary(..., exclude_financekit)`).

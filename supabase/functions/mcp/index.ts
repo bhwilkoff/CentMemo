@@ -68,6 +68,15 @@ function txnLine(t: any, withMemo = true): string {
   return line;
 }
 
+// FinanceKit APIs Addendum 3.2: FinanceKit Account Data may not reach a
+// third party (Anthropic, for a person's Claude) without Apple's written
+// permission, and consent does not override that. Until Apple permits it,
+// every read below goes through these helpers, which drop FinanceKit rows.
+// tests/connector_guard.test.mjs fails if a query bypasses them.
+const SHARE_FINANCEKIT = false;
+// deno-lint-ignore no-explicit-any
+function guarded(q: any, column = 'source') { return SHARE_FINANCEKIT ? q : q.neq(column, 'financekit'); }
+
 const TXN_COLUMNS = 'id, txn_date, amount_minor, currency, merchant, description, category, txn_type, status, memos(body, memo_values(life_values(name)))';
 
 Deno.serve(
@@ -75,6 +84,7 @@ Deno.serve(
     [withOAuthProtectedResource(), withSupabase({ auth: 'user' })],
     // deno-lint-ignore no-explicit-any
     async (req: Request, { supabase }: any) => {
+      const txns = (cols: string) => guarded(supabase.from('transactions').select(cols));
       async function idsForValue(name: string): Promise<string[]> {
         const r = await supabase.from('memo_values').select('transaction_id, life_values!inner(name)').ilike('life_values.name', name);
         if (r.error) throw new Error(r.error.message);
@@ -91,7 +101,7 @@ Deno.serve(
           inputSchema: z.object({}),
           annotations: READ_ONLY,
         }, async () => {
-          const r = await supabase.from('accounts').select('id, display_name, institution, kind, currency, credit_limit_minor, source').order('display_name');
+          const r = await guarded(supabase.from('accounts').select('id, display_name, institution, kind, currency, credit_limit_minor, source')).order('display_name');
           if (r.error) throw new Error(r.error.message);
           if (!r.data.length) return text('No accounts yet. The person can import an Apple Card export at centmemo.com or connect FinanceKit in the CentMemo iPhone app.');
           // deno-lint-ignore no-explicit-any
@@ -106,7 +116,7 @@ Deno.serve(
           inputSchema: z.object({}),
           annotations: READ_ONLY,
         }, async () => {
-          const r = await supabase.from('balances').select('account_id, as_of, available_minor, booked_minor, currency, accounts(display_name)').order('as_of', { ascending: false }).limit(200);
+          const r = await guarded(supabase.from('balances').select('account_id, as_of, available_minor, booked_minor, currency, accounts!inner(display_name, source)'), 'accounts.source').order('as_of', { ascending: false }).limit(200);
           if (r.error) throw new Error(r.error.message);
           const latest = new Map();
           // deno-lint-ignore no-explicit-any
@@ -135,7 +145,7 @@ Deno.serve(
           annotations: READ_ONLY,
         }, async (a) => {
           const from = a.from ?? daysAgo(30), to = a.to ?? today(), limit = a.limit ?? 50;
-          let q = supabase.from('transactions').select(TXN_COLUMNS).gte('txn_date', from).lte('txn_date', to);
+          let q = txns(TXN_COLUMNS).gte('txn_date', from).lte('txn_date', to);
           if (a.merchant) {
             const m = a.merchant.replace(/[%_,()]/g, ' ');
             q = q.or(`merchant.ilike.%${m}%,description.ilike.%${m}%`);
@@ -169,7 +179,7 @@ Deno.serve(
           }),
           annotations: READ_ONLY,
         }, async ({ from, to, group_by }) => {
-          const r = await supabase.rpc('spending_summary', { from_date: from, to_date: to, group_by });
+          const r = await supabase.rpc('spending_summary', { from_date: from, to_date: to, group_by, exclude_financekit: !SHARE_FINANCEKIT });
           if (r.error) throw new Error(r.error.message);
           if (!r.data.length) return text(`Nothing recorded from ${from} to ${to}.`);
           // deno-lint-ignore no-explicit-any
@@ -187,7 +197,7 @@ Deno.serve(
           annotations: READ_ONLY,
         }, async ({ from, limit }) => {
           const since = from ?? daysAgo(30);
-          const r = await supabase.from('transactions').select('id, txn_date, amount_minor, currency, merchant, description, category, txn_type, status, memos(transaction_id)')
+          const r = await txns('id, txn_date, amount_minor, currency, merchant, description, category, txn_type, status, memos(transaction_id)')
             .gte('txn_date', since).lt('amount_minor', 0).neq('status', 'rejected').order('txn_date', { ascending: false }).limit(1000);
           if (r.error) throw new Error(r.error.message);
           // deno-lint-ignore no-explicit-any
@@ -210,7 +220,7 @@ Deno.serve(
           annotations: READ_ONLY,
         }, async (a) => {
           const from = a.from ?? daysAgo(90), to = a.to ?? today();
-          let q = supabase.from('transactions').select(TXN_COLUMNS.replace('memos(', 'memos!inner(')).gte('txn_date', from).lte('txn_date', to);
+          let q = txns(TXN_COLUMNS.replace('memos(', 'memos!inner(')).gte('txn_date', from).lte('txn_date', to);
           if (a.value) {
             const ids = await idsForValue(a.value);
             if (!ids.length) return text(`No memos carry the value "${clean(a.value, 60)}".`);
