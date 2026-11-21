@@ -1,4 +1,4 @@
-# Project Scratchpad: [APP NAME]
+# Project Scratchpad: Duet Connect
 
 > Active working notes, loaded into every session, so keep it small.
 > Keep only the two most recent session-log entries; roll older ones
@@ -13,23 +13,14 @@
 
 ## Current state
 
-- **Status**: NOT STARTED. This is a fresh copy of the template.
-- **Active milestone**: M0
-- **Last session**: none yet
+- **Status**: STARTED 2026-11-21. Private repo made from the template; identity set (`com.learningischange.duetconnect`, "Duet Connect"). Ben's words are in AGENTS.md "What this app does".
+- **Active milestone**: M0, research before any build
+- **Last session**: 2026-11-21, repo created, pathway research written to `docs/research/duet-connect-pathways.md`
 - **Next actions**:
-  1. If the app is not live yet, finish `docs/path/setup.md` with the
-     owner: put the web app's name on it, turn on GitHub Pages, and
-     tell the owner its address so they can open it on any device.
-  2. Stage 00 (`docs/path/00-why-we-build.md`): the owner says why the
-     app exists and who it is for. Ask, listen, and write their words
-     into AGENTS.md ("Why we build", "What this app does"); never write
-     the values for them.
-  3. Stage 01 (`docs/path/01-first-prototype.md`): one platform (the
-     web, unless the owner's people are somewhere else), real data,
-     live at its own address.
-  4. Leave other platforms for stages 02 and 03, and log the platform
-     set in DECISIONS.md when the owner decides it.
-- **Open questions**: none yet
+  1. Ben reads the research and decides the platform set (web first may not fit: the data lives on Apple devices) and which pathway to try first for Apple Card.
+  2. Ben says who else, if anyone, the app is for, and anything he wants in "Why we build" beyond the template's text.
+  3. GitHub Pages stays off until there is something worth putting at an address; this app handles private data.
+- **Open questions**: see the end of the research doc.
 
 ---
 

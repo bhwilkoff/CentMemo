@@ -1,10 +1,4 @@
-# [APP NAME]: Agent Project Context
-
-**A fresh copy** (`[APP NAME]` above, SCRATCHPAD.md says NOT STARTED):
-walk the owner through `docs/path/setup.md`, then stage 00. The owner
-writes why the app exists and who it is for; ask and record their
-words, never fill them in yourself. Start on the web, live at its own
-address; other platforms wait for stages 02 and 03.
+# Duet Connect: Agent Project Context
 
 ## Why we build
 
@@ -209,7 +203,7 @@ real-device check before "done."
 
 ## What this app does
 
-<!-- FILL IN: One paragraph on what your app does and who it's for -->
+In Ben's words (2026-11-21): "make an app that can provide information to Claude Duet that the app/service doesn't currently have access to. The primary purpose of this is to provide Apple Card purchase to be seen by the app with an approved pathway via fincancekit or some other means. I'd also like to provide access to things like my iCloud Drive and my iCloud Photos library. The goal would be for the app to either use a fully documented pathway or to create one of its own. It is possible that this could only work as a native app, but much research will have to be done before we can fully decide on that."
 
 Every app starts as a **web app**, and can grow to a **native
 iOS/iPadOS app**, a **native macOS app**, a **native Apple TV (tvOS)

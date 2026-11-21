@@ -1,6 +1,6 @@
 {
-  "name": "App Name",
-  "short_name": "AppName",
+  "name": "Duet Connect",
+  "short_name": "Duet Connect",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FFFFFF",

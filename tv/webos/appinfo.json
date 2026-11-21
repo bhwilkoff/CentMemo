@@ -1,10 +1,10 @@
 {
-  "id": "com.example.appname",
+  "id": "com.learningischange.duetconnect",
   "version": "0.1.0",
   "vendor": "FILL IN vendor",
   "type": "web",
   "main": "index.html",
-  "title": "App Name",
+  "title": "Duet Connect",
   "icon": "icon.png",
   "largeIcon": "largeIcon.png",
   "splashBackground": "splash.png",
