@@ -55,7 +55,7 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
      page as the synthetic owner.
    - Call all six tools.
    - Record the results.
-6. ⏳ Connector documentation page on centmemo.com. The Connectors Directory
+6. ✅ (tick 9) Connector documentation page on centmemo.com. The Connectors Directory
    requires public docs and a privacy policy (the policy exists).
 7. ✅ (tick 6) iOS FinanceKit sync path wired end to end with the DEBUG sample source:
    - Settings: Connect Apple Wallet.
@@ -73,6 +73,8 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
     - The color-search tools.
     - The test_grounds pattern.
     - The device-harness lessons from docs/PROVENANCE.md.
+11b. ⏳ Web: static pages (privacy, terms, connect) set headings in system
+    sans, not Newsreader (DESIGN T1). Found tick 9.
 12. 🔮 Shared stories at a public URL (opt-in per story).
 13. 🔮 macOS through the universal target.
 
@@ -268,3 +270,25 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
 - **Verification:** `tools/test_all.sh` ALL PASS.
 - **Next:** tick 9 (infrastructure), backlog item 6, the connector
   documentation page.
+
+### Tick 9 — 2026-11-21 — infra: centmemo.com/connect/, the connector's public docs
+- **Context:** backlog item 6 (the Connectors Directory needs public docs;
+  AGENTS.md: side doors findable on the website, never featured in apps).
+- **Implementation:** `/connect/`: what the connector is (read-only), how to
+  add it (custom connector, the MCP address, Apple sign-in, the consent
+  page), the six tools in plain words from their registered titles, the
+  fact a person cannot discover (Wallet purchases are never shared with
+  Claude, Addendum 3.2, `SHARE_FINANCEKIT = false`), sample questions, how
+  to disconnect, the privacy link and contact. Linked from the sign-in
+  footer beside Privacy and Terms. CSS: doc table, wrapping code, ordered
+  list indent. Assets `?v=20261121f`.
+- **Verification:** `tools/test_web_states.mjs` now also checks connect/,
+  privacy/, and terms/ at 375px (all 375 wide) and that connect/ states the
+  Wallet exclusion; frame viewed. US English passes. `tools/test_all.sh`
+  ALL PASS.
+- **Lesson:** headless Chrome's `--window-size` has a minimum near 500 px,
+  so a 375 screenshot taken that way shows false clipping; measure with
+  device-metrics emulation (what test_web_states does).
+- **Found:** static-page headings use system sans, not Newsreader (new
+  backlog item 11b).
+- **Next:** tick 10 (opt): net-remove lines.

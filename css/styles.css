@@ -306,3 +306,11 @@ html[data-ground="pistachio"] { --color-yours: #B4C875; }
 .memo-input { background: var(--color-surface); }
 .story-entry { background: var(--color-surface); border-top: 0; border-radius: var(--radius-card); padding: var(--space-4); margin-bottom: var(--space-3); }
 .story-meta { color: var(--color-text-muted); }
+
+/* /connect/: the tool table and the connector address (wraps at 375px). */
+.page code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem; overflow-wrap: anywhere; }
+.doc-table { width: 100%; border-collapse: collapse; margin: var(--space-3, 12px) 0; }
+.doc-table th, .doc-table td { text-align: left; vertical-align: top; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--color-border, rgba(0,0,0,.12)); }
+.doc-table th { font-weight: 700; }
+.doc-table td:first-child { white-space: nowrap; font-weight: 600; }
+.page ol { padding-left: 1.6em; }

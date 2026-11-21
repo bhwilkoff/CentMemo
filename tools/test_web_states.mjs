@@ -120,6 +120,18 @@ await shot('offline-ledger');
 await cdp('Network.emulateNetworkConditions', { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
 ok(await waitFor('document.getElementById("offline-banner").hidden'), 'the banner clears when back online');
 
+console.log('static pages');
+for (const page of ['connect/', 'privacy/', 'terms/']) {
+  await cdp('Page.navigate', { url: SITE + page });
+  await waitFor('document.readyState === "complete" && !!document.querySelector("h1")');
+  await sleep(300);
+  const w = await evaluate('document.documentElement.scrollWidth');
+  ok(w <= 375, `${page} fits 375px (${w})`);
+  await shot('page-' + page.replace('/', ''));
+}
+ok(/never shared with Claude/.test(await (async () => { await cdp('Page.navigate', { url: SITE + 'connect/' }); await waitFor('!!document.querySelector("h1")'); return evaluate('document.body.innerText'); })()),
+  'connect/ states that Wallet purchases are never shared with Claude');
+
 ok(await evaluate('document.documentElement.scrollWidth <= 375'), `no horizontal scroll at 375 (${await evaluate('document.documentElement.scrollWidth')})`);
 console.log(failures ? `FAIL: ${failures} web state check(s); frames in ${OUT}` : `PASS: four states at 375px; frames in ${OUT}`);
 ws.close(); cleanup();

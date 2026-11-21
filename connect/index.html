@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connect Claude | CentMemo</title>
+  <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <meta property="og:image" content="https://centmemo.com/assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="The CentMemo mark, a sanguine cent sign circled in aqua pencil, beside the words CentMemo and Every cent tells a story.">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="canonical" href="https://centmemo.com/connect/">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,700&display=swap">
+  <link rel="stylesheet" href="../css/styles.css?v=20261121f">
+  <script>try{var g=localStorage.getItem("cm_ground");if(g)document.documentElement.setAttribute("data-ground",g)}catch(e){}</script>
+</head>
+<body>
+  <main class="page"><div class="page-inner">
+    <p><a href="../">CentMemo</a></p>
+    <h1>Connect Claude</h1>
+    <p>The CentMemo connector lets Claude read your CentMemo, so it can help you understand your money and the stories you have written about it. Claude can read. It can never write, change, or delete anything; the memos are yours to write.</p>
+
+    <h2>Add it</h2>
+    <ol>
+      <li>In Claude, open <strong>Settings</strong>, then <strong>Connectors</strong>, and choose <strong>Add custom connector</strong>.</li>
+      <li>Name it CentMemo and paste this address:<br><code>https://qucsmmazfalbyduxlavl.supabase.co/functions/v1/mcp</code></li>
+      <li>Choose <strong>Connect</strong>, sign in to CentMemo with Apple, and approve on the CentMemo page that names Claude.</li>
+    </ol>
+    <p>Works in Claude on the web, desktop, and phone, in Claude Code, and in scheduled tasks.</p>
+
+    <h2>What Claude can read</h2>
+    <table class="doc-table">
+      <thead><tr><th>Tool</th><th>What it returns</th></tr></thead>
+      <tbody>
+        <tr><td>List accounts</td><td>Your accounts in CentMemo, with kind, currency, and credit limit.</td></tr>
+        <tr><td>Get balances</td><td>The latest balance recorded for each account.</td></tr>
+        <tr><td>Search transactions</td><td>Transactions by date, merchant, category, value, amount, or whether they have a memo, with your memo and values.</td></tr>
+        <tr><td>Spending summary</td><td>Totals by month, by category, or by the values you named.</td></tr>
+        <tr><td>Unexamined purchases</td><td>Recent purchases without a memo, so Claude can ask you about them.</td></tr>
+        <tr><td>Get memos</td><td>The stories you wrote, in date order, optionally for one value.</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Purchases synced from Apple Wallet are never shared with Claude.</strong> Apple's terms for Wallet data do not allow it. Claude reads only Apple Card exports you imported and what you wrote.</p>
+
+    <h2>Try asking</h2>
+    <ul>
+      <li>What did I spend on things I tagged "time with my kids" this fall?</li>
+      <li>Which purchases this month don't have a memo yet?</li>
+      <li>Read me my memos from October.</li>
+    </ul>
+
+    <h2>Disconnect</h2>
+    <p>Remove CentMemo in Claude's <strong>Settings</strong>, <strong>Connectors</strong>. Deleting your CentMemo account in Settings also ends Claude's access.</p>
+
+    <p class="caption">What Claude reads is sent to Anthropic; see <a href="../privacy/">Privacy</a>. Questions: <a href="mailto:hello@centmemo.com">hello@centmemo.com</a>.</p>
+  </div></main>
+</body>
+</html>
