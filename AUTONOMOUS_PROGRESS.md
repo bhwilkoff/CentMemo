@@ -64,7 +64,7 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
    - The connector excludes these rows (already in code).
 8. ✅ (tick 7) Web: verify account deletion, plus the empty, error, and offline
    states at 375px.
-9. ⏳ The iPad Pro on the bench: run the tap tier there (the stand-in
+9. 🟡 (tick 8: glass tier 5/5; tap tier blocked on Ben) The iPad Pro on the bench: run the tap tier there (the stand-in
    device, never yet run).
 10. ⏳ Photos and files attached to a memo by reference (M2, Decision 055
     attachments table; `money-story-design`).
@@ -77,6 +77,9 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
 13. 🔮 macOS through the universal target.
 
 ### Blocked on Ben (not loop work)
+- iPad Pro UI automation: unlock the iPad, then Settings > Developer >
+  Enable UI Automation (and allow it if a prompt appears). The tap tier
+  times out with "Timed out while enabling automation mode" until then.
 - Sign in with Apple on the iPhone: sign out of the test account in
   Settings, then sign in.
 - The Claude Duet test: add the connector on claude.ai, then ask once live
@@ -244,3 +247,24 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
   about 7 s to appear after "Loading…". Acceptable for now.
 - **Verification:** `tools/test_all.sh` ALL PASS.
 - **Next:** tick 8 (iOS), backlog item 9, the tap tier on the iPad Pro.
+
+### Tick 8 — 2026-11-21 — iOS: the iPad Pro on the bench (glass 5/5; tap tier blocked)
+- **Context:** backlog item 9; first ever run on the iPad Pro 12.9
+  (iPad13,8, paired).
+- **Tap tier (XCUITest):** the app installed, but the runner failed twice
+  with "Timed out while enabling automation mode". That is the device-side
+  first-run gate (locked, or UI Automation not enabled in Developer
+  settings). Stopped after one retry; it needs Ben at the iPad (Blocked on
+  Ben). No crash logs; app left as found.
+- **Glass tier (OCR, no automation needed):** ad hoc plus all five
+  scenarios (unexamined, ledger, story, settings, item) RESULT OK: awake,
+  app owns the glass, no error text, no clipping.
+- **Seen:** the iPad uses the top tab bar (native iPadOS), and the pencil
+  circle and color marks render.
+- **Design finding (for Ben, not changed):** in landscape, rows run the full
+  2732 px, so the amount sits far from its merchant. A readable-width rule
+  belongs in an iPad section of DESIGN.md before any change.
+- **No version bump:** no app code changed this tick.
+- **Verification:** `tools/test_all.sh` ALL PASS.
+- **Next:** tick 9 (infrastructure), backlog item 6, the connector
+  documentation page.
