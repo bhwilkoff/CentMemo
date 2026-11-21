@@ -1,0 +1,122 @@
+<!doctype html>
+<!-- CentMemo brand renderer. Every brand image is drawn here and rendered to PNG
+     by tools/render_brand.sh (headless Chrome), so assets regenerate from source.
+     ?kind=icon|og|wordmark|sheet  &concept=a|b|c  &size=1024  &dark=1
+     Rules: docs/DESIGN.md (paper, ink, sanguine pencil; the person's color as a
+     mark), memory no-handwriting-fonts (the pencil is drawn, never typeset). -->
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,700;6..72,800&display=block">
+<style>
+  html,body{margin:0;padding:0;background:transparent}
+  body{font-family:"Newsreader",Georgia,serif}
+  svg{display:block}
+  .sheet{display:flex;gap:48px;flex-wrap:wrap;padding:40px;background:#FBFAF7;font-family:system-ui,sans-serif;color:#231B1C}
+  .sheet figure{margin:0;display:grid;gap:10px;justify-items:start}
+  .sheet figcaption{font-size:14px;max-width:300px}
+  .sheet h2{font:700 22px "Newsreader",Georgia,serif;margin:0;color:#4A1520}
+  .home{display:flex;gap:18px;align-items:flex-end}
+  .home svg{border-radius:22.4%;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+</style>
+<body>
+<div id="out"></div>
+<script>
+const P = new URLSearchParams(location.search);
+const KIND = P.get('kind') || 'sheet', CONCEPT = P.get('concept') || 'b', SIZE = +(P.get('size') || 1024), DARK = P.get('dark') === '1';
+const SANGUINE = '#4A1520', PAPER = '#FBFAF7', AQUA = '#2FD4EC', INK = '#231B1C';
+
+// Seeded jitter so every render of a mark is identical.
+function rng(s){ return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; }; }
+// A pencil stroke as a filled ribbon whose width breathes, so it reads as graphite, not a vector line.
+function stroke(points, w, seed){
+  // Ribbon edges as smooth curves (Catmull-Rom to cubic), width breathing gently.
+  const r = rng(seed), L = [], R = [];
+  for (let i = 0; i < points.length; i++) {
+    const [x, y] = points[i], [nx, ny] = points[Math.min(i + 1, points.length - 1)], [px, py] = points[Math.max(i - 1, 0)];
+    let dx = nx - px, dy = ny - py; const len = Math.hypot(dx, dy) || 1; dx /= len; dy /= len;
+    const t = i / (points.length - 1);
+    const taper = Math.min(1, t * 6, (1 - t) * 4) ** 0.5;
+    const hw = w * (0.9 + r() * 0.16) * Math.max(taper, 0.04) / 2;
+    L.push([x - dy * hw, y + dx * hw]); R.push([x + dy * hw, y - dx * hw]);
+  }
+  const smooth = pts => { let d = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+    for (let i = 0; i < pts.length - 1; i++) { const p0 = pts[Math.max(i - 1, 0)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(i + 2, pts.length - 1)];
+      d += ` C${(p1[0] + (p2[0] - p0[0]) / 6).toFixed(1)} ${(p1[1] + (p2[1] - p0[1]) / 6).toFixed(1)} ${(p2[0] - (p3[0] - p1[0]) / 6).toFixed(1)} ${(p2[1] - (p3[1] - p1[1]) / 6).toFixed(1)} ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`; }
+    return d; };
+  const right = R.reverse();
+  return smooth(L) + ' L' + right[0][0].toFixed(1) + ' ' + right[0][1].toFixed(1) + smooth(right).replace(/^M[^C]*/, '') + ' Z';
+}
+function arc(cx, cy, rx, ry, from, to, n, seed, wob = 0.035){
+  const r = rng(seed), pts = [];
+  for (let i = 0; i <= n; i++) { const t = from + (to - from) * i / n, j = 1 + (r() - .5) * wob;
+    pts.push([cx + Math.cos(t) * rx * j, cy + Math.sin(t) * ry * j]); }
+  return pts;
+}
+function line(x0, y0, x1, y1, n, seed, wob){
+  const r = rng(seed), pts = [];
+  for (let i = 0; i <= n; i++) { const t = i / n; pts.push([x0 + (x1 - x0) * t, y0 + (y1 - y0) * t + (r() - .5) * wob]); }
+  return pts;
+}
+// Graphite grain: a fine displacement that roughens the edge slightly, never a sawtooth.
+const GRAIN = id => `<filter id="g${id}" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.35" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="1.4"/></filter>`;
+
+// ---------- The three marks, drawn on a 1024 canvas ----------
+// A: Circled cent. A serif cent sign with a pencil loop drawn round it, the way the app circles what still needs you.
+function markA(bg, fg, pop){
+  // Starts upper right, goes round once, and runs past its start: a circle drawn by hand, not a ring.
+  const loop = stroke(arc(512, 524, 336, 312, -1.0, 2 * Math.PI - 0.62, 26, 11, 0.025)
+    .concat(arc(522, 514, 352, 302, 2 * Math.PI - 0.5, 2 * Math.PI + 0.12, 5, 4, 0.01)), 48, 3);
+  return `<rect width="1024" height="1024" fill="${bg}"/>
+    <text x="512" y="676" text-anchor="middle" font-family="Newsreader" font-weight="700" font-size="520" fill="${fg}">¢</text>
+    <g filter="url(#gA)"><path d="${loop}" fill="${pop}"/></g>`;
+}
+// B: Highlighted cent. The person's color as a highlighter stroke behind a serif cent sign, underlined in pencil:
+// the app's own two marks (what still needs you; the pencil) in one picture.
+function markB(bg, fg, pop){
+  const band = stroke(line(170, 548, 860, 512, 40, 5, 10), 300, 9);
+  const under = stroke(line(250, 782, 790, 762, 40, 8, 9), 30, 4);
+  return `<rect width="1024" height="1024" fill="${bg}"/>
+    <g filter="url(#gB)"><path d="${band}" fill="${pop}" opacity=".95"/></g>
+    <text x="512" y="700" text-anchor="middle" font-family="Newsreader" font-weight="700" font-size="560" fill="${fg}">¢</text>
+    <g filter="url(#gB)"><path d="${under}" fill="${fg}"/></g>`;
+}
+// C: Memo slip. A paper slip with a torn top edge, two pencil lines and a cent at the foot, on the person's color.
+function markC(bg, fg, pop){
+  const r = rng(21); let top = 'M232 300'; for (let x = 232; x <= 792; x += 28) top += ` L${x} ${300 + (r() - .5) * 26}`;
+  const l1 = stroke(line(300, 470, 720, 462, 30, 3, 6), 26, 2), l2 = stroke(line(300, 578, 640, 584, 30, 4, 6), 26, 5);
+  return `<rect width="1024" height="1024" fill="${pop}"/>
+    <path d="${top} L792 820 L232 820 Z" fill="${bg}"/>
+    <g filter="url(#gC)"><path d="${l1}" fill="${fg}"/><path d="${l2}" fill="${fg}"/></g>
+    <text x="700" y="770" text-anchor="middle" font-family="Newsreader" font-weight="700" font-size="200" fill="${fg}">¢</text>`;
+}
+const MARKS = { a: markA, b: markB, c: markC };
+function icon(concept, size, dark){
+  const bg = dark ? '#171615' : PAPER, fg = dark ? '#F0B9BE' : SANGUINE;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 1024 1024">
+    <defs>${GRAIN('A')}${GRAIN('B')}${GRAIN('C')}</defs>${MARKS[concept](bg, fg, AQUA)}</svg>`;
+}
+function wordmark(concept, w, dark){
+  const fg = dark ? '#F0B9BE' : SANGUINE, bg = dark ? '#171615' : PAPER;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${w * 0.25}" viewBox="0 0 2000 500">
+    <rect width="2000" height="500" fill="${bg}"/>
+    <g transform="translate(40,40) scale(0.41)">${MARKS[concept](bg, fg, AQUA).replace(/<rect[^>]*\/>/, '')}</g>
+    <text x="520" y="330" font-family="Newsreader" font-weight="700" font-size="250" fill="${fg}" letter-spacing="-4">CentMemo</text></svg>`;
+}
+function og(concept){
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+    <defs>${GRAIN('A')}${GRAIN('B')}${GRAIN('C')}</defs>
+    <rect width="1200" height="630" fill="${PAPER}"/>
+    <g transform="translate(80,115) scale(0.39)">${MARKS[concept](PAPER, SANGUINE, AQUA).replace(/<rect[^>]*\/>/, '')}</g>
+    <text x="520" y="290" font-family="Newsreader" font-weight="700" font-size="112" fill="${SANGUINE}" letter-spacing="-2">CentMemo</text>
+    <text x="524" y="370" font-family="Newsreader" font-weight="500" font-size="46" fill="${INK}">Every cent tells a story.</text></svg>`;
+}
+document.fonts.load('700 100px Newsreader').then(() => {
+  const out = document.getElementById('out');
+  if (KIND === 'icon') out.innerHTML = icon(CONCEPT, SIZE, DARK);
+  else if (KIND === 'wordmark') out.innerHTML = wordmark(CONCEPT, SIZE, DARK);
+  else if (KIND === 'og') out.innerHTML = og(CONCEPT);
+  else out.innerHTML = '<div class="sheet">' + ['a', 'b', 'c'].map(c => `<figure><h2>${{a: 'A. Circled cent', b: 'B. Highlighted cent', c: 'C. Memo slip'}[c]}</h2>
+    <div class="home">${icon(c, 180)}${icon(c, 120, true)}${icon(c, 60)}${icon(c, 29)}</div>${wordmark(c, 360)}</figure>`).join('') + '</div>';
+  document.body.setAttribute('data-ready', '1');
+});
+</script>
+</body>

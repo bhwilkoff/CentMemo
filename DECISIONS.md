@@ -1455,3 +1455,33 @@ gets one focal point.
 - `tools/test_grounds.mjs` fails if a chosen color becomes a page background,
   if ink can't be read on it, or if web and Apple drift apart.
 - When everything has a memo, a screen has no bold color. That is the reward.
+
+---
+
+## 061: The mark is a sanguine cent sign circled once in pencil, in the person's color
+*Date: 2026-11-21*
+
+CentMemo's mark is a serif cent sign (Newsreader) in sanguine. Around it is
+one drawn pencil circle in the person's color (aqua by default) that runs a
+little past its start. It sits on paper, and in dark mode on near-black with
+a pale sanguine cent sign. The wordmark is the mark plus "CentMemo" in
+Newsreader 700. Every asset renders from `branding/brand.html` through
+`tools/render_brand.sh`, and none is hand-exported. The brand page is at
+`/brand/`.
+
+**Why**: Ben asked for "branding/logos, etc. for us to work from." The mark
+uses the app's own gesture: the circle around what still needs you
+(DESIGN C3.1, M1). Three concepts were drawn at real home-screen sizes:
+- A, the circled cent, was the only one legible at 29 px.
+- B, a highlighter band, turned muddy below 60 px.
+- C, a memo slip, read as a generic notes app.
+
+A's loop is not Duet's: Duet draws a squiggle on a terracotta disc, and
+CentMemo draws a circle around a glyph in its own colors.
+
+**How to apply**:
+- Change the mark in `branding/brand.html`, re-run the render script, and
+  look at every size, light and dark.
+- The icon stays paper with one aqua circle. Color stays a mark, even on the
+  icon.
+- No handwriting fonts anywhere (memory `no-handwriting-fonts`).
