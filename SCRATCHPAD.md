@@ -28,6 +28,8 @@
 - **Sign-in (Decision 058, amended)**: Apple only. Web VERIFIED by Ben 2026-11-21 ("I also logged in just fine on the web"). iPhone (id_token) not yet verified: needs a team-signed device build.
 - **Color research**: docs/research/color-search.md (Human Shaped method).
 - **Testing (docs/TESTING.md)**: `tools/test_all.sh` (ALL PASS) off-device; on the iPhone 12 under the shared device lease: `tools/ios_uitest.py` (8/8 tap tests: tabs, memo write/read-back/remove, color persists; no crashes) and `tools/ios_run.py` (5/5 OCR scenarios; negative control FAILs as expected). Harness from Ear Drama (power never touched). Bugs it found: keyboard covered Save (now nav-bar Save + keyboard Done), "Saved." off-screen (now under the memo).
+- **Store (docs/STORE.md)**: App Store Connect app 6837824241 (Finance); TestFlight 1.0 (1) VALID; internal group "CentMemo testers" (all builds), Ben invited 2026-11-21. Brand: Decision 061, /brand/.
+- **Autonomous loop**: AUTONOMOUS_PROGRESS.md holds the backlog and tick log.
 - **Blocked on Ben**:
   1. Chrome is signed in to the Minerva Supabase account; sign in as the Learning is Change owner so the agent can enable the OAuth server (path `/oauth/consent/`), Site URL `https://centmemo.com`, redirect URLs. Or create an org-wide Supabase access token at `~/.centmemo/supabase-token`.
   2. Apple Developer sign-in in Chrome, then the agent prefills the FinanceKit form and Ben presses Submit.

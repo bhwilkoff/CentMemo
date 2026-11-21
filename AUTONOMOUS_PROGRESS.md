@@ -38,7 +38,7 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
 2. ✅ (tick 2, app id 6837824241) **App Store Connect app record**: name CentMemo, bundle
    `com.learningischange.centmemo`, category Finance, SKU, primary language
    English (US).
-3. ⏳ **TestFlight**:
+3. ✅ (tick 2) **TestFlight**:
    - Archive, export, and upload with the API key.
    - An internal testing group with Ben.
    - Export compliance is already declared (`ITSAppUsesNonExemptEncryption NO`).
@@ -123,5 +123,9 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
 - **Verification:** "Upload succeeded"; the category reads back as FINANCE.
   Adding Ben to the group failed with "Tester(s) cannot be assigned" while
   the app had no processed build. A watcher adds him once processing ends.
-- **Next:** confirm the build is VALID and Ben is in the group (item 3).
-  Every later upload bumps CURRENT_PROJECT_VERSION.
+- **Follow-up (same tick):**
+  - Build 1 is VALID.
+  - Ben was added by creating the tester by email for the group
+    (`POST /v1/betaTesters`); his state is INVITED.
+  - Routine and lessons are in `docs/STORE.md`.
+- **Next:** tick 3 (iOS): backlog item 4, the drawn marks on iOS.
