@@ -35,6 +35,20 @@ plus the review lessons Tidbits Trivia paid for.
   batches, keep a foreground sync. The extension's bundle ID likely needs
   the entitlement too; ask in the request.
 - **No public turnaround.** File early; it is the long pole.
+- **Read the FinanceKit APIs Addendum before designing any data flow**
+  (published at developer.apple.com/contact/request/download/financekit.pdf):
+  - Approval grants development first; distribution is a second
+    application (2.6).
+  - No disclosure of Account Data (including data *derived from* it) to any
+    third party except your own service providers, Apple's separate written
+    permission, or law (3.2), and **user consent does not override that**
+    (3.3). An AI connector that lets a user's assistant read FinanceKit rows
+    is such a disclosure: exclude `source = 'financekit'` rows from it or
+    get Apple's written permission.
+  - Destroy data within 30 days of revocation (3.6).
+  - **Two-factor sign-in with a one-time password on new devices**, for app
+    and website alike (3.7).
+  - Report security incidents to Apple (3.8).
 - **Bridge while you wait**: the person's own export (Wallet: Apple Card,
   Card Balance, Export Transactions; or card.apple.com) as CSV. Apple Card
   columns: Transaction Date, Clearing Date, Description, Merchant,

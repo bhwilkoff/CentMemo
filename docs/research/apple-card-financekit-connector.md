@@ -263,3 +263,81 @@ Precedent (vendor or reported)
 - Copilot Apple accounts: https://help.copilot.money/en/articles/9038131-apple-card-apple-cash-and-savings
 - Lunch Sync: https://lunchmoney.app/blog/2025-11-10-community-newsletter
 - Every, Duet review: https://every.to/vibe-check/vibe-check-duet-anthropic-s-always-on-agent
+
+---
+
+## Addendum: what Apple's FinanceKit terms say (read November 21, 2026)
+
+The request form (developer.apple.com/contact/request/financekit/, signed in
+as Account Holder) carries the **FinanceKit APIs Addendum** to the Apple
+Developer Program License Agreement (LYL169, dated April 15, 2024). It is
+also published at developer.apple.com/contact/request/download/financekit.pdf.
+Summary, not legal advice; section numbers are the addendum's:
+
+- **2.6: Two grants.** Approval first gives a development and testing
+  entitlement only. Distribution is applied for separately once Apple's
+  requirements are met, and is not guaranteed. **[documented]**
+- **2.1: Finance and spending trends.** Finance must be the *primary*
+  category, and the app must give "financial management tools (including
+  tools that help with tracking comprehensive net worth or spending trends)".
+  **[documented]**
+- **3.1: Minimum data.** Account Data is used only to provide the service
+  through the app and its "Corresponding Product", collecting the minimum
+  necessary. **[documented]**
+- **3.2: No third parties.** No sharing, transfer, or disclosure of Account
+  Data to *any third party*. The only exceptions are a **service provider
+  acting on our behalf** (Developer Agreement 2.9: Supabase, Cloudflare), a
+  **separate written permission from Apple**, or law. "Account Data"
+  includes data "derived from" FinanceKit. **[documented]**
+- **3.3: Consent does not override 3.2.** Before asking for access, show the
+  data elements, how they are processed, and the privacy policy. Marketing
+  or personalized recommendations need separate, unbundled consent. And
+  "any end user consent ... shall not supersede the restrictions set forth
+  in Section 3.2." **[documented]**
+- **3.4: Corresponding Product.** A companion such as the web app may use
+  the data with the user's explicit consent, if the use is comparable to the
+  app's. **[documented]**
+- **3.6: Revocation.** Destroy a user's Account Data within 30 days of
+  revocation, and certify it to Apple on request. **[documented]**
+- **3.7: Security.** Encryption in transit (App Transport Security) and at
+  rest, access controls, and **two-factor authentication with a one-time
+  password when a user signs in on a new or unrecognized device**, for both
+  the app and the Corresponding Product. **[documented]**
+- **3.8: Security incidents.** Notify Apple, remediate, and make no public
+  announcement without Apple's written approval. **[documented]**
+
+### What this changes [inferred]
+
+1. **The Claude connector cannot serve FinanceKit-sourced rows by default.**
+   Claude reading a user's data through our MCP server discloses Account
+   Data to Anthropic. Anthropic acts for the user, not as our service
+   provider, and user consent does not override 3.2. Unless Apple grants
+   written permission, the connector must exclude rows with
+   `source = 'financekit'` and anything derived from them. Rows the person
+   imported from their own Wallet or card.apple.com export are not
+   FinanceKit Account Data, so the connector may keep serving them, along
+   with the person's own memos.
+2. **Ask Apple in the request.** The explanation field now says plainly
+   that an opt-in, read-only Claude connector is planned. Apple's answer
+   (approval, conditions, or a separate written agreement) decides
+   whether FinanceKit rows can ever reach Claude.
+3. **Two-factor sign-in is required** before FinanceKit data syncs. An email
+   magic link alone is one factor. Plan Sign in with Apple (Apple ID 2FA),
+   or an email code plus a passkey or TOTP, for any new device.
+4. **The website is fine** as a Corresponding Product, with explicit consent.
+
+### The form, as Apple asks it
+
+Fields:
+- Website, distribution (US/UK), app name, App Store URL and Apple ID
+  (optional), bundle ID, privacy policy link.
+- iOS yes/no, interest in other platforms.
+- "Does your app provide financial management tools?"
+- "Explain why you need the FinanceKit APIs and how you'll use them" (free
+  text).
+- Whether the app offers financial products.
+- "Will any data obtained from FinanceKit APIs be sold?"
+- "Will any data obtained from FinanceKit be used for marketing purposes or
+  app personalization?"
+- Expected users in 12 months (bands).
+- The addendum, with an **Agree** button.
