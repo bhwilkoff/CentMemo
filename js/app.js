@@ -53,7 +53,9 @@
   function empty(body, text, action) { body.replaceChildren(h('div', { class: 'state state-empty' }, h('p', {}, text), action || null)); }
   function failed(body, err, retry) {
     body.replaceChildren(h('div', { class: 'banner banner-error', role: 'alert' },
-      h('span', {}, navigator.onLine ? (err && err.message) || 'Something went wrong.' : 'You\'re offline.'),
+      h('span', {}, !navigator.onLine ? 'You\'re offline.'
+        : /Failed to fetch|NetworkError|Load failed/i.test((err && err.message) || '') ? 'CentMemo couldn\'t reach its server.'
+        : (err && err.message) || 'Something went wrong.'),
       retry ? h('button', { class: 'btn btn-small', onclick: retry }, 'Try again') : null));
   }
   function updateOnline() { $('offline-banner').hidden = navigator.onLine; }

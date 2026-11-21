@@ -15,6 +15,8 @@ One command, about two minutes, no device needed:
 | `tests/connector_guard.test.mjs` | The Claude connector never reads FinanceKit rows (Addendum 3.2) |
 | `tools/test_design_tokens.mjs` | Every platform's tokens match the JSON; text pairs pass AA |
 | `tools/test_grounds.mjs` | Every color a person can choose: ink reads on it, it is never a page background, web and Apple agree |
+| `tools/test_web_states.mjs` | The web app at 375px in headless Chrome: empty (stranger), rows (owner, the control), error with Try again and recovery (REST blocked), offline banner and message; no horizontal scroll. Frames in `build/qa/web-states-<date>/` |
+| `supabase/tests/delete_my_account.sql` | Account deletion removes the person and their rows and nothing else; run as the stranger, always rolled back |
 | `tools/test_connector.mjs` | The Claude connector end to end, as Claude drives it: discovery, registration, PKCE, consent, token, all six tools, refresh. The agent token gets 403 on writes; a control shows the owner's token can write |
 | `tools/test_rls.mjs` | Deployed row-level security: a stranger sees and changes nothing; a read-only control proves the test can fail |
 | `CentMemoTests` (Swift) | The same money goldens as the web, plus calendar dates in any time zone |

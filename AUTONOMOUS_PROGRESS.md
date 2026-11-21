@@ -62,7 +62,7 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
    - Accounts and transactions upsert as `source = 'financekit'`.
    - History tokens are kept per account.
    - The connector excludes these rows (already in code).
-8. ⏳ Web: verify account deletion, plus the empty, error, and offline
+8. ✅ (tick 7) Web: verify account deletion, plus the empty, error, and offline
    states at 375px.
 9. ⏳ The iPad Pro on the bench: run the tap tier there (the stand-in
    device, never yet run).
@@ -219,3 +219,28 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
   test. Real FinanceKit stays unverified until Apple grants the entitlement.
 - **Next:** tick 7 (web), backlog item 8, deletion and the empty, error,
   and offline states at 375px.
+
+### Tick 7 — 2026-11-21 — web: deletion proven, four states at 375px, one bug fixed
+- **Context:** backlog item 8.
+- **Audit:** the code already had all four states, the offline banner, and
+  deletion, so this tick was verification.
+- **Deletion:** `delete_my_account` run as the stranger inside a transaction
+  that never commits: user 1 to 0, their rows 1 to 0, owner untouched.
+  Saved as `supabase/tests/delete_my_account.sql` (ends in `rollback`).
+  The first run lacked an explicit rollback; the stranger was confirmed
+  still present afterward. Lesson saved to memory (supabase-approvals).
+- **States:** `tools/test_web_states.mjs` (headless Chrome over CDP,
+  dependency-free, sessions injected from the synthetic users, so Ben's
+  browser is untouched): 13/13 at 375px. Empty (stranger), rows (owner, the
+  control), error plus Try again plus recovery (REST blocked), offline
+  banner plus message, no horizontal scroll. Added to `tools/test_all.sh`.
+- **Bug fixed:** a network failure showed the browser's "TypeError: Failed
+  to fetch". `failed()` now says "CentMemo couldn't reach its server.";
+  the test checks the wording. Assets `?v=20261121e`.
+- **Harness lessons:** a hash-only navigation keeps the document, so the
+  injected session needs a reload; hidden sections keep old banners, so
+  selectors are scoped to the visible view.
+- **Noted, not fixed:** supabase-js retries failed reads, so an error takes
+  about 7 s to appear after "Loading…". Acceptable for now.
+- **Verification:** `tools/test_all.sh` ALL PASS.
+- **Next:** tick 8 (iOS), backlog item 9, the tap tier on the iPad Pro.
