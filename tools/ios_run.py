@@ -43,33 +43,34 @@ from devharness import Grader, ocr, qa_dir   # noqa: E402
 BUNDLE = APPLE_BUNDLE_ID
 SHOT_EVERY = 3.0
 
-BASE_ENV = {HOOK_SKIP_ONBOARD: "1", **DOOR_DEFAULTS}
+BASE_ENV = {HOOK_SKIP_ONBOARD: "1", **DOOR_DEFAULTS, **test_account_env()}
 
 # Chrome that proves OUR app owns the glass rather than Springboard.
-APP_ANCHOR_RX = APP_ANCHOR_RX  # see tools/app_config.py
+APP_ANCHOR_RX = IOS_ANCHOR_RX  # see tools/app_config.py
 
 # expect_any regexes are calibrated against real captures on your own device,
 # never guessed — an assertion written from imagination fails on correct pixels
 # and teaches the loop to be ignored. (Other keys devharness.Grader.grade_glass
 # reads: expect_end, forbid.)
 #
-# FILL IN: EXAMPLES matching what the template's starter honours (APP_START_TAB
-# home|search, APP_START_ITEM, APP_MUTE, APP_DOOR_SECONDS — see
-# apple/Core/Store/LaunchDoors.swift). Tab titles are on every screen, so replace
-# each regex with content unique to that surface, then add your app's surfaces.
+# Ear Drama's sections (LaunchDoors.swift: home|browse|record|search|library; Decision 075).
+# `stations` and `surprise` still open: Home, then that screen pushed (AppTab.push(forDoor:));
+# the old listen|series|radio|plays names still open too;
+# each regex is text only its screen draws, never a tab-bar label (calibrated on the iPhone 12,
+# 2026-10-24: the tab bar's "Browse"/"Library"/"Search" made Release-build Home frames pass).
 SCENARIOS = {
-    "home":        {"env": {HOOK_START_TAB: "home"},   "minutes": 0.6,
-                    "expect_any": r"Home"},                              # FILL IN
-    "search":      {"env": {HOOK_START_TAB: "search"}, "minutes": 0.6,
-                    "expect_any": r"Search"},                            # FILL IN
-    # Mute is in every launch already (DOOR_DEFAULTS); spelled out on the
-    # scenario most likely to start playback.
-    "item":        {"env": {HOOK_START_ITEM: QA_ITEM_ID, HOOK_MUTE: "1"}, "minutes": 0.6,
-                    "expect_any": QA_ITEM_RX},
-    # The door bounds itself: the app leaves the item on its own clock.
-    "door-return": {"env": {HOOK_START_ITEM: QA_ITEM_ID, HOOK_DOOR_SECONDS: "10"},
-                    "minutes": 0.6, "expect_any": QA_ITEM_RX,
-                    "expect_end": r"Home"},                              # FILL IN
+    # Each regex is text only that screen draws, never a tab-bar label (Ear Drama's
+    # lesson: the bar's own words made frames pass). Calibrate on the iPhone 12.
+    "unexamined": {"env": {HOOK_START_TAB: "unexamined"}, "minutes": 0.5,
+                   "expect_any": r"waiting for a memo|Every purchase has a memo|No transactions yet"},
+    "ledger":     {"env": {HOOK_START_TAB: "ledger"}, "minutes": 0.5,
+                   "expect_any": r"Spent|Paid or credited|Nothing recorded"},
+    "story":      {"env": {HOOK_START_TAB: "story"}, "minutes": 0.5,
+                   "expect_any": r"memos? \W*\$|No memos here yet"},
+    "settings":   {"env": {HOOK_START_TAB: "settings"}, "minutes": 0.5,
+                   "expect_any": r"Connect Claude|Ground"},
+    "item":       {"env": {HOOK_START_ITEM: QA_ITEM_ID}, "minutes": 0.5,
+                   "expect_any": QA_ITEM_RX},
 }
 
 

@@ -27,6 +27,7 @@ struct SettingsView: View {
                         }
                         .buttonStyle(.plain)
                         .accessibilityLabel(g.name)
+                        .accessibilityIdentifier("ground-\(g.rawValue)")
                         .accessibilityAddTraits(session.ground == g ? .isSelected : [])
                     }
                 }

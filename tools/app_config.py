@@ -54,12 +54,12 @@ PLAY_REPORTS_BUCKET = ""                          # e.g. "pubsite_prod_rev_0978.
 # Real hardware, by udid/serial. None = not on this bench. This is the SIMPLE form,
 # one device per kind. A manifest (tools/bench.py) overrides it when present.
 DEVICES = {
-    "iphone":  None,      # devicectl udid
-    "ipad":    None,      # devicectl udid
-    "appletv": None,      # devicectl udid (paired over the network)
-    "android": None,      # adb serial
+    "iphone":  "00008101-000339320188801E",  # iPhone 12 (owner 2026-11-21: "use the iPhone 12 for the initial push"; also Ear Drama's live-test phone)
+    "ipad":    "00008103-0019388E3CF1001E",  # iPad Pro 12.9 (5th gen), paired; the iPhone 12 stand-in when it is off
+    "appletv": None,      # CentMemo has no tvOS app (Decision 055)
+    "android": None,      # no Android app (Decision 055)
     "mac":     "local",   # the Mac this runs on
-    "windows": None,      # hostname or IP for SSH; see winbox.py
+    "windows": None,
     "web":     "local",   # a local Chrome driven over CDP
 }
 
@@ -82,7 +82,7 @@ ADB = Path(os.environ.get("ADB", Path.home() / "Library/Android/sdk/platform-too
 # Empty = inherit `xcode-select -p`. Set it when devicectl must come from a beta Xcode;
 # it is passed into every devicectl subprocess explicitly, because a plain os.environ
 # copy does not carry it when the parent shell never exported it.
-DEVELOPER_DIR = os.environ.get("DEVELOPER_DIR", "")
+DEVELOPER_DIR = os.environ.get("DEVELOPER_DIR", "/Applications/Xcode.app/Contents/Developer")
 
 # --- Env hooks ----------------------------------------------------------------
 # The env vars / intent extras your app reads to open a screen directly. These are
@@ -107,8 +107,10 @@ HOOK_FORCE_OFFLINE = "APP_FORCE_OFFLINE"
 # The item every runner's "item" scenario opens with HOOK_START_ITEM (the web's
 # ?item=), and text its detail screen renders. FILL IN both with a real id from your
 # catalog and a phrase calibrated against a real capture of that item's screen.
-QA_ITEM_ID = "example-item"                       # FILL IN
-QA_ITEM_RX = r"example-item"                      # FILL IN
+# The synthetic test owner's Denver Zoo purchase (tools/seed_demo.mjs): it has a memo
+# and two values, so its detail screen draws all three parts.
+QA_ITEM_ID = "a3b8c10c-68b8-4bfe-9380-c87b7015a49d"
+QA_ITEM_RX = r"Denver Zoo"
 
 # --- Doors are muted and time-bounded by default ------------------------------
 # A harness that plays media on someone's television is in their living room. A
@@ -168,7 +170,7 @@ MIN_OCR_LINES = 4              # fewer than this = the frame is unreadable
 # real screen. The harness grades "is my app on the glass" by matching this, so it
 # must be words your UI actually renders (tab titles, primary actions), not the app's
 # name. Getting this wrong makes every scenario fail with "wrong app/screen".
-APP_ANCHOR_RX = r"Home|Settings|Search"          # FILL IN
+APP_ANCHOR_RX = r"Unexamined|Ledger|Story|Settings"
 
 # Text that means the app is broken, whatever else is on screen.
 FORBIDDEN = (r"No results|Couldn.t load|Something went wrong|"
@@ -178,3 +180,30 @@ FORBIDDEN = (r"No results|Couldn.t load|Something went wrong|"
 # Streaming-app tiles and the clock are what a backgrounded launch leaves on the glass.
 TVOS_HOME_RX = (r"prime video|pluto|fubo|Apple TV\+|Select up for full screen|"
                 r"\d{1,2}:\d{2} [AP]M")
+
+
+# --- CentMemo ----------------------------------------------------------------
+# The tab bar's three words prove CentMemo (signed in) owns the glass; the sign-in
+# screen has none of them, so a signed-out launch fails the anchor instead of passing.
+IOS_ANCHOR_RX = r"^(?=.*\bUnexamined\b)(?=.*\bLedger\b)(?=.*\bStory\b)"
+# Text that means iOS, not the app, owns the glass (from Ear Drama: XCUITest queries
+# match through these overlays).
+SYSTEM_OVERLAY_RX = (r"Time Limit|You.ve reached your limit|Ask for More Time|"
+                     r"Would Like to|Don.t Allow|Low Battery|Software Update")
+# Text that means the app is broken, whatever else is on screen.
+FORBIDDEN = r"Couldn.t load|signed out|couldn.t read|The server answered|isn.t in your CentMemo"
+# The DEBUG door that signs the SYNTHETIC test owner in (CentMemoApp.swift). The
+# password is read at run time from ~/.centmemo/test-users.json, never stored here.
+HOOK_TEST_EMAIL = "APP_TEST_EMAIL"
+HOOK_TEST_PASSWORD = "APP_TEST_PASSWORD"
+
+
+def test_account_env():
+    """{APP_TEST_EMAIL, APP_TEST_PASSWORD} for the synthetic owner, or {} when absent."""
+    import json
+    f = Path.home() / ".centmemo" / "test-users.json"
+    try:
+        owner = json.loads(f.read_text())["owner"]
+        return {HOOK_TEST_EMAIL: owner["email"], HOOK_TEST_PASSWORD: owner["password"]}
+    except (OSError, KeyError, ValueError):
+        return {}

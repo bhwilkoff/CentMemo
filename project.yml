@@ -53,6 +53,7 @@ targets:
           - "Tests/**"
           - "tvOS/**"
           - "macOS/**"
+          - "UITests/**"
           # The folder READMEs are notes for people, not app resources.
           - "**/*.md"
     settings:
@@ -114,3 +115,30 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.learningischange.centmemo.CoreTests
         GENERATE_INFOPLIST_FILE: YES
         CODE_SIGNING_ALLOWED: NO
+
+  # The tap tier (docs/DEVICE-HARNESSES.md, iOS; from Ear Drama): XCUITest drives
+  # the real iPhone through tools/ios_uitest.py, which holds the device lease. Its
+  # own scheme below, so the macOS CentMemoTests scheme and CI never build it.
+  CentMemoUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: apple/UITests
+    dependencies:
+      - target: CentMemo
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.learningischange.centmemo.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: CentMemo
+        SWIFT_DEFAULT_ACTOR_ISOLATION: nonisolated
+
+schemes:
+  CentMemoUITests:
+    build:
+      targets:
+        CentMemo: all
+        CentMemoUITests: [test]
+    test:
+      config: Debug
+      targets: [CentMemoUITests]

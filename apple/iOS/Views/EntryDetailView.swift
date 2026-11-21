@@ -15,6 +15,7 @@ struct EntryDetailView: View {
     @State private var error: String?
     @State private var loading = true
     @State private var saving = false
+    @FocusState private var writing: Bool
 
     var body: some View {
         LoadState(isLoading: loading, error: entry == nil ? error : nil, retry: load) {
@@ -35,11 +36,21 @@ struct EntryDetailView: View {
                             LabeledContent("Statement") { Text(e.description).font(TypeRamp.caption) }
                         }
                     }
-                    Section("Memo") {
+                    Section {
                         TextEditor(text: $memo)
                             .frame(minHeight: 140)
                             .font(DisplayType.memo)
                             .accessibilityLabel("Memo")
+                            .accessibilityIdentifier("memo-editor")
+                            .focused($writing)
+                    } header: {
+                        Text("Memo")
+                    } footer: {
+                        // The confirmation sits under the memo, where the person is
+                        // looking (the iPhone 12 tap tier found it off-screen below).
+                        if let status {
+                            Text(status).accessibilityIdentifier("memo-status")
+                        }
                     }
                     Section("Values") {
                         FlowLayout(spacing: 8) {
@@ -55,10 +66,7 @@ struct EntryDetailView: View {
                         }
                     }
                     if let error { Section { Text(error).foregroundStyle(Color.semanticError) } }
-                    Section {
-                        Button(saving ? "Saving…" : "Save") { Task { await save() } }.disabled(saving)
-                        if let status { Text(status).font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted) }
-                    }
+
                 }
             } else {
                 ContentUnavailableView("This purchase isn't in your CentMemo.", systemImage: "questionmark")
@@ -67,6 +75,23 @@ struct EntryDetailView: View {
         .grounded()
         .navigationTitle(entry?.displayMerchant ?? "")
         .navigationBarTitleDisplayMode(.inline)
+        .scrollDismissesKeyboard(.interactively)
+        // Save stays reachable while the keyboard is up (found by the iPhone 12 tap
+        // tier: the keyboard covered a Save button at the bottom of the form).
+        .toolbar {
+            if entry != nil {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(saving ? "Saving…" : "Save") { writing = false; Task { await save() } }
+                        .disabled(saving)
+                        .fontWeight(.semibold)
+                        .accessibilityIdentifier("save-memo")
+                }
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") { writing = false }
+                }
+            }
+        }
         .task { await load() }
     }
 
