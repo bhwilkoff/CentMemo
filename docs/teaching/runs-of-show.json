@@ -1,0 +1,876 @@
+{
+  "about": "Each session's run of show, rebuilt on November 18, 2026 at Ben's request on the routine in docs/teaching/leading-a-session.md: your plans from last week, try each app, write your next round, your questions. `lengths.60` is the 60-minute session in one call that most cohorts run and what a new cohort gets by default; `scenes` is the 75-minute session for a cohort of eight or more, trying apps in groups of three. Week 0 is Prep and week 1 is finding the problem, so their middle parts hear each problem rather than try each app; week 5 is the showing. The site seeds a new cohort's sessions from this file, and every scene stays editable in the class builder; the leader writes each person's name, plan, and app into the slides before the session. Scenes use the site's shape (assets/show-lib.js on the site branch): kind, title, minutes, body (what the main stage shows, four short lines at most), and config. A scene's `note` is for the leader only, and a week's `questions` go into the cohort's question bank. Awaiting Ben's review.",
+  "source": "docs/research/curriculum/00-curriculum-design.md",
+  "minutes": 75,
+  "weeks": [
+    {
+      "key": "prep",
+      "week": 0,
+      "title": "Cohort Prep: getting set up and meeting your group",
+      "move": "Publish",
+      "question": "What do I need in order to build at all?",
+      "guide": "before.md",
+      "scenes": [
+        {
+          "kind": "talk",
+          "title": "Arrive",
+          "body": "Your name, where you are joining from, and one thing in your life you wish worked differently. That last line is the first entry in the log you start tonight.",
+          "minutes": 5
+        },
+        {
+          "kind": "talk",
+          "title": "How we talk to one another",
+          "body": "The four rules, said aloud: no correcting what does not matter, no acting surprised, no taking over, and no small digs at who someone is. When one is broken, someone says so plainly, the person says thanks, and we move on.",
+          "minutes": 5
+        },
+        {
+          "kind": "rooms",
+          "title": "Open each app",
+          "minutes": 30,
+          "body": "In your group's room, each person shows their app's address, or where setup stopped, and the group works through it.",
+          "config": {
+            "prompt": "Show your app's address, or where setup stopped.",
+            "room_scenes": [
+              {
+                "title": "Show your address",
+                "minutes": 4
+              },
+              {
+                "title": "Work through what stopped",
+                "minutes": 6
+              }
+            ]
+          },
+          "note": "Visit each room; bring anyone still stuck back to the main room."
+        },
+        {
+          "kind": "break",
+          "title": "Break",
+          "minutes": 3
+        },
+        {
+          "kind": "design",
+          "title": "What a build looks like",
+          "body": "Every session from week 1 opens with each person showing the week's work on a device. Here is a strong build and a weak one, side by side. Then everyone practices the three questions on the weak one: where is it going, how is it going, and what is next.",
+          "config": {
+            "template": "questions"
+          },
+          "minutes": 12
+        },
+        {
+          "kind": "reflection",
+          "title": "Start your noticing log",
+          "body": "For five days, write one line whenever one of these happens: I wished something worked differently. I gave up on something I care about. I did something the long way because nothing helped. Someone I know struggled with the same thing. No app ideas yet, just what happened. Write today's line now, before you leave: this log is where week 1's problem comes from.",
+          "config": {
+            "prompt": "What is one thing that happened today that could go in your log?"
+          },
+          "minutes": 15
+        },
+        {
+          "kind": "question",
+          "title": "Your questions",
+          "minutes": 5,
+          "body": "Only your leaders read the answers.",
+          "config": {
+            "prompt": "What questions do you still have?",
+            "kind": "short"
+          },
+          "note": "Answer two or three aloud and the rest before the next session, and open the next session with what you read."
+        }
+      ],
+      "questions": [
+        {
+          "kind": "short",
+          "prompt": "What do you hope your app will do for someone?"
+        },
+        {
+          "kind": "scale",
+          "prompt": "How ready do you feel to build?",
+          "choices": [
+            "Not ready yet",
+            "Ready to build"
+          ],
+          "points": 5
+        },
+        {
+          "kind": "short",
+          "prompt": "What did your agent do for you during setup that you expected to have to do yourself?"
+        },
+        {
+          "kind": "choice",
+          "prompt": "Where will you keep your noticing log this week?",
+          "choices": [
+            "A notes app on my phone",
+            "Paper",
+            "My app's note",
+            "Somewhere else"
+          ]
+        }
+      ],
+      "lengths": {
+        "60": [
+          {
+            "kind": "talk",
+            "title": "Arrive",
+            "body": "Your name, where you are joining from, and one thing in your life you wish worked differently. That last line is the first entry in the log you start tonight.",
+            "minutes": 5
+          },
+          {
+            "kind": "talk",
+            "title": "How we talk to one another",
+            "body": "The four rules, said aloud: no correcting what does not matter, no acting surprised, no taking over, and no small digs at who someone is. When one is broken, someone says so plainly, the person says thanks, and we move on.",
+            "minutes": 5
+          },
+          {
+            "kind": "presenter",
+            "title": "Open each app",
+            "minutes": 24,
+            "body": "Each person shows their app's address with Show my app to everyone\n\nIf setup stopped, show where it stopped, and we work through it together",
+            "config": {
+              "prompt": "Show your app's address, or where setup stopped."
+            },
+            "note": "Watch for anyone whose setup is still stuck, and fix one in front of everyone: it teaches the room how to ask their agent for help."
+          },
+          {
+            "kind": "design",
+            "title": "What a build looks like",
+            "body": "Every session from week 1 opens with each person showing the week's work on a device. Here is a strong build and a weak one, side by side. Then everyone practices the three questions on the weak one: where is it going, how is it going, and what is next.",
+            "config": {
+              "template": "questions"
+            },
+            "minutes": 10
+          },
+          {
+            "kind": "reflection",
+            "title": "Start your noticing log",
+            "body": "For five days, write one line whenever one of these happens: I wished something worked differently. I gave up on something I care about. I did something the long way because nothing helped. Someone I know struggled with the same thing. No app ideas yet, just what happened. Write today's line now, before you leave: this log is where week 1's problem comes from.",
+            "config": {
+              "prompt": "What is one thing that happened today that could go in your log?"
+            },
+            "minutes": 12
+          },
+          {
+            "kind": "question",
+            "title": "Your questions",
+            "minutes": 4,
+            "body": "Only your leaders read the answers.",
+            "config": {
+              "prompt": "What questions do you still have?",
+              "kind": "short"
+            },
+            "note": "Answer two or three aloud and the rest before the next session, and open the next session with what you read."
+          }
+        ]
+      }
+    },
+    {
+      "key": "week-1",
+      "week": 1,
+      "title": "Week 1: finding a problem worth building for",
+      "move": "Write",
+      "question": "What problem in your own life is worth building something for, and who else has it?",
+      "guide": "week-1.md",
+      "scenes": [
+        {
+          "kind": "talk",
+          "title": "What your log holds",
+          "minutes": 8,
+          "body": "One line from your noticing log\n\nWho else it happens to",
+          "note": "In a fixed order, each person reads one line from their five days of noticing and says who else it happens to, in about thirty seconds. No app ideas yet."
+        },
+        {
+          "kind": "rooms",
+          "title": "Hear each problem",
+          "minutes": 33,
+          "body": "In your group's room, each person reads the log line they keep coming back to; the others ask one question each about what happened, never about an app.",
+          "config": {
+            "prompt": "Read the noticing log line you keep coming back to, and say why.",
+            "room_scenes": [
+              {
+                "title": "Read the line, and why",
+                "minutes": 2
+              },
+              {
+                "title": "One question each about what happened",
+                "minutes": 5
+              },
+              {
+                "title": "Which problem you will keep",
+                "minutes": 4
+              }
+            ]
+          },
+          "note": "Visit each room. Watch for a problem that is really a solution."
+        },
+        {
+          "kind": "break",
+          "title": "Break",
+          "minutes": 3
+        },
+        {
+          "kind": "design",
+          "title": "Hold yours to the tests",
+          "minutes": 12,
+          "body": "Your own problem on the board, with your agent closed\n\nHold it to the tests, one at a time",
+          "config": {
+            "template": "problem-tests"
+          },
+          "note": "Each person puts their own problem on the board and holds it to the tests from stage 00; the group reads one another's. The tests come from docs/research/curriculum/06-instructional-design.md."
+        },
+        {
+          "kind": "reflection",
+          "title": "Plan your two conversations",
+          "minutes": 15,
+          "body": "Who I will talk to: ___ and ___\n\nTell me about the last time you ___\n\nWhat did you try? What happened next?",
+          "config": {
+            "prompt": "Who are the two people you will talk to this week, and what is your first \"Tell me about the last time you...\" question?"
+          },
+          "note": "With the agent closed: this week is stage 00, then stage 01 once the problem holds, and the two conversations come before anyone builds. Each person names two people who might have the problem and writes questions about what happened, never describing an app, then reads their first question aloud, in the same order, with no comment. Once the problem holds after the conversations, the first prompt asks for the smallest real version, live with real data, in the hands of one of those two people, and it starts \"I want to build an app that helps ___ to ___.\""
+        },
+        {
+          "kind": "question",
+          "title": "Your questions",
+          "minutes": 4,
+          "body": "Only your leaders read the answers.",
+          "config": {
+            "prompt": "What questions do you still have?",
+            "kind": "short"
+          },
+          "note": "Answer two or three aloud and the rest before the next session, and open the next session with what you read."
+        }
+      ],
+      "questions": [
+        {
+          "kind": "scale",
+          "prompt": "How sure are you, right now, that someone besides you has this problem?",
+          "choices": [
+            "Not sure at all",
+            "I could name them"
+          ],
+          "points": 5
+        },
+        {
+          "kind": "short",
+          "prompt": "What questions do you still have?"
+        },
+        {
+          "kind": "multi",
+          "prompt": "Which of these does your problem statement do?",
+          "choices": [
+            "Starts from something that happens in my life",
+            "Says what a better life would look like",
+            "Names who else has it",
+            "Never names a technology"
+          ]
+        },
+        {
+          "kind": "rank",
+          "prompt": "Which questions for your two conversations will tell you the most?",
+          "choices": [
+            "Tell me about the last time you...",
+            "What did you try?",
+            "What happened next?",
+            "Who else deals with this?"
+          ]
+        }
+      ],
+      "lengths": {
+        "60": [
+          {
+            "kind": "talk",
+            "title": "What your log holds",
+            "minutes": 6,
+            "body": "One line from your noticing log\n\nWho else it happens to",
+            "note": "In a fixed order, each person reads one line from their five days of noticing and says who else it happens to, in about thirty seconds. No app ideas yet."
+          },
+          {
+            "kind": "presenter",
+            "title": "Hear each problem",
+            "minutes": 24,
+            "body": "The builder reads the line they keep coming back to, and why\n\nEach person asks one question about what happened, never about an app\n\nThe builder says which problem they will keep, and who else has it",
+            "config": {
+              "prompt": "Read the noticing log line you keep coming back to, and say why."
+            },
+            "note": "About five minutes each, in the same order. Questions are about what happened (when, who was there, what they tried), never about an app. Watch for a problem that is really a solution, and ask what happened the last time instead."
+          },
+          {
+            "kind": "design",
+            "title": "Hold yours to the tests",
+            "minutes": 12,
+            "body": "Your own problem on the board, with your agent closed\n\nHold it to the tests, one at a time",
+            "config": {
+              "template": "problem-tests"
+            },
+            "note": "Each person puts their own problem on the board and holds it to the tests from stage 00; the group reads one another's. The tests come from docs/research/curriculum/06-instructional-design.md."
+          },
+          {
+            "kind": "reflection",
+            "title": "Plan your two conversations",
+            "minutes": 14,
+            "body": "Who I will talk to: ___ and ___\n\nTell me about the last time you ___\n\nWhat did you try? What happened next?",
+            "config": {
+              "prompt": "Who are the two people you will talk to this week, and what is your first \"Tell me about the last time you...\" question?"
+            },
+            "note": "With the agent closed: this week is stage 00, then stage 01 once the problem holds, and the two conversations come before anyone builds. Each person names two people who might have the problem and writes questions about what happened, never describing an app, then reads their first question aloud, in the same order, with no comment. Once the problem holds after the conversations, the first prompt asks for the smallest real version, live with real data, in the hands of one of those two people, and it starts \"I want to build an app that helps ___ to ___.\""
+          },
+          {
+            "kind": "question",
+            "title": "Your questions",
+            "minutes": 4,
+            "body": "Only your leaders read the answers.",
+            "config": {
+              "prompt": "What questions do you still have?",
+              "kind": "short"
+            },
+            "note": "Answer two or three aloud and the rest before the next session, and open the next session with what you read."
+          }
+        ]
+      }
+    },
+    {
+      "key": "week-2",
+      "week": 2,
+      "title": "Week 2: the first app, and the same app on a second device",
+      "move": "Play",
+      "question": "What has to be the same on every device, and what should feel as if it was born there?",
+      "guide": "week-2.md",
+      "scenes": [
+        {
+          "kind": "talk",
+          "title": "Your plans from last week",
+          "minutes": 8,
+          "body": "My plan was ___\n\nWhat happened was ___",
+          "note": "Before the session, put a table on a slide: each person, the plan they read aloud at the end of the last session, and what their app does today, from their repository (branches too). Then, in a fixed order, each person says the two lines in about thirty seconds. Not started yet is an ordinary answer, said plainly and passed over; when someone changed their plan, ask what changed it."
+        },
+        {
+          "kind": "rooms",
+          "title": "Try each app",
+          "minutes": 30,
+          "body": "In your group's room, nine minutes for each builder: their question, three quiet minutes trying it, what you did and what happened, \"I wonder if\", then one decision and what changes first.",
+          "config": {
+            "prompt": "Show your app with its real data, and ask one question about it.",
+            "room_scenes": [
+              {
+                "title": "The builder's question",
+                "minutes": 1
+              },
+              {
+                "title": "Try it quietly",
+                "minutes": 3
+              },
+              {
+                "title": "What you did and what happened",
+                "minutes": 2
+              },
+              {
+                "title": "I wonder if",
+                "minutes": 1
+              },
+              {
+                "title": "One decision, and what changes first",
+                "minutes": 2
+              }
+            ]
+          },
+          "note": "Visit each room. Groups of three stay together all five weeks. This week's stages (02 and 03) ask what must be the same on every device and what should feel native. When people try an app on different devices, ask what differed."
+        },
+        {
+          "kind": "break",
+          "title": "Break",
+          "minutes": 3
+        },
+        {
+          "kind": "talk",
+          "title": "What we saw",
+          "minutes": 9,
+          "body": "One person from each group: one thing someone did with an app\n\nThen what it suggests",
+          "note": "Facts first, meaning second. Ask each group for one thing someone did, then ask the room what it suggests."
+        },
+        {
+          "kind": "reflection",
+          "title": "Write your next round",
+          "minutes": 19,
+          "body": "I tried my app, and here is what I saw: 1. ___ 2. ___ 3. ___\n\nStart with ___\n\nThis is done when ___\n\nIt must never ___",
+          "config": {
+            "prompt": "Paste the round you are sending to your agent."
+          },
+          "note": "Show a real round first: a numbered list someone sent their agent after using their app, each line something they saw (the leader's own, or one shared with permission). Then quiet minutes: everyone writes in the box in their panel and sends the same words to their agent before the part ends. In the last two minutes each person reads their Start with line aloud, in the same order, with no applause and no comment; those lines open the next session. \"This is done when\" names what they will see in the app with its real data."
+        },
+        {
+          "kind": "question",
+          "title": "Your questions",
+          "minutes": 6,
+          "body": "Only your leaders read the answers.",
+          "config": {
+            "prompt": "What questions do you still have?",
+            "kind": "short"
+          },
+          "note": "Answer two or three aloud and the rest before the next session, and open the next session with what you read."
+        }
+      ],
+      "questions": [
+        {
+          "kind": "multi",
+          "prompt": "Which of these belong in the data, so every platform gets them the same way? Choose every one.",
+          "choices": [
+            "A film's title and year",
+            "Whether a film is saved",
+            "A trivia question's correct answer",
+            "Swipe to go back",
+            "The size of the play button"
+          ]
+        },
+        {
+          "kind": "short",
+          "prompt": "What questions do you still have?"
+        }
+      ],
+      "lengths": {
+        "60": [
+          {
+            "kind": "talk",
+            "title": "Your plans from last week",
+            "minutes": 6,
+            "body": "My plan was ___\n\nWhat happened was ___",
+            "note": "Before the session, put a table on a slide: each person, the plan they read aloud at the end of the last session, and what their app does today, from their repository (branches too). Then, in a fixed order, each person says the two lines in about thirty seconds. Not started yet is an ordinary answer, said plainly and passed over; when someone changed their plan, ask what changed it."
+          },
+          {
+            "kind": "presenter",
+            "title": "Try each app",
+            "minutes": 36,
+            "body": "The builder asks one question about the app\n\nEveryone tries it, quietly, for three minutes\n\nI tried to ___. What happened was ___. I expected ___.\n\nOne \"I wonder if\", then the builder explains one decision and what they will change first",
+            "config": {
+              "prompt": "Show your app with its real data, and ask one question about it."
+            },
+            "note": "Nine minutes each, in the same order as the plans: one minute for the builder's question, three to try, two for what people did and what happened, one for \"I wonder if\", two for one decision (agent closed) and what changes first. Each builder presses Show my app to everyone in their panel, and you press Show it; everyone gets their own working copy. Nobody says what they think until they have said what they did, the builder listens and writes, and you call on people by name after the three minutes. Put a slide for each builder with their name, their app, and what changed this week. A builder with nothing to try says who it is for and what its first screen would show, and leaves with that prompt half written. This week's stages (02 and 03) ask what must be the same on every device and what should feel native. When people try an app on different devices, ask what differed."
+          },
+          {
+            "kind": "reflection",
+            "title": "Write your next round",
+            "minutes": 14,
+            "body": "I tried my app, and here is what I saw: 1. ___ 2. ___ 3. ___\n\nStart with ___\n\nThis is done when ___\n\nIt must never ___",
+            "config": {
+              "prompt": "Paste the round you are sending to your agent."
+            },
+            "note": "Show a real round first: a numbered list someone sent their agent after using their app, each line something they saw (the leader's own, or one shared with permission). Then quiet minutes: everyone writes in the box in their panel and sends the same words to their agent before the part ends. In the last two minutes each person reads their Start with line aloud, in the same order, with no applause and no comment; those lines open the next session. \"This is done when\" names what they will see in the app with its real data."
+          },
+          {
+            "kind": "question",
+            "title": "Your questions",
+            "minutes": 4,
+            "body": "Only your leaders read the answers.",
+            "config": {
+              "prompt": "What questions do you still have?",
+              "kind": "short"
+            },
+            "note": "Answer two or three aloud and the rest before the next session, and open the next session with what you read."
+          }
+        ]
+      }
+    },
+    {
+      "key": "week-3",
+      "week": 3,
+      "title": "Week 3: proof that it works, and someone else's hands",
+      "move": "Play, then Publish",
+      "question": "How do I know it works, and what happens when someone I did not build it with holds it?",
+      "guide": "week-3.md",
+      "scenes": [
+        {
+          "kind": "talk",
+          "title": "Your plans from last week",
+          "minutes": 8,
+          "body": "My plan was ___\n\nWhat happened was ___",
+          "note": "Before the session, put a table on a slide: each person, the plan they read aloud at the end of the last session, and what their app does today, from their repository (branches too). Then, in a fixed order, each person says the two lines in about thirty seconds. Not started yet is an ordinary answer, said plainly and passed over; when someone changed their plan, ask what changed it."
+        },
+        {
+          "kind": "rooms",
+          "title": "Try each app",
+          "minutes": 30,
+          "body": "In your group's room, nine minutes for each builder: their question, three quiet minutes trying it, what you did and what happened, \"I wonder if\", then one decision and what changes first.",
+          "config": {
+            "prompt": "Show your app, and ask one question about it.",
+            "room_scenes": [
+              {
+                "title": "The builder's question",
+                "minutes": 1
+              },
+              {
+                "title": "Try it quietly",
+                "minutes": 3
+              },
+              {
+                "title": "What you did and what happened",
+                "minutes": 2
+              },
+              {
+                "title": "I wonder if",
+                "minutes": 1
+              },
+              {
+                "title": "One decision, and what changes first",
+                "minutes": 2
+              }
+            ]
+          },
+          "note": "Visit each room. Groups of three stay together all five weeks. This week's stages (04 and 05) ask how the builder knows it works and what happens in someone else's hands. When a builder says something works, ask what they saw on their own screen."
+        },
+        {
+          "kind": "break",
+          "title": "Break",
+          "minutes": 3
+        },
+        {
+          "kind": "talk",
+          "title": "What we saw",
+          "minutes": 9,
+          "body": "One person from each group: one thing someone did with an app\n\nThen what it suggests",
+          "note": "Facts first, meaning second. Ask each group for one thing someone did, then ask the room what it suggests."
+        },
+        {
+          "kind": "reflection",
+          "title": "Write your next round",
+          "minutes": 19,
+          "body": "I tried my app, and here is what I saw: 1. ___ 2. ___ 3. ___\n\nStart with ___\n\nThis is done when ___\n\nIt must never ___",
+          "config": {
+            "prompt": "Paste the round you are sending to your agent."
+          },
+          "note": "Show a real round first: a numbered list someone sent their agent after using their app, each line something they saw (the leader's own, or one shared with permission). Then quiet minutes: everyone writes in the box in their panel and sends the same words to their agent before the part ends. In the last two minutes each person reads their Start with line aloud, in the same order, with no applause and no comment; those lines open the next session. \"This is done when\" is something they will see on their own device, and the last line can name who tries it next, on what device."
+        },
+        {
+          "kind": "question",
+          "title": "Your questions",
+          "minutes": 6,
+          "body": "Only your leaders read the answers.",
+          "config": {
+            "prompt": "What questions do you still have?",
+            "kind": "short"
+          },
+          "note": "Answer two or three aloud and the rest before the next session, and open the next session with what you read."
+        }
+      ],
+      "questions": [
+        {
+          "kind": "short",
+          "prompt": "When your agent says something is fixed, what do you ask to see, and why is its word not enough?"
+        },
+        {
+          "kind": "short",
+          "prompt": "How do you know your last fix is real?"
+        },
+        {
+          "kind": "short",
+          "prompt": "What questions do you still have?"
+        }
+      ],
+      "lengths": {
+        "60": [
+          {
+            "kind": "talk",
+            "title": "Your plans from last week",
+            "minutes": 6,
+            "body": "My plan was ___\n\nWhat happened was ___",
+            "note": "Before the session, put a table on a slide: each person, the plan they read aloud at the end of the last session, and what their app does today, from their repository (branches too). Then, in a fixed order, each person says the two lines in about thirty seconds. Not started yet is an ordinary answer, said plainly and passed over; when someone changed their plan, ask what changed it."
+          },
+          {
+            "kind": "presenter",
+            "title": "Try each app",
+            "minutes": 36,
+            "body": "The builder asks one question about the app\n\nEveryone tries it, quietly, for three minutes\n\nI tried to ___. What happened was ___. I expected ___.\n\nOne \"I wonder if\", then the builder explains one decision and what they will change first",
+            "config": {
+              "prompt": "Show your app, and ask one question about it."
+            },
+            "note": "Nine minutes each, in the same order as the plans: one minute for the builder's question, three to try, two for what people did and what happened, one for \"I wonder if\", two for one decision (agent closed) and what changes first. Each builder presses Show my app to everyone in their panel, and you press Show it; everyone gets their own working copy. Nobody says what they think until they have said what they did, the builder listens and writes, and you call on people by name after the three minutes. Put a slide for each builder with their name, their app, and what changed this week. A builder with nothing to try says who it is for and what its first screen would show, and leaves with that prompt half written. This week's stages (04 and 05) ask how the builder knows it works and what happens in someone else's hands. When a builder says something works, ask what they saw on their own screen."
+          },
+          {
+            "kind": "reflection",
+            "title": "Write your next round",
+            "minutes": 14,
+            "body": "I tried my app, and here is what I saw: 1. ___ 2. ___ 3. ___\n\nStart with ___\n\nThis is done when ___\n\nIt must never ___",
+            "config": {
+              "prompt": "Paste the round you are sending to your agent."
+            },
+            "note": "Show a real round first: a numbered list someone sent their agent after using their app, each line something they saw (the leader's own, or one shared with permission). Then quiet minutes: everyone writes in the box in their panel and sends the same words to their agent before the part ends. In the last two minutes each person reads their Start with line aloud, in the same order, with no applause and no comment; those lines open the next session. \"This is done when\" is something they will see on their own device, and the last line can name who tries it next, on what device."
+          },
+          {
+            "kind": "question",
+            "title": "Your questions",
+            "minutes": 4,
+            "body": "Only your leaders read the answers.",
+            "config": {
+              "prompt": "What questions do you still have?",
+              "kind": "short"
+            },
+            "note": "Answer two or three aloud and the rest before the next session, and open the next session with what you read."
+          }
+        ]
+      }
+    },
+    {
+      "key": "week-4",
+      "week": 4,
+      "title": "Week 4: the app on someone else's device",
+      "move": "Publish, then Write",
+      "question": "What is happening to it when I am not holding it, and what do I want now that I live with it?",
+      "guide": "week-4.md",
+      "scenes": [
+        {
+          "kind": "talk",
+          "title": "Your plans from last week",
+          "minutes": 8,
+          "body": "My plan was ___\n\nWhat happened was ___",
+          "note": "Before the session, put a table on a slide: each person, the plan they read aloud at the end of the last session, and what their app does today, from their repository (branches too). Then, in a fixed order, each person says the two lines in about thirty seconds. Not started yet is an ordinary answer, said plainly and passed over; when someone changed their plan, ask what changed it."
+        },
+        {
+          "kind": "rooms",
+          "title": "Try each app",
+          "minutes": 30,
+          "body": "In your group's room, nine minutes for each builder: their question, three quiet minutes trying it, what you did and what happened, \"I wonder if\", then one decision and what changes first.",
+          "config": {
+            "prompt": "Show what happened when someone else used your app, and ask one question about it.",
+            "room_scenes": [
+              {
+                "title": "The builder's question",
+                "minutes": 1
+              },
+              {
+                "title": "Try it quietly",
+                "minutes": 3
+              },
+              {
+                "title": "What you did and what happened",
+                "minutes": 2
+              },
+              {
+                "title": "I wonder if",
+                "minutes": 1
+              },
+              {
+                "title": "One decision, and what changes first",
+                "minutes": 2
+              }
+            ]
+          },
+          "note": "Visit each room. Groups of three stay together all five weeks. This week's stages (06 and 07) ask what happens when the builder is not holding it, and what they want now that they live with it. Ask who used it this week, and what they did first."
+        },
+        {
+          "kind": "break",
+          "title": "Break",
+          "minutes": 3
+        },
+        {
+          "kind": "talk",
+          "title": "What we saw",
+          "minutes": 9,
+          "body": "One person from each group: one thing someone did with an app\n\nThen what it suggests",
+          "note": "Facts first, meaning second. Ask each group for one thing someone did, then ask the room what it suggests."
+        },
+        {
+          "kind": "reflection",
+          "title": "Write your next round",
+          "minutes": 19,
+          "body": "I tried my app, and here is what I saw: 1. ___ 2. ___ 3. ___\n\nStart with ___\n\nThis is done when ___\n\nIt must never ___",
+          "config": {
+            "prompt": "Paste the round you are sending to your agent."
+          },
+          "note": "Show a real round first: a numbered list someone sent their agent after using their app, each line something they saw (the leader's own, or one shared with permission). Then quiet minutes: everyone writes in the box in their panel and sends the same words to their agent before the part ends. In the last two minutes each person reads their Start with line aloud, in the same order, with no applause and no comment; those lines open the next session. One line can name what they will watch for when they are not holding the app."
+        },
+        {
+          "kind": "question",
+          "title": "Your questions",
+          "minutes": 6,
+          "body": "Only your leaders read the answers.",
+          "config": {
+            "prompt": "What questions do you still have?",
+            "kind": "short"
+          },
+          "note": "Answer two or three aloud and the rest before the next session, and open the next session with what you read."
+        }
+      ],
+      "questions": [
+        {
+          "kind": "short",
+          "prompt": "What is the difference between a fix that is verified and a fix that is shipped?"
+        },
+        {
+          "kind": "rank",
+          "prompt": "Rank what the other person noticed first.",
+          "choices": [
+            "What it is for",
+            "How it looks",
+            "What it does first",
+            "Something that broke",
+            "How fast it is"
+          ]
+        },
+        {
+          "kind": "words",
+          "prompt": "In one word, how did it feel to hand it over?"
+        },
+        {
+          "kind": "short",
+          "prompt": "What is one thing about your app you can no longer see by using it yourself, and how will you find out about it?"
+        },
+        {
+          "kind": "short",
+          "prompt": "What questions do you still have?"
+        }
+      ],
+      "lengths": {
+        "60": [
+          {
+            "kind": "talk",
+            "title": "Your plans from last week",
+            "minutes": 6,
+            "body": "My plan was ___\n\nWhat happened was ___",
+            "note": "Before the session, put a table on a slide: each person, the plan they read aloud at the end of the last session, and what their app does today, from their repository (branches too). Then, in a fixed order, each person says the two lines in about thirty seconds. Not started yet is an ordinary answer, said plainly and passed over; when someone changed their plan, ask what changed it."
+          },
+          {
+            "kind": "presenter",
+            "title": "Try each app",
+            "minutes": 36,
+            "body": "The builder asks one question about the app\n\nEveryone tries it, quietly, for three minutes\n\nI tried to ___. What happened was ___. I expected ___.\n\nOne \"I wonder if\", then the builder explains one decision and what they will change first",
+            "config": {
+              "prompt": "Show what happened when someone else used your app, and ask one question about it."
+            },
+            "note": "Nine minutes each, in the same order as the plans: one minute for the builder's question, three to try, two for what people did and what happened, one for \"I wonder if\", two for one decision (agent closed) and what changes first. Each builder presses Show my app to everyone in their panel, and you press Show it; everyone gets their own working copy. Nobody says what they think until they have said what they did, the builder listens and writes, and you call on people by name after the three minutes. Put a slide for each builder with their name, their app, and what changed this week. A builder with nothing to try says who it is for and what its first screen would show, and leaves with that prompt half written. This week's stages (06 and 07) ask what happens when the builder is not holding it, and what they want now that they live with it. Ask who used it this week, and what they did first."
+          },
+          {
+            "kind": "reflection",
+            "title": "Write your next round",
+            "minutes": 14,
+            "body": "I tried my app, and here is what I saw: 1. ___ 2. ___ 3. ___\n\nStart with ___\n\nThis is done when ___\n\nIt must never ___",
+            "config": {
+              "prompt": "Paste the round you are sending to your agent."
+            },
+            "note": "Show a real round first: a numbered list someone sent their agent after using their app, each line something they saw (the leader's own, or one shared with permission). Then quiet minutes: everyone writes in the box in their panel and sends the same words to their agent before the part ends. In the last two minutes each person reads their Start with line aloud, in the same order, with no applause and no comment; those lines open the next session. One line can name what they will watch for when they are not holding the app."
+          },
+          {
+            "kind": "question",
+            "title": "Your questions",
+            "minutes": 4,
+            "body": "Only your leaders read the answers.",
+            "config": {
+              "prompt": "What questions do you still have?",
+              "kind": "short"
+            },
+            "note": "Answer two or three aloud and the rest before the next session, and open the next session with what you read."
+          }
+        ]
+      }
+    },
+    {
+      "key": "week-5",
+      "week": 5,
+      "title": "Week 5: a feature you wanted, shown to everyone",
+      "move": "Publish",
+      "question": "Is this version enough for its people, and what should the next builder not have to learn?",
+      "guide": "week-5.md",
+      "scenes": [
+        {
+          "kind": "talk",
+          "title": "Welcome",
+          "minutes": 4,
+          "body": "Guests are welcome\n\nEach builder shows their app, and one decision behind it",
+          "note": "Say who is here, and that anyone can try each app in their own copy on the stage."
+        },
+        {
+          "kind": "presenter",
+          "title": "The showing",
+          "minutes": 52,
+          "body": "The builder says who the app is for\n\nEveryone tries it\n\nThe builder explains one decision, and what waits for the next version",
+          "config": {
+            "prompt": "Show your app, the feature you wanted, and one decision behind it."
+          },
+          "note": "Share the time evenly among the builders, with guests trying each app in their own copy. Keep the routine: what people did before what they think."
+        },
+        {
+          "kind": "break",
+          "title": "Break",
+          "minutes": 3
+        },
+        {
+          "kind": "reflection",
+          "title": "What the next builder should not have to learn",
+          "minutes": 12,
+          "body": "The lesson: ___\n\nWhere it lives now (a memory, a skill, a decision): ___",
+          "config": {
+            "prompt": "What is one lesson the next builder should not have to learn?"
+          },
+          "note": "Stage 08: each person names one lesson the next builder should not have to learn, and where their agent will find it (a memory, a skill, or a decision). Show a real one first. In the last two minutes each person reads their lesson aloud, in the same order, with no applause and no comment."
+        },
+        {
+          "kind": "question",
+          "title": "Your questions",
+          "minutes": 4,
+          "body": "Only your leaders read the answers.",
+          "config": {
+            "prompt": "What questions do you still have?",
+            "kind": "short"
+          },
+          "note": "Answer two or three aloud and the rest before the next session, and open the next session with what you read."
+        }
+      ],
+      "questions": [
+        {
+          "kind": "short",
+          "prompt": "What is enough about this version, for now, and for whom?"
+        },
+        {
+          "kind": "short",
+          "prompt": "What waits for the next version?"
+        },
+        {
+          "kind": "short",
+          "prompt": "What will your agent know at the start of your next app that it did not know in week 1, and where does that knowledge live?"
+        },
+        {
+          "kind": "short",
+          "prompt": "What questions do you still have?"
+        }
+      ],
+      "lengths": {
+        "60": [
+          {
+            "kind": "talk",
+            "title": "Welcome",
+            "minutes": 4,
+            "body": "Guests are welcome\n\nEach builder shows their app, and one decision behind it",
+            "note": "Say who is here, and that anyone can try each app in their own copy on the stage."
+          },
+          {
+            "kind": "presenter",
+            "title": "The showing",
+            "minutes": 40,
+            "body": "The builder says who the app is for\n\nEveryone tries it\n\nThe builder explains one decision, and what waits for the next version",
+            "config": {
+              "prompt": "Show your app, the feature you wanted, and one decision behind it."
+            },
+            "note": "Share the time evenly among the builders, with guests trying each app in their own copy. Keep the routine: what people did before what they think."
+          },
+          {
+            "kind": "reflection",
+            "title": "What the next builder should not have to learn",
+            "minutes": 12,
+            "body": "The lesson: ___\n\nWhere it lives now (a memory, a skill, a decision): ___",
+            "config": {
+              "prompt": "What is one lesson the next builder should not have to learn?"
+            },
+            "note": "Stage 08: each person names one lesson the next builder should not have to learn, and where their agent will find it (a memory, a skill, or a decision). Show a real one first. In the last two minutes each person reads their lesson aloud, in the same order, with no applause and no comment."
+          },
+          {
+            "kind": "question",
+            "title": "Your questions",
+            "minutes": 4,
+            "body": "Only your leaders read the answers.",
+            "config": {
+              "prompt": "What questions do you still have?",
+              "kind": "short"
+            },
+            "note": "Answer two or three aloud and the rest before the next session, and open the next session with what you read."
+          }
+        ]
+      }
+    }
+  ]
+}
