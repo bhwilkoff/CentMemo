@@ -56,13 +56,13 @@ targets:
         - AppNameTests
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.learningischange.duetconnect
+        PRODUCT_BUNDLE_IDENTIFIER: com.learningischange.centmemo
         PRODUCT_NAME: AppName
         # Xcode writes the Info.plist from INFOPLIST_KEY_* settings, so there
         # is no plist file to drift. CFBundleVersion and the short version are
         # filled from AppVersion.xcconfig automatically.
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: "Duet Connect"
+        INFOPLIST_KEY_CFBundleDisplayName: "CentMemo"
         # Standard HTTPS only: skips the export-compliance question on every
         # TestFlight / App Store build.
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
@@ -101,6 +101,6 @@ targets:
           - "**/*.md"
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.learningischange.duetconnect.CoreTests
+        PRODUCT_BUNDLE_IDENTIFIER: com.learningischange.centmemo.CoreTests
         GENERATE_INFOPLIST_FILE: YES
         CODE_SIGNING_ALLOWED: NO

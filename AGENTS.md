@@ -115,6 +115,7 @@ Sources: `docs/research/gemini-and-other-agents.md`. Rows follow the
 | Coordinating with a second AI agent surface | `two-agent-handoff` |
 | Adding a third-party data dependency, or a partner revokes one | `third-party-revocation-resilience` |
 | Monetizing an app built around IP/content you don't own | `third-party-ip-monetization` |
+| Financial data, money UI, or a Claude connector | `finance-app-foundations` + `money-story-design` + `claude-connector-mcp` |
 | Prices or market data from third-party listings | `provenance-honest-market-data` |
 | User-to-user trading / selling / matching | `marketplace-adjacent-design` + `docs/templates/TRADE-DESIGN-template.md` |
 
@@ -203,7 +204,12 @@ real-device check before "done."
 
 ## What this app does
 
-In Ben's words (2026-11-21): "make an app that can provide information to Claude Duet that the app/service doesn't currently have access to. The primary purpose of this is to provide Apple Card purchase to be seen by the app with an approved pathway via fincancekit or some other means. I'd also like to provide access to things like my iCloud Drive and my iCloud Photos library. The goal would be for the app to either use a fully documented pathway or to create one of its own. It is possible that this could only work as a native app, but much research will have to be done before we can fully decide on that."
+**CentMemo** (centmemo.com): every cent tells a story. People write the
+memo for each Apple Card purchase (and other FinanceKit accounts) and see
+what they value and "invest" in. A read-only connector lets Claude Duet
+help them understand and act on their money; the story stays in CentMemo.
+For Ben and for others. Ben's full words (2026-11-21, twice):
+`docs/WHAT-CENTMEMO-IS.md`. Plan: `docs/research/apple-card-financekit-connector.md`.
 
 Every app starts as a **web app**, and can grow to a **native
 iOS/iPadOS app**, a **native macOS app**, a **native Apple TV (tvOS)

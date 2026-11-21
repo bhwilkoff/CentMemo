@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Connect Claude | CentMemo</title>
+  <link rel="stylesheet" href="../../css/styles.css">
+</head>
+<body>
+  <main class="page" data-consent>
+    <div class="page-inner">
+      <h1 class="wordmark">CentMemo</h1>
+
+      <div data-state="loading"><p class="state" role="status">Loading…</p></div>
+
+      <div data-state="signed-out" hidden>
+        <h2>Sign in to connect</h2>
+        <p>Sign in to CentMemo, and this page will ask whether to connect.</p>
+        <form data-sign-in novalidate>
+          <label for="consent-email" class="field-label">Email</label>
+          <input type="email" id="consent-email" class="field-input" autocomplete="email" required>
+          <div class="actions"><button type="submit" class="btn btn-primary">Email me a sign-in link</button></div>
+          <p class="caption" role="status" data-sent></p>
+        </form>
+      </div>
+
+      <div data-state="ask" hidden>
+        <h2><span data-client-name></span> wants to read your CentMemo</h2>
+        <p>Signed in as <strong data-who></strong>.</p>
+        <ul>
+          <li>It can read your accounts, transactions, balances, memos, and values.</li>
+          <li>It can never write, change, or delete anything.</li>
+          <li>What it reads is sent to the company that runs it. For Claude, that is Anthropic.</li>
+        </ul>
+        <p class="caption">It will return to <span data-redirect></span>.</p>
+        <div class="actions">
+          <button type="button" class="btn btn-primary" data-approve>Allow reading</button>
+          <button type="button" class="btn" data-deny>Don't allow</button>
+        </div>
+      </div>
+
+      <div data-state="done" hidden><p data-done-text></p></div>
+      <div data-state="error" hidden><div class="banner banner-error" role="alert" data-error-text></div></div>
+
+      <p class="caption"><a href="../../privacy/">Privacy</a></p>
+    </div>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
+  <script src="../../js/api.js"></script>
+  <script src="../../js/consent.js"></script>
+</body>
+</html>

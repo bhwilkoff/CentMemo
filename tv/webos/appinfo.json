@@ -1,10 +1,10 @@
 {
-  "id": "com.learningischange.duetconnect",
+  "id": "com.learningischange.centmemo",
   "version": "0.1.0",
   "vendor": "FILL IN vendor",
   "type": "web",
   "main": "index.html",
-  "title": "Duet Connect",
+  "title": "CentMemo",
   "icon": "icon.png",
   "largeIcon": "largeIcon.png",
   "splashBackground": "splash.png",

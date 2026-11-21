@@ -1,4 +1,4 @@
-# [APP NAME]: Cross-Platform Feature Parity
+# CentMemo: Cross-Platform Feature Parity
 
 > **Single source of truth** for what's shipping where. Updated in
 > the SAME change set as any user-facing feature.
@@ -38,13 +38,15 @@ returning to the platform it started on.
 
 ## 0. Platform set
 
-<!-- Pin the platform decision here so it's not re-litigated. Which of
-     web / iOS / iPadOS / macOS / tvOS / Android ship, and WHY each earns
-     its place (or is 🚫 out of scope), with DECISIONS.md refs. Name the
-     LEAD platform (ships first, others mirror). tvOS earns its place when
-     content is lean-back; macOS is nearly free once the universal Apple
-     target exists; skip a platform whose idiom fights the app. A platform
-     not yet reached is ⏳ with a note, never silence. -->
+Decision 055. **Lead: web** (works today with Apple Card exports),
+**source of truth for FinanceKit: iOS** (iPhone is the only device with
+FinanceKit transaction APIs).
+
+- **Web** ✅ in progress: import, memo writing, ledger, story, connector consent.
+- **iOS/iPadOS** ⏳ M2: FinanceKit sync once Apple grants the entitlement; memo writing; photos by reference.
+- **macOS** ⏳: reads and writes memos through the universal Apple target; no FinanceKit on Mac.
+- **tvOS** 🚫: CentMemo is writing and reflection, not lean-back.
+- **Android** 🚫 for now: FinanceKit is Apple-only; a CSV-only Android app is possible later if asked.
 
 ---
 
@@ -90,21 +92,33 @@ When shipping any user-facing feature:
 
 | Verb | Web | iOS | macOS | tvOS | Android | Notes |
 |---|---|---|---|---|---|---|
-| <!-- add verbs here as you ship them --> | | | | | | |
+| Unexamined (home) | 🚧 | ⏳ | ⏳ | 🚫 | 🚫 | Purchases with no memo, newest first |
+| Ledger by month | 🚧 | ⏳ | ⏳ | 🚫 | 🚫 | |
+| Story (month or value) | 🚧 | ⏳ | ⏳ | 🚫 | 🚫 | |
+| Settings (values, connect Claude, account) | 🚧 | ⏳ | ⏳ | 🚫 | 🚫 | |
 
 ---
 
-## 2. Find / explore
+## 2. Money in
 
 | Feature | Web | iOS | macOS | tvOS | Android | Notes |
 |---|---|---|---|---|---|---|
+| Import Apple Card CSV export | 🚧 | ⏳ | ⏳ | 🚫 | 🚫 | `js/money/money.js`; iOS ports the same goldens |
+| FinanceKit sync (history tokens) | n/a | ⏳ | n/a | n/a | n/a | No FinanceKit on web, Mac, TV, Android; waits on Apple's entitlement grant |
+| FinanceKit background delivery | n/a | ⏳ | n/a | n/a | n/a | iOS 26 extension |
 
 ---
 
-## 3. [Next verb]
+## 3. Telling the story
 
 | Feature | Web | iOS | macOS | tvOS | Android | Notes |
 |---|---|---|---|---|---|---|
+| Write a memo on a purchase | 🚧 | ⏳ | ⏳ | 🚫 | 🚫 | Only the person writes (Decision 056) |
+| Values the person names, tagged on memos | 🚧 | ⏳ | ⏳ | 🚫 | 🚫 | |
+| Attach a photo or file | 🔮 | ⏳ | ⏳ | 🚫 | 🚫 | By device reference first; upload is opt-in |
+| Share one story | 🔮 | 🔮 | 🔮 | 🚫 | 🚫 | Opt-in, per story |
+| Claude connector (read-only MCP) | 🚧 | n/a | n/a | n/a | n/a | Server-side; every platform's data is readable once synced |
+| Delete account | 🚧 | ⏳ | ⏳ | 🚫 | 🚫 | Decision 035 |
 
 ---
 

@@ -1,6 +1,6 @@
 # The skills
 
-There are 154 folders in this directory. 64 of them I wrote, one lesson
+There are 157 folders in this directory. 67 of them I wrote, one lesson
 at a time, while building BOBA Playbook, Bsky Dreams, Tidbits Trivia,
 Archive Watch, and humanshaped.org. The other 90 came from people who wrote good skills
 before I needed them, and they are credited below.
@@ -95,6 +95,14 @@ them. "From" names the app where the lesson was learned.
 | `internet-archive-source` | Reading archive.org honestly: scrape vs search, throttled is not empty, the connection limit, upload dates, items that hold many works, private files, storage nodes. | Archive Watch |
 | `web-catalog-data-layer` | A worked example: how Archive Watch's web app reads the shared catalog. Read `shared-data-plane-contract` first. | Archive Watch |
 | `github-and-google-learning-infrastructure` | When a free platform leans on GitHub and Google for sign-in, a shared space, private notices, videos, and calendars instead of running its own, including the traps that only show up for people outside your own team. | humanshaped.org |
+
+### CentMemo: finance and Claude connectors
+
+| Skill | What it is for | From |
+|---|---|---|
+| `finance-app-foundations` | Apps that hold people's financial data: earning FinanceKit, money as integer cents, imports that never duplicate, reconciling an export with FinanceKit later, and the App Review rules finance apps trip. | CentMemo; review lessons from Tidbits Trivia |
+| `money-story-design` | How people look at and write about their own spending: the unexamined purchases first, a memo in their own words, values they name, stories they can read and share, and no scores or shame. | CentMemo |
+| `claude-connector-mcp` | Letting a person's own Claude read their data: a read-only MCP server on Supabase behind its OAuth server, agent writes refused in SQL, tool design, the Connectors Directory checklist, and testing Claude Duet. | humanshaped.org, CentMemo |
 
 ### Stage 03: Going native
 

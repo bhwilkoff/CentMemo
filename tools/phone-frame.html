@@ -1,0 +1,10 @@
+<!doctype html>
+<!-- Dev aid: headless Chrome's window is never narrower than 500px, so a
+     375px check loads the page in a 375px iframe. ?src=/path&dark=1 -->
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#888}iframe{border:0;width:375px;height:812px;display:block;background:#fff}</style>
+<iframe id="f"></iframe>
+<script>
+  var p = new URLSearchParams(location.search);
+  document.getElementById('f').src = p.get('src') || '/';
+</script>

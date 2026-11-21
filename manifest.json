@@ -1,6 +1,6 @@
 {
-  "name": "Duet Connect",
-  "short_name": "Duet Connect",
+  "name": "CentMemo",
+  "short_name": "CentMemo",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FFFFFF",

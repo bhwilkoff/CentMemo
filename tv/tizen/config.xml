@@ -9,7 +9,7 @@
                      package="ExampleApp"
                      required_version="6.5"/>
 
-  <name>Duet Connect</name>
+  <name>CentMemo</name>
   <description>FILL IN: one-sentence store description.</description>
   <author href="https://example.com" email="you@example.com">FILL IN author</author>
 

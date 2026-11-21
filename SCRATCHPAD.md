@@ -1,4 +1,4 @@
-# Project Scratchpad: Duet Connect
+# Project Scratchpad: CentMemo
 
 > Active working notes, loaded into every session, so keep it small.
 > Keep only the two most recent session-log entries; roll older ones
@@ -13,14 +13,23 @@
 
 ## Current state
 
-- **Status**: STARTED 2026-11-21. Private repo made from the template; identity set (`com.learningischange.duetconnect`, "Duet Connect"). Ben's words are in AGENTS.md "What this app does".
-- **Active milestone**: M0, research before any build
-- **Last session**: 2026-11-21, repo created, pathway research written to `docs/research/duet-connect-pathways.md`
+- **Status**: CentMemo (was Duet Connect), 2026-11-21. Bundle `com.learningischange.centmemo`, team Learning is Change, Inc. (`L2G756LY8N`). Ben's words: `docs/WHAT-CENTMEMO-IS.md`. Decisions 054-057.
+- **Active milestone**: M1 (plan: memory file `~/.claude/plans/mighty-percolating-simon-*.md`): backend, connector, web app, skills, infrastructure.
+- **Built (unverified end to end yet)**:
+  - Supabase project `centmemo` (`qucsmmazfalbyduxlavl`, free tier). Migrations in `supabase/migrations/` applied. Edge Function `mcp` deployed; unauthenticated POST returns 401 + `resource_metadata` (verified). OAuth server NOT yet enabled (dashboard).
+  - Money core `js/money/money.js` + goldens `node --test tests/*.test.mjs` (5 pass; golden seen failing first).
+  - Web app (index.html, js/app.js, js/api.js, css), consent page, privacy, terms. Sign-in screen verified at 375px dark; signed-in views not yet seen.
+  - Skills: `claude-connector-mcp`, `finance-app-foundations`, `money-story-design`.
+- **Supabase slot**: free tier allows 2 active projects. boba-card-app was paused for CentMemo; Ben unpaused it 2026-11-21 to export BOBA data, and CentMemo is PAUSED until he is done.
 - **Next actions**:
-  1. Ben reads the research and decides the platform set (web first may not fit: the data lives on Apple devices) and which pathway to try first for Apple Card.
-  2. Ben says who else, if anyone, the app is for, and anything he wants in "Why we build" beyond the template's text.
-  3. GitHub Pages stays off until there is something worth putting at an address; this app handles private data.
-- **Open questions**: see the end of the research doc.
+  1. When Ben's BOBA export is done: pause boba, restore centmemo.
+  2. Dashboard (Chrome): enable OAuth server (authorization path `/oauth/consent/`), Site URL `https://centmemo.com`, redirect URLs, email template.
+  3. Seed two synthetic test users + sample ledger; run `node tools/test_rls.mjs`; run `supabase/tests/agents_cannot_write.sql`.
+  4. Repo rename to CentMemo, Pages at centmemo.com, DNS at the registrar.
+  5. See signed-in views at 375 and 1440, light and dark; connect MCP in Claude Code and call every tool.
+  6. Register bundle ID; prefill FinanceKit request for Ben to submit.
+  7. Email: privacy@ and hello@centmemo.com are named on the site but don't exist yet.
+- **Open questions**: end of `docs/research/apple-card-financekit-connector.md`.
 
 ---
 

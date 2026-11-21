@@ -2,97 +2,120 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Duet Connect</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CentMemo</title>
+  <meta name="description" content="Every cent tells a story. Write the memo for each purchase and see what your money says you value.">
   <!-- PWA / iOS Safari standalone support.
        NO viewport-fit=cover — Safari auto-clips to safe area without it.
        NO position:fixed overlays — they break Safari's compositor at the
        Dynamic Island. See css/styles.css comment on body flex-column. -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Duet Connect">
+  <meta name="apple-mobile-web-app-title" content="CentMemo">
   <!-- BEGIN design-tokens. Generated from design-tokens.json by tools/design_tokens.mjs. Do not edit by hand. -->
   <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#141619" media="(prefers-color-scheme: dark)">
   <!-- END design-tokens -->
-
-  <!-- Open Graph — read by Discord / iMessage / Slack / Bluesky / Mastodon
-       / Threads (and every other major link-preview consumer). Mirror in
-       per-view <title> updates from js/app.js. -->
-  <meta property="og:title" content="App Name">
-  <meta property="og:description" content="Your tagline here">
+  <meta property="og:title" content="CentMemo">
+  <meta property="og:description" content="Every cent tells a story. Write the memo for each purchase and see what your money says you value.">
   <meta property="og:type" content="website">
-  <!-- <meta property="og:image" content="https://example.com/og-image.png"> -->
-
-  <!-- Smart App Banner — uncomment after App Store / Play Store ship.
-       iOS uses meta tag; Android uses Digital Asset Links + Chrome
-       install prompt (handled via /.well-known/assetlinks.json). -->
-  <!-- <meta name="apple-itunes-app" content="app-id=YOUR_APP_ID"> -->
-
+  <meta property="og:url" content="https://centmemo.com/">
+  <link rel="canonical" href="https://centmemo.com/">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-
-  <!-- Skip link for keyboard navigation (WCAG AA) -->
   <a href="#main-content" class="skip-link">Skip to content</a>
 
-  <!-- AUTH SCREEN — shown when no session -->
-  <div id="auth-screen" class="screen" aria-label="Sign in">
-    <div class="auth-card">
-      <h1 class="auth-title">App Name</h1>
-      <p class="auth-subtitle">Your tagline here</p>
+  <!-- Inline icon sprite (R-ICON-1: UI icons from SVG, never emoji). -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3 13h5l1.5 3h5L16 13h5M5 5h14l2 8v6H3v-6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5zM4 5.5v16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-import" viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v3h16v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </svg>
+
+  <!-- SIGNED OUT: what CentMemo is, and the way in -->
+  <div id="auth-screen" class="screen auth-screen" hidden>
+    <main class="auth-card" aria-labelledby="auth-title">
+      <h1 id="auth-title" class="wordmark">CentMemo</h1>
+      <p class="auth-lede">Every cent tells a story.</p>
+      <p class="auth-body">Write the memo for each purchase on your Apple Card, and see what your money says you value.</p>
       <form id="auth-form" novalidate>
-        <div class="field-group">
-          <label for="auth-handle" class="field-label">Handle</label>
-          <input type="text" id="auth-handle" class="field-input" placeholder="you@example.com" required>
-        </div>
-        <div class="field-group">
-          <label for="auth-password" class="field-label">Password</label>
-          <input type="password" id="auth-password" class="field-input" required>
-        </div>
-        <div id="auth-error" class="error-banner" hidden role="alert"></div>
-        <button type="submit" class="btn btn-primary btn-full" id="auth-submit">Sign in</button>
+        <label for="auth-email" class="field-label">Email</label>
+        <input type="email" id="auth-email" class="field-input" autocomplete="email" required>
+        <div id="auth-error" class="banner banner-error" hidden role="alert"></div>
+        <div id="auth-sent" class="banner banner-info" hidden role="status"></div>
+        <button type="submit" class="btn btn-primary btn-full" id="auth-submit">Email me a sign-in link</button>
       </form>
-    </div>
+      <p class="auth-foot"><a href="privacy/">Privacy</a> · <a href="terms/">Terms</a></p>
+    </main>
   </div>
 
-  <!-- MAIN APP — shown when authenticated -->
-  <div id="app-screen" class="screen" hidden>
+  <!-- SIGNED IN -->
+  <div id="app-screen" class="screen app-screen" hidden>
+    <header class="app-header">
+      <span class="wordmark wordmark-small">CentMemo</span>
+      <nav class="tabs tabs-top" aria-label="Main"></nav>
+    </header>
 
-    <!-- SIDEBAR -->
-    <aside id="channels-sidebar" class="channels-sidebar" aria-label="Navigation">
-      <div class="sidebar-header">
-        <h2 class="sidebar-title">App Name</h2>
-      </div>
-      <nav class="sidebar-nav" aria-label="Main navigation">
-        <!-- Add nav items here. Pattern: -->
-        <!-- <button class="sidebar-nav-item active" id="nav-home-btn" data-view="home">
-          <svg>...</svg><span>Home</span>
-        </button> -->
-      </nav>
-    </aside>
+    <div id="offline-banner" class="banner banner-warning" hidden role="status">You're offline. Nothing can be saved until you're back.</div>
 
-    <!-- VIEWS — one section per view, toggled by showView() -->
-    <main id="main-content">
-      <section id="view-home" class="view" aria-label="Home">
-        <div class="view-inner">
-          <h2 class="view-heading">Home</h2>
-          <p>Your first view goes here.</p>
+    <main id="main-content" tabindex="-1">
+      <section id="view-unexamined" class="view" aria-labelledby="h-unexamined" hidden>
+        <h1 id="h-unexamined" class="view-heading">Unexamined</h1>
+        <div class="view-body" data-body></div>
+      </section>
+
+      <section id="view-ledger" class="view" aria-labelledby="h-ledger" hidden>
+        <div class="month-bar">
+          <button class="icon-btn" data-month-step="-1" aria-label="Previous month"><svg><use href="#i-prev"/></svg></button>
+          <h1 id="h-ledger" class="view-heading month-title"></h1>
+          <button class="icon-btn" data-month-step="1" aria-label="Next month"><svg><use href="#i-next"/></svg></button>
         </div>
+        <div class="view-body" data-body></div>
+      </section>
+
+      <section id="view-txn" class="view" aria-labelledby="h-txn" hidden>
+        <button class="back-btn" data-back><svg><use href="#i-back"/></svg><span>Back</span></button>
+        <div class="view-body" data-body></div>
+      </section>
+
+      <section id="view-story" class="view" aria-labelledby="h-story" hidden>
+        <h1 id="h-story" class="view-heading">Story</h1>
+        <div class="story-controls">
+          <label class="field-label" for="story-scope">Show</label>
+          <select id="story-scope" class="field-input"></select>
+        </div>
+        <div class="view-body" data-body></div>
+      </section>
+
+      <section id="view-import" class="view" aria-labelledby="h-import" hidden>
+        <h1 id="h-import" class="view-heading">Import</h1>
+        <p class="caption">In Wallet, open Apple Card, then Card Balance, then Export Transactions (CSV). Or export from card.apple.com.</p>
+        <label class="file-drop" for="import-file">
+          <input type="file" id="import-file" accept=".csv,text/csv">
+          <span>Choose an Apple Card CSV</span>
+        </label>
+        <div class="view-body" data-body></div>
+      </section>
+
+      <section id="view-settings" class="view" aria-labelledby="h-settings" hidden>
+        <h1 id="h-settings" class="view-heading">Settings</h1>
+        <div class="view-body" data-body></div>
       </section>
     </main>
 
+    <nav class="tabs tabs-bottom" aria-label="Main"></nav>
   </div>
 
-  <script src="js/compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
+  <script src="js/money/money.js"></script>
   <script src="js/api.js"></script>
   <script src="js/app.js"></script>
-  <!-- Additive smart-TV layer + Cast sender: both self-disable off-TV
-       (tv.js adds html.tv only on a TV runtime; cast-sender no-ops when the
-       Cast framework never loads). See docs/TV-PLATFORMS.md. -->
-  <link rel="stylesheet" href="tv.css">
-  <script src="tv.js"></script>
-  <script src="js/cast-sender.js"></script>
 </body>
 </html>

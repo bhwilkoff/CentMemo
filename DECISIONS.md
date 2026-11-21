@@ -1,4 +1,4 @@
-# [APP NAME] — Architecture & Technology Decisions
+# CentMemo — Architecture & Technology Decisions
 
 Entries capture the *why* behind choices — not the *what* (the code
 already shows that). Each entry should answer: **"what would the next
@@ -1262,3 +1262,95 @@ platform still maps tokens into its own idiom by hand (Android's
 `Theme.kt` slots, Windows control styles, Apple views), and Apple keeps
 system text styles for Dynamic Type. A deleted platform folder is
 skipped, not recreated.
+
+---
+
+## 054: CentMemo is a public Finance-category app, and the story is the product
+*Date: 2026-11-21*
+
+CentMemo ships on the US App Store for iPhone in the Finance category, under
+Learning is Change, Inc., for anyone with Apple Card, Apple Cash, or Savings.
+Its core is the person's own memo for each purchase. The Claude connector is
+one feature, not the reason the app exists.
+
+**Why**: FinanceKit is the only documented path to full Apple Card history.
+Apple grants it only to organization accounts for App Store Finance apps that
+"provide financial management tools". A pipe to Claude alone would fail that
+test. It would also fail ours: it makes people more passive about their
+money. Ben: "There are far too many charges on my card that go unexamined."
+
+**How to apply**: every feature must be something a person uses to
+understand their money without Claude. The connector exposes what the app
+already holds. Ben's words: `docs/WHAT-CENTMEMO-IS.md`.
+
+**Who was in the room, who gains, who pays:** Ben decided, with research
+from this session. People with Apple Card gain a place to tell their money's
+story. Learning is Change, Inc. takes on holding other people's financial
+data, with its support duty and security bar.
+
+---
+
+## 055: Hosted split on Supabase; iOS is the only FinanceKit source; web writes and imports
+*Date: 2026-11-21 (applies 047)*
+
+One Supabase project (`centmemo`) holds Auth (email, Sign in with Apple, and
+the OAuth 2.1 server Claude signs in through), plus Postgres with owner-only
+RLS on every table. A single Edge Function `mcp` serves the connector. The
+platforms:
+- **iOS** syncs FinanceKit.
+- **Web** (centmemo.com, GitHub Pages) imports Apple Card CSV exports and
+  writes memos.
+- **macOS** waits: it could be added later through the universal target,
+  without FinanceKit.
+- **tvOS** is excluded.
+- **Android** is excluded for FinanceKit.
+
+**Why**: Claude can only read data from a server it can reach. Shared
+stories will be read by other people, which is the 047 fork. Human Shaped
+already runs this exact shape (a Supabase OAuth server, a static consent
+page, and read-only MCP under RLS) as a working Claude connector. FinanceKit
+has no Mac or web API.
+
+**How to apply**: no client calls the network except through its one API
+client. Refresh the JWT before Edge Function calls (011). Test every RLS
+policy against the deployed project as a stranger and as the owner. Account
+deletion ships with sign-in (035).
+
+---
+
+## 056: Claude reads; only the person writes the story
+*Date: 2026-11-21*
+
+The connector's tools are all read-only (`readOnlyHint`). The database
+refuses writes from any token that carries an OAuth `client_id` claim. No
+memo, value, or summary in CentMemo is written by a model.
+
+**Why**: Ben chose read-only. The memo is the person's act of examining a
+purchase. If Claude wrote it, the examining would be gone. A read-only
+connector also leaves an injected instruction in a merchant name with
+nothing to act on.
+
+**How to apply**: no `create_memo` tool, ever, without a new decision.
+Claude may point to unexamined purchases (`unexamined_transactions`) and
+help the person think. Writing stays in the app.
+
+---
+
+## 057: Money is signed integer minor units, and ingestion is idempotent on the source ID
+*Date: 2026-11-21*
+
+Store every amount as `amount_minor bigint` with an ISO currency code.
+Negative means money left the account. Never store floats. Every
+transaction row is unique on `(user_id, source, source_id)`. For FinanceKit
+the source ID is the transaction's UUID. For CSV imports, which have no
+IDs, it is a hash of date, amount, and description, plus an index for
+identical rows on the same day.
+
+**Why**: FinanceKit amounts are always positive, and the direction lives in
+`creditDebitIndicator`. Floats round cents wrong in sums. Re-importing the
+same export, or syncing again after a crash, must never duplicate a
+purchase, or memos split across copies.
+
+**How to apply**: parse with `js/money/` (golden-tested). When FinanceKit
+replaces CSV data, reconcile on date, amount, and merchant so memos carry
+over. Never delete and reinsert.
