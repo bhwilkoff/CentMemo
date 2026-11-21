@@ -31,6 +31,5 @@ enum Ground: String, CaseIterable, Identifiable, Sendable {
 /// and the person's memos, matching Newsreader on the web; SF for controls.
 enum DisplayType {
     static let title = Font.system(.largeTitle, design: .serif).weight(.bold)
-    static let heading = Font.system(.title2, design: .serif).weight(.bold)
     static let memo = Font.system(.body, design: .serif)
 }

@@ -16,7 +16,8 @@ The owner's requests jump the rotation.
 **Rules every tick**:
 - Quote `docs/DESIGN.md` before UI work.
 - Audit before shipping (grep for the feature; PARITY.md can lie).
-- Verify with `tools/test_all.sh`, plus the device tiers on the iPhone 12
+- Verify with `tools/test_all.sh` EVERY tick, however small (ticks 1 to 4
+  skipped it and missed a manifest drift), plus the device tiers on the iPhone 12
   (`tools/ios_uitest.py`, `tools/ios_run.py`) for iOS work.
 - One commit per tick. Bump both iOS version numbers on iOS-touching ticks.
 - The agent is never the tester of record: Ben plays.
@@ -173,3 +174,23 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
 - **Note:** each run registers one OAuth client named "CentMemo connector
   test" (Supabase lists them under OAuth Apps).
 - **Next:** tick 5 (opt): net-remove lines.
+
+### Tick 5 — 2026-11-21 — opt: stale planning collapse, dead symbol, a caught drift
+- **Context:** opt tick (net-remove lines).
+- **Implementation:**
+  - SCRATCHPAD.md's template placeholders became the real milestone state
+    and a real "Out of scope" table of what Ben ruled out: the placeholder
+    M0 to M2 sections, the "when you go native" checklist, and the
+    binding-doc how-to.
+  - Removed `DisplayType.heading` (unused).
+  - Kept `js/compat.js`, `tv.js`, and the cast layer: the scaffolds of
+    platforms ruled out stay (AGENTS.md), and compat has its own test.
+- **Lines:** SCRATCHPAD.md plus Ground.swift went from 187 to 103 (−84).
+- **Caught:** `tools/test_all.sh` failed on `manifest.json`. Tick 1's hand
+  edit re-serialized a token-managed file. Regenerated, and the icons were
+  kept.
+- **Lesson:** run `test_all.sh` every tick (rule tightened above).
+- **Verification:** `tools/test_all.sh` ALL PASS.
+- **Next:** tick 6 (iOS), backlog item 7, the FinanceKit sync path with the
+  DEBUG sample source. Item 6, connector docs, goes to the next
+  infrastructure tick.

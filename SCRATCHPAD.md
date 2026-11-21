@@ -41,111 +41,28 @@
 
 ## Milestones
 
-### M0: A first version, live at its own address
-
-- [ ] The web app carries the app's name and is live on GitHub Pages
-- [ ] AGENTS.md "Why we build" and "What this app does" hold the
-      owner's own words (stage 00)
-- [ ] One platform, real data from a real source, live at its address
-      (stage 01)
-- [ ] One person the owner knows has used it, and what they did first
-      is written down
-
-### When you go native (stage 03)
-
-Only when the owner decides to add a platform, and logs the platform
-set in DECISIONS.md. The agent does each of these; the owner never
-clicks through Xcode or Android Studio.
-
-- [ ] **Apple (universal)**: rename `AppName` and the bundle ids in
-      `project.yml` (no spaces), run `xcodegen generate`, then build
-      unsigned for iOS Simulator, tvOS Simulator, and macOS and run the
-      Core tests, per `apple/README.md`. One target, four destinations;
-      sources stay in `apple/`; `AppVersion.xcconfig` is already wired
-- [ ] **Android**: `cd android && ./gradlew :app:assembleDebug`; rename
-      the package from `com.example.appname` to your reverse-DNS and
-      rebuild; smoke-test on a device or emulator
-- [ ] **Links**: drop verification files in `/.well-known/` (with
-      `.nojekyll`) once the `appID`, `package_name`, and fingerprints
-      are known
-- [ ] **CI / submission**: `.github/workflows/appstore-build.yml`
-      (one workflow covers iOS + macOS + tvOS) with the seven signing
-      secrets seeded per `docs/CLOUD-SUBMISSION.md`;
-      `.github/workflows/android-build.yml` for CI builds and
-      `.github/workflows/play-release.yml` to publish to Play (internal
-      track first, then promote)
-
-### M1: [First user-visible capability]
-
-<!-- One sentence: what can a user DO after this milestone? -->
-
-Before implementing, run the `learning-orientation-design` skill:
-
-- [ ] Deepens understanding
-- [ ] Invites participation
-- [ ] Supports agency
-- [ ] Clarity over cleverness
-
-**Acceptance criteria** (observable by users, not developers):
-
-- [ ] Web: …
-- [ ] (each platform you have added: …)
-
-**Parity check**: update PARITY.md row(s) for this capability in
-the same change set. Reject the PR if PARITY.md is silent.
-
-### M2: [Second user-visible capability]
-
-- Learning-orientation check passed
-- **Acceptance**:
-  - [ ] Web: …
-  - [ ] (each platform you have added: …)
-
----
-
-## When to add a binding design doc
-
-When a platform crosses ~5 views OR you find yourself making
-inconsistent UI choices, create that platform's binding doc
-(`tvOS-DESIGN.md`, `iOS-DESIGN.md`, `macOS-DESIGN.md`, `WEB-DESIGN.md`,
-`ANDROID-DESIGN.md`), seeded from the matching per-platform template
-in `docs/templates/` (start from `PLATFORM-DESIGN-template.md`, the
-index). Invoke
-`binding-design-doc-discipline` for the workflow. Treat as binding
-from the moment it exists.
-
-The sibling docs share a shape: the **principles** are identical;
-the **idioms** they reference diverge per platform. Deliberate
-rule inversions between platforms (tvOS auto-focuses Play; iOS
-never steals focus) are stated explicitly so they don't get
-"harmonized" away.
-
----
-
-## Open questions
-
-<!-- Add questions as they arise; remove when resolved. Don't
-     accumulate. Every question should have a path to resolution. -->
-
----
+- **M0 (done 2026-11-21)**: the owner's words in AGENTS.md; centmemo.com live
+  over HTTPS; real data (an Apple Card CSV) through the web; the owner signed
+  in (Apple, web).
+- **M1 (done)**: backend, read-only Claude connector, web app, finance skills
+  (plan: `~/.claude/plans/mighty-percolating-simon-*.md`).
+- **M2 (in progress)**: iPhone app on TestFlight; FinanceKit once Apple grants
+  it; photos by reference; shared stories. Tick-level work and the backlog:
+  `AUTONOMOUS_PROGRESS.md`.
 
 ## Out of scope (intentionally)
 
-Document explicitly-rejected ideas so future sessions don't
-re-litigate them. "We thought about this and chose not to design it
-now" is far more useful than silently re-arriving at the same answer.
-
-When a request gets declined, write a row. Format:
-`**Idea**: Why declined. Revisit when …` (revisit condition lets
-the entry retire when circumstances change).
-
 | Idea | Why declined | Revisit when |
 |---|---|---|
-| <!-- e.g. Web push notifications | Too-inconsistent UX across browsers; APNs/FCM cover the need on mobile | iOS + Android push ship and a real cross-platform request appears --> | | |
-
----
+| Handwriting or informal typefaces | Ben: "read like elementary school kids are writing financial memos" (memory no-handwriting-fonts) | Never |
+| The person's color as a page background | Ben: "reads as too much color ... harder to read" (Decision 060) | Never |
+| Claude writing memos or values | The memo is the person's act of examining (Decision 056); FinanceKit Addendum 3.2 | A new decision |
+| FinanceKit rows in the Claude connector | Addendum 3.2: no third-party disclosure without Apple's written permission | Apple grants it |
+| Email sign-in or codes | Apple sign-in covers web and iPhone with two-factor; email codes need SMTP (Decision 058) | Non-Apple users appear |
+| Shortcuts-only Apple Card capture | Sees only Apple Pay taps; FinanceKit is the full path | Never |
+| tvOS and Android apps | FinanceKit is iPhone-only; not lean-back (Decision 055) | A CSV-only audience asks |
 
 ## Session log
 
-<!-- Append-only. Format: state found → work done → state left.
-     Keep entries short: one paragraph per session. -->
+The tick-by-tick log is `AUTONOMOUS_PROGRESS.md`; earlier sessions are in the
+git history and DECISIONS.md.
