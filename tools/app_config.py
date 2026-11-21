@@ -36,7 +36,7 @@ ROKU_CHANNEL_NAME = "AppName"
 
 # --- Product health (tools/pulse_collect.py, /pulse) --------------------------
 # The numeric App Store id, from the listing URL or `v1/apps?filter[bundleId]=`.
-APPLE_APP_STORE_ID = ""                           # e.g. "1234567890"
+APPLE_APP_STORE_ID = "6837824241"
 GITHUB_REPO = "bhwilkoff/CentMemo"
 PRODUCT_NAME = "CentMemo"                          # how a human writes it
 PRODUCT_SITE = "https://centmemo.com"              # the public site, no slash

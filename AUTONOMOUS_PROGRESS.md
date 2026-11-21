@@ -35,7 +35,7 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
      and Open Graph image.
    - A brand page on the site.
    - Present the options to Ben and proceed with the recommended one.
-2. ⏳ **App Store Connect app record**: name CentMemo, bundle
+2. ✅ (tick 2, app id 6837824241) **App Store Connect app record**: name CentMemo, bundle
    `com.learningischange.centmemo`, category Finance, SKU, primary language
    English (US).
 3. ⏳ **TestFlight**:
@@ -106,3 +106,22 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
   - US English passes.
 - **Next:** backlog item 2, the App Store Connect app record (the owner's
   request jumps the rotation).
+
+### Tick 2 — 2026-11-21 — store: App Store Connect record and first TestFlight upload
+- **Context:** Ben's request, backlog items 2 and 3.
+- **Implementation:**
+  - Created the app record "CentMemo" in Chrome: iOS, English (U.S.),
+    bundle `com.learningischange.centmemo`, SKU `centmemo-ios`, full access
+    (app id 6837824241). The API cannot create apps.
+  - Set the primary category to Finance through the API.
+  - Adopted Ear Drama's `tools/submit-appstore.sh` and `asc_*` helpers
+    (manual signing through the API key).
+  - Restored the app's own `CentMemo` scheme (archives need it).
+  - Uploaded 1.0 (1).
+  - Created the internal group "CentMemo testers" (all builds), the
+    Archive Watch pattern.
+- **Verification:** "Upload succeeded"; the category reads back as FINANCE.
+  Adding Ben to the group failed with "Tester(s) cannot be assigned" while
+  the app had no processed build. A watcher adds him once processing ends.
+- **Next:** confirm the build is VALID and Ben is in the group (item 3).
+  Every later upload bumps CURRENT_PROJECT_VERSION.

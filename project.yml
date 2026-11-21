@@ -41,6 +41,9 @@ settings:
 targets:
   CentMemo:
     type: application
+    # The app's own scheme: archives and TestFlight uploads build it
+    # (tools/submit-appstore.sh). Tests live in CentMemoTests / CentMemoUITests.
+    scheme: {}
     # One target, four destinations (Decision 013, amended by 019). Per-platform
     # UI is guarded by #if os(iOS) / os(macOS) / os(tvOS) inside each file, so
     # every file compiles into every slice with no exclusion lists.
