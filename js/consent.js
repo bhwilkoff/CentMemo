@@ -19,12 +19,10 @@
   function fail(message) { $('[data-error-text]').textContent = message; show('error'); }
   function host(url) { try { return new URL(url).host || url; } catch (e) { return url; } }
 
-  $('[data-sign-in]').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var email = $('#consent-email').value.trim();
-    db.auth.signInWithOtp({ email: email, options: { emailRedirectTo: location.href } }).then(function (r) {
-      $('[data-sent]').textContent = r.error ? r.error.message : 'Check ' + email + ' for your sign-in link. It brings you back here.';
-    });
+  $('[data-sign-in]').addEventListener('click', function () {
+    $('[data-sent]').textContent = '';
+    API.signInWithApple('https://centmemo.com/oauth/consent/').then(function () { location.reload(); })
+      .catch(function (e) { $('[data-sent]').textContent = e.message; });
   });
 
   function answer(approve) {

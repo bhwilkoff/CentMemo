@@ -1357,7 +1357,7 @@ over. Never delete and reinsert.
 
 ---
 
-## 058: The iPhone app signs in with Apple; the website keeps its email link
+## 058: CentMemo signs in with Apple only, on iPhone and on the web
 *Date: 2026-11-21*
 
 On iPhone, CentMemo signs in only with Sign in with Apple. The app sends
@@ -1372,12 +1372,28 @@ emails an hour. Sign in with Apple needs neither. It also brings Apple ID's
 two-factor sign-in, which the FinanceKit Addendum (3.7) requires on new
 devices.
 
+**Amended the same day:**
+- **The web signs in with Apple too.** The email link is removed. Ben: "Why
+  aren't we using apple sign in on the web?"
+- The website uses Apple's own script in popup mode, which returns a signed
+  identity token. The page hands it to Supabase (`signInWithIdToken`). That
+  is the same token-only shape as Tidbits on Windows and Human Shaped with
+  Google.
+- **There is no client secret, so nothing expires.** I had wrongly said a
+  six-month secret was needed. That applies only to the server-side code
+  exchange, which CentMemo doesn't use.
+- The web identifier `com.learningischange.centmemo.web` is grouped under
+  the CentMemo App ID. Its return URLs are `https://centmemo.com/` and
+  `/oauth/consent/`.
+- Because the identifier is grouped, a person gets the same Apple user ID
+  on the web and on iPhone: one account.
+
 **How to apply**:
 - Keep the Apple button out of any `Form`, and show every failure on screen,
   including a cancel (Tidbits' 2.1(a) rejection).
 - Bundle ID capability: `APPLE_ID_AUTH`. Supabase Apple provider client ID:
   `com.learningischange.centmemo`.
-- Someone who used the website's email link and then signs in with Apple (or
-  a private-relay address) gets a second account until the two are linked.
-  Turn on Supabase manual linking before inviting other people.
+- Apple sign-in on the web works only on centmemo.com (the registered
+  domain), not on localhost. Local testing signs the synthetic accounts in
+  from the console.
 - The full round trip is verified only on a team-signed device build.

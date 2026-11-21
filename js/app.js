@@ -376,17 +376,12 @@
     updateOnline();
     route();
   }
-  $('auth-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = $('auth-email').value.trim();
-    const err = $('auth-error'), sent = $('auth-sent'), btn = $('auth-submit');
-    err.hidden = true; sent.hidden = true;
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { err.textContent = 'Enter your email address.'; err.hidden = false; return; }
+  $('auth-apple').addEventListener('click', async () => {
+    const err = $('auth-error'), btn = $('auth-apple');
+    err.hidden = true; $('auth-sent').hidden = true;
     btn.disabled = true;
-    try {
-      await API.sendSignInLink(email, location.origin + location.pathname);
-      sent.textContent = 'Check ' + email + ' for your sign-in link.'; sent.hidden = false;
-    } catch (ex) { err.textContent = ex.message; err.hidden = false; }
+    try { await API.signInWithApple('https://centmemo.com/'); }
+    catch (ex) { err.textContent = ex.message; err.hidden = false; }
     btn.disabled = false;
   });
 

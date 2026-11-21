@@ -106,7 +106,12 @@ svg { width: 22px; height: 22px; flex: none; }
 .auth-card { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: var(--space-3); }
 .auth-lede { font-size: var(--type-section-header-size); font-weight: var(--type-section-header-weight); }
 .auth-body { color: var(--color-text-muted); margin-bottom: var(--space-3); }
-#auth-form { display: flex; flex-direction: column; gap: var(--space-3); }
+.auth-actions { display: flex; flex-direction: column; gap: var(--space-3); }
+/* Apple's button rules: black (white in dark), the Apple logo, "Sign in with Apple". */
+.btn-apple { background: #000; border-color: #000; color: #fff; font-weight: var(--type-body-strong-weight); }
+.btn-apple .apple-logo { width: 16px; height: 19px; }
+html[data-theme="dark"] .btn-apple { background: #fff; border-color: #fff; color: #000; }
+@media (prefers-color-scheme: dark) { html:not([data-theme="light"]) .btn-apple { background: #fff; border-color: #fff; color: #000; } }
 .auth-foot { font-size: var(--type-caption-size); color: var(--color-text-muted); margin-top: var(--space-4); }
 
 /* ---- Signed in ---- */
@@ -180,7 +185,6 @@ a.row:hover .row-title { text-decoration: underline; }
 
 /* ---- Fields and buttons ---- */
 .field-label { display: block; font-size: var(--type-caption-size); font-weight: var(--type-body-strong-weight); color: var(--color-text-muted); margin: var(--space-4) 0 var(--space-2); }
-#auth-form .field-label { margin: 0; }
 .field-input {
   width: 100%; padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border);
   border-radius: var(--radius-control); background: var(--color-background); font-size: 1rem;

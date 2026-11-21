@@ -28,8 +28,35 @@ const API = (() => {
   /* ---- Auth ---- */
   async function session() { return (await client().auth.getSession()).data.session; }
   function onAuthChange(fn) { client().auth.onAuthStateChange((_e, s) => fn(s)); }
-  async function sendSignInLink(email, redirectTo) {
-    must(await client().auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } }));
+  /**
+   * Sign in with Apple on the web (Decision 058, amended): Apple's own script
+   * opens a popup and returns a signed identity token, which Supabase checks
+   * against the web identifier. No client secret, so nothing expires.
+   * redirectURI must match one registered on com.learningischange.centmemo.web.
+   */
+  const APPLE_WEB_CLIENT_ID = 'com.learningischange.centmemo.web';
+  async function sha256Hex(text) {
+    const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(d)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  async function signInWithApple(redirectURI) {
+    if (!window.AppleID) throw new Error('Apple\u2019s sign-in script did not load. Check your connection and reload.');
+    const raw = Array.from(crypto.getRandomValues(new Uint8Array(24)), b => b.toString(16).padStart(2, '0')).join('');
+    window.AppleID.auth.init({
+      clientId: APPLE_WEB_CLIENT_ID, scope: 'email', redirectURI,
+      usePopup: true, nonce: await sha256Hex(raw), state: raw.slice(0, 12),
+    });
+    let res;
+    try { res = await window.AppleID.auth.signIn(); }
+    catch (e) {
+      const code = e && (e.error || e.message);
+      throw new Error(code === 'popup_closed_by_user' || code === 'user_cancelled_authorize'
+        ? 'Sign-in was canceled. Choose Sign in with Apple to try again.'
+        : 'Apple couldn\u2019t sign you in (' + (code || 'unknown error') + ').');
+    }
+    const token = res && res.authorization && res.authorization.id_token;
+    if (!token) throw new Error('Apple didn\u2019t return a sign-in token. Try again.');
+    must(await client().auth.signInWithIdToken({ provider: 'apple', token, nonce: raw }));
   }
   async function signOut() { await client().auth.signOut(); }
   async function deleteAccount() {
@@ -129,7 +156,7 @@ const API = (() => {
   }
 
   return {
-    MCP_URL, client, session, onAuthChange, sendSignInLink, signOut, deleteAccount,
+    MCP_URL, client, session, onAuthChange, signInWithApple, signOut, deleteAccount,
     unexamined, transactionCount, month, latestMonth, transaction, stories,
     values, addValue, renameValue, deleteValue, saveMemo, importAppleCard,
   };
