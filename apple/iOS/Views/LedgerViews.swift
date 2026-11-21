@@ -25,11 +25,12 @@ struct UnexaminedView: View {
                 }
             } else {
                 List(entries) { e in
-                    NavigationLink(value: EntryRoute(id: e.id)) { EntryRow(entry: e) }
+                    NavigationLink(value: EntryRoute(id: e.id)) { EntryRow(entry: e) }.onGround()
                 }
                 .listStyle(.plain)
             }
         }
+        .grounded()
         .navigationTitle(entries.isEmpty ? "Unexamined" : "Unexamined (\(entries.count))")
         .refreshable { await load() }
         .task(id: session.dataVersion) { await load() }
@@ -59,7 +60,7 @@ struct LedgerView: View {
             List {
                 if let month {
                     Section {
-                        totals
+                        totals.onGround()
                     } header: {
                         HStack {
                             Button { step(-1) } label: { Image(systemName: "chevron.left") }
@@ -74,15 +75,16 @@ struct LedgerView: View {
                     }
                 }
                 if entries.isEmpty {
-                    Text("Nothing recorded this month.").foregroundStyle(Color.brandTextMuted)
+                    Text("Nothing recorded this month.").foregroundStyle(Color.brandTextMuted).onGround()
                 } else {
                     ForEach(entries) { e in
-                        NavigationLink(value: EntryRoute(id: e.id)) { EntryRow(entry: e, showMemo: true) }
+                        NavigationLink(value: EntryRoute(id: e.id)) { EntryRow(entry: e, showMemo: true) }.onGround()
                     }
                 }
             }
             .listStyle(.plain)
         }
+        .grounded()
         .navigationTitle("Ledger")
         .refreshable { await load() }
         .task(id: "\(session.dataVersion)-\(month ?? "")") { await load() }
@@ -155,8 +157,9 @@ struct StoryView: View {
                             .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
                     }
                 }
+                .onGround()
                 if entries.isEmpty {
-                    Text("No memos here yet.").foregroundStyle(Color.brandTextMuted)
+                    Text("No memos here yet.").foregroundStyle(Color.brandTextMuted).onGround()
                 }
                 ForEach(entries) { e in
                     NavigationLink(value: EntryRoute(id: e.id)) {
@@ -167,7 +170,7 @@ struct StoryView: View {
                                 Spacer()
                                 MoneyText(minor: e.amountMinor, currency: e.currency, font: TypeRamp.caption)
                             }
-                            Text(e.memo?.body ?? "").font(TypeRamp.body)
+                            Text(e.memo?.body ?? "").font(DisplayType.memo)
                             if let names = e.memo?.valueNames, !names.isEmpty {
                                 FlowLayout(spacing: 6) {
                                     ForEach(names, id: \.self) { ValueChip(name: $0, isOn: false) }
@@ -176,10 +179,12 @@ struct StoryView: View {
                         }
                         .padding(.vertical, Spacing.s1)
                     }
+                    .listRowBackground(RoundedRectangle(cornerRadius: Radius.card).fill(session.ground.paper).padding(.vertical, 4).padding(.horizontal, Spacing.s3))
                 }
             }
             .listStyle(.plain)
         }
+        .grounded()
         .navigationTitle("Story")
         .task(id: "\(session.dataVersion)-\(String(describing: scope))") { await load() }
     }

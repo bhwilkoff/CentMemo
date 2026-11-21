@@ -2,7 +2,7 @@
 <!-- Design tokens (dark), generated from design-tokens.json by tools/design_tokens.mjs. Do not edit by hand. -->
 <!-- Compose reads Color.kt; these serve themes.xml (the splash) and the launcher icon. -->
 <resources>
-    <color name="brand_primary">#FFA7BFD6</color>
-    <color name="brand_background">#FF141619</color>
-    <color name="brand_surface">#FF1D2024</color>
+    <color name="brand_primary">#FFF5D6D8</color>
+    <color name="brand_background">#FF131B1C</color>
+    <color name="brand_surface">#FF1C2426</color>
 </resources>

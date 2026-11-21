@@ -202,6 +202,19 @@ final class APIClient {
         return try await rest("transactions", q)
     }
 
+    // MARK: - The person's ground (Decision 059)
+
+    func ground() async throws -> Ground {
+        struct Row: Decodable { let ground: String }
+        let rows: [Row] = try await rest("profiles", [.init(name: "select", value: "ground"), .init(name: "limit", value: "1")])
+        return rows.first.flatMap { Ground(rawValue: $0.ground) } ?? .aqua
+    }
+
+    func setGround(_ g: Ground) async throws {
+        try await raw("rest/v1/profiles", query: [.init(name: "on_conflict", value: "user_id")], method: "POST",
+                      body: ["ground": g.rawValue], prefer: "resolution=merge-duplicates")
+    }
+
     // MARK: - Values the person names
 
     func values() async throws -> [LifeValue] {

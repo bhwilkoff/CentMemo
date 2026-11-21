@@ -9,6 +9,23 @@ final class SessionStore {
     private(set) var isSignedIn = APIClient.shared.isSignedIn
     private(set) var email = APIClient.shared.email
     private(set) var dataVersion = 0
+    /// Cached so the first frame already wears the person's ground.
+    private(set) var ground = Ground(rawValue: UserDefaults.standard.string(forKey: "ground") ?? "") ?? .aqua
+
+    func loadGround() async {
+        guard let g = try? await APIClient.shared.ground() else { return }
+        setLocal(g)
+    }
+
+    func choose(_ g: Ground) async throws {
+        setLocal(g)
+        try await APIClient.shared.setGround(g)
+    }
+
+    private func setLocal(_ g: Ground) {
+        ground = g
+        UserDefaults.standard.set(g.rawValue, forKey: "ground")
+    }
 
     func didSignIn() {
         isSignedIn = APIClient.shared.isSignedIn

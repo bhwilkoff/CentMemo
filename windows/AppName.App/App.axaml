@@ -18,62 +18,62 @@
             <!-- BEGIN design-tokens:resources. Generated from design-tokens.json by tools/design_tokens.mjs. Do not edit by hand. -->
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
-                    <Color x:Key="BrandPrimary">#3F5E78</Color>
-                    <SolidColorBrush x:Key="BrandPrimaryBrush" Color="#3F5E78"/>
-                    <Color x:Key="BrandOnPrimary">#FFFFFF</Color>
-                    <SolidColorBrush x:Key="BrandOnPrimaryBrush" Color="#FFFFFF"/>
-                    <Color x:Key="BrandBackground">#FFFFFF</Color>
-                    <SolidColorBrush x:Key="BrandBackgroundBrush" Color="#FFFFFF"/>
-                    <Color x:Key="BrandSurface">#F5F6F8</Color>
-                    <SolidColorBrush x:Key="BrandSurfaceBrush" Color="#F5F6F8"/>
-                    <Color x:Key="BrandSurfaceAlt">#EBEDF0</Color>
-                    <SolidColorBrush x:Key="BrandSurfaceAltBrush" Color="#EBEDF0"/>
-                    <Color x:Key="BrandText">#1A1C1F</Color>
-                    <SolidColorBrush x:Key="BrandTextBrush" Color="#1A1C1F"/>
-                    <Color x:Key="BrandTextMuted">#5B6270</Color>
-                    <SolidColorBrush x:Key="BrandTextMutedBrush" Color="#5B6270"/>
-                    <Color x:Key="BrandBorder">#D3D7DE</Color>
-                    <SolidColorBrush x:Key="BrandBorderBrush" Color="#D3D7DE"/>
-                    <Color x:Key="SemanticSuccess">#1E7A4F</Color>
-                    <SolidColorBrush x:Key="SemanticSuccessBrush" Color="#1E7A4F"/>
-                    <Color x:Key="SemanticWarning">#8A5A00</Color>
-                    <SolidColorBrush x:Key="SemanticWarningBrush" Color="#8A5A00"/>
-                    <Color x:Key="SemanticError">#B42318</Color>
-                    <SolidColorBrush x:Key="SemanticErrorBrush" Color="#B42318"/>
+                    <Color x:Key="BrandPrimary">#4A1520</Color>
+                    <SolidColorBrush x:Key="BrandPrimaryBrush" Color="#4A1520"/>
+                    <Color x:Key="BrandOnPrimary">#FBFAF7</Color>
+                    <SolidColorBrush x:Key="BrandOnPrimaryBrush" Color="#FBFAF7"/>
+                    <Color x:Key="BrandBackground">#2FD4EC</Color>
+                    <SolidColorBrush x:Key="BrandBackgroundBrush" Color="#2FD4EC"/>
+                    <Color x:Key="BrandSurface">#FBFAF7</Color>
+                    <SolidColorBrush x:Key="BrandSurfaceBrush" Color="#FBFAF7"/>
+                    <Color x:Key="BrandSurfaceAlt">#EFEDE8</Color>
+                    <SolidColorBrush x:Key="BrandSurfaceAltBrush" Color="#EFEDE8"/>
+                    <Color x:Key="BrandText">#4A1520</Color>
+                    <SolidColorBrush x:Key="BrandTextBrush" Color="#4A1520"/>
+                    <Color x:Key="BrandTextMuted">#6E2B36</Color>
+                    <SolidColorBrush x:Key="BrandTextMutedBrush" Color="#6E2B36"/>
+                    <Color x:Key="BrandBorder">#8E5C63</Color>
+                    <SolidColorBrush x:Key="BrandBorderBrush" Color="#8E5C63"/>
+                    <Color x:Key="SemanticSuccess">#0D5230</Color>
+                    <SolidColorBrush x:Key="SemanticSuccessBrush" Color="#0D5230"/>
+                    <Color x:Key="SemanticWarning">#5A3A00</Color>
+                    <SolidColorBrush x:Key="SemanticWarningBrush" Color="#5A3A00"/>
+                    <Color x:Key="SemanticError">#8E1414</Color>
+                    <SolidColorBrush x:Key="SemanticErrorBrush" Color="#8E1414"/>
                     <Color x:Key="SemanticErrorSurface">#FDECEA</Color>
                     <SolidColorBrush x:Key="SemanticErrorSurfaceBrush" Color="#FDECEA"/>
-                    <SolidColorBrush x:Key="BrandPrimaryHoverBrush" Color="#39556C"/>
-                    <SolidColorBrush x:Key="BrandPrimaryPressedBrush" Color="#324B60"/>
-                    <SolidColorBrush x:Key="BrandPrimaryDisabledBrush" Color="#663F5E78"/>
+                    <SolidColorBrush x:Key="BrandPrimaryHoverBrush" Color="#43131D"/>
+                    <SolidColorBrush x:Key="BrandPrimaryPressedBrush" Color="#3B111A"/>
+                    <SolidColorBrush x:Key="BrandPrimaryDisabledBrush" Color="#664A1520"/>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
-                    <Color x:Key="BrandPrimary">#A7BFD6</Color>
-                    <SolidColorBrush x:Key="BrandPrimaryBrush" Color="#A7BFD6"/>
-                    <Color x:Key="BrandOnPrimary">#0F1720</Color>
-                    <SolidColorBrush x:Key="BrandOnPrimaryBrush" Color="#0F1720"/>
-                    <Color x:Key="BrandBackground">#141619</Color>
-                    <SolidColorBrush x:Key="BrandBackgroundBrush" Color="#141619"/>
-                    <Color x:Key="BrandSurface">#1D2024</Color>
-                    <SolidColorBrush x:Key="BrandSurfaceBrush" Color="#1D2024"/>
-                    <Color x:Key="BrandSurfaceAlt">#272B30</Color>
-                    <SolidColorBrush x:Key="BrandSurfaceAltBrush" Color="#272B30"/>
-                    <Color x:Key="BrandText">#ECEEF1</Color>
-                    <SolidColorBrush x:Key="BrandTextBrush" Color="#ECEEF1"/>
-                    <Color x:Key="BrandTextMuted">#A2A9B4</Color>
-                    <SolidColorBrush x:Key="BrandTextMutedBrush" Color="#A2A9B4"/>
-                    <Color x:Key="BrandBorder">#3A3F47</Color>
-                    <SolidColorBrush x:Key="BrandBorderBrush" Color="#3A3F47"/>
-                    <Color x:Key="SemanticSuccess">#5CC593</Color>
-                    <SolidColorBrush x:Key="SemanticSuccessBrush" Color="#5CC593"/>
-                    <Color x:Key="SemanticWarning">#E8B04B</Color>
-                    <SolidColorBrush x:Key="SemanticWarningBrush" Color="#E8B04B"/>
-                    <Color x:Key="SemanticError">#FF8A80</Color>
-                    <SolidColorBrush x:Key="SemanticErrorBrush" Color="#FF8A80"/>
+                    <Color x:Key="BrandPrimary">#F5D6D8</Color>
+                    <SolidColorBrush x:Key="BrandPrimaryBrush" Color="#F5D6D8"/>
+                    <Color x:Key="BrandOnPrimary">#4A1520</Color>
+                    <SolidColorBrush x:Key="BrandOnPrimaryBrush" Color="#4A1520"/>
+                    <Color x:Key="BrandBackground">#131B1C</Color>
+                    <SolidColorBrush x:Key="BrandBackgroundBrush" Color="#131B1C"/>
+                    <Color x:Key="BrandSurface">#1C2426</Color>
+                    <SolidColorBrush x:Key="BrandSurfaceBrush" Color="#1C2426"/>
+                    <Color x:Key="BrandSurfaceAlt">#273031</Color>
+                    <SolidColorBrush x:Key="BrandSurfaceAltBrush" Color="#273031"/>
+                    <Color x:Key="BrandText">#F5D6D8</Color>
+                    <SolidColorBrush x:Key="BrandTextBrush" Color="#F5D6D8"/>
+                    <Color x:Key="BrandTextMuted">#D8B0B4</Color>
+                    <SolidColorBrush x:Key="BrandTextMutedBrush" Color="#D8B0B4"/>
+                    <Color x:Key="BrandBorder">#4A5658</Color>
+                    <SolidColorBrush x:Key="BrandBorderBrush" Color="#4A5658"/>
+                    <Color x:Key="SemanticSuccess">#8FE3B4</Color>
+                    <SolidColorBrush x:Key="SemanticSuccessBrush" Color="#8FE3B4"/>
+                    <Color x:Key="SemanticWarning">#F3C26B</Color>
+                    <SolidColorBrush x:Key="SemanticWarningBrush" Color="#F3C26B"/>
+                    <Color x:Key="SemanticError">#FFB4AB</Color>
+                    <SolidColorBrush x:Key="SemanticErrorBrush" Color="#FFB4AB"/>
                     <Color x:Key="SemanticErrorSurface">#3A1D1B</Color>
                     <SolidColorBrush x:Key="SemanticErrorSurfaceBrush" Color="#3A1D1B"/>
-                    <SolidColorBrush x:Key="BrandPrimaryHoverBrush" Color="#96ACC1"/>
-                    <SolidColorBrush x:Key="BrandPrimaryPressedBrush" Color="#8699AB"/>
-                    <SolidColorBrush x:Key="BrandPrimaryDisabledBrush" Color="#66A7BFD6"/>
+                    <SolidColorBrush x:Key="BrandPrimaryHoverBrush" Color="#DDC1C2"/>
+                    <SolidColorBrush x:Key="BrandPrimaryPressedBrush" Color="#C4ABAD"/>
+                    <SolidColorBrush x:Key="BrandPrimaryDisabledBrush" Color="#66F5D6D8"/>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
             <x:Double x:Key="Space1">4</x:Double>
@@ -91,7 +91,7 @@
     <Application.Styles>
         <!-- The brand accent (instead of the default purple) and the type ramp. -->
         <!-- BEGIN design-tokens:styles. Generated from design-tokens.json by tools/design_tokens.mjs. Do not edit by hand. -->
-        <sty:FluentAvaloniaTheme CustomAccentColor="#3F5E78" />
+        <sty:FluentAvaloniaTheme CustomAccentColor="#4A1520" />
 
         <!-- The six-level type ramp, adopted via Classes. Refuse a seventh level. -->
         <Style Selector="TextBlock.view-heading"> <!-- L1 pageTitle -->

@@ -26,11 +26,11 @@ html.tv {
 /* §4.4 colors come from design-tokens.json (the dark palette). */
 /* BEGIN design-tokens. Generated from design-tokens.json by tools/design_tokens.mjs. Do not edit by hand. */
 html.tv {
-  --tv-bg: #141619;
-  --tv-text: #ECEEF1;
-  --tv-text-muted: #A2A9B4;
-  --tv-accent: #A7BFD6;
-  --tv-focus-ring: #ECEEF1;
+  --tv-bg: #131B1C;
+  --tv-text: #F5D6D8;
+  --tv-text-muted: #D8B0B4;
+  --tv-accent: #F5D6D8;
+  --tv-focus-ring: #F5D6D8;
 }
 /* END design-tokens */
 

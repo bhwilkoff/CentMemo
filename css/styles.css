@@ -9,17 +9,17 @@
 /* BEGIN design-tokens. Generated from design-tokens.json by tools/design_tokens.mjs. Do not edit by hand. */
 :root {
   color-scheme: light;
-  --color-primary: #3F5E78;
-  --color-on-primary: #FFFFFF;
-  --color-background: #FFFFFF;
-  --color-surface: #F5F6F8;
-  --color-surface-alt: #EBEDF0;
-  --color-text: #1A1C1F;
-  --color-text-muted: #5B6270;
-  --color-border: #D3D7DE;
-  --color-success: #1E7A4F;
-  --color-warning: #8A5A00;
-  --color-error: #B42318;
+  --color-primary: #4A1520;
+  --color-on-primary: #FBFAF7;
+  --color-background: #2FD4EC;
+  --color-surface: #FBFAF7;
+  --color-surface-alt: #EFEDE8;
+  --color-text: #4A1520;
+  --color-text-muted: #6E2B36;
+  --color-border: #8E5C63;
+  --color-success: #0D5230;
+  --color-warning: #5A3A00;
+  --color-error: #8E1414;
   --color-error-surface: #FDECEA;
   --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -46,33 +46,33 @@
 }
 html[data-theme="dark"] {
   color-scheme: dark;
-  --color-primary: #A7BFD6;
-  --color-on-primary: #0F1720;
-  --color-background: #141619;
-  --color-surface: #1D2024;
-  --color-surface-alt: #272B30;
-  --color-text: #ECEEF1;
-  --color-text-muted: #A2A9B4;
-  --color-border: #3A3F47;
-  --color-success: #5CC593;
-  --color-warning: #E8B04B;
-  --color-error: #FF8A80;
+  --color-primary: #F5D6D8;
+  --color-on-primary: #4A1520;
+  --color-background: #131B1C;
+  --color-surface: #1C2426;
+  --color-surface-alt: #273031;
+  --color-text: #F5D6D8;
+  --color-text-muted: #D8B0B4;
+  --color-border: #4A5658;
+  --color-success: #8FE3B4;
+  --color-warning: #F3C26B;
+  --color-error: #FFB4AB;
   --color-error-surface: #3A1D1B;
 }
 @media (prefers-color-scheme: dark) {
   html:not([data-theme="light"]) {
     color-scheme: dark;
-    --color-primary: #A7BFD6;
-    --color-on-primary: #0F1720;
-    --color-background: #141619;
-    --color-surface: #1D2024;
-    --color-surface-alt: #272B30;
-    --color-text: #ECEEF1;
-    --color-text-muted: #A2A9B4;
-    --color-border: #3A3F47;
-    --color-success: #5CC593;
-    --color-warning: #E8B04B;
-    --color-error: #FF8A80;
+    --color-primary: #F5D6D8;
+    --color-on-primary: #4A1520;
+    --color-background: #131B1C;
+    --color-surface: #1C2426;
+    --color-surface-alt: #273031;
+    --color-text: #F5D6D8;
+    --color-text-muted: #D8B0B4;
+    --color-border: #4A5658;
+    --color-success: #8FE3B4;
+    --color-warning: #F3C26B;
+    --color-error: #FFB4AB;
     --color-error-surface: #3A1D1B;
   }
 }
@@ -247,3 +247,62 @@ a.row:hover .row-title { text-decoration: underline; }
 .page-inner h2 { font-size: var(--type-section-header-size); margin: var(--space-6) 0 var(--space-2); }
 .page-inner p, .page-inner li { margin-bottom: var(--space-3); }
 .page-inner ul { padding-left: var(--space-6); }
+
+/* ---- Grounds: the person's chosen page color (Decision 059) ----
+   Values from design-tokens.json `grounds`; tools/test_grounds.mjs fails if
+   these drift from the JSON or from apple/Core/Ground.swift. */
+html[data-ground="sky"]       { --color-background: #9AC0F8; }
+html[data-ground="salmon"]    { --color-background: #FDA19B; }
+html[data-ground="apricot"]   { --color-background: #FEA669; }
+html[data-ground="citron"]    { --color-background: #C7C43F; }
+html[data-ground="pistachio"] { --color-background: #B4C875; }
+html[data-theme="dark"][data-ground="sky"]       { --color-background: #161A1F; --color-surface: #1F2329; --color-surface-alt: #2A2E34; }
+html[data-theme="dark"][data-ground="salmon"]    { --color-background: #1F1717; --color-surface: #282120; --color-surface-alt: #342C2B; }
+html[data-theme="dark"][data-ground="apricot"]   { --color-background: #1E1814; --color-surface: #28211D; --color-surface-alt: #332C28; }
+html[data-theme="dark"][data-ground="citron"]    { --color-background: #1A1A14; --color-surface: #23231D; --color-surface-alt: #2E2E27; }
+html[data-theme="dark"][data-ground="pistachio"] { --color-background: #191A14; --color-surface: #22241D; --color-surface-alt: #2D2F28; }
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"])[data-ground="sky"]       { --color-background: #161A1F; --color-surface: #1F2329; --color-surface-alt: #2A2E34; }
+  html:not([data-theme="light"])[data-ground="salmon"]    { --color-background: #1F1717; --color-surface: #282120; --color-surface-alt: #342C2B; }
+  html:not([data-theme="light"])[data-ground="apricot"]   { --color-background: #1E1814; --color-surface: #28211D; --color-surface-alt: #332C28; }
+  html:not([data-theme="light"])[data-ground="citron"]    { --color-background: #1A1A14; --color-surface: #23231D; --color-surface-alt: #2E2E27; }
+  html:not([data-theme="light"])[data-ground="pistachio"] { --color-background: #191A14; --color-surface: #22241D; --color-surface-alt: #2D2F28; }
+}
+
+/* ---- Editorial type: Newsreader for headings and the person's memos ---- */
+:root { --font-display: "Newsreader", Georgia, "Times New Roman", serif; }
+.wordmark, .view-heading, .section-heading, .txn-head .view-heading { font-family: var(--font-display); letter-spacing: -0.005em; }
+.memo-input, .story-text, .row-memo { font-family: var(--font-display); }
+
+
+/* ---- Pencil marks: drawn, never a handwriting font (memory no-handwriting-fonts) ---- */
+.row { border-bottom: 0; position: relative; }
+.row::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 6px;
+  background: var(--color-primary);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 6' preserveAspectRatio='none'%3E%3Cpath d='M1 3.2 C 20 1.9, 38 4.3, 60 3.0 S 101 1.8, 121 3.4 S 160 4.4, 182 2.7 S 222 2.2, 239 3.3' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 6' preserveAspectRatio='none'%3E%3Cpath d='M1 3.2 C 20 1.9, 38 4.3, 60 3.0 S 101 1.8, 121 3.4 S 160 4.4, 182 2.7 S 222 2.2, 239 3.3' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  opacity: .55;
+}
+.list { border-top: 0; }
+.pencil-circle { position: relative; display: inline-block; padding: 0 .35em; }
+.pencil-circle::before {
+  content: ""; position: absolute; inset: -.18em -.12em -.12em -.12em; background: var(--color-primary);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60' preserveAspectRatio='none'%3E%3Cpath d='M58 4 C 26 2, 4 14, 5 31 C 6 49, 34 57, 58 55 C 84 53, 97 42, 95 27 C 93 12, 72 3, 44 6' fill='none' stroke='black' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60' preserveAspectRatio='none'%3E%3Cpath d='M58 4 C 26 2, 4 14, 5 31 C 6 49, 34 57, 58 55 C 84 53, 97 42, 95 27 C 93 12, 72 3, 44 6' fill='none' stroke='black' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+
+/* ---- Ground picker (Settings) ---- */
+.grounds { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.ground-swatch {
+  width: 64px; display: flex; flex-direction: column; align-items: center; gap: var(--space-1);
+  background: none; border: 0; padding: 0; cursor: pointer; color: var(--color-text); font-size: var(--type-caption-size);
+}
+.ground-swatch i { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--color-border); display: block; }
+.ground-swatch[aria-pressed="true"] i { border: 3px solid var(--color-primary); box-shadow: 0 0 0 3px var(--color-surface); }
+.ground-swatch[aria-pressed="true"] span { font-weight: var(--type-body-strong-weight); }
+
+/* Paper for long reading and writing: the memo field and the story sit on surface. */
+.memo-input { background: var(--color-surface); }
+.story-entry { background: var(--color-surface); border-top: 0; border-radius: var(--radius-card); padding: var(--space-4); margin-bottom: var(--space-3); }
+.story-meta { color: var(--color-text-muted); }

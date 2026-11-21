@@ -108,6 +108,20 @@ const API = (() => {
     return must(await q.order('txn_date', { ascending: true }).limit(1000));
   }
 
+  /* ---- The person's ground (Decision 059) ---- */
+  const GROUNDS = [
+    { id: 'aqua', name: 'Aqua', hex: '#2FD4EC' }, { id: 'sky', name: 'Sky', hex: '#9AC0F8' },
+    { id: 'salmon', name: 'Salmon', hex: '#FDA19B' }, { id: 'apricot', name: 'Apricot', hex: '#FEA669' },
+    { id: 'citron', name: 'Citron', hex: '#C7C43F' }, { id: 'pistachio', name: 'Pistachio', hex: '#B4C875' },
+  ];
+  async function ground() {
+    const rows = must(await client().from('profiles').select('ground').limit(1));
+    return rows.length ? rows[0].ground : 'aqua';
+  }
+  async function setGround(id) {
+    must(await client().from('profiles').upsert({ ground: id }, { onConflict: 'user_id' }));
+  }
+
   /* ---- Values the person names ---- */
   async function values() {
     return must(await client().from('life_values').select('id, name').order('name'));
@@ -158,6 +172,6 @@ const API = (() => {
   return {
     MCP_URL, client, session, onAuthChange, signInWithApple, signOut, deleteAccount,
     unexamined, transactionCount, month, latestMonth, transaction, stories,
-    values, addValue, renameValue, deleteValue, saveMemo, importAppleCard,
+    values, addValue, renameValue, deleteValue, saveMemo, importAppleCard, GROUNDS, ground, setGround,
   };
 })();

@@ -5,22 +5,22 @@ package com.example.appname.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // --- BRAND tokens (UI chrome only, never content meaning) ---
-val BrandPrimaryLight = Color(0xFF3F5E78)
-val BrandPrimaryDark = Color(0xFFA7BFD6)
-val BrandOnPrimaryLight = Color(0xFFFFFFFF)
-val BrandOnPrimaryDark = Color(0xFF0F1720)
-val BrandBackgroundLight = Color(0xFFFFFFFF)
-val BrandBackgroundDark = Color(0xFF141619)
-val BrandSurfaceLight = Color(0xFFF5F6F8)
-val BrandSurfaceDark = Color(0xFF1D2024)
-val BrandSurfaceAltLight = Color(0xFFEBEDF0)
-val BrandSurfaceAltDark = Color(0xFF272B30)
-val BrandTextLight = Color(0xFF1A1C1F)
-val BrandTextDark = Color(0xFFECEEF1)
-val BrandTextMutedLight = Color(0xFF5B6270)
-val BrandTextMutedDark = Color(0xFFA2A9B4)
-val BrandBorderLight = Color(0xFFD3D7DE)
-val BrandBorderDark = Color(0xFF3A3F47)
+val BrandPrimaryLight = Color(0xFF4A1520)
+val BrandPrimaryDark = Color(0xFFF5D6D8)
+val BrandOnPrimaryLight = Color(0xFFFBFAF7)
+val BrandOnPrimaryDark = Color(0xFF4A1520)
+val BrandBackgroundLight = Color(0xFF2FD4EC)
+val BrandBackgroundDark = Color(0xFF131B1C)
+val BrandSurfaceLight = Color(0xFFFBFAF7)
+val BrandSurfaceDark = Color(0xFF1C2426)
+val BrandSurfaceAltLight = Color(0xFFEFEDE8)
+val BrandSurfaceAltDark = Color(0xFF273031)
+val BrandTextLight = Color(0xFF4A1520)
+val BrandTextDark = Color(0xFFF5D6D8)
+val BrandTextMutedLight = Color(0xFF6E2B36)
+val BrandTextMutedDark = Color(0xFFD8B0B4)
+val BrandBorderLight = Color(0xFF8E5C63)
+val BrandBorderDark = Color(0xFF4A5658)
 
 // --- SEMANTIC tokens (content only, never chrome) ---
 // Read them through AppSemantics (Theme.kt), never through colorScheme, so
@@ -33,16 +33,16 @@ data class SemanticColors(
 )
 
 val LightSemanticColors = SemanticColors(
-    success = Color(0xFF1E7A4F),
-    warning = Color(0xFF8A5A00),
-    error = Color(0xFFB42318),
+    success = Color(0xFF0D5230),
+    warning = Color(0xFF5A3A00),
+    error = Color(0xFF8E1414),
     errorSurface = Color(0xFFFDECEA),
 )
 
 val DarkSemanticColors = SemanticColors(
-    success = Color(0xFF5CC593),
-    warning = Color(0xFFE8B04B),
-    error = Color(0xFFFF8A80),
+    success = Color(0xFF8FE3B4),
+    warning = Color(0xFFF3C26B),
+    error = Color(0xFFFFB4AB),
     errorSurface = Color(0xFF3A1D1B),
 )
 

@@ -1397,3 +1397,36 @@ devices.
   domain), not on localhost. Local testing signs the synthetic accounts in
   from the console.
 - The full round trip is verified only on a team-signed device build.
+
+---
+
+## 059: A sanguine pencil on a ground the person chooses; aqua by default
+*Date: 2026-11-21*
+
+The pencil, meaning text, marks, and actions, is sanguine `#4A1520`. The
+page is a bold ground the person picks in Settings: Aqua (the default), Sky,
+Salmon, Apricot, Citron, or Pistachio. The choice is stored in `profiles`,
+so it follows them across web and iPhone. Type is editorial: Newsreader on
+the web and New York (the system serif) on Apple, for headings and memos.
+The pencil appears as drawn marks (a circled count, wavy rules), never as a
+handwriting font.
+
+**Why**: Ben: "I like the sanguine color a lot and the background color(s)
+should be able to be chosen by the user, but I like the aqua as a default as
+long as it isn't too close to the old Twitter bird color."
+- Aqua is 16 to 21 CIEDE2000 from Twitter's blues, so it is clearly distinct.
+- Every ground pairs with sanguine in a way no brand uses
+  (docs/research/color-search.md). Lavender was left out because it reads as
+  Human Shaped's sibling.
+- The usual green, red, and amber fail on bold grounds, so the semantic
+  colors are deeper in light mode.
+- Dark grounds stay near neutral, so the pale sanguine never sits on its
+  near-opposite hue (Human Shaped's October 9 lesson).
+
+**How to apply**:
+- A new ground needs four things: a `grounds` entry in design-tokens.json, a
+  CSS rule in all three blocks, a case in `apple/Core/Ground.swift`, and the
+  `profiles` check constraint.
+- `node tools/test_grounds.mjs` fails on any contrast or parity miss.
+- Long reading and writing (memos, the story) sit on paper (surface), not
+  directly on the ground.

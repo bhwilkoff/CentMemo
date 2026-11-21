@@ -22,7 +22,7 @@ struct EntryDetailView: View {
                 Form {
                     Section {
                         VStack(alignment: .leading, spacing: Spacing.s1) {
-                            Text(e.displayMerchant).font(TypeRamp.pageTitle)
+                            Text(e.displayMerchant).font(DisplayType.title)
                             MoneyText(minor: e.amountMinor, currency: e.currency, font: TypeRamp.sectionHeader)
                         }
                         LabeledContent("Date", value: LedgerDate.display(e.txnDate))
@@ -38,7 +38,7 @@ struct EntryDetailView: View {
                     Section("Memo") {
                         TextEditor(text: $memo)
                             .frame(minHeight: 140)
-                            .font(TypeRamp.body)
+                            .font(DisplayType.memo)
                             .accessibilityLabel("Memo")
                     }
                     Section("Values") {
@@ -64,6 +64,7 @@ struct EntryDetailView: View {
                 ContentUnavailableView("This purchase isn't in your CentMemo.", systemImage: "questionmark")
             }
         }
+        .grounded()
         .navigationTitle(entry?.displayMerchant ?? "")
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }

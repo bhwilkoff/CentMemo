@@ -13,6 +13,25 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
+            Section("Ground") {
+                HStack(spacing: Spacing.s3) {
+                    ForEach(Ground.allCases) { g in
+                        Button { Task { do { try await session.choose(g) } catch { self.error = session.handle(error) } } } label: {
+                            VStack(spacing: Spacing.s1) {
+                                Circle().fill(g.swatch).frame(width: 40, height: 40)
+                                    .overlay(Circle().strokeBorder(session.ground == g ? Color.brandPrimary : Color.brandBorder,
+                                                                   lineWidth: session.ground == g ? 3 : 1))
+                                Text(g.name).font(TypeRamp.caption)
+                                    .fontWeight(session.ground == g ? .semibold : .regular)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(g.name)
+                        .accessibilityAddTraits(session.ground == g ? .isSelected : [])
+                    }
+                }
+                .frame(maxWidth: .infinity)
+            }
             Section("Values") {
                 if values.isEmpty {
                     Text("Add a value from any memo.").foregroundStyle(Color.brandTextMuted)
@@ -51,6 +70,7 @@ struct SettingsView: View {
                 Link("Terms", destination: URL(string: "https://centmemo.com/terms/")!)
             }
         }
+        .grounded()
         .navigationTitle("Settings")
         .confirmationDialog("Delete your account?", isPresented: $confirmDelete, titleVisibility: .visible) {
             Button("Delete everything, permanently", role: .destructive) { Task { await deleteAccount() } }

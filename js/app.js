@@ -124,7 +124,7 @@
           ? empty(body, 'Every purchase has a memo.')
           : empty(body, 'No transactions yet.', h('a', { class: 'btn btn-primary', href: '#/import' }, 'Import from Apple Card'));
       }
-      heading.textContent = 'Unexamined (' + count.toLocaleString('en-US') + ')';
+      heading.replaceChildren('Unexamined ', h('span', { class: 'pencil-circle', 'aria-label': count + ' unexamined' }, count.toLocaleString('en-US')));
       body.replaceChildren(h('div', { class: 'list' }, rows.map((t) => txnRow(t))),
         count > rows.length ? h('p', { class: 'caption' }, 'Showing the newest ' + rows.length + '.') : null);
     } catch (err) { failed(body, err, unexaminedView); }
@@ -315,12 +315,29 @@
       h('div', { class: 'actions' }, go, status));
   });
 
+  /* ---- Ground ---- */
+  function applyGround(id) {
+    if (id && id !== 'aqua') document.documentElement.setAttribute('data-ground', id);
+    else document.documentElement.removeAttribute('data-ground');
+    try { localStorage.setItem('cm_ground', id || 'aqua'); } catch (_) {}
+  }
+
   /* ---- Settings ---- */
   async function settingsView() {
     const body = showView('settings', 'settings');
     loading(body);
     try {
-      const [vals, session] = await Promise.all([API.values(), API.session()]);
+      const [vals, session, current] = await Promise.all([API.values(), API.session(), API.ground()]);
+      const picker = h('div', { class: 'grounds', role: 'group', 'aria-label': 'Ground color' }, API.GROUNDS.map((g) => {
+        const b = h('button', { type: 'button', class: 'ground-swatch', 'aria-pressed': g.id === current ? 'true' : 'false' },
+          h('i', { style: 'background:' + g.hex }), h('span', {}, g.name));
+        b.addEventListener('click', async () => {
+          picker.querySelectorAll('.ground-swatch').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+          applyGround(g.id);
+          try { await API.setGround(g.id); } catch (err) { failed(body, err, settingsView); }
+        });
+        return b;
+      }));
       const valueList = h('ul', { class: 'list' }, vals.map((v) => {
         const input = h('input', { type: 'text', class: 'field-input field-inline', value: v.name, maxlength: '60', 'aria-label': 'Value name' });
         const rename = h('button', { class: 'btn btn-small' }, 'Rename');
@@ -350,6 +367,8 @@
       });
 
       body.replaceChildren(
+        h('h2', { class: 'section-heading' }, 'Ground'),
+        picker,
         h('h2', { class: 'section-heading' }, 'Values'),
         vals.length ? valueList : h('p', { class: 'caption' }, 'Add a value from any memo.'),
         h('h2', { class: 'section-heading' }, 'Connect Claude'),
@@ -371,6 +390,7 @@
     sent.hidden = !message; sent.textContent = message || '';
   }
   function showApp() {
+    API.ground().then(applyGround).catch(() => {});
     $('auth-screen').hidden = true;
     $('app-screen').hidden = false;
     updateOnline();

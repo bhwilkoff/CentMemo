@@ -20,6 +20,7 @@ struct ContentView_iOS: View {
                 Tab("Settings", systemImage: "gearshape", value: "settings") { stack { SettingsView() } }
             }
             .tint(Color.brandPrimary)
+            .task { await session.loadGround() }
         } else {
             SignInView()
         }

@@ -9,6 +9,9 @@ struct CentMemoApp: App {
     @State private var session = SessionStore()
 
     init() {
+        #if os(iOS)
+        NavigationLook.apply()
+        #endif
         // 100 MB memory / 500 MB disk — mirrors Android's Coil 3 config
         // so image cache behavior is symmetric across platforms.
         URLCache.shared = URLCache(
