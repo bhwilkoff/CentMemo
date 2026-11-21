@@ -11,15 +11,15 @@
   color-scheme: light;
   --color-primary: #4A1520;
   --color-on-primary: #FBFAF7;
-  --color-background: #2FD4EC;
-  --color-surface: #FBFAF7;
-  --color-surface-alt: #EFEDE8;
-  --color-text: #4A1520;
-  --color-text-muted: #6E2B36;
-  --color-border: #8E5C63;
-  --color-success: #0D5230;
-  --color-warning: #5A3A00;
-  --color-error: #8E1414;
+  --color-background: #FBFAF7;
+  --color-surface: #FFFFFF;
+  --color-surface-alt: #F1EEEA;
+  --color-text: #231B1C;
+  --color-text-muted: #5E5455;
+  --color-border: #D9D2CF;
+  --color-success: #1E7A4F;
+  --color-warning: #8A5A00;
+  --color-error: #B42318;
   --color-error-surface: #FDECEA;
   --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -46,33 +46,33 @@
 }
 html[data-theme="dark"] {
   color-scheme: dark;
-  --color-primary: #F5D6D8;
+  --color-primary: #F0B9BE;
   --color-on-primary: #4A1520;
-  --color-background: #131B1C;
-  --color-surface: #1C2426;
-  --color-surface-alt: #273031;
-  --color-text: #F5D6D8;
-  --color-text-muted: #D8B0B4;
-  --color-border: #4A5658;
-  --color-success: #8FE3B4;
-  --color-warning: #F3C26B;
-  --color-error: #FFB4AB;
+  --color-background: #171615;
+  --color-surface: #201E1D;
+  --color-surface-alt: #2A2826;
+  --color-text: #EFE9E7;
+  --color-text-muted: #B8AEAC;
+  --color-border: #3A3634;
+  --color-success: #5CC593;
+  --color-warning: #E8B04B;
+  --color-error: #FF8A80;
   --color-error-surface: #3A1D1B;
 }
 @media (prefers-color-scheme: dark) {
   html:not([data-theme="light"]) {
     color-scheme: dark;
-    --color-primary: #F5D6D8;
+    --color-primary: #F0B9BE;
     --color-on-primary: #4A1520;
-    --color-background: #131B1C;
-    --color-surface: #1C2426;
-    --color-surface-alt: #273031;
-    --color-text: #F5D6D8;
-    --color-text-muted: #D8B0B4;
-    --color-border: #4A5658;
-    --color-success: #8FE3B4;
-    --color-warning: #F3C26B;
-    --color-error: #FFB4AB;
+    --color-background: #171615;
+    --color-surface: #201E1D;
+    --color-surface-alt: #2A2826;
+    --color-text: #EFE9E7;
+    --color-text-muted: #B8AEAC;
+    --color-border: #3A3634;
+    --color-success: #5CC593;
+    --color-warning: #E8B04B;
+    --color-error: #FF8A80;
     --color-error-surface: #3A1D1B;
   }
 }
@@ -248,30 +248,30 @@ a.row:hover .row-title { text-decoration: underline; }
 .page-inner p, .page-inner li { margin-bottom: var(--space-3); }
 .page-inner ul { padding-left: var(--space-6); }
 
-/* ---- Grounds: the person's chosen page color (Decision 059) ----
+/* ---- The person's color: a mark, never a ground (docs/DESIGN.md C3-C5) ----
    Values from design-tokens.json `grounds`; tools/test_grounds.mjs fails if
    these drift from the JSON or from apple/Core/Ground.swift. */
-html[data-ground="sky"]       { --color-background: #9AC0F8; }
-html[data-ground="salmon"]    { --color-background: #FDA19B; }
-html[data-ground="apricot"]   { --color-background: #FEA669; }
-html[data-ground="citron"]    { --color-background: #C7C43F; }
-html[data-ground="pistachio"] { --color-background: #B4C875; }
-html[data-theme="dark"][data-ground="sky"]       { --color-background: #161A1F; --color-surface: #1F2329; --color-surface-alt: #2A2E34; }
-html[data-theme="dark"][data-ground="salmon"]    { --color-background: #1F1717; --color-surface: #282120; --color-surface-alt: #342C2B; }
-html[data-theme="dark"][data-ground="apricot"]   { --color-background: #1E1814; --color-surface: #28211D; --color-surface-alt: #332C28; }
-html[data-theme="dark"][data-ground="citron"]    { --color-background: #1A1A14; --color-surface: #23231D; --color-surface-alt: #2E2E27; }
-html[data-theme="dark"][data-ground="pistachio"] { --color-background: #191A14; --color-surface: #22241D; --color-surface-alt: #2D2F28; }
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme="light"])[data-ground="sky"]       { --color-background: #161A1F; --color-surface: #1F2329; --color-surface-alt: #2A2E34; }
-  html:not([data-theme="light"])[data-ground="salmon"]    { --color-background: #1F1717; --color-surface: #282120; --color-surface-alt: #342C2B; }
-  html:not([data-theme="light"])[data-ground="apricot"]   { --color-background: #1E1814; --color-surface: #28211D; --color-surface-alt: #332C28; }
-  html:not([data-theme="light"])[data-ground="citron"]    { --color-background: #1A1A14; --color-surface: #23231D; --color-surface-alt: #2E2E27; }
-  html:not([data-theme="light"])[data-ground="pistachio"] { --color-background: #191A14; --color-surface: #22241D; --color-surface-alt: #2D2F28; }
+:root { --color-yours: #2FD4EC; --color-on-yours: #231B1C; }
+html[data-ground="sky"]       { --color-yours: #9AC0F8; }
+html[data-ground="salmon"]    { --color-yours: #FDA19B; }
+html[data-ground="apricot"]   { --color-yours: #FEA669; }
+html[data-ground="citron"]    { --color-yours: #C7C43F; }
+html[data-ground="pistachio"] { --color-yours: #B4C875; }
+
+/* C3.1 What still needs you: the Unexamined count sits on the person's color;
+   in the Ledger a purchase without a memo carries a highlighter stroke. */
+.yours-count { background: var(--color-yours); color: var(--color-on-yours); border-radius: 999px; padding: 0 .4em; }
+.row.is-unexamined .row-amount {
+  background: linear-gradient(transparent 12%, var(--color-yours) 12%, var(--color-yours) 88%, transparent 88%);
+  color: var(--color-on-yours); padding: 0 .3em; border-radius: 3px;
 }
+/* C3.2 What you value: value chips wear the person's color. */
+.chip[aria-pressed="true"], .chips-static .chip { background: var(--color-yours); border-color: var(--color-yours); color: var(--color-on-yours); }
+.chip[aria-pressed="false"] { background: transparent; border-color: var(--color-border); color: var(--color-text); }
 
 /* ---- Editorial type: Newsreader for headings and the person's memos ---- */
 :root { --font-display: "Newsreader", Georgia, "Times New Roman", serif; }
-.wordmark, .view-heading, .section-heading, .txn-head .view-heading { font-family: var(--font-display); letter-spacing: -0.005em; }
+.wordmark, .view-heading, .section-heading, .txn-head .view-heading { font-family: var(--font-display); letter-spacing: -0.005em; color: var(--color-primary); }
 .memo-input, .story-text, .row-memo { font-family: var(--font-display); }
 
 

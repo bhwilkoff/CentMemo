@@ -3,7 +3,7 @@
   "short_name": "CentMemo",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#2FD4EC",
-  "theme_color": "#2FD4EC",
+  "background_color": "#FBFAF7",
+  "theme_color": "#FBFAF7",
   "icons": []
 }

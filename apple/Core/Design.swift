@@ -11,19 +11,19 @@ import AppKit
 
 extension Color {
     // Brand: UI chrome only, never content meaning.
-    nonisolated static let brandPrimary = Color.tokenPair(light: 0x4A1520, dark: 0xF5D6D8)
+    nonisolated static let brandPrimary = Color.tokenPair(light: 0x4A1520, dark: 0xF0B9BE)
     nonisolated static let brandOnPrimary = Color.tokenPair(light: 0xFBFAF7, dark: 0x4A1520)
-    nonisolated static let brandBackground = Color.tokenPair(light: 0x2FD4EC, dark: 0x131B1C)
-    nonisolated static let brandSurface = Color.tokenPair(light: 0xFBFAF7, dark: 0x1C2426)
-    nonisolated static let brandSurfaceAlt = Color.tokenPair(light: 0xEFEDE8, dark: 0x273031)
-    nonisolated static let brandText = Color.tokenPair(light: 0x4A1520, dark: 0xF5D6D8)
-    nonisolated static let brandTextMuted = Color.tokenPair(light: 0x6E2B36, dark: 0xD8B0B4)
-    nonisolated static let brandBorder = Color.tokenPair(light: 0x8E5C63, dark: 0x4A5658)
+    nonisolated static let brandBackground = Color.tokenPair(light: 0xFBFAF7, dark: 0x171615)
+    nonisolated static let brandSurface = Color.tokenPair(light: 0xFFFFFF, dark: 0x201E1D)
+    nonisolated static let brandSurfaceAlt = Color.tokenPair(light: 0xF1EEEA, dark: 0x2A2826)
+    nonisolated static let brandText = Color.tokenPair(light: 0x231B1C, dark: 0xEFE9E7)
+    nonisolated static let brandTextMuted = Color.tokenPair(light: 0x5E5455, dark: 0xB8AEAC)
+    nonisolated static let brandBorder = Color.tokenPair(light: 0xD9D2CF, dark: 0x3A3634)
 
     // Semantic: content meaning only, never chrome.
-    nonisolated static let semanticSuccess = Color.tokenPair(light: 0x0D5230, dark: 0x8FE3B4)
-    nonisolated static let semanticWarning = Color.tokenPair(light: 0x5A3A00, dark: 0xF3C26B)
-    nonisolated static let semanticError = Color.tokenPair(light: 0x8E1414, dark: 0xFFB4AB)
+    nonisolated static let semanticSuccess = Color.tokenPair(light: 0x1E7A4F, dark: 0x5CC593)
+    nonisolated static let semanticWarning = Color.tokenPair(light: 0x8A5A00, dark: 0xE8B04B)
+    nonisolated static let semanticError = Color.tokenPair(light: 0xB42318, dark: 0xFF8A80)
     nonisolated static let semanticErrorSurface = Color.tokenPair(light: 0xFDECEA, dark: 0x3A1D1B)
 
     nonisolated private static func tokenPair(light: UInt32, dark: UInt32) -> Color {

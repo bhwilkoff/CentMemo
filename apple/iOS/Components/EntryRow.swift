@@ -4,8 +4,12 @@ import SwiftUI
 /// One purchase in a list: merchant, date and category, amount; the first
 /// lines of the memo when there is one.
 struct EntryRow: View {
+    @Environment(SessionStore.self) private var session
     let entry: LedgerEntry
     var showMemo = false
+    /// DESIGN C3.1: in the Ledger, a purchase still waiting for a memo carries
+    /// a highlighter stroke of the person's color behind its amount.
+    private var waiting: Bool { showMemo && entry.memo == nil && entry.amountMinor < 0 && entry.status != "rejected" }
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: Spacing.s3) {
@@ -17,7 +21,16 @@ struct EntryRow: View {
                 }
             }
             Spacer(minLength: Spacing.s2)
-            MoneyText(minor: entry.amountMinor, currency: entry.currency)
+            if waiting {
+                Text(Money.format(entry.amountMinor, currency: entry.currency))
+                    .font(TypeRamp.tabular).monospacedDigit()
+                    .foregroundStyle(Ground.onColor)
+                    .padding(.horizontal, 5).padding(.vertical, 1)
+                    .background(session.ground.color, in: RoundedRectangle(cornerRadius: 3))
+                    .accessibilityLabel("\(Money.format(entry.amountMinor, currency: entry.currency)), no memo yet")
+            } else {
+                MoneyText(minor: entry.amountMinor, currency: entry.currency)
+            }
         }
         .accessibilityElement(children: .combine)
     }

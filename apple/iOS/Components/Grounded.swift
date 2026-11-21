@@ -1,13 +1,13 @@
 #if os(iOS)
 import SwiftUI
 
-/// The person's ground behind a scrolling list or form (Decision 059).
+/// Paper behind every list and form, ink text on it (DESIGN C1). The
+/// person's color is never a background (Decision 060).
 struct Grounded: ViewModifier {
-    @Environment(SessionStore.self) private var session
     func body(content: Content) -> some View {
         content
             .scrollContentBackground(.hidden)
-            .background(session.ground.color.ignoresSafeArea())
+            .background(Color.brandBackground.ignoresSafeArea())
             .foregroundStyle(Color.brandText)
     }
 }
@@ -25,7 +25,7 @@ enum NavigationLook {
             .withDesign(.serif)?.withSymbolicTraits(.traitBold) ?? UIFontDescriptor.preferredFontDescriptor(withTextStyle: .largeTitle)
         let inline = UIFontDescriptor.preferredFontDescriptor(withTextStyle: .headline).withDesign(.serif)
             ?? UIFontDescriptor.preferredFontDescriptor(withTextStyle: .headline)
-        let ink = UIColor(Color.brandText)
+        let ink = UIColor(Color.brandPrimary)  // titles are sanguine (DESIGN C2)
         let look = UINavigationBarAppearance()
         look.configureWithTransparentBackground()
         look.largeTitleTextAttributes = [.font: UIFont(descriptor: large, size: 0), .foregroundColor: ink]

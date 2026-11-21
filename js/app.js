@@ -102,7 +102,9 @@
   /* ---- Rows ---- */
   function txnRow(t, opts) {
     const memo = t.memos && (Array.isArray(t.memos) ? t.memos[0] : t.memos);
-    return h('a', { class: 'row', href: '#/t/' + t.id },
+    // DESIGN C3.1: in the Ledger, a purchase still waiting for a memo is highlighted.
+    const waiting = opts && opts.memo && !memo && t.amount_minor < 0 && t.status !== 'rejected';
+    return h('a', { class: 'row' + (waiting ? ' is-unexamined' : ''), href: '#/t/' + t.id },
       h('span', { class: 'row-main' },
         h('span', { class: 'row-title' }, merchantOf(t)),
         h('span', { class: 'row-sub' }, [niceDate(t.txn_date), t.category, t.status === 'pending' ? 'Pending' : null].filter(Boolean).join(' · ')),
@@ -124,7 +126,8 @@
           ? empty(body, 'Every purchase has a memo.')
           : empty(body, 'No transactions yet.', h('a', { class: 'btn btn-primary', href: '#/import' }, 'Import from Apple Card'));
       }
-      heading.replaceChildren('Unexamined ', h('span', { class: 'pencil-circle', 'aria-label': count + ' unexamined' }, count.toLocaleString('en-US')));
+      heading.replaceChildren('Unexamined ', h('span', { class: 'pencil-circle', 'aria-label': count + ' unexamined' },
+        h('span', { class: 'yours-count' }, count.toLocaleString('en-US'))));
       body.replaceChildren(h('div', { class: 'list' }, rows.map((t) => txnRow(t))),
         count > rows.length ? h('p', { class: 'caption' }, 'Showing the newest ' + rows.length + '.') : null);
     } catch (err) { failed(body, err, unexaminedView); }

@@ -24,14 +24,27 @@ struct UnexaminedView: View {
                     }
                 }
             } else {
-                List(entries) { e in
-                    NavigationLink(value: EntryRoute(id: e.id)) { EntryRow(entry: e) }.onGround()
+                List {
+                    // DESIGN C3.1 + C4: the count is this screen's one bold mark.
+                    HStack(spacing: Spacing.s2) {
+                        Text("\(entries.count)")
+                            .font(TypeRamp.bodyStrong).monospacedDigit()
+                            .foregroundStyle(Ground.onColor)
+                            .padding(.horizontal, 10).padding(.vertical, 2)
+                            .background(session.ground.color, in: Capsule())
+                        Text(entries.count == 1 ? "purchase waiting for a memo" : "purchases waiting for a memo")
+                            .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
+                    }
+                    .onGround()
+                    ForEach(entries) { e in
+                        NavigationLink(value: EntryRoute(id: e.id)) { EntryRow(entry: e) }.onGround()
+                    }
                 }
                 .listStyle(.plain)
             }
         }
         .grounded()
-        .navigationTitle(entries.isEmpty ? "Unexamined" : "Unexamined (\(entries.count))")
+        .navigationTitle("Unexamined")
         .refreshable { await load() }
         .task(id: session.dataVersion) { await load() }
     }
@@ -173,13 +186,13 @@ struct StoryView: View {
                             Text(e.memo?.body ?? "").font(DisplayType.memo)
                             if let names = e.memo?.valueNames, !names.isEmpty {
                                 FlowLayout(spacing: 6) {
-                                    ForEach(names, id: \.self) { ValueChip(name: $0, isOn: false) }
+                                    ForEach(names, id: \.self) { ValueChip(name: $0, isOn: false, isStatic: true) }
                                 }
                             }
                         }
                         .padding(.vertical, Spacing.s1)
                     }
-                    .listRowBackground(RoundedRectangle(cornerRadius: Radius.card).fill(session.ground.paper).padding(.vertical, 4).padding(.horizontal, Spacing.s3))
+                    .listRowBackground(RoundedRectangle(cornerRadius: Radius.card).fill(Color.brandSurface).padding(.vertical, 4).padding(.horizontal, Spacing.s3))
                 }
             }
             .listStyle(.plain)
@@ -203,15 +216,21 @@ struct StoryView: View {
     }
 }
 
+/// DESIGN C3.2: the values a person names wear their color. Static chips (in
+/// the story) are always filled; on a memo, unselected ones are outlined.
 struct ValueChip: View {
+    @Environment(SessionStore.self) private var session
     let name: String
     let isOn: Bool
+    var isStatic = false
     var body: some View {
+        let filled = isOn || isStatic
         Text(name)
             .font(TypeRamp.caption)
             .padding(.horizontal, Spacing.s3).padding(.vertical, Spacing.s1)
-            .background(isOn ? Color.brandPrimary : Color.brandSurfaceAlt, in: Capsule())
-            .foregroundStyle(isOn ? Color.brandOnPrimary : Color.brandText)
+            .background(filled ? session.ground.color : Color.clear, in: Capsule())
+            .overlay(Capsule().strokeBorder(filled ? Color.clear : Color.brandBorder))
+            .foregroundStyle(filled ? Ground.onColor : Color.brandText)
     }
 }
 #endif

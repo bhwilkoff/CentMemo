@@ -6,21 +6,21 @@ import androidx.compose.ui.graphics.Color
 
 // --- BRAND tokens (UI chrome only, never content meaning) ---
 val BrandPrimaryLight = Color(0xFF4A1520)
-val BrandPrimaryDark = Color(0xFFF5D6D8)
+val BrandPrimaryDark = Color(0xFFF0B9BE)
 val BrandOnPrimaryLight = Color(0xFFFBFAF7)
 val BrandOnPrimaryDark = Color(0xFF4A1520)
-val BrandBackgroundLight = Color(0xFF2FD4EC)
-val BrandBackgroundDark = Color(0xFF131B1C)
-val BrandSurfaceLight = Color(0xFFFBFAF7)
-val BrandSurfaceDark = Color(0xFF1C2426)
-val BrandSurfaceAltLight = Color(0xFFEFEDE8)
-val BrandSurfaceAltDark = Color(0xFF273031)
-val BrandTextLight = Color(0xFF4A1520)
-val BrandTextDark = Color(0xFFF5D6D8)
-val BrandTextMutedLight = Color(0xFF6E2B36)
-val BrandTextMutedDark = Color(0xFFD8B0B4)
-val BrandBorderLight = Color(0xFF8E5C63)
-val BrandBorderDark = Color(0xFF4A5658)
+val BrandBackgroundLight = Color(0xFFFBFAF7)
+val BrandBackgroundDark = Color(0xFF171615)
+val BrandSurfaceLight = Color(0xFFFFFFFF)
+val BrandSurfaceDark = Color(0xFF201E1D)
+val BrandSurfaceAltLight = Color(0xFFF1EEEA)
+val BrandSurfaceAltDark = Color(0xFF2A2826)
+val BrandTextLight = Color(0xFF231B1C)
+val BrandTextDark = Color(0xFFEFE9E7)
+val BrandTextMutedLight = Color(0xFF5E5455)
+val BrandTextMutedDark = Color(0xFFB8AEAC)
+val BrandBorderLight = Color(0xFFD9D2CF)
+val BrandBorderDark = Color(0xFF3A3634)
 
 // --- SEMANTIC tokens (content only, never chrome) ---
 // Read them through AppSemantics (Theme.kt), never through colorScheme, so
@@ -33,16 +33,16 @@ data class SemanticColors(
 )
 
 val LightSemanticColors = SemanticColors(
-    success = Color(0xFF0D5230),
-    warning = Color(0xFF5A3A00),
-    error = Color(0xFF8E1414),
+    success = Color(0xFF1E7A4F),
+    warning = Color(0xFF8A5A00),
+    error = Color(0xFFB42318),
     errorSurface = Color(0xFFFDECEA),
 )
 
 val DarkSemanticColors = SemanticColors(
-    success = Color(0xFF8FE3B4),
-    warning = Color(0xFFF3C26B),
-    error = Color(0xFFFFB4AB),
+    success = Color(0xFF5CC593),
+    warning = Color(0xFFE8B04B),
+    error = Color(0xFFFF8A80),
     errorSurface = Color(0xFF3A1D1B),
 )
 

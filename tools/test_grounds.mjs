@@ -9,35 +9,28 @@ const root = new URL('..', import.meta.url);
 const read = (p) => readFileSync(new URL(p, root), 'utf8');
 
 export function checkGrounds(tokens, css, swift) {
+  // The person's color is a mark, never a ground (docs/DESIGN.md C3-C5):
+  // ink text on it at 4.5:1, and visible against the dark page at 3:1.
   const fails = [];
-  const b = tokens.color.brand, s = tokens.color.semantic;
+  const b = tokens.color.brand, ink = b.text.light;
   for (const [id, g] of Object.entries(tokens.grounds)) {
     if (id.startsWith('$')) continue;
-    const modes = { light: { bg: g.light, paper: b.surface.light }, dark: { bg: g.dark, paper: g.darkSurface } };
-    for (const [mode, { bg, paper }] of Object.entries(modes)) {
-      for (const [name, fg, on, min] of [
-        ['text', b.text[mode], bg, 4.5], ['textMuted', b.textMuted[mode], bg, 4.5],
-        ['text on paper', b.text[mode], paper, 4.5], ['textMuted on paper', b.textMuted[mode], paper, 4.5],
-        ['success', s.success[mode], bg, 4.5], ['error', s.error[mode], bg, 4.5], ['warning', s.warning[mode], bg, 4.5],
-        ['primary', b.primary[mode], bg, 3],
-      ]) {
-        const r = contrast(fg, on);
-        if (r < min) fails.push(`${id} ${mode}: ${name} ${r.toFixed(2)} < ${min}`);
-      }
-    }
-    const hx = (h) => h.replace('#', '').toUpperCase();
-    for (const h of [g.light, g.dark, g.darkSurface]) {
-      if (!swift.toUpperCase().includes('0X' + hx(h))) fails.push(`${id}: ${h} missing from Ground.swift`);
-    }
-    if (!g.default) {
-      const lightRule = new RegExp(`data-ground="${id}"\\]\\s*\\{\\s*--color-background:\\s*${g.light}`, 'i');
-      if (!lightRule.test(css)) fails.push(`${id}: light ${g.light} missing from styles.css`);
-      const darkCount = (css.match(new RegExp(`data-ground="${id}"\\]\\s*\\{\\s*--color-background:\\s*${g.dark};\\s*--color-surface:\\s*${g.darkSurface}`, 'gi')) || []).length;
-      if (darkCount < 2) fails.push(`${id}: dark ${g.dark}/${g.darkSurface} not in both dark blocks of styles.css`);
-    } else if (g.light.toUpperCase() !== tokens.color.brand.background.light.toUpperCase()) {
-      fails.push(`${id}: default ground must equal brand.background`);
+    const onIt = contrast(ink, g.hex);
+    if (onIt < 4.5) fails.push(`${id}: ink on it ${onIt.toFixed(2)} < 4.5`);
+    const onDark = contrast(g.hex, b.background.dark);
+    if (onDark < 3) fails.push(`${id}: against the dark page ${onDark.toFixed(2)} < 3`);
+    const hx = g.hex.replace('#', '').toUpperCase();
+    if (!swift.toUpperCase().includes('0X' + hx)) fails.push(`${id}: ${g.hex} missing from Ground.swift`);
+    if (g.default) {
+      if (!new RegExp(`--color-yours:\\s*${g.hex}`, 'i').test(css)) fails.push(`${id}: default ${g.hex} is not --color-yours in styles.css`);
+    } else if (!new RegExp(`data-ground="${id}"\\]\\s*\\{\\s*--color-yours:\\s*${g.hex}`, 'i').test(css)) {
+      fails.push(`${id}: ${g.hex} missing from styles.css`);
     }
   }
+  // C1: no ground may be the page background.
+  const grounds = Object.entries(tokens.grounds).filter(([k]) => !k.startsWith('$')).map(([, g]) => g.hex.toUpperCase());
+  for (const mode of ['light', 'dark']) if (grounds.includes(b.background[mode].toUpperCase())) fails.push(`page background (${mode}) is a ground: DESIGN C1`);
+  if (/data-ground="[a-z]+"\]\s*\{[^}]*--color-background/i.test(css)) fails.push('styles.css sets --color-background from a ground: DESIGN C1');
   return fails;
 }
 
@@ -48,10 +41,10 @@ for (const f of fails) console.log('  FAIL ' + f);
 
 // Negative control: a planted drift must be caught.
 const planted = structuredClone(tokens);
-planted.grounds.sky.light = '#123456';
+planted.grounds.sky.hex = '#123456';
 const caught = checkGrounds(planted, css, swift).length > 0;
 console.log(caught ? '  ok   control: a drifted ground is caught' : '  FAIL control: drift went unnoticed');
 
 const n = Object.keys(tokens.grounds).filter((k) => !k.startsWith('$')).length;
 if (fails.length || !caught) { console.log(`FAIL: ${fails.length} ground check(s)`); process.exit(1); }
-console.log(`PASS: ${n} grounds hold AA in light and dark, and match on web and Apple`);
+console.log(`PASS: ${n} colors: ink reads on each, each shows on the dark page, none is a page background, web and Apple match`);

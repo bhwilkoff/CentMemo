@@ -1,11 +1,11 @@
 {
-  "$about": "The one source of the app's look. Change a value here, run `node tools/design_tokens.mjs`, and every platform's token file is rewritten to match; `node tools/test_design_tokens.mjs` fails if any of them drifts. CentMemo: a sanguine pencil (#4A1520) on a bold ground the person chooses (Decision 059; docs/research/color-search.md). `background` is the default ground (aqua); `grounds` lists every choice.",
+  "$about": "The one source of the app's look. Change a value here, run `node tools/design_tokens.mjs`, and every platform's token file is rewritten to match; `node tools/test_design_tokens.mjs` fails if any of them drifts. CentMemo: paper and ink, a sanguine pencil (#4A1520), and one bold color the person chooses used only as a mark (Decision 060, docs/DESIGN.md C1-C6). `grounds` lists the choices.",
   "color": {
     "brand": {
       "primary": {
         "light": "#4A1520",
-        "dark": "#F5D6D8",
-        "use": "the pencil: actions, the selected item, drawn marks"
+        "dark": "#F0B9BE",
+        "use": "the pencil: titles, actions, selection, drawn marks (DESIGN C2)"
       },
       "onPrimary": {
         "light": "#FBFAF7",
@@ -13,50 +13,50 @@
         "use": "text and icons on primary"
       },
       "background": {
-        "light": "#2FD4EC",
-        "dark": "#131B1C",
-        "use": "the page: the default ground (aqua); the person may choose another from grounds"
+        "light": "#FBFAF7",
+        "dark": "#171615",
+        "use": "the page: paper (DESIGN C1)"
       },
       "surface": {
-        "light": "#FBFAF7",
-        "dark": "#1C2426",
-        "use": "paper: the memo, forms, cards"
+        "light": "#FFFFFF",
+        "dark": "#201E1D",
+        "use": "cards for long reading and writing: the memo, story entries"
       },
       "surfaceAlt": {
-        "light": "#EFEDE8",
-        "dark": "#273031",
-        "use": "a quieter paper, chips, hover"
+        "light": "#F1EEEA",
+        "dark": "#2A2826",
+        "use": "quiet fills: unselected chips, hover"
       },
       "text": {
-        "light": "#4A1520",
-        "dark": "#F5D6D8",
-        "use": "body text, in sanguine"
+        "light": "#231B1C",
+        "dark": "#EFE9E7",
+        "use": "ink: body text"
       },
       "textMuted": {
-        "light": "#6E2B36",
-        "dark": "#D8B0B4",
+        "light": "#5E5455",
+        "dark": "#B8AEAC",
         "use": "secondary text, captions"
       },
       "border": {
-        "light": "#8E5C63",
-        "dark": "#4A5658",
+        "light": "#D9D2CF",
+        "dark": "#3A3634",
         "use": "hairlines and outlines"
       }
     },
     "semantic": {
       "success": {
-        "light": "#0D5230",
-        "dark": "#8FE3B4",
+        "light": "#1E7A4F",
+        "dark": "#5CC593",
         "use": "money in (credits); an operation that worked"
       },
       "warning": {
-        "light": "#5A3A00",
-        "dark": "#F3C26B",
+        "light": "#8A5A00",
+        "dark": "#E8B04B",
         "use": "something needs attention"
       },
       "error": {
-        "light": "#8E1414",
-        "dark": "#FFB4AB",
+        "light": "#B42318",
+        "dark": "#FF8A80",
         "use": "something failed"
       },
       "errorSurface": {
@@ -162,49 +162,31 @@
     "card": 12
   },
   "grounds": {
-    "$about": "Grounds the person can choose (Settings). Each passes every text pair at AA with the tokens above, in both modes; dark grounds stay near neutral so the pale sanguine never sits on its near-opposite hue (Human Shaped, October 9 lesson). Checked against 4,160 brands: no brand pairs any of them with sanguine.",
+    "$about": "The person's color, chosen in Settings and stored in profiles. A mark, never a ground (DESIGN C3-C5): what still needs a memo, and the values they name. The same bright value in light and dark; ink text on it. Checked against 4,160 brands: no brand pairs any of them with sanguine.",
     "aqua": {
       "name": "Aqua",
-      "light": "#2FD4EC",
-      "dark": "#131B1C",
-      "darkSurface": "#1C2426",
-      "darkSurfaceAlt": "#273031",
+      "hex": "#2FD4EC",
       "default": true
     },
     "sky": {
       "name": "Sky",
-      "light": "#9AC0F8",
-      "dark": "#161A1F",
-      "darkSurface": "#1F2329",
-      "darkSurfaceAlt": "#2A2E34"
+      "hex": "#9AC0F8"
     },
     "salmon": {
       "name": "Salmon",
-      "light": "#FDA19B",
-      "dark": "#1F1717",
-      "darkSurface": "#282120",
-      "darkSurfaceAlt": "#342C2B"
+      "hex": "#FDA19B"
     },
     "apricot": {
       "name": "Apricot",
-      "light": "#FEA669",
-      "dark": "#1E1814",
-      "darkSurface": "#28211D",
-      "darkSurfaceAlt": "#332C28"
+      "hex": "#FEA669"
     },
     "citron": {
       "name": "Citron",
-      "light": "#C7C43F",
-      "dark": "#1A1A14",
-      "darkSurface": "#23231D",
-      "darkSurfaceAlt": "#2E2E27"
+      "hex": "#C7C43F"
     },
     "pistachio": {
       "name": "Pistachio",
-      "light": "#B4C875",
-      "dark": "#191A14",
-      "darkSurface": "#22241D",
-      "darkSurfaceAlt": "#2D2F28"
+      "hex": "#B4C875"
     }
   }
 }

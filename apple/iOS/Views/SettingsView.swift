@@ -18,7 +18,7 @@ struct SettingsView: View {
                     ForEach(Ground.allCases) { g in
                         Button { Task { do { try await session.choose(g) } catch { self.error = session.handle(error) } } } label: {
                             VStack(spacing: Spacing.s1) {
-                                Circle().fill(g.swatch).frame(width: 40, height: 40)
+                                Circle().fill(g.color).frame(width: 40, height: 40)
                                     .overlay(Circle().strokeBorder(session.ground == g ? Color.brandPrimary : Color.brandBorder,
                                                                    lineWidth: session.ground == g ? 3 : 1))
                                 Text(g.name).font(TypeRamp.caption)

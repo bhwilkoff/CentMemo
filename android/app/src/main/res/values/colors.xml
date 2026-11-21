@@ -3,6 +3,6 @@
 <!-- Compose reads Color.kt; these serve themes.xml (the splash) and the launcher icon. -->
 <resources>
     <color name="brand_primary">#FF4A1520</color>
-    <color name="brand_background">#FF2FD4EC</color>
-    <color name="brand_surface">#FFFBFAF7</color>
+    <color name="brand_background">#FFFBFAF7</color>
+    <color name="brand_surface">#FFFFFFFF</color>
 </resources>

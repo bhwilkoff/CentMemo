@@ -1430,3 +1430,28 @@ long as it isn't too close to the old Twitter bird color."
 - `node tools/test_grounds.mjs` fails on any contrast or parity miss.
 - Long reading and writing (memos, the story) sit on paper (surface), not
   directly on the ground.
+
+---
+
+## 060: The person's color is a mark, never a background (replaces 059's full-screen ground)
+*Date: 2026-11-21*
+
+Pages are paper, and text is ink. Sanguine is the pencil: titles, actions,
+selection, and drawn marks. The person's chosen color (aqua by default) has
+exactly two jobs: what still needs a memo, and the values they name. The
+binding rules are in `docs/DESIGN.md`, sections C1 to C6.
+
+**Why**: Ben: "I like the colors as strong color pops, but having an entire
+background of an app be aqua (or any of the other colors) reads as too much
+color. It also makes the text harder to read. You need to use an actual
+design skill to determine where to use the good colors in the app." Human
+Shaped had learned the same thing on October 6: pages stay near-white, and
+color appears in highlights and buttons. `mobile-first-density-design` gives
+the rule: color carries meaning or an action, never chrome, and each screen
+gets one focal point.
+
+**How to apply**:
+- Quote `docs/DESIGN.md` before placing color.
+- `tools/test_grounds.mjs` fails if a chosen color becomes a page background,
+  if ink can't be read on it, or if web and Apple drift apart.
+- When everything has a memo, a screen has no bold color. That is the reward.
