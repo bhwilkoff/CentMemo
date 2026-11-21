@@ -36,6 +36,11 @@ function rest(token, path, init = {}) {
 }
 async function rows(token, path) { const r = await rest(token, path); return r.ok ? r.json() : { status: r.status, body: await r.text() }; }
 
+// A negative control (stranger set to the owner) must never run the write
+// probes: they would really change the owner's rows. Same account means
+// read checks only, which should then FAIL.
+const control = users.owner.email === users.stranger.email;
+if (control) console.log('negative control: stranger is the owner; read checks only, expect FAIL');
 const owner = await signIn(users.owner);
 const stranger = await signIn(users.stranger);
 
@@ -53,6 +58,7 @@ for (const t of TABLES) {
 const sum = await rest(stranger, 'rpc/spending_summary', { method: 'POST', body: JSON.stringify({ from_date: '2000-01-01', to_date: '2100-01-01', group_by: 'category' }) });
 ok(sum.ok && (await sum.json()).length === 0, 'stranger spending_summary is empty');
 
+if (control) { console.log(failures ? `control FAILED as expected (${failures})` : 'control PASSED: the test is blind'); process.exit(failures ? 0 : 1); }
 console.log('a stranger cannot write into the owner\'s ledger');
 const target = ownTx[0];
 const ins = await rest(stranger, 'transactions', { method: 'POST', body: JSON.stringify({

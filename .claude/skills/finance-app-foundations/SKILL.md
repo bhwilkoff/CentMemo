@@ -101,6 +101,12 @@ plus the review lessons Tidbits Trivia paid for.
   as owner and as a stranger and checks the stranger sees zero rows and
   can't write; an agent token can't write. (Tidbits: one broad parent read
   rule exposed every user; the repo file looked right.)
+- **A negative control must never run write probes.** CentMemo's first
+  control (stranger set to the owner) really deleted and edited the
+  owner's synthetic rows. Control mode runs read checks only.
+- **Never `.catch(() => {})` a seed or import step.** A swallowed 400 left
+  every value un-created while the script reported success; catch only the
+  one expected error (a 409 duplicate) and let the rest surface.
 - No financial data in logs, analytics, crash reports, or URLs.
 - Publishable keys only in clients; secrets in function env.
 - Free-tier databases pause when idle; move to a paid tier before other
