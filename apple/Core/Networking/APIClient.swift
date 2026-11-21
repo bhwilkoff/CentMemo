@@ -50,15 +50,12 @@ final class APIClient {
 
     // MARK: - Auth
 
-    /// Sends a six-digit sign-in code (and link) to the address.
-    func sendCode(to email: String) async throws {
-        struct OTP: Encodable { let email: String; let create_user = true }
-        _ = try await raw("auth/v1/otp", method: "POST", body: OTP(email: email), authed: false)
-    }
-
-    func verify(email: String, code: String) async throws {
-        let data = try await raw("auth/v1/verify", method: "POST",
-                                 body: ["type": "email", "email": email, "token": code], authed: false)
+    /// Sign in with Apple: the identity token Apple signed, exchanged for a
+    /// CentMemo session. `nonce` is the raw value whose SHA-256 went to Apple.
+    func signInWithApple(idToken: String, nonce: String) async throws {
+        struct Body: Encodable { let provider = "apple"; let id_token: String; let nonce: String }
+        let data = try await raw("auth/v1/token", query: [URLQueryItem(name: "grant_type", value: "id_token")],
+                                 method: "POST", body: Body(id_token: idToken, nonce: nonce), authed: false)
         try adoptAuthResponse(data)
     }
 

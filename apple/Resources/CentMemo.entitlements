@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Sign in with Apple: enabled on the App ID through the App Store Connect API. -->
+	<key>com.apple.developer.applesignin</key>
+	<array>
+		<string>Default</string>
+	</array>
+	<!-- FinanceKit (com.apple.developer.financekit) is added here only after
+	     Apple grants it, together with CMFinanceKitEnabled = YES in project.yml. -->
+</dict>
+</plist>

@@ -1354,3 +1354,30 @@ purchase, or memos split across copies.
 **How to apply**: parse with `js/money/` (golden-tested). When FinanceKit
 replaces CSV data, reconcile on date, amount, and merchant so memos carry
 over. Never delete and reinsert.
+
+---
+
+## 058: The iPhone app signs in with Apple; the website keeps its email link
+*Date: 2026-11-21*
+
+On iPhone, CentMemo signs in only with Sign in with Apple. The app sends
+Apple's identity token to Supabase (`grant_type=id_token`, provider `apple`,
+with a nonce). There is no email code and no password. The website keeps its
+email sign-in link, which works with Supabase's default sender.
+
+**Why**: Ben: "Why do we need this? Neither Archive Watch nor tidbits trivia
+requires this for sign in." An email code needs a custom mail sender (SMTP)
+just to edit Supabase's template, and the default sender allows only a few
+emails an hour. Sign in with Apple needs neither. It also brings Apple ID's
+two-factor sign-in, which the FinanceKit Addendum (3.7) requires on new
+devices.
+
+**How to apply**:
+- Keep the Apple button out of any `Form`, and show every failure on screen,
+  including a cancel (Tidbits' 2.1(a) rejection).
+- Bundle ID capability: `APPLE_ID_AUTH`. Supabase Apple provider client ID:
+  `com.learningischange.centmemo`.
+- Someone who used the website's email link and then signs in with Apple (or
+  a private-relay address) gets a second account until the two are linked.
+  Turn on Supabase manual linking before inviting other people.
+- The full round trip is verified only on a team-signed device build.

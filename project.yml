@@ -59,6 +59,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.learningischange.centmemo
         PRODUCT_NAME: CentMemo
+        CODE_SIGN_ENTITLEMENTS: apple/Resources/CentMemo.entitlements
         # Xcode writes the Info.plist from INFOPLIST_KEY_* settings, so there
         # is no plist file to drift. CFBundleVersion and the short version are
         # filled from AppVersion.xcconfig automatically.
