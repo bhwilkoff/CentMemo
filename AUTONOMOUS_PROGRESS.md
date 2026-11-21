@@ -47,7 +47,7 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
      later goes through the cloud build (`cloud-appstore-submission`).
 
 ### Documented work
-4. ⏳ iOS parity with the web's drawn marks: the circled Unexamined count and
+4. ✅ (tick 3) iOS parity with the web's drawn marks: the circled Unexamined count and
    the Ledger rule (PARITY / DESIGN M1).
 5. ⏳ Connector end to end:
    - Connect the MCP server in Claude Code through the real OAuth consent
@@ -129,3 +129,23 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
     (`POST /v1/betaTesters`); his state is INVITED.
   - Routine and lessons are in `docs/STORE.md`.
 - **Next:** tick 3 (iOS): backlog item 4, the drawn marks on iOS.
+
+### Tick 3 — 2026-11-21 — iOS: the pencil circle around the Unexamined count (DESIGN M1)
+- **Context:** backlog item 4. DESIGN M1 asks for a circle around the count
+  on every platform; iOS rows keep the system divider by design, so the
+  circle was the only gap.
+- **Implementation:**
+  - `PencilCircle` shape in `apple/iOS/Components/Grounded.swift`, using the
+    same path as the web's `.pencil-circle` mask, drawn in sanguine around
+    the count.
+  - Build 1.0 (2).
+- **Verification:**
+  - The iOS build compiles.
+  - On the iPhone 12, `TabSmokeUITests/testUnexamined` passes and the frame
+    shows the circle; no crash logs.
+- **Lessons:** with default MainActor isolation, a `Shape` conformance needs
+  `nonisolated` (the compiler caught it before the device run).
+- **Polish later:** the circle sits tight to the capsule; loosen it if Ben
+  wants more of a hand-drawn feel.
+- **Next:** tick 4 (infrastructure), backlog item 5, the connector end to
+  end through OAuth.

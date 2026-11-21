@@ -32,6 +32,11 @@ struct UnexaminedView: View {
                             .foregroundStyle(Ground.onColor)
                             .padding(.horizontal, 10).padding(.vertical, 2)
                             .background(session.ground.color, in: Capsule())
+                            // DESIGN M1: circled in sanguine pencil, like the web.
+                            .overlay(PencilCircle().stroke(Color.brandPrimary, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                                .padding(-6))
+                            .padding(6)
+                            .accessibilityLabel("\(entries.count) unexamined")
                         Text(entries.count == 1 ? "purchase waiting for a memo" : "purchases waiting for a memo")
                             .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
                     }
