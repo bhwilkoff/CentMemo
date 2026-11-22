@@ -187,7 +187,7 @@
       const chosen = new Set(memo ? (memo.memo_values || []).map((v) => v.value_id) : []);
       const area = h('textarea', { id: 'memo-body', class: 'field-input memo-input', rows: '6', maxlength: '10000' });
       area.value = memo ? memo.body : '';
-      area.placeholder = 'What happened here?';
+      area.placeholder = 'What do you want to remember?';
       const status = h('p', { class: 'caption', role: 'status' });
       const error = h('div', { class: 'banner banner-error', role: 'alert', hidden: true });
 

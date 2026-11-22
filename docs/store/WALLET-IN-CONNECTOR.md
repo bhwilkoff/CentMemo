@@ -1,7 +1,7 @@
 # Apple Wallet data in the Claude connector: the turn-on commit
 
 Status: **built, off.** Waiting on Apple's written answer (Case-ID 23676235;
-Ben's question is drafted in his Gmail, 2026-11-22). Decision 066.
+Ben sent the question on 2026-11-22). Decision 066.
 
 Ben, 2026-11-22: "let's build everything as if we can send the apple wallet
 data to claude, but let's draft the email and see what they say rather than

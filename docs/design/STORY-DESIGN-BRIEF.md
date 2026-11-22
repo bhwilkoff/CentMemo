@@ -69,6 +69,11 @@ Ben, 2026-11-22, verbatim:
 | A collection, a value, a kind of event | a **Theme** | value, set, category |
 | Where it happened | the **Setting** | merchant, vendor, store |
 | Purchases with no memo yet | **Unexamined** | |
+| The prompt in an empty memo | **"What do you want to remember?"** | "What happened here?" |
+
+Ben, 2026-11-22: "The wording should be 'What do you want to remember?' We can
+also use the idea that memos are MEMOries (memo is a part of memory)." A
+memo is a memory kept; copy may lean on that link.
 
 Direction: C (the Chronicle design) is the base; components from A (three
 suggestions with reasons, the memo as headline) and B (theme collections,
@@ -108,10 +113,14 @@ the Setting page) join where they fit.
 > So long as the CSV pathway works from the venmo, paypal, and cashapp mobile
 > apps, we should build for it.
 
-- S1 Venmo CSV import (the monthly statement export exists on the phone; its
-  Note column arrives as the memo).
-- S2 PayPal and Cash App CSV import, once a real export from each phone app
-  confirms the pathway and the columns.
+- S1 Venmo CSV import: meets Ben's rule. In the app, Settings > Statements,
+  then a year and a month; one month per file, downloaded or emailed. The Note
+  column arrives as the memo. Columns and quirks: docs/research/p2p-csv-export-paths.md.
+- S2 PayPal and Cash App: no CSV export in either phone app is documented
+  (Cash App's app gives monthly PDFs only). Both export CSV on their websites
+  (PayPal: Activity > download > CSV; Cash App: cash.app/account > Activity >
+  CSV). Whether those websites work in Safari on an iPhone is unconfirmed.
+  Waiting on Ben: does a website export from the phone's browser meet his rule?
 - S3 The connector returns memos with date, amount, and Setting, so a
   person's Claude can match them to the bank data Claude Personal Finance
   already reads (Plaid).

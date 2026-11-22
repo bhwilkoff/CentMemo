@@ -45,7 +45,7 @@ struct EntryDetailView: View {
                             .frame(minHeight: 160)
                             .overlay(alignment: .topLeading) {
                                 if memo.isEmpty {
-                                    Text("What happened here?").font(DisplayType.memo)
+                                    Text("What do you want to remember?").font(DisplayType.memo)
                                         .foregroundStyle(Color.brandTextMuted.opacity(0.7))
                                         .padding(.top, 8).padding(.leading, 5).allowsHitTesting(false)
                                 }

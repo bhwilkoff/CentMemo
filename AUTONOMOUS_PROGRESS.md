@@ -1038,3 +1038,19 @@ Apple.
   - Memo-first rows.
   - S1 Venmo CSV.
   - D14 default themes for Ben.
+
+### 2026-11-22 — Ben's words: the memo prompt; the email to Apple sent
+- Empty memo prompt: "What do you want to remember?" (Ben), on iOS and web.
+  The vocabulary table now holds it, along with "memos are MEMOries".
+- Ben sent the email in Case-ID 23676235 (Decision 066). Watch for Apple's
+  reply; the turn-on steps are docs/store/WALLET-IN-CONNECTOR.md.
+- The mobile CSV export paths for Venmo, PayPal and Cash App are being
+  researched (docs/research/p2p-csv-export-paths.md).
+- Verified "What do you want to remember?" on the iPhone 12 and the Duo
+  (frames read). MemoUITests.testDetailShowsMemoAndValues failed once (the
+  event never opened, the first launch after install) and passed on the
+  rerun: a flake, logged, not a regression.
+- docs/research/p2p-csv-export-paths.md:
+  - Venmo has a phone path.
+  - PayPal and Cash App are documented only on their websites. Cash App's
+    app gives PDF statements only.
