@@ -373,3 +373,26 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
 - **Next:** tick 13 (iOS). Candidates: files on iOS, or the iPad
   readable width once Ben answers. Otherwise item 11, upstream to the
   template (infrastructure, tick 14).
+
+### Tick 13 — 2026-11-22 — store: TestFlight 1.0 (5) (the pencil circle, Connect Apple Wallet, photos)
+- **Context:** Ben's TestFlight request outranks the rotation; builds 2 to 5
+  existed only locally.
+- **Implementation:**
+  - Confirmed the sample Wallet source and the test sign-in door are DEBUG
+    only.
+  - `tools/submit-appstore.sh ios`: archive, manual signing, export,
+    "Upload succeeded".
+- **Verification:**
+  - App Store Connect reads build 5 VALID (build 1 still VALID). The
+    internal group takes all builds, so Ben has it.
+  - Build 5 had already passed `tools/test_all.sh` and the iPhone 12 tap
+    tier 10/10 (tick 11).
+- **Lesson:** the state check needs `tools/.asc-venv` and
+  `tools/asc-credentials.env`. My first two watchers died on a missing jwt
+  module, then on missing credentials, and the second failed silently into
+  stderr for 30 minutes. Recorded in docs/STORE.md.
+- **What Ben will see in TestFlight:** Connect Apple Wallet says FinanceKit
+  is unavailable (no entitlement yet, so the release build has no sample
+  data); photos ask for access when he adds one.
+- **Next:** tick 14 (infrastructure), backlog item 11, upstream to
+  UniversalAppTemplate.

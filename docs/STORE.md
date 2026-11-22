@@ -31,3 +31,15 @@
   is rejected after upload.
 - **The FinanceKit entitlement is not in the build yet**, and FinanceKit
   stays off until Apple grants it (`CMFinanceKitEnabled`).
+
+## Checking a build's processing state
+
+```sh
+set -a; . tools/asc-credentials.env; set +a
+tools/.asc-venv/bin/python -c "import sys; sys.path.insert(0,'tools'); import asc_release as a; b=a.find_build(a.app_id(),'5','IOS'); print(b['attributes']['processingState'])"
+```
+
+Homebrew's python3 lacks PyJWT (submit-appstore.sh provisions
+`tools/.asc-venv`), and the helpers read `ASC_KEY_ID` and friends from the
+environment, so both lines are needed. A watcher without them fails
+silently into stderr (tick 13 lost 30 minutes to that).
