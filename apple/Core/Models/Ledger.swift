@@ -24,6 +24,10 @@ struct LedgerEntry: Decodable, Identifiable, Hashable, Sendable {
     }
     var isCredit: Bool { amountMinor > 0 }
     var isSkipped: Bool { skippedAt != nil }
+    /// Cash back and interest landing in Apple Cash or Savings (FinanceKit types
+    /// "deposit" and "interest"): details, hidden from the Narrative by default
+    /// (Ben, 2026-11-22); the filters will show them on request.
+    var isQuietDetail: Bool { txnType == "deposit" || txnType == "interest" }
 
     struct Memo: Decodable, Hashable, Sendable {
         let body: String

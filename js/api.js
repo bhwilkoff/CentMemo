@@ -122,7 +122,7 @@ const API = (() => {
     const [y, m] = ym.split('-').map(Number);
     const from = ym + '-01';
     const to = new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
-    return must(await client().from('transactions').select(TXN + ', memos(body)')
+    return must(await client().from('transactions').select(TXN + ', memos(body, memo_values(value_id, life_values(name)))')
       .gte('txn_date', from).lte('txn_date', to).order('txn_date', { ascending: false }).limit(2000));
   }
   async function latestMonth() {

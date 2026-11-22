@@ -47,6 +47,13 @@ final class SessionStore {
         email = nil
     }
 
+    /// The synthetic accounts the harness and reviewers use (test-*@centmemo.com,
+    /// review@centmemo.com). Real Wallet data never goes into one.
+    static func isSynthetic(_ email: String?) -> Bool {
+        guard let e = email?.lowercased() else { return false }
+        return e == "review@centmemo.com" || (e.hasPrefix("test-") && e.hasSuffix("@centmemo.com"))
+    }
+
     /// Called when a request finds the session gone.
     func handle(_ error: Error) -> String {
         if case APIClient.APIError.signedOut = error {

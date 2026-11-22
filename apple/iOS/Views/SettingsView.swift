@@ -177,6 +177,13 @@ struct WalletSyncButton: View {
     private func sync() async {
         working = true
         defer { working = false }
+        // Real Wallet data never syncs into a synthetic account (it once did, from a
+        // test build left signed in on a personal phone, 2026-11-22).
+        if finance is FinanceKitSource, SessionStore.isSynthetic(session.email) {
+            result = "This is a test account. Sign out and sign in with Apple to connect your Wallet."
+            UINotificationFeedbackGenerator().notificationOccurred(.error)
+            return
+        }
         do {
             guard try await finance.requestAccess() else {
                 result = "Apple Wallet access wasn't allowed. You can change this in Settings, Privacy & Security, Financial Data."

@@ -5,6 +5,12 @@ import SwiftUI
 /// opens sit side by side: the list on the left, the story on the right.
 /// Compact width (every closed phone, the iPhone 12) keeps the push. The branch
 /// is on width only, never on the device (Ear Drama iOS-DESIGN 3.6).
+extension EnvironmentValues {
+    /// True when a purchase is drawn as the right-hand pane: its own header carries
+    /// the title, so it leaves the shared navigation title to the list.
+    @Entry var inPane = false
+}
+
 @Observable final class PaneSelection {
     var route: EntryRoute?
 }
@@ -19,8 +25,8 @@ struct EntryLink<Label: View>: View {
     var body: some View {
         if width == .regular, let pane {
             Button { pane.route = EntryRoute(id: id) } label: {
-                HStack { label(); Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(Color.brandTextMuted.opacity(0.6)) }
-                    .contentShape(Rectangle())
+                // No chevron: the opened row's highlight and the right pane say where it went.
+                label().frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .listRowBackground(pane.route?.id == id ? Color.brandSurfaceAlt : Color.clear)
@@ -61,11 +67,16 @@ struct TwoPane<List: View>: View {
 
     var body: some View {
         if width == .regular {
-            HStack(spacing: 0) {
-                leftStack
-                    .frame(minWidth: 320, idealWidth: 420, maxWidth: 480)
-                Divider()
-                NavigationStack {
+            // Ear Drama's pattern (iOS-DESIGN §3.6e, ProductionScreen): ONE stack for the
+            // screen, the list as a plain column beside the detail. A stack per pane is a
+            // navigation controller of its own that takes the whole window's safe area,
+            // so the list ended 84pt (the tab strip's inset) short of the divider
+            // (measured on the open Duo, 2026-11-22).
+            screenStack {
+                HStack(spacing: 0) {
+                    destinations(AnyView(list()))
+                        .frame(width: 380)
+                    Divider()
                     Group {
                         if let r = pane.route {
                             EntryDetailView(entryID: r.id).id(r.id)
@@ -73,9 +84,9 @@ struct TwoPane<List: View>: View {
                             ContentUnavailableView("Choose a purchase", systemImage: "square.and.pencil")
                         }
                     }
-                    .grounded()
+                    .environment(\.inPane, true)
+                    .frame(maxWidth: .infinity)
                 }
-                .frame(maxWidth: .infinity)
             }
             .environment(pane)
             // A link that opened an item (the inbox) shows it on the right, not
@@ -90,12 +101,16 @@ struct TwoPane<List: View>: View {
         }
     }
 
-    @ViewBuilder private var leftStack: some View {
+    @ViewBuilder private func screenStack<C: View>(@ViewBuilder _ content: () -> C) -> some View {
         if let path {
-            NavigationStack(path: path) { destinations(AnyView(list())) }
+            NavigationStack(path: path) { content() }
         } else {
-            NavigationStack { destinations(AnyView(list())) }
+            NavigationStack { content() }
         }
+    }
+
+    @ViewBuilder private var leftStack: some View {
+        screenStack { destinations(AnyView(list())) }
     }
 }
 #endif

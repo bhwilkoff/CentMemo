@@ -107,6 +107,15 @@ struct RootView: View {
                     try? await APIClient.shared.signInForTesting(email: email, password: password)
                     session.didSignIn()
                 }
+                // A door's sign-in lasts only for door launches. On Ben's own Duo a later
+                // ordinary launch stayed signed in as the synthetic owner, and his real
+                // Wallet synced into it (2026-11-22). Any launch without the door signs out.
+                if env["APP_TEST_EMAIL"] != nil {
+                    UserDefaults.standard.set(true, forKey: "doorSession")
+                } else if UserDefaults.standard.bool(forKey: "doorSession") {
+                    UserDefaults.standard.removeObject(forKey: "doorSession")
+                    if session.isSignedIn, SessionStore.isSynthetic(session.email) { await session.signOut() }
+                }
                 #endif
                 let doors = LaunchDoors.current
                 guard !doors.isEmpty, store.openDoorsOnce(doors) else { return }

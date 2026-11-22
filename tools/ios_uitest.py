@@ -119,6 +119,13 @@ def main():
     ap.add_argument("--lease-wait", type=int, default=0)
     a = ap.parse_args()
 
+    if a.device == "duo" and not os.environ.get("CENTMEMO_UITEST_DUO"):
+        # The tap tier signs synthetic test accounts in. On Ben's own Duo that once
+        # left the phone signed in as the test owner and copied his real Wallet into
+        # it (2026-11-22). Design captures there go through tools/design_shots.py,
+        # which uses his own session. Set CENTMEMO_UITEST_DUO=1 only with his say-so.
+        raise SystemExit("REFUSED: duo is Ben's personal phone; the tap tier signs test accounts in. "
+                         "Use tools/design_shots.py --device duo (his own session).")
     entry = bench.require(a.device, platforms=("ios", "ipados"))
     udid = entry.get("udid")
     if not udid:

@@ -8,6 +8,7 @@ import Photos
 struct EntryDetailView: View {
     let entryID: String
     @Environment(SessionStore.self) private var session
+    @Environment(\.inPane) private var inPane
     @State private var entry: LedgerEntry?
     @State private var values: [LifeValue] = []
     @State private var memo = ""
@@ -38,7 +39,9 @@ struct EntryDetailView: View {
                             }
                         }
                         .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                        // In a pane the Form's cards stand 16pt off the divider; the header
+                        // stands with them (Ear Drama iOS-DESIGN §3.6e).
+                        .listRowInsets(EdgeInsets(top: 0, leading: inPane ? Spacing.s4 : 0, bottom: 0, trailing: 0))
                     }
                     Section {
                         TextEditor(text: $memo)
@@ -131,8 +134,8 @@ struct EntryDetailView: View {
             }
         }
         .grounded()
-        .navigationTitle(entry?.displayMerchant ?? "")
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle(inPane ? "" : (entry?.displayMerchant ?? ""))
+        .modifier(InlineTitle(on: !inPane))
         .scrollDismissesKeyboard(.interactively)
         // Save stays reachable while the keyboard is up (found by the iPhone 12 tap
         // tier: the keyboard covered a Save button at the bottom of the form).
@@ -258,6 +261,13 @@ struct EntryDetailView: View {
             UINotificationFeedbackGenerator().notificationOccurred(.error)
         }
         saving = false
+    }
+}
+/// Inline title on a pushed purchase; in a pane the list keeps the screen's title.
+private struct InlineTitle: ViewModifier {
+    let on: Bool
+    func body(content: Content) -> some View {
+        if on { content.navigationBarTitleDisplayMode(.inline) } else { content }
     }
 }
 #endif

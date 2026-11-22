@@ -77,6 +77,7 @@ struct UnexaminedView: View {
 struct LedgerView: View {
     @Environment(SessionStore.self) private var session
     @State private var showSkipped = false
+    @State private var showDetails = false
     @State private var month: String?
     @State private var entries: [LedgerEntry] = []
     @State private var loading = true
@@ -98,17 +99,27 @@ struct LedgerView: View {
                             Button { step(1) } label: { Image(systemName: "chevron.right") }
                                 .accessibilityLabel("Next month")
                         }
+                        .padding(.horizontal, Spacing.s1)
                         .textCase(nil)
                     }
                 }
                 if entries.isEmpty {
                     Text("Nothing recorded this month.").foregroundStyle(Color.brandTextMuted).onGround()
                 } else {
-                    ForEach(entries.filter { !$0.isSkipped }) { e in
+                    ForEach(entries.filter { !$0.isSkipped && (showDetails || !$0.isQuietDetail) }) { e in
                         EntryLink(id: e.id) { ThreadRow(entry: e) }.onGround()
                             .listRowSeparator(.hidden)
                             .listRowInsets(EdgeInsets(top: 0, leading: Spacing.s4, bottom: 0, trailing: Spacing.s4))
                             .skipAction(e) { await skip(e, !e.isSkipped) }
+                    }
+                    let quiet = entries.filter { !$0.isSkipped && $0.isQuietDetail }.count
+                    if quiet > 0 {
+                        Button { withAnimation { showDetails.toggle() } } label: {
+                            Text(showDetails ? "Hide deposits and interest" : "\(quiet) deposits and interest hidden · Show")
+                                .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
+                        }
+                        .buttonStyle(.plain).onGround().listRowSeparator(.hidden)
+                        .accessibilityIdentifier("quiet-details")
                     }
                     let skipped = entries.filter(\.isSkipped)
                     if !skipped.isEmpty {
@@ -132,7 +143,7 @@ struct LedgerView: View {
                 }
             }
             .listStyle(.plain)
-            .opensFirst(entries.first?.id)
+            .opensFirst(entries.first { !$0.isSkipped && !$0.isQuietDetail }?.id)
         }
         .grounded()
         .navigationTitle("Narrative")

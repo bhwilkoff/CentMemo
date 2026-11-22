@@ -142,6 +142,35 @@
     } catch (err) { failed(body, err, unexaminedView); }
   }
 
+  // Cash back and interest into Apple Cash or Savings: details, hidden from the
+  // Narrative by default (Ben, 2026-11-22), as LedgerEntry.isQuietDetail on the iPhone.
+  const isQuietDetail = (t) => t.txn_type === 'deposit' || t.txn_type === 'interest';
+  function quietToggle(list) {
+    if (!list.length) return '';
+    const box = h('details', { class: 'skipped quiet-details' }, h('summary', {}, list.length + ' deposits and interest hidden · Show'),
+      h('div', { class: 'thread' }, list.map(threadRow)));
+    return box;
+  }
+
+  /* ---- The Narrative as a thread (D10), as on the iPhone's ThreadRow ---- */
+  function threadRow(t) {
+    const memo = t.memos && (Array.isArray(t.memos) ? t.memos[0] : t.memos);
+    const meta = niceDate(t.txn_date) + ' · ' + merchantOf(t);
+    if (!memo || !memo.body) {
+      return h('a', { class: 'trow is-waiting', href: '#/t/' + t.id },
+        h('span', { class: 'trow-mark', 'aria-hidden': 'true' }),
+        h('span', { class: 'trow-meta' }, meta),
+        h('span', { class: 'row-amount' + (t.amount_minor > 0 ? ' is-credit' : '') }, money(t.amount_minor, t.currency)));
+    }
+    const theme = ((memo.memo_values || [])[0] || {}).life_values;
+    const hue = theme ? 'var(--color-store-' + TILE_HUES[CentMoney.merchantHue(theme.name, 6)] + ')' : 'var(--color-primary)';
+    return h('a', { class: 'trow is-written', href: '#/t/' + t.id, style: '--mark: ' + hue },
+      h('span', { class: 'trow-mark', 'aria-hidden': 'true' }),
+      h('span', { class: 'trow-body' },
+        h('span', { class: 'trow-memo' }, memo.body),
+        h('span', { class: 'trow-meta' }, tile(t), meta, theme ? h('span', { class: 'trow-theme' }, theme.name) : null)));
+  }
+
   /* ---- Ledger ---- */
   async function ledgerView(ym) {
     const body = showView('ledger', 'ledger');
@@ -164,7 +193,8 @@
           h('div', {}, h('dt', {}, 'Spent'), h('dd', {}, money(spent))),
           h('div', {}, h('dt', {}, 'Paid or credited'), h('dd', {}, money(received))),
           h('div', {}, h('dt', {}, 'Memos'), h('dd', {}, written + ' of ' + rows.length))),
-        h('div', { class: 'list' }, rows.filter((t) => !t.skipped_at).map((t) => txnRow(t, { memo: true }))),
+        h('div', { class: 'thread' }, rows.filter((t) => !t.skipped_at && !isQuietDetail(t)).map(threadRow)),
+        quietToggle(rows.filter((t) => !t.skipped_at && isQuietDetail(t))),
         rows.some((t) => t.skipped_at)
           ? h('details', { class: 'skipped' }, h('summary', {}, rows.filter((t) => t.skipped_at).length + ' skipped'),
               h('div', { class: 'list' }, rows.filter((t) => t.skipped_at).map((t) => txnRow(t))))

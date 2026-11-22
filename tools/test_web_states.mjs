@@ -124,6 +124,16 @@ console.log('skip (Decision 065): an event leaves Unexamined and the Narrative, 
   }
 }
 
+console.log('Narrative thread (D10): written memos are marks with the memo as headline; waiting events are quiet');
+{
+  await evaluate('location.hash = "#/ledger/2026-11"; true');
+  ok(await waitFor('document.querySelectorAll("#view-ledger .trow.is-written").length > 0'), 'written memos show as filled marks');
+  ok(await evaluate('document.querySelectorAll("#view-ledger .trow.is-waiting").length > 0'), 'waiting events show as quiet marks');
+  ok(await evaluate('/penguins/.test(document.querySelector("#view-ledger .thread").innerText)'), 'a memo is the headline');
+  ok(await evaluate('getComputedStyle(document.querySelector(".trow.is-written .trow-mark")).backgroundColor !== getComputedStyle(document.querySelector(".trow.is-waiting .trow-mark")).backgroundColor'), 'written and waiting marks differ');
+  await shot('narrative-thread');
+}
+
 console.log('event page (D6): the Setting and the memo lead; the money is a footnote');
 {
   await evaluate('location.hash = "#/t/a3b8c10c-68b8-4bfe-9380-c87b7015a49d"; true');
@@ -190,7 +200,7 @@ console.log('import (stranger, through the real file input)');
     await clickImport();
     ok(await waitFor(`(${lines}).some(l => l.trim() === "0 new, ${n} already in CentMemo.")`, 20000), `second import: 0 new, ${n} already in CentMemo (Decision 057)`);
     await cdp('Page.navigate', { url: SITE + '#/ledger' });
-    ok(await waitFor('document.querySelectorAll(".row").length > 0'), 'the imported purchases appear in the Ledger');
+    ok(await waitFor('document.querySelectorAll("#view-ledger .trow").length > 0'), 'the imported purchases appear in the Narrative');
   } finally {
     await fetch(P + '/rest/v1/accounts?source=eq.csv', { method: 'DELETE', headers: hdr });
     await fetch(P + '/rest/v1/import_batches?source=eq.csv', { method: 'DELETE', headers: hdr });

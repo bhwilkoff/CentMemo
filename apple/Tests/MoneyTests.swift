@@ -148,3 +148,13 @@ struct MerchantNameTests {
         }
     }
 }
+
+struct SyntheticAccountTests {
+    @Test func recognizesOnlyTheHarnessAndReviewerAccounts() {
+        #expect(SessionStore.isSynthetic("test-owner@centmemo.com"))
+        #expect(SessionStore.isSynthetic("Review@CentMemo.com"))
+        #expect(!SessionStore.isSynthetic("ben@learningischange.com"))
+        #expect(!SessionStore.isSynthetic("test-owner@gmail.com"))
+        #expect(!SessionStore.isSynthetic(nil))
+    }
+}

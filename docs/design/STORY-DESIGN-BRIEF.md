@@ -105,6 +105,16 @@ the Setting page) join where they fit.
   draft: docs/research/story-design-research.md section 3), each with a one-line
   meaning and a mark color; chosen at first run and in Settings, renamable,
   never forced. Ben approves the set and its words before it ships.
+- D15 Place (Ben, 2026-11-22: "can we get location data from Apple Wallet? I'd
+  like for place-based purchases to pull in information whenever possible."):
+  FinanceKit gives no location for a transaction (merchant name and category
+  code only). Proposal for Ben: an on-device Apple Maps lookup of a Setting's
+  name, which the person confirms once per Setting ("Lazy Dog, Arapahoe Rd?"),
+  stored with the Setting. It needs his yes, and location permission only if
+  he wants "near me" matching.
+- D9 note: deposits and interest (FinanceKit types deposit, interest: Daily
+  Cash into Apple Cash and Savings) are hidden from the Narrative by default
+  (Ben, 2026-11-22); the filters will show them.
 - D13 🟡 (iOS swipe + detail menu, web detail button, Narrative 'N skipped' group, Unexamined excludes ✅; connector tool ⏳) Skip: swipe an event away as a detail; only plot points reach the Story.
 - D12 Themes (Ben's word for sets): collect stories into sets by value; share a story or a set.
 

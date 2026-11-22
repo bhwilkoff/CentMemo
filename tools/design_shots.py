@@ -35,6 +35,7 @@ import devlease  # noqa: E402
 import frame_blind  # noqa: E402
 from ios_uitest import displays  # noqa: E402
 
+PERSONAL = {"duo"}  # phones whose owner's own session is what we design with
 SCREENS = ["unexamined", "ledger", "story", "settings", "memo", "blank"]
 # Event pages from the synthetic owner's fixture (apple/UITests/UITestSupport.swift):
 # a written memo (Denver Zoo) and an unexamined purchase.
@@ -55,7 +56,11 @@ def shoot(name, extra_env, screens, settle):
     with devlease.hold([bench.lease_name(entry)], task="design_shots", wait=300):
         for screen in screens:
             door = {"APP_START_ITEM": ITEMS[screen]} if screen in ITEMS else {"APP_START_TAB": screen}
-            env = {**owner_env(), **app_config.DOOR_DEFAULTS, **door, **extra_env}
+            # Ben's Duo is his own phone, signed into his real account: never send it
+            # the test sign-in (a door session there once copied his Wallet into the
+            # synthetic owner, 2026-11-22). Test accounts only on test phones.
+            creds = {} if name in PERSONAL else owner_env()
+            env = {**creds, **app_config.DOOR_DEFAULTS, **door, **extra_env}
             ok, out = ad.launch(udid, app_config.APPLE_BUNDLE_ID, env=env)
             if not ok:
                 print(f"FAIL {name}/{screen}: launch refused: {out}")

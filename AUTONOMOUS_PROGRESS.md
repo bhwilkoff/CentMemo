@@ -1071,3 +1071,38 @@ Apple.
 - **Next:**
   - The web Narrative thread (parity).
   - The S1/S2 importers, with the paths shown.
+
+### Design tick 8 — 2026-11-22 — a privacy fix (test sign-in on Ben's Duo); Duo layout done right; deposits quiet
+- **Incident:** my harness's test sign-in (APP_TEST_EMAIL door) persisted on
+  Ben's own Duo. A later Wallet sync in that session copied his real Wallet
+  (6,979 events) into the synthetic test-owner account at 21:15 UTC. His own
+  account also has them, from his own sync at 17:07 UTC. Nothing reached
+  Claude (the connector excludes FinanceKit) and nothing left this Mac; the
+  web test screenshotted them into build/qa (gitignored, local).
+  - **Fixes:**
+    - A door sign-in lasts only for door launches; any plain launch signs a
+      synthetic account out. Seen on the iPhone 12: a door launch, then a
+      plain launch, lands on the sign-in screen.
+    - Real Wallet never syncs into a synthetic account
+      (`SessionStore.isSynthetic`, unit tested).
+    - design_shots never sends test credentials to the Duo (PERSONAL).
+    - ios_uitest refuses the Duo unless CENTMEMO_UITEST_DUO=1.
+  - **⏳ Ben to confirm:** delete the copy from the test-owner account.
+    WalletSyncUITests fails until then (the fixture holds his accounts).
+- **Duo layout, found on Ben's real data:**
+  - The list ended 84pt short of the divider. Fixes I guessed at failed
+    four times. Then I measured: an on-screen readout showed window 867 +
+    84 inset, pane 364, list 280, and an experiment without the pane's own
+    NavigationStack filled the column.
+  - Ben pointed at the existing solution: Ear Drama iOS-DESIGN §3.6e
+    (ProductionScreen), one stack per screen with the list as a plain
+    column. TwoPane now does exactly that; the workarounds and the readout
+    are removed.
+  - Plus 16pt off the divider for the month › and the event header.
+  - Seen on the Duo on Ben's account and on the iPhone 12; the iPhone tap
+    tier passes.
+- **Deposits:** Daily Cash deposits (FinanceKit `deposit`: 2,113 Savings +
+  1,017 Apple Cash) and `interest` are quiet by default in the Narrative,
+  with "N deposits and interest hidden · Show" on iOS and web.
+- **Ben's direction:** design on his real data from now on (the Duo, his own
+  session); the synthetic accounts stay on the iPhone 12 and the web tests.
