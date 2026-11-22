@@ -123,6 +123,7 @@ fail.
 | Test | Holds |
 |---|---|
 | `test_workflow_health.py`, `test_workflow_health_gate.py` | The auditor never goes blind to a failure, and never cries wolf. |
+| `test_no_secrets.py`, `test_secrets_sh.py` | No secret in git (proved on planted samples; run as `.githooks/pre-commit` and `secrets-check.yml`), and `secrets.sh` never prints a value or runs anything but its recipes. |
 | `test_pulse_collect.py`, `test_pulse_charts.mjs`, `test_pulse_render.mjs` | Pulse never draws a zero it did not read, and its charts mean what they show. |
 | `test_home_screen_probe.py` | The Apple TV home-screen check says "I cannot tell" when it cannot. |
 | `test_gtv_scenario.py`, `test_roku_run.py` | The Google TV and Roku runners parse what devices really return. |

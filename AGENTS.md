@@ -154,7 +154,7 @@ conventions, and which skill fires first.
   `tools/set_app_identity.py` when the owner names it; never ship
   `com.example.appname`.
 - **Native components first**; no third-party Swift packages.
-- **Secrets never in git**, and never in cleartext on disk.
+- **Secrets never in git**, and never in cleartext on disk. *Check: `tools/test_no_secrets.py`.*
 
 ---
 

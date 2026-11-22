@@ -12,8 +12,10 @@ Auth uses the same ES256 key the cloud build already uses
     python3 tools/asc.py apps
     python3 tools/asc.py get 'v1/apps/<id>/inAppPurchasesV2?limit=200'
 """
+import base64
 import json
 import os
+import subprocess
 import sys
 import time
 import urllib.error
@@ -22,17 +24,33 @@ import urllib.request
 BASE = "https://api.appstoreconnect.apple.com/"
 
 
+def _kc(name, force=False):
+    """Environment first, then the login Keychain (`centmemo:<name>`, set by tools/secrets.sh)."""
+    v = os.environ.get(name)
+    if v or (name == "ASC_KEY_P8" and not force):
+        return v
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import app_config
+    r = subprocess.run(["security", "find-generic-password", "-a", app_config.SECRETS_NAME,
+                        "-s", f"{app_config.SECRETS_NAME}:{name}", "-w"], capture_output=True, text=True)
+    return r.stdout.strip() if r.returncode == 0 else None
+
+
 def token():
     try:
         import jwt
     except ImportError:
         sys.exit("pip install pyjwt cryptography (or use tools/.play-venv)")
-    kid = os.environ.get("ASC_KEY_ID") or sys.exit("set ASC_KEY_ID")
-    iss = os.environ.get("ASC_ISSUER_ID") or sys.exit("set ASC_ISSUER_ID")
-    path = os.environ.get(
-        "ASC_KEY_PATH", os.path.expanduser(f"~/.appstoreconnect/private_keys/AuthKey_{kid}.p8"))
-    with open(path) as f:
-        key = f.read()
+    kid = _kc("ASC_KEY_ID") or sys.exit("set ASC_KEY_ID (or tools/secrets.sh keychain-import-asc)")
+    iss = _kc("ASC_ISSUER_ID") or sys.exit("set ASC_ISSUER_ID (or tools/secrets.sh keychain-import-asc)")
+    p8 = os.environ.get("ASC_KEY_P8") or ("" if os.environ.get("ASC_KEY_PATH") else _kc("ASC_KEY_P8", force=True))
+    if p8:
+        key = base64.b64decode(p8).decode()
+    else:
+        path = os.environ.get(
+            "ASC_KEY_PATH", os.path.expanduser(f"~/.appstoreconnect/private_keys/AuthKey_{kid}.p8"))
+        with open(path) as f:
+            key = f.read()
     now = int(time.time())
     return jwt.encode(
         {"iss": iss, "iat": now, "exp": now + 19 * 60, "aud": "appstoreconnect-v1"},

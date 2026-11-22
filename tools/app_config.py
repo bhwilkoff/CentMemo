@@ -39,6 +39,11 @@ ROKU_CHANNEL_NAME = "AppName"
 APPLE_APP_STORE_ID = "6837824241"
 GITHUB_REPO = "bhwilkoff/CentMemo"
 PRODUCT_NAME = "CentMemo"                          # how a human writes it
+# tools/secrets.sh: the Keychain account and service prefix (`centmemo:ASC_KEY_P8`), and the
+# Cloudflare Worker's folder and name when the app has one (empty = no Worker recipes).
+SECRETS_NAME = "centmemo"
+WORKER_DIR = "workers/mcp-proxy"
+WORKER_NAME = "centmemo-mcp"
 PRODUCT_SITE = "https://centmemo.com"              # the public site, no slash
 # What counts as somebody talking about US when searching the open web. The
 # LOOSE term is matched only alongside a corroborating word, because a product

@@ -149,6 +149,7 @@ them. "From" names the app where the lesson was learned.
 | `product-pulse-dashboard` | One daily page for how the app is doing, where a reader that cannot read says so. | Archive Watch |
 | `store-metrics-pipelines` | Getting downloads, installs, ratings, reviews and crashes out of each store's API, and the traps in each. | Archive Watch |
 | `ci-fleet-engineering` | Scheduled workflows that never lose work and never cry wolf. | Archive Watch |
+| `secrets-without-bookkeeping` | No key for the owner to keep: remove the secret (CI-signed OIDC tokens), give each survivor one home, let agents move values only through a fixed-recipe script, fail every commit and CI run on a secret shape. | Ear Drama |
 | `autonomous-loop-cadence` | Running an agent in timed ticks across several platforms. | BOBA Playbook |
 
 ### Stage 07: Raising the ceiling
