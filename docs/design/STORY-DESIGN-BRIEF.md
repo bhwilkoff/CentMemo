@@ -128,10 +128,10 @@ the Setting page) join where they fit.
 > So long as the CSV pathway works from the venmo, paypal, and cashapp mobile
 > apps, we should build for it.
 
-- S1 Venmo CSV import: meets Ben's rule. In the app, Settings > Statements,
+- S1 🟡 (web ✅; iPhone ⏳ Swift port) Venmo CSV import: meets Ben's rule. In the app, Settings > Statements,
   then a year and a month; one month per file, downloaded or emailed. The Note
   column arrives as the memo. Columns and quirks: docs/research/p2p-csv-export-paths.md.
-- S2 PayPal and Cash App CSV import: approved. Ben, 2026-11-22: "So long as
+- S2 🟡 (web ✅; iPhone ⏳ Swift port) PayPal and Cash App CSV import: approved. Ben, 2026-11-22: "So long as
   there is a documented process to get the csv via the web, it should work just
   fine on a mobile browser. Ideally, we would share the documented path for each
   of the csv pathways to allow for easier import." Each source shows its own

@@ -1,0 +1,5 @@
+"Date","Time","TimeZone","Name","Type","Status","Currency","Gross","Fee","Net","From Email Address","To Email Address","Transaction ID","Item Title","Balance","Subject","Note","Balance Impact"
+"11/2/2026","10:15:00","PST","Riverside Bookshop","Express Checkout Payment","Completed","USD","-23.99","0.00","-23.99","sample@example.com","shop@example.com","8AB12345CD678901E","Used poetry book","0.00","","","Debit"
+"11/2/2026","10:15:00","PST","","General Card Deposit","Completed","USD","23.99","0.00","23.99","","","9XY12345CD678901F","","23.99","","","Credit"
+"11/4/2026","19:40:21","PST","Sam Okafor","General Payment","Completed","USD","-1,250.00","0.00","-1,250.00","sample@example.com","sam@example.com","1ZZ12345CD678901G","","0.00","Rent share","November rent, thank you!","Debit"
+"11/6/2026","08:00:00","PST","Streaming Co","General Authorization","Pending","USD","-12.00","0.00","-12.00","sample@example.com","bill@example.com","2QQ12345CD678901H","","0.00","","","Memo"

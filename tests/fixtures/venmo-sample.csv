@@ -1,0 +1,10 @@
+Account Statement - (@sample-person) ,,,,,,,,,,,,,,,,,,,,,
+Account Activity,,,,,,,,,,,,,,,,,,,,,
+,ID,Datetime,Type,Status,Note,From,To,Amount (total),Amount (tip),Amount (tax),Amount (fee),Tax Rate,Tax Exempt,Funding Source,Destination,Beginning Balance,Ending Balance,Statement Period Venmo Fees,Terminal Location,Year to Date Venmo Fees,Disclaimer
+,,,,,,,,,,,,,,,,$12.50,,,,,
+,3912345678901234567,2026-11-03T18:33:12,Payment,Complete,"Pizza night 🍕, my half",Sample Person,Alex Rivera,- $18.50,,0,,0,,Apple Card,,,,,Venmo,,
+,3912345678901234568,2026-11-05T09:01:44,Payment,Complete,Concert tickets,Jordan Lee,Sample Person,+ $40.00,,0,,0,,,Venmo balance,,,,Venmo,,
+,3912345678901234569,2026-11-09T21:10:02,Standard Transfer,Issued,,,,"- $1,021.50",,0,,0,,,Bank,,,,Venmo,,
+,,,,,,,,,,,,,,,,,$12.50,$0.00,,$0.00,
+,,,,,,,,,,,,,,,,,,,,,"In case of errors or questions about your
+electronic transfers, contact us."

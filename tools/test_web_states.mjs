@@ -181,14 +181,14 @@ console.log('import (stranger, through the real file input)');
     const q = await cdp('DOM.querySelector', { nodeId: doc.result.root.nodeId, selector: '#import-file' });
     await cdp('DOM.setFileInputFiles', { nodeId: q.result.nodeId, files: [FIXTURE] });
   };
-  const clickImport = () => evaluate(`[...document.querySelectorAll("${VIS}button")].find(b => /^Import \\d+ transactions$/.test(b.textContent))?.click(), true`);
+  const clickImport = () => evaluate(`[...document.querySelectorAll("${VIS}button")].find(b => /^Import \\d+ Apple Card events$/.test(b.textContent))?.click(), true`);
   try {
     await openAs('stranger', '#/import');
     // A new, empty account lands on Unexamined; go to Import once the app has settled.
     await evaluate('location.hash = "#/import"; true');
     ok(await waitFor('!document.getElementById("view-import").hidden'), 'the Import view is on screen');
     await choose();
-    ok(await waitFor(`[...document.querySelectorAll("${VIS}button")].some(b => /^Import \\d+ transactions$/.test(b.textContent))`), 'choosing the export shows a preview and Import N transactions');
+    ok(await waitFor(`[...document.querySelectorAll("${VIS}button")].some(b => /^Import \\d+ Apple Card events$/.test(b.textContent))`), 'choosing the export shows a preview and Import N Apple Card events');
     const n = await evaluate(`Number(([...document.querySelectorAll("${VIS}button")].find(b => /^Import \\d+/.test(b.textContent))?.textContent.match(/\\d+/) || [0])[0])`);
     await clickImport();
     const lines = 'document.querySelector("section:not([hidden]) [data-body]")?.innerText.split("\\n") || []';
@@ -196,11 +196,28 @@ console.log('import (stranger, through the real file input)');
     await shot('import-first');
     await evaluate('document.getElementById("import-file").value = ""; true');
     await choose();
-    await waitFor(`[...document.querySelectorAll("${VIS}button")].some(b => /^Import \\d+ transactions$/.test(b.textContent))`);
+    await waitFor(`[...document.querySelectorAll("${VIS}button")].some(b => /^Import \\d+ Apple Card events$/.test(b.textContent))`);
     await clickImport();
     ok(await waitFor(`(${lines}).some(l => l.trim() === "0 new, ${n} already in CentMemo.")`, 20000), `second import: 0 new, ${n} already in CentMemo (Decision 057)`);
     await cdp('Page.navigate', { url: SITE + '#/ledger' });
     ok(await waitFor('document.querySelectorAll("#view-ledger .trow").length > 0'), 'the imported purchases appear in the Narrative');
+    // S1: a Venmo statement through the same file input lands in its own account, with its notes.
+    await evaluate('location.hash = "#/import"; true');
+    await waitFor('!document.getElementById("view-import").hidden');
+    ok(await evaluate('[...document.querySelectorAll("[data-export-paths] summary")].map(s => s.textContent).join() === "Apple Card,Venmo,PayPal,Cash App"'), 'the import page shows each source\'s documented export path');
+    await evaluate('document.querySelectorAll("[data-export-paths] details")[1].open = true; true');
+    await shot('import-paths');
+    await evaluate('document.getElementById("import-file").value = ""; true');
+    {
+      const doc = await cdp('DOM.getDocument', { depth: -1 });
+      const q = await cdp('DOM.querySelector', { nodeId: doc.result.root.nodeId, selector: '#import-file' });
+      await cdp('DOM.setFileInputFiles', { nodeId: q.result.nodeId, files: [path.join(ROOT, 'tests/fixtures/venmo-sample.csv')] });
+    }
+    ok(await waitFor(`[...document.querySelectorAll("${VIS}button")].some(b => b.textContent === "Import 3 Venmo events")`), 'a Venmo statement is recognized: Import 3 Venmo events');
+    await evaluate(`[...document.querySelectorAll("${VIS}button")].find(b => b.textContent === "Import 3 Venmo events").click(); true`);
+    ok(await waitFor(`(${lines}).some(l => l.trim() === "3 new.")`, 20000), 'Venmo import: 3 new');
+    const venmo = await (await fetch(P + '/rest/v1/transactions?select=description,accounts(display_name)&source_id=like.venmo*', { headers: hdr })).json();
+    ok(venmo.length === 3 && venmo.every((t) => t.accounts?.display_name === 'Venmo') && venmo.some((t) => /Pizza night/.test(t.description)), 'in the Venmo account, with the person\'s notes');
   } finally {
     await fetch(P + '/rest/v1/accounts?source=eq.csv', { method: 'DELETE', headers: hdr });
     await fetch(P + '/rest/v1/import_batches?source=eq.csv', { method: 'DELETE', headers: hdr });

@@ -110,6 +110,116 @@
     return out;
   }
 
+  // ---- Other sources (S1/S2): Venmo, PayPal, Cash App statement CSVs. Formats and
+  // traps: docs/research/p2p-csv-export-paths.md. Each row keeps the person's note
+  // in `description`, and the other party (or the store) as `merchant`.
+
+  // "- $65.00", "+ $10.00", "-$2.90", "($2.90)", "-6.99", "1,234.50" -> cents.
+  function looseMinor(text) {
+    let s = String(text || '').trim();
+    if (!s) throw new Error('Not an amount: (empty)');
+    const paren = /^\(.*\)$/.test(s);
+    s = s.replace(/[()\s$,]/g, '');
+    const neg = paren || s.startsWith('-');
+    const n = toMinor(s.replace(/^[+-]/, ''));
+    return neg ? -n : n;
+  }
+  function headerIndex(rows, must) {
+    const i = rows.findIndex((r) => must.every((m) => r.some((c) => c.trim() === m)));
+    if (i < 0) throw new Error('Not a recognized export: no "' + must.join('", "') + '" columns.');
+    const col = {};
+    rows[i].forEach((c, k) => { const t = c.trim(); if (t && !(t in col)) col[t] = k; });
+    return { i, col };
+  }
+  const cell = (r, col, name) => (col[name] == null ? '' : String(r[col[name]] || '').trim());
+
+  function parseVenmoCsv(text) {
+    const rows = parseCsv(text);
+    const { i, col } = headerIndex(rows, ['ID', 'Datetime', 'Amount (total)']);
+    const out = [];
+    for (const r of rows.slice(i + 1)) {
+      const id = cell(r, col, 'ID');
+      if (!/^\d{6,}$/.test(id)) continue;  // title, balance, and disclaimer rows have no ID
+      const amount = looseMinor(cell(r, col, 'Amount (total)'));
+      const status = cell(r, col, 'Status');
+      out.push({
+        source: 'csv', source_id: 'venmo:' + id,
+        txn_date: cell(r, col, 'Datetime').slice(0, 10), posted_date: null,
+        amount_minor: amount, currency: 'USD',
+        description: cell(r, col, 'Note').slice(0, 500),
+        merchant: (amount < 0 ? cell(r, col, 'To') : cell(r, col, 'From')).slice(0, 200),
+        category: '', txn_type: cell(r, col, 'Type').slice(0, 40),
+        status: /^(complete|completed)$/i.test(status) ? 'booked' : 'pending',
+      });
+    }
+    return out;
+  }
+
+  function parsePayPalCsv(text) {
+    const rows = parseCsv(text);
+    const { i, col } = headerIndex(rows, ['Date', 'Gross', 'Transaction ID']);
+    const out = [];
+    for (const r of rows.slice(i + 1)) {
+      const id = cell(r, col, 'Transaction ID');
+      if (!id || /^memo$/i.test(cell(r, col, 'Balance Impact'))) continue;  // holds move no money
+      const status = cell(r, col, 'Status');
+      out.push({
+        source: 'csv', source_id: 'paypal:' + id,
+        txn_date: isoDate(cell(r, col, 'Date')), posted_date: null,
+        amount_minor: looseMinor(cell(r, col, 'Gross')), currency: cell(r, col, 'Currency') || 'USD',
+        description: (cell(r, col, 'Note') || cell(r, col, 'Subject') || cell(r, col, 'Item Title')).slice(0, 500),
+        merchant: cell(r, col, 'Name').slice(0, 200),
+        category: '', txn_type: cell(r, col, 'Type').slice(0, 40),
+        status: /^completed$/i.test(status) ? 'booked' : 'pending',
+      });
+    }
+    return out;
+  }
+
+  function parseCashAppCsv(text) {
+    const rows = parseCsv(text);
+    const { i, col } = headerIndex(rows, ['Transaction ID', 'Date', 'Amount']);
+    const out = [];
+    for (const r of rows.slice(i + 1)) {
+      const id = cell(r, col, 'Transaction ID');
+      const status = cell(r, col, 'Status');
+      const type = cell(r, col, 'Transaction Type');
+      if (!id || /^failed$/i.test(status) || /notification/i.test(type)) continue;
+      const name = cell(r, col, 'Name of sender/receiver');
+      const notes = cell(r, col, 'Notes');
+      out.push({
+        source: 'csv', source_id: 'cashapp:' + id,
+        txn_date: cell(r, col, 'Date').slice(0, 10), posted_date: null,
+        amount_minor: looseMinor(cell(r, col, 'Amount')), currency: cell(r, col, 'Currency') || 'USD',
+        // On Cash Card purchases Notes holds the store, not a note.
+        description: (name ? notes : '').slice(0, 500),
+        merchant: (name || notes).slice(0, 200),
+        category: '', txn_type: type.slice(0, 40),
+        status: /refund|fail/i.test(status) ? 'pending' : 'booked',
+      });
+    }
+    return out;
+  }
+
+  // Which export a file is, by its header: 'applecard', 'venmo', 'paypal', 'cashapp', or null.
+  function detectExport(text) {
+    const head = parseCsv(String(text).slice(0, 20000)).slice(0, 12).map((r) => r.map((c) => c.trim()));
+    const has = (...names) => head.some((r) => names.every((n) => r.includes(n)));
+    if (has('Transaction Date', 'Clearing Date', 'Amount (USD)')) return 'applecard';
+    if (has('ID', 'Datetime', 'Amount (total)')) return 'venmo';
+    if (has('Gross', 'Balance Impact')) return 'paypal';
+    if (has('Transaction ID', 'Name of sender/receiver')) return 'cashapp';
+    return null;
+  }
+  async function parseAnyExport(text) {
+    const kind = detectExport(text);
+    if (kind === 'applecard') return { kind, rows: await parseAppleCardCsv(text) };
+    if (kind === 'venmo') return { kind, rows: parseVenmoCsv(text) };
+    if (kind === 'paypal') return { kind, rows: parsePayPalCsv(text) };
+    if (kind === 'cashapp') return { kind, rows: parseCashAppCsv(text) };
+    throw new Error('This file is not an Apple Card, Venmo, PayPal, or Cash App export.');
+  }
+
   // Store names (D8): the bank's descriptor cleaned for people, conservatively.
   // The raw string is always kept beside it; a rename the person makes wins.
   const PROCESSOR = /^(?:SQ|TST|SP|PP|PAYPAL|DD|GOOGLE|IC|POS|PY|BT)\s*\*\s*/i;
@@ -139,7 +249,8 @@
     return h % (count || 6);
   }
 
-  const api = { toMinor, formatMinor, parseCsv, isoDate, parseAppleCardCsv, sha256Hex, cleanMerchant, merchantInitials, merchantHue };
+  const api = { toMinor, formatMinor, parseCsv, isoDate, parseAppleCardCsv, sha256Hex, cleanMerchant, merchantInitials, merchantHue,
+    looseMinor, parseVenmoCsv, parsePayPalCsv, parseCashAppCsv, detectExport, parseAnyExport };
   if (typeof module === 'object' && module.exports) module.exports = api;
   root.CentMoney = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

@@ -197,9 +197,17 @@ const API = (() => {
   }
 
   /* ---- Import (idempotent on source_id, Decision 057) ---- */
-  async function importAppleCard(rows, filename) {
+  // One account per exported source (S1/S2).
+  const EXPORT_ACCOUNTS = {
+    applecard: { source_id: 'applecard', kind: 'liability', display_name: 'Apple Card', institution: 'Apple' },
+    venmo: { source_id: 'venmo', kind: 'asset', display_name: 'Venmo', institution: 'Venmo' },
+    paypal: { source_id: 'paypal', kind: 'asset', display_name: 'PayPal', institution: 'PayPal' },
+    cashapp: { source_id: 'cashapp', kind: 'asset', display_name: 'Cash App', institution: 'Block' },
+  };
+  async function importAppleCard(rows, filename) { return importExport('applecard', rows, filename); }
+  async function importExport(kind, rows, filename) {
     const account = must(await client().from('accounts').upsert(
-      { source: 'csv', source_id: 'applecard', kind: 'liability', display_name: 'Apple Card', institution: 'Apple' },
+      { source: 'csv', ...EXPORT_ACCOUNTS[kind] },
       { onConflict: 'user_id,source,source_id' }).select('id').single());
     const batch = must(await client().from('import_batches').insert(
       { source: 'csv', filename: String(filename || '').slice(0, 255), row_count: rows.length }).select('id').single());
@@ -217,6 +225,6 @@ const API = (() => {
   return {
     MCP_URL, client, session, onAuthChange, signInWithApple, finishAppleRedirect, signOut, deleteAccount,
     unexamined, transactionCount, month, latestMonth, transaction, stories,
-    values, addValue, setSkipped, renameValue, deleteValue, saveMemo, importAppleCard, GROUNDS, ground, setGround,
+    values, addValue, setSkipped, renameValue, deleteValue, saveMemo, importAppleCard, importExport, GROUNDS, ground, setGround,
   };
 })();

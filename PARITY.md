@@ -104,6 +104,7 @@ When shipping any user-facing feature:
 | Feature | Web | iOS | Notes |
 |---|---|---|---|
 | Import Apple Card CSV export | ✅ | 🚧 | Web: real file input, re-import adds 0 (test_web_states). Same source IDs on both (golden parity test). iOS import never run on a device |
+| Import Venmo, PayPal, Cash App CSV (S1/S2) | ✅ | ⏳ | Web: auto-detected by header, own account per source, documented export paths on the page; golden tests on synthetic samples. iOS: Swift port pending |
 | Connect Apple Wallet (FinanceKit sync, history tokens) | n/a | 🚧 | Entitlement granted 2026-11-22 and signed into build 10; the iPhone 12 offers Connect (WalletAvailabilityUITests). Sync path verified with the sample source; the real sync is Ben's to run on his own phone |
 | FinanceKit background delivery | n/a | ⏳ | iOS 26 extension, after the entitlement |
 

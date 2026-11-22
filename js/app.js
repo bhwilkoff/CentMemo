@@ -356,19 +356,20 @@
     const body = $('view-import').querySelector('[data-body]');
     if (!file) return;
     loading(body);
-    let rows;
+    let rows, kind;
     try {
-      rows = await M.parseAppleCardCsv(await file.text());
+      ({ kind, rows } = await M.parseAnyExport(await file.text()));
     } catch (err) { e.target.value = ''; return failed(body, err); }
     if (!rows.length) { e.target.value = ''; return empty(body, 'That export has no transactions.'); }
     const dates = rows.map((r) => r.txn_date).sort();
     const spent = rows.filter((r) => r.amount_minor < 0).reduce((a, r) => a - r.amount_minor, 0);
-    const go = h('button', { class: 'btn btn-primary' }, 'Import ' + rows.length + ' transactions');
+    const NAMES = { applecard: 'Apple Card', venmo: 'Venmo', paypal: 'PayPal', cashapp: 'Cash App' };
+    const go = h('button', { class: 'btn btn-primary' }, 'Import ' + rows.length + ' ' + NAMES[kind] + ' events');
     const status = h('p', { class: 'caption', role: 'status' });
     go.addEventListener('click', async () => {
       go.disabled = true; status.textContent = 'Importing…';
       try {
-        const r = await API.importAppleCard(rows, file.name);
+        const r = await API.importExport(kind, rows, file.name);
         e.target.value = '';
         body.replaceChildren(h('div', { class: 'state' },
           h('p', {}, r.inserted + ' new' + (r.skipped ? ', ' + r.skipped + ' already in CentMemo.' : '.')),

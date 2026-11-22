@@ -58,3 +58,39 @@ test('store names: cleaned, initials, hue match the golden (D8; Swift reads the 
     assert.equal(M.merchantHue(name, 6), g.hue, g.raw);
   }
 });
+
+const fx = (f) => readFileSync(new URL('./fixtures/' + f, import.meta.url), 'utf8');
+test('detectExport names each source by its header, and refuses others', () => {
+  assert.equal(M.detectExport(fixture), 'applecard');
+  assert.equal(M.detectExport(fx('venmo-sample.csv')), 'venmo');
+  assert.equal(M.detectExport(fx('paypal-sample.csv')), 'paypal');
+  assert.equal(M.detectExport(fx('cashapp-sample.csv')), 'cashapp');
+  assert.equal(M.detectExport('Name,Amount\nCoffee,3.00\n'), null);
+});
+test('Venmo: skips title, balance, and disclaimer rows; keeps notes; signs money out', () => {
+  const r = M.parseVenmoCsv(fx('venmo-sample.csv'));
+  assert.deepEqual(r.map((x) => [x.source_id, x.txn_date, x.amount_minor, x.merchant, x.description]), [
+    ['venmo:3912345678901234567', '2026-11-03', -1850, 'Alex Rivera', 'Pizza night 🍕, my half'],
+    ['venmo:3912345678901234568', '2026-11-05', 4000, 'Jordan Lee', 'Concert tickets'],
+    ['venmo:3912345678901234569', '2026-11-09', -102150, '', ''],
+  ]);
+});
+test('PayPal: maps by header, drops Memo (hold) rows, keeps the note', () => {
+  const r = M.parsePayPalCsv(fx('paypal-sample.csv'));
+  assert.deepEqual(r.map((x) => [x.source_id, x.txn_date, x.amount_minor, x.merchant, x.description]), [
+    ['paypal:8AB12345CD678901E', '2026-11-02', -2399, 'Riverside Bookshop', 'Used poetry book'],
+    ['paypal:9XY12345CD678901F', '2026-11-02', 2399, '', ''],
+    ['paypal:1ZZ12345CD678901G', '2026-11-04', -125000, 'Sam Okafor', 'November rent, thank you!'],
+  ]);
+});
+test('Cash App: drops FAILED; a card purchase has the store as merchant and no note', () => {
+  const r = M.parseCashAppCsv(fx('cashapp-sample.csv'));
+  assert.deepEqual(r.map((x) => [x.source_id, x.amount_minor, x.merchant, x.description]), [
+    ['cashapp:rmgsrz', -290, 'MTA*NYCT PAYGO', ''],
+    ['cashapp:7jdb8q', -1500, 'Dana Park', 'Lunch with Dana'],
+    ['cashapp:4pp9tt', 100000, 'Mom', 'Birthday gift 🎂'],
+  ]);
+});
+test('looseMinor reads every sign style the three apps use', () => {
+  for (const [t, v] of [['- $65.00', -6500], ['+ $10.00', 1000], ['-$2.90', -290], ['($2.90)', -290], ['$1', 100], ['-6.99', -699], ['"1,234.50"'.replace(/"/g, ''), 123450]]) assert.equal(M.looseMinor(t), v, t);
+});

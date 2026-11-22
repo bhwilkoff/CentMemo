@@ -33,7 +33,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600;6..72,700&display=swap">
-  <link rel="stylesheet" href="css/styles.css?v=20261122j">
+  <link rel="stylesheet" href="css/styles.css?v=20261122k">
   <script>try{var g=localStorage.getItem("cm_ground");if(g)document.documentElement.setAttribute("data-ground",g)}catch(e){}</script>
 </head>
 <body>
@@ -106,11 +106,16 @@
 
       <section id="view-import" class="view" aria-labelledby="h-import" hidden>
         <h1 id="h-import" class="view-heading">Import</h1>
-        <p class="caption">In Wallet, open Apple Card, then Card Balance, then Export Transactions (CSV). Or export from card.apple.com.</p>
         <label class="file-drop" for="import-file">
           <input type="file" id="import-file" accept=".csv,text/csv">
-          <span>Choose an Apple Card CSV</span>
+          <span>Choose a CSV from Apple Card, Venmo, PayPal, or Cash App</span>
         </label>
+        <div class="export-paths" data-export-paths>
+          <details><summary>Apple Card</summary><p>In Wallet, open Apple Card, then Card Balance, then Export Transactions (CSV). Or export from card.apple.com.</p></details>
+          <details><summary>Venmo</summary><p>In Venmo, tap Me, then the gear, then Statements. Pick a month and download it, once for each month you want.</p></details>
+          <details><summary>PayPal</summary><p>On paypal.com (the app can't export): open Activity, tap the download icon, choose Custom, pick up to 12 months and CSV. Big reports can take a while; PayPal emails you.</p></details>
+          <details><summary>Cash App</summary><p>On cash.app/account (the app gives PDFs only): open Activity and tap the CSV button next to search.</p></details>
+        </div>
         <div class="view-body" data-body></div>
       </section>
 
@@ -125,8 +130,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
   <script src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
-  <script src="js/money/money.js?v=20261122j"></script>
-  <script src="js/api.js?v=20261122j"></script>
-  <script src="js/app.js?v=20261122j"></script>
+  <script src="js/money/money.js?v=20261122k"></script>
+  <script src="js/api.js?v=20261122k"></script>
+  <script src="js/app.js?v=20261122k"></script>
 </body>
 </html>

@@ -1121,3 +1121,27 @@ Apple.
   time, status, card last four, Daily Cash, "Shown on Statement as", and
   Apple's category. FinanceKit exposes no place. D15 is updated with a
   lookup-and-confirm proposal for Ben.
+
+### Design tick 9 — 2026-11-22 — S1/S2 Venmo, PayPal, Cash App import (web)
+- js/money/money.js:
+  - `detectExport` recognizes the file by its header.
+  - `parseVenmoCsv`, `parsePayPalCsv` and `parseCashAppCsv` follow every
+    trap in docs/research/p2p-csv-export-paths.md:
+    - Venmo's title, balance and disclaimer rows, and the `- $65.00` signs.
+    - PayPal's Memo-impact holds, mapped by header name.
+    - Cash App's FAILED rows, and Notes being the store on card purchases.
+  - `looseMinor` handles every sign style. The person's note goes to
+    `description`; the other party or store to `merchant`.
+- Golden tests on synthetic fixtures (tests/fixtures/{venmo,paypal,cashapp}-sample.csv);
+  a planted FAILED row is caught (seen).
+- `API.importExport(kind)` gives each source its own account.
+- The web import page takes any of the four, says which it found
+  ("Import 3 Venmo events"), and lists each source's documented export
+  path (Ben: "share the documented path for each of the csv pathways").
+- test_web_states imports the Venmo sample through the real file input as
+  the stranger: 3 new, in the Venmo account, with notes; left empty.
+  Screenshot read.
+- **⏳:**
+  - The iPhone import still takes only Apple Card (Swift port of the
+    three parsers, with goldens, next).
+  - "Use this note as my memo" on events that carry one.
