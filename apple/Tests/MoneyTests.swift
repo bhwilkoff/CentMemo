@@ -70,3 +70,29 @@ struct LedgerDateTests {
         #expect(LedgerDate.step("2026-01", by: -1) == "2025-12")
     }
 }
+
+/// PostgREST refuses a bulk insert whose objects carry different keys ("All
+/// object keys must match"). Swift's synthesized Encodable drops nil optionals,
+/// so a pending purchase (no posted date) or an account without a credit limit
+/// broke Ben's first real FinanceKit sync (2026-11-22). Every row must carry
+/// every key, nil as null.
+struct UniformKeysTests {
+    private func keys<T: Encodable>(_ v: T) throws -> Set<String> {
+        let obj = try JSONSerialization.jsonObject(with: JSONEncoder().encode(v)) as! [String: Any]
+        return Set(obj.keys)
+    }
+
+    @Test func importRowsCarryEveryKey() throws {
+        let posted = ImportRow(sourceID: "a", txnDate: "2026-11-20", postedDate: "2026-11-21", amountMinor: -100, currency: "USD",
+                               description: "d", merchant: "m", category: "", txnType: "pointOfSale", status: "booked", mcc: 5411)
+        var pending = posted; pending.postedDate = nil; pending.mcc = nil; pending.status = "pending"
+        #expect(try keys(posted) == keys(pending))
+        #expect(try !keys(posted).contains("accountSourceID"), "the account is a relationship, not a column")
+    }
+
+    @Test func accountRowsCarryEveryKey() throws {
+        let card = FinanceAccountRow(sourceID: "c", kind: "liability", displayName: "Apple Card", institution: "Apple", currency: "USD", creditLimitMinor: 500_000)
+        let cash = FinanceAccountRow(sourceID: "s", kind: "asset", displayName: "Apple Cash", institution: "Apple", currency: "USD", creditLimitMinor: nil)
+        #expect(try keys(card) == keys(cash))
+    }
+}

@@ -334,17 +334,13 @@ final class APIClient {
     /// deletions applied. The connector never reads these rows (Addendum 3.2).
     func syncFinance(_ changes: FinanceChanges) async throws -> ImportResult {
         struct IDRow: Decodable { let id: String; let source_id: String }
-        struct AccountRow: Encodable {
-            let source = "financekit"; let source_id: String; let kind: String; let display_name: String
-            let institution: String; let currency: String; let credit_limit_minor: Int?
-        }
         var accountIDs: [String: String] = [:]
         if !changes.accounts.isEmpty {
             let data = try await raw("rest/v1/accounts", query: [.init(name: "on_conflict", value: "user_id,source,source_id"),
                                                                  .init(name: "select", value: "id,source_id")], method: "POST",
-                                     body: changes.accounts.map { AccountRow(source_id: $0.sourceID, kind: $0.kind, display_name: $0.displayName,
-                                                                              institution: $0.institution, currency: $0.currency,
-                                                                              credit_limit_minor: $0.creditLimitMinor) },
+                                     body: changes.accounts.map { FinanceAccountRow(sourceID: $0.sourceID, kind: $0.kind, displayName: $0.displayName,
+                                                                                     institution: $0.institution, currency: $0.currency,
+                                                                                     creditLimitMinor: $0.creditLimitMinor) },
                                      prefer: "return=representation,resolution=merge-duplicates")
             for r in try JSONDecoder().decode([IDRow].self, from: data) { accountIDs[r.source_id] = r.id }
         }

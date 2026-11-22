@@ -140,4 +140,32 @@ struct ImportRow: Codable, Equatable, Sendable {
         case sourceID = "source_id", txnDate = "txn_date", postedDate = "posted_date", amountMinor = "amount_minor"
         case currency, description, merchant, category, txnType = "txn_type", status, mcc
     }
+
+    /// Every key on every row, nil as null: PostgREST refuses a bulk insert whose
+    /// objects differ ("All object keys must match"; Ben's first FinanceKit sync,
+    /// 2026-11-22). The synthesized encoder would drop nil optionals.
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(sourceID, forKey: .sourceID); try c.encode(txnDate, forKey: .txnDate)
+        try c.encode(postedDate, forKey: .postedDate); try c.encode(amountMinor, forKey: .amountMinor)
+        try c.encode(currency, forKey: .currency); try c.encode(description, forKey: .description)
+        try c.encode(merchant, forKey: .merchant); try c.encode(category, forKey: .category)
+        try c.encode(txnType, forKey: .txnType); try c.encode(status, forKey: .status); try c.encode(mcc, forKey: .mcc)
+    }
+}
+
+/// A FinanceKit account as CentMemo stores it, with every key on every row
+/// (an Apple Cash account has no credit limit; see ImportRow.encode).
+struct FinanceAccountRow: Encodable, Sendable {
+    var sourceID: String, kind: String, displayName: String, institution: String, currency: String
+    var creditLimitMinor: Int?
+    enum CodingKeys: String, CodingKey {
+        case source, sourceID = "source_id", kind, displayName = "display_name", institution, currency, creditLimitMinor = "credit_limit_minor"
+    }
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode("financekit", forKey: .source); try c.encode(sourceID, forKey: .sourceID); try c.encode(kind, forKey: .kind)
+        try c.encode(displayName, forKey: .displayName); try c.encode(institution, forKey: .institution)
+        try c.encode(currency, forKey: .currency); try c.encode(creditLimitMinor, forKey: .creditLimitMinor)
+    }
 }

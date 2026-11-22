@@ -13,11 +13,11 @@ final class WalletSyncUITests: DeviceTestCase {
         button.tap()
         let result = app.staticTexts["wallet-result"]
         XCTAssertTrue(result.waitForExistence(timeout: 20))
-        XCTAssertTrue(result.label.hasPrefix("Synced 3 transactions from 1 account"), result.label)
+        XCTAssertTrue(result.label.hasPrefix("Synced 4 transactions from 2 accounts"), result.label)
         shot(app, "wallet-synced")
         button.tap()
         sleep(3)
-        XCTAssertTrue(result.label.hasPrefix("Synced 3 transactions"), "upsert, not duplicate: \(result.label)")
+        XCTAssertTrue(result.label.hasPrefix("Synced 4 transactions"), "upsert, not duplicate: \(result.label)")
         XCTAssertTrue(removeSampleAccount(), "sample account removed")
     }
 
@@ -37,7 +37,7 @@ final class WalletSyncUITests: DeviceTestCase {
         signIn.httpBody = try? JSONSerialization.data(withJSONObject: ["email": email, "password": password])
         let (_, body) = call(signIn)
         guard let token = (try? JSONSerialization.jsonObject(with: body) as? [String: Any])?["access_token"] as? String else { return false }
-        var del = URLRequest(url: URL(string: base + "/rest/v1/accounts?source=eq.financekit&source_id=eq.sample-card")!)
+        var del = URLRequest(url: URL(string: base + "/rest/v1/accounts?source=eq.financekit&source_id=in.(sample-card,sample-cash)")!)
         del.httpMethod = "DELETE"; del.setValue(key, forHTTPHeaderField: "apikey"); del.setValue("Bearer " + token, forHTTPHeaderField: "Authorization")
         return (200..<300).contains(call(del).0)
     }

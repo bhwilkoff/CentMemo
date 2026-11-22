@@ -64,18 +64,23 @@ struct SampleFinanceSource: FinanceSource {
     var unavailableReason: String? { nil }
     func requestAccess() async throws -> Bool { true }
     func changes(since token: Data?) async throws -> FinanceChanges {
-        let rows: [(String, String, Int, String, String)] = [
-            ("sample-1", "2026-11-20", -2450, "Little Man Ice Cream", "Restaurants"),
-            ("sample-2", "2026-11-20", -6800, "Denver Botanic Gardens", "Entertainment"),
-            ("sample-3", "2026-11-19", 25000, "Payment", "Payment"),
+        // Shaped like a real Wallet: two accounts, one without a credit limit, and a
+        // pending purchase with no posted date (the mix that broke the first real sync).
+        let rows: [(String, String, Int, String, String, Bool, String)] = [
+            ("sample-1", "2026-11-20", -2450, "Little Man Ice Cream", "Restaurants", true, "sample-card"),
+            ("sample-2", "2026-11-20", -6800, "Denver Botanic Gardens", "Entertainment", true, "sample-card"),
+            ("sample-3", "2026-11-19", 25000, "Payment", "Payment", true, "sample-card"),
+            ("sample-4", "2026-11-21", -1200, "Sent to a friend", "", false, "sample-cash"),
         ]
         return FinanceChanges(
             accounts: [FinanceAccount(sourceID: "sample-card", kind: "liability", displayName: "Apple Card (sample)",
-                                      institution: "Apple", currency: "USD", creditLimitMinor: 1_000_000)],
-            inserted: rows.map { ImportRow(sourceID: $0.0, txnDate: $0.1, postedDate: $0.1, amountMinor: $0.2, currency: "USD",
+                                      institution: "Apple", currency: "USD", creditLimitMinor: 1_000_000),
+                       FinanceAccount(sourceID: "sample-cash", kind: "asset", displayName: "Apple Cash (sample)",
+                                      institution: "Apple", currency: "USD", creditLimitMinor: nil)],
+            inserted: rows.map { ImportRow(sourceID: $0.0, txnDate: $0.1, postedDate: $0.5 ? $0.1 : nil, amountMinor: $0.2, currency: "USD",
                                            description: $0.3, merchant: $0.3, category: $0.4,
-                                           txnType: $0.2 < 0 ? "pointOfSale" : "billPayment", status: "booked", mcc: nil,
-                                           accountSourceID: "sample-card") },
+                                           txnType: $0.2 < 0 ? "pointOfSale" : "billPayment", status: $0.5 ? "booked" : "pending",
+                                           mcc: $0.5 ? 5812 : nil, accountSourceID: $0.6) },
             newToken: Data("sample".utf8))
     }
 }

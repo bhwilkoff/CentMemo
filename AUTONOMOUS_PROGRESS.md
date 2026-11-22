@@ -684,3 +684,27 @@ Apple.
   - The App Store version: description, keywords, screenshots, privacy
     labels, age rating, review notes.
   - Upload the recording, then submit through the cloud build.
+
+### Fix — 2026-11-22 — Ben's first real Wallet sync failed: "All object keys must match" (build 1.0 (12))
+- **Found by Ben** on his iPhone Duo (TestFlight 10): Connect Apple Wallet
+  showed PostgREST's "All object keys must match".
+- **Cause:** Swift's synthesized Encodable drops nil optionals. An account
+  without a credit limit (Apple Cash, Savings) or a pending purchase (no
+  posted date) sent objects with fewer keys in the same bulk insert. The
+  DEBUG sample had one account and no pending rows, so it never showed.
+  The iOS CSV import had the same flaw for pending rows.
+- **Fix:**
+  - `ImportRow` and the new `FinanceAccountRow` encode every key, nil as
+    null.
+  - The sample now looks like a real Wallet: an Apple Cash account with no
+    limit, plus a pending purchase.
+- **Verification:**
+  - `UniformKeysTests` was seen failing on the old encoder (pending vs
+    posted keys differ) and passes after the fix.
+  - iPhone 12 `WalletSyncUITests` against the real database: "Synced 4
+    transactions from 2 accounts", re-sync idempotent, cleaned up (0
+    left).
+  - `tools/test_all.sh` exit 0.
+- **Lesson:** a sample source must carry the real data's variety (several
+  account kinds, missing optionals), or it proves only the happy path.
+- **Next:** TestFlight 12 to Ben; the real sync on his phone.
