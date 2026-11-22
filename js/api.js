@@ -53,7 +53,7 @@ const API = (() => {
       const code = e && (e.error || e.message);
       // In-app browsers (Claude's connector sheet among them) block the popup.
       // Fall back to a same-window round trip to Apple; it never returns here.
-      if (code === 'popup_blocked_by_browser') return signInWithAppleRedirect(redirectURI);
+      if (code === 'popup_blocked_by_browser') return signInWithAppleRedirect();
       throw new Error(code === 'popup_closed_by_user' || code === 'user_cancelled_authorize'
         ? 'Sign-in was canceled. Choose Sign in with Apple to try again.'
         : 'Apple couldn\u2019t sign you in (' + (code || 'unknown error') + ').');
@@ -63,20 +63,23 @@ const API = (() => {
     must(await client().auth.signInWithIdToken({ provider: 'apple', token, nonce: raw }));
   }
   /**
-   * The same-window fallback: Apple's authorize page, then back to redirectURI
-   * with the identity token in the fragment. Apple allows a fragment response
-   * only when no scope is asked, so no email comes back; an existing account is
-   * found by its Apple ID alone. The page's query (the consent request's
-   * authorization_id) and the nonce wait in sessionStorage, checked by state.
+   * The same-window fallback: Apple's authorize page, asking for the email,
+   * which Apple will only POST to a server; supabase/functions/apple-return
+   * receives it and sends the browser back to the starting page (named by the
+   * end of state, from a fixed list) with the identity token in the fragment.
+   * The page's query (the consent request's authorization_id) and the nonce
+   * wait in sessionStorage, checked by state.
    */
   const APPLE_RETURN_KEY = 'cm_apple_return';
+  const APPLE_RETURN_URL = SUPABASE_URL + '/functions/v1/apple-return';
   const randomHex = (n) => Array.from(crypto.getRandomValues(new Uint8Array(n)), b => b.toString(16).padStart(2, '0')).join('');
-  async function signInWithAppleRedirect(redirectURI) {
-    const raw = randomHex(24), state = randomHex(16);
+  async function signInWithAppleRedirect() {
+    const page = location.pathname.startsWith('/oauth/consent') ? 'c' : 'w';
+    const raw = randomHex(24), state = randomHex(16) + '.' + page;
     sessionStorage.setItem(APPLE_RETURN_KEY, JSON.stringify({ raw, state, back: location.search }));
     const u = new URL('https://appleid.apple.com/auth/authorize');
-    u.search = new URLSearchParams({ client_id: APPLE_WEB_CLIENT_ID, redirect_uri: redirectURI,
-      response_type: 'code id_token', response_mode: 'fragment', state, nonce: await sha256Hex(raw) }).toString();
+    u.search = new URLSearchParams({ client_id: APPLE_WEB_CLIENT_ID, redirect_uri: APPLE_RETURN_URL,
+      response_type: 'code id_token', response_mode: 'form_post', scope: 'email', state, nonce: await sha256Hex(raw) }).toString();
     location.assign(u.href);
     return new Promise(() => {});
   }

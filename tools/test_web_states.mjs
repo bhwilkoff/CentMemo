@@ -40,7 +40,8 @@ const cleanup = () => { try { chrome.kill(); } catch (_) {} try { server.kill();
 process.on('exit', cleanup);
 
 let target;
-for (let i = 0; i < 40 && !target; i++) {
+// Up to 30 s: a cold Chrome start once took longer than 10 s and left the run blind.
+for (let i = 0; i < 120 && !target; i++) {
   await sleep(250);
   try { target = (await (await fetch(`http://127.0.0.1:${DEVTOOLS}/json`)).json()).find((t) => t.type === 'page'); } catch (_) {}
 }
@@ -199,9 +200,19 @@ console.log('Apple same-window return (the fallback when a popup is blocked)');
   ok(await evaluate('location.hash === ""'), 'and the token-bearing hash is cleared');
   await arrive(consent + '#id_token=abc&state=forged');
   ok(await waitFor(`/didn.t start on this page/.test(${sentText})`), 'a return this page did not start is refused (state check)');
-  await evaluate(`sessionStorage.setItem("cm_apple_return", JSON.stringify({ raw: "r", state: "s1", back: "?authorization_id=test" })); true`);
-  await arrive(consent + '#id_token=not.a.token&state=s1');
+  await evaluate(`sessionStorage.setItem("cm_apple_return", JSON.stringify({ raw: "r", state: "0123456789abcdef0123456789abcdef.c", back: "?authorization_id=test" })); true`);
+  await arrive(consent + '#id_token=not.a.token&state=0123456789abcdef0123456789abcdef.c');
   ok(await waitFor(`${sentText}.length > 0 && !/didn.t start|canceled/.test(${sentText})`), 'a matching return reaches Supabase, which refuses a token Apple did not sign');
+  // The whole chain as Apple drives it: POST to apple-return, follow its redirect.
+  const st = '0123456789abcdef0123456789abcdef.c';
+  const hop = await fetch(P + '/functions/v1/apple-return', { method: 'POST', redirect: 'manual',
+    body: new URLSearchParams({ state: st, id_token: 'not.a.token' }) });
+  const loc = hop.headers.get('location') || '';
+  ok(hop.status === 303 && loc.startsWith('https://centmemo.com/oauth/consent/#'), `apple-return sends the browser back to the consent page (${hop.status})`);
+  await arrive(consent + '?authorization_id=test');
+  await evaluate(`sessionStorage.setItem("cm_apple_return", JSON.stringify({ raw: "r", state: "${st}", back: "?authorization_id=test" })); true`);
+  await arrive(consent + loc.slice(loc.indexOf('#')));
+  ok(await waitFor(`${sentText}.length > 0 && !/didn.t start|canceled/.test(${sentText})`), 'and the page takes it up: state matches, Supabase judges the token');
   await arrive(SITE + '#id_token=abc&state=forged');
   ok(await waitFor('!document.getElementById("auth-error").hidden'), 'the main site finishes the return before routing');
   ok(await evaluate('location.hash === ""'), 'and its router never sees the token');

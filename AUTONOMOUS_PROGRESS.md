@@ -50,6 +50,20 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
    - Note: the dev Mac's Xcode works for TestFlight. An App Store submission
      later goes through the cloud build (`cloud-appstore-submission`).
 
+### Ben's request (2026-11-22): "Start with item one and keep going. You can also do the recording too. The skills should be built for that in at least one of my repositories. Start an autonomous loop to make sure you get it all done."
+L1. ✅ (launch tick 1) First sign-in from inside Claude: the same-window Apple fallback asks
+    no scope, so a brand-new account gets no email. Make it work with email.
+L2. ⏳ App Store submission: privacy labels matching PrivacyInfo.xcprivacy,
+    screenshots, description, the review recording (find the recording
+    skill in Ben's repos), and the cloud build (the dev Mac runs a beta OS).
+L3. ⏳ Connectors Directory submission: reviewer test account, the form
+    (after L1).
+L4. ⏳ iPhone checks still missing: import (file on the phone), error
+    state, delete account (needs a throwaway Apple ID: Ben).
+Then, from the plan: 6 files and opt-in uploaded copies; 7 shared stories;
+8 iPad readable width (Ben's answer); 9 macOS (later). FinanceKit waits on
+Apple.
+
 ### Documented work
 4. ✅ (tick 3) iOS parity with the web's drawn marks: the circled Unexamined count and
    the Ledger rule (PARITY / DESIGN M1).
@@ -567,3 +581,33 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
      live and once in a scheduled task.
   3. Decide: the iPad readable width; push the template branch.
   4. iPad: Settings > Developer > Enable UI Automation.
+
+### Launch tick 1 — 2026-11-22 — L1: first sign-in from inside Claude now gets an email
+- **Context:** Ben's launch list, L1. The same-window Apple fallback asked no
+  scope (Apple returns the email only by POSTing to a server), so a
+  brand-new account created inside Claude's sheet had no email.
+- **Implementation:**
+  - `supabase/functions/apple-return` (v1): receives Apple's form_post and
+    303s back to the consent page or the website with the token in the
+    fragment. The page is chosen by the end of `state` from a fixed list of
+    two; anything else gets 400, so it is never an open redirect. Stores
+    nothing.
+  - `js/api.js`: the fallback asks `scope=email`, `response_mode=form_post`
+    to apple-return; `state` = 32 hex + ".c"/".w".
+  - Apple Developer: added the Supabase host and the apple-return URL to the
+    Services ID `com.learningischange.centmemo.web` (5 website URLs; the
+    three existing ones kept).
+- **Verification:**
+  - The endpoint returns to exactly the two pages, carries a cancel through,
+    and refuses an unknown target, a malformed state, and GET.
+  - Apple accepts the new request (an unregistered address is refused);
+    both old return addresses are still accepted.
+  - `test_web_states`: the whole chain (POST to apple-return, follow the
+    303, the page takes the token up with the state check passing).
+  - `tools/test_all.sh` exit 0. The first run was blind (headless Chrome
+    took more than 10 s to start); the start-up wait is now 30 s.
+- **Not verified:** a real brand-new Apple ID signing up inside Claude.
+- **Order kept:** the website change shipped only after Apple accepted the
+  return address, so Ben's in-Claude sign-in never broke.
+- **Next:** L2, App Store submission, starting with the review recording
+  (Ear Drama's AppReviewTourUITests pattern plus the playbook's capture).
