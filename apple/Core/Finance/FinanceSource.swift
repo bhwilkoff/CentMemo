@@ -35,19 +35,23 @@ enum FinanceSources {
     /// Wallet data AND this build carries the entitlement; calling FinanceKit
     /// otherwise terminates the app ("Process is not entitled").
     static var current: FinanceSource {
-        #if canImport(FinanceKit) && os(iOS)
-        if FinanceKitSource.isEntitled { return FinanceKitSource() }
-        #endif
         #if DEBUG
         if ProcessInfo.processInfo.environment["APP_SAMPLE_FINANCE"] == "1" { return SampleFinanceSource() }
         #endif
+        #if canImport(FinanceKit) && os(iOS)
+        return FinanceKitSource()
+        #else
         return UnavailableFinanceSource()
+        #endif
     }
+
+    /// The saved history token, per signed-in person.
+    static func tokenKey(_ email: String?) -> String { "financeToken-" + (email ?? "anon") }
 }
 
 struct UnavailableFinanceSource: FinanceSource {
     var unavailableReason: String? {
-        "Waiting on Apple's approval to read Apple Wallet. Until then, import an Apple Card export."
+        "Apple Wallet isn't available here. Import an Apple Card export instead."
     }
     func requestAccess() async throws -> Bool { false }
     func changes(since token: Data?) async throws -> FinanceChanges { FinanceChanges() }
@@ -78,17 +82,21 @@ struct SampleFinanceSource: FinanceSource {
 #endif
 
 #if canImport(FinanceKit) && os(iOS)
-/// The real source, compiled now and switched on when Apple's grant arrives.
+/// The real source (entitlement granted 2026-11-22). isDataAvailable is the
+/// only FinanceKit call made before checking it: the others terminate the app
+/// where Wallet data doesn't exist (iPad, the simulator).
 struct FinanceKitSource: FinanceSource {
-    /// The entitlement is added to CentMemo.entitlements only after Apple
-    /// approves it; until then this stays false and FinanceKit is never called.
-    static var isEntitled: Bool {
-        Bundle.main.object(forInfoDictionaryKey: "CMFinanceKitEnabled") as? Bool == true
-            && FinanceStore.isDataAvailable(.financialData)
+    var unavailableReason: String? {
+        FinanceStore.isDataAvailable(.financialData) ? nil
+            : "Apple Wallet's financial data isn't on this device. Import an Apple Card export instead."
     }
 
-    var unavailableReason: String? {
-        FinanceStore.isDataAvailable(.financialData) ? nil : "Apple Wallet's financial data isn't available on this device."
+    /// True when the person turned CentMemo's Wallet access off (Settings,
+    /// Privacy & Security, Financial Data). The entitlement request promised the
+    /// synced data is then deleted (FinanceRevocation).
+    static func accessRevoked() async -> Bool {
+        guard FinanceStore.isDataAvailable(.financialData) else { return false }
+        return (try? await FinanceStore.shared.authorizationStatus()) == .denied
     }
 
     func requestAccess() async throws -> Bool {
@@ -104,15 +112,31 @@ struct FinanceKitSource: FinanceSource {
         for account in accounts {
             out.accounts.append(Self.account(account))
             let key = account.id.uuidString
-            for try await changes in store.transactionHistory(forAccountID: account.id, since: tokens[key], isMonitoring: false) {
-                out.inserted += changes.inserted.map(Self.row)
-                out.inserted += changes.updated.map(Self.row)
-                out.deletedSourceIDs += changes.deleted.map { (id: UUID) in id.uuidString }
-                tokens[key] = changes.newToken
+            do {
+                try await Self.collect(store, account.id, since: tokens[key], into: &out, token: &tokens[key])
+            } catch let error as FinanceError where Self.isInvalidToken(error) {
+                // The history was compacted past the saved token: start this account over
+                // (upserts on source_id make the replay harmless).
+                try await Self.collect(store, account.id, since: nil, into: &out, token: &tokens[key])
             }
         }
         out.newToken = try? JSONEncoder().encode(tokens)
         return out
+    }
+
+    private static func collect(_ store: FinanceStore, _ id: UUID, since: FinanceStore.HistoryToken?,
+                                into out: inout FinanceChanges, token: inout FinanceStore.HistoryToken?) async throws {
+        for try await changes in store.transactionHistory(forAccountID: id, since: since, isMonitoring: false) {
+            out.inserted += changes.inserted.map(Self.row)
+            out.inserted += changes.updated.map(Self.row)
+            out.deletedSourceIDs += changes.deleted.map { (id: UUID) in id.uuidString }
+            token = changes.newToken
+        }
+    }
+
+    private static func isInvalidToken(_ e: FinanceError) -> Bool {
+        if case .historyTokenInvalid = e { return true }
+        return false
     }
 
     private static func account(_ a: Account) -> FinanceAccount {
@@ -158,3 +182,22 @@ struct FinanceKitSource: FinanceSource {
     }
 }
 #endif
+
+/// Keeps the entitlement request's promise: when the person turns CentMemo's
+/// Wallet access off, the Wallet data synced to CentMemo is deleted (their own
+/// memos on those purchases go with it; imported exports are untouched).
+enum FinanceRevocation {
+    @MainActor
+    static func check(email: String?) async {
+        #if canImport(FinanceKit) && os(iOS)
+        let key = FinanceSources.tokenKey(email)
+        guard UserDefaults.standard.data(forKey: key) != nil, await FinanceKitSource.accessRevoked() else { return }
+        do {
+            try await APIClient.shared.deleteFinanceKitData()
+            UserDefaults.standard.removeObject(forKey: key)
+        } catch {
+            print("FinanceRevocation: delete failed, will retry next launch: \(error)")
+        }
+        #endif
+    }
+}

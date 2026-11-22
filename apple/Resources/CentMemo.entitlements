@@ -7,7 +7,11 @@
 	<array>
 		<string>Default</string>
 	</array>
-	<!-- FinanceKit (com.apple.developer.financekit) is added here only after
-	     Apple grants it, together with CMFinanceKitEnabled = YES in project.yml. -->
+	<!-- FinanceKit: granted by Apple 2026-11-22 (case 23676235), managed
+	     capability on the App ID. -->
+	<key>com.apple.developer.financekit</key>
+	<array>
+		<string>financial-data</string>
+	</array>
 </dict>
 </plist>

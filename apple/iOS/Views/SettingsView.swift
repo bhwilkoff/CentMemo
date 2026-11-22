@@ -156,7 +156,7 @@ struct WalletSyncButton: View {
     @State private var working = false
     @State private var result: String?
 
-    private var tokenKey: String { "financeToken-" + (session.email ?? "anon") }
+    private var tokenKey: String { FinanceSources.tokenKey(session.email) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.s1) {

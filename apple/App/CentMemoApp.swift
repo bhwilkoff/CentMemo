@@ -76,9 +76,17 @@ struct CentMemoApp: App {
 struct RootView: View {
     @Environment(AppStore.self) private var store
     @Environment(SessionStore.self) private var session
+    @Environment(\.scenePhase) private var phase
 
     var body: some View {
         platformRoot
+            // Wallet access turned off in Settings: delete the synced Wallet data
+            // (the FinanceKit entitlement request's promise). Checked on every return
+            // to the foreground, which is when someone comes back from Settings.
+            .onChange(of: phase, initial: true) { _, now in
+                guard now == .active, session.isSignedIn else { return }
+                Task { await FinanceRevocation.check(email: session.email) }
+            }
             // The ONE place the inbox is consumed: deep links and test doors
             // alike land in the store and are routed here.
             .onChange(of: store.inbox, initial: true) { _, pending in

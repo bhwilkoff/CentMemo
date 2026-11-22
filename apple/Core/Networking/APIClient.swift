@@ -323,6 +323,12 @@ final class APIClient {
 
     // MARK: - FinanceKit sync (Decision 057: idempotent on source_id)
 
+    /// Deletes every account that came from FinanceKit; its transactions,
+    /// balances, memos, and attachments cascade. Used when access is revoked.
+    func deleteFinanceKitData() async throws {
+        try await raw("rest/v1/accounts", query: [.init(name: "source", value: "eq.financekit")], method: "DELETE")
+    }
+
     /// Writes one batch of FinanceKit changes: accounts upserted by their
     /// FinanceKit id, transactions upserted as `source = 'financekit'`, and
     /// deletions applied. The connector never reads these rows (Addendum 3.2).

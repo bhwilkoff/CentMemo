@@ -50,6 +50,10 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
    - Note: the dev Mac's Xcode works for TestFlight. An App Store submission
      later goes through the cloud build (`cloud-appstore-submission`).
 
+### FinanceKit (2026-11-22): Ben: "Finance kit entitlement approval just came in!"
+F1. 🟡 (launch tick 2) Real FinanceKit in the app; Ben runs the first real sync on his phone.
+F2. ⏳ FinanceKit background delivery extension (iOS 26).
+
 ### Ben's request (2026-11-22): "Start with item one and keep going. You can also do the recording too. The skills should be built for that in at least one of my repositories. Start an autonomous loop to make sure you get it all done."
 L1. ✅ (launch tick 1) First sign-in from inside Claude: the same-window Apple fallback asks
     no scope, so a brand-new account gets no email. Make it work with email.
@@ -611,3 +615,36 @@ Apple.
   return address, so Ben's in-Claude sign-in never broke.
 - **Next:** L2, App Store submission, starting with the review recording
   (Ear Drama's AppReviewTourUITests pattern plus the playbook's capture).
+
+### Launch tick 2 — 2026-11-22 — FinanceKit granted: real Wallet in the app (build 1.0 (10))
+- **Context:** Ben: "Finance kit entitlement approval just came in!" (Apple
+  case 23676235: granted for team L2G756LY8N, bundle
+  com.learningischange.centmemo). The grant does not answer the Addendum 3.2
+  connector question, so the connector still excludes Wallet rows.
+- **Implementation:**
+  - FinanceKit enabled on the App ID (Developer portal).
+  - `com.apple.developer.financekit = [financial-data]` in the entitlements.
+  - The never-working `CMFinanceKitEnabled` Info flag removed: Xcode never
+    wrote that custom key, so the path had been off in every build.
+    FinanceKit now gates on `isDataAvailable`, with a truthful message where
+    there is no Wallet data.
+  - An invalid history token restarts that account instead of failing every
+    sync.
+  - `FinanceRevocation`: when Wallet access is turned off in Settings, the
+    synced Wallet data is deleted, checked on every return to the
+    foreground. The entitlement request promised this.
+  - Build 10.
+- **Verification:**
+  - The signed app carries `financial-data`, and Apple's regenerated
+    profile allows exactly that.
+  - iPhone 12 tap tier 12/12, plus `WalletAvailabilityUITests`: Settings
+    offers Connect there (FinanceKit reports Wallet data) and the
+    pre-approval wording is gone.
+  - `tools/test_all.sh` exit 0.
+- **Deliberately not done:** tapping Connect on the bench. It runs as the
+  synthetic account, so authorizing would copy a real person's Wallet data
+  into test data. The first real sync is Ben's, on his own phone, signed in
+  as himself (TestFlight build 10).
+- **Not yet verified:** the revocation delete against real FinanceKit (it
+  needs a real authorization, then turning it off).
+- **Next:** TestFlight build 10 for Ben; then L2 (App Store submission).
