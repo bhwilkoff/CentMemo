@@ -56,6 +56,7 @@ struct TwoPane<List: View>: View {
     /// The Unexamined tab's stack takes inbox pushes (deep links, test doors).
     var path: Binding<NavigationPath>? = nil
     @Environment(\.horizontalSizeClass) private var width
+    @Environment(AppStore.self) private var store
     @State private var pane = PaneSelection()
 
     var body: some View {
@@ -77,6 +78,13 @@ struct TwoPane<List: View>: View {
                 .frame(maxWidth: .infinity)
             }
             .environment(pane)
+            // A link that opened an item (the inbox) shows it on the right, not
+            // pushed onto the list's stack.
+            .onChange(of: store.openedItem, initial: true) { _, id in
+                guard let path, let id else { return }
+                pane.route = EntryRoute(id: id)
+                path.wrappedValue = NavigationPath()
+            }
         } else {
             leftStack
         }

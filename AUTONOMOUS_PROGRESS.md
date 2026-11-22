@@ -989,3 +989,32 @@ Apple.
     (deploy).
   - The narrow left pane in Duo portrait wraps the date and category.
   - D6: the event page is still a bank form.
+
+### Design tick 5 — 2026-11-22 — connector Skip (v8); D6 event page memo-first; Duo link fix
+- **Connector v8:** `unexamined_transactions` leaves skipped events out.
+  The test_connector check skips one as the owner, expects it gone, then
+  restores it. Seen failing on v7, passing on v8. The reviewer path still
+  passes.
+  - Note: v8 shipped a trimmed money.js beside the function (only
+    toMinor/formatMinor, all it uses). tools/deploy-mcp.sh ships the full
+    file when a token is present.
+- **D6 event page (iOS):**
+  - The Setting tile (56pt) and the name lead, with the date under them.
+  - The memo editor follows, with the placeholder "What happened here?"
+    (wording for Ben to review).
+  - Themes, then Photos.
+  - The amount, account and category form a footnote line that opens the
+    bank facts (a DisclosureGroup).
+  - On save, a pencil stroke draws in beside "Saved." (PencilStroke).
+  - MemoUITests and SkipUITests pass on the iPhone 12. Frames read on the
+    iPhone 12 (memo, blank) and the Duo.
+- **Duo bug found by looking:** an item opened by a link (the inbox, the
+  APP_START_ITEM door) was pushed onto the left stack while the right pane
+  said "Choose a purchase". Now `AppStore.openedItem` routes it to the right
+  pane at regular width. Seen fixed in the Duo frame.
+- **design_shots.py** captures event pages too (`--screen memo|blank`).
+- **⏳:**
+  - The web event page doesn't lead with the memo yet (parity).
+  - Narrative and Story rows as memo-first.
+  - S1 Venmo CSV.
+  - Ben's FinanceKit choice (S4).

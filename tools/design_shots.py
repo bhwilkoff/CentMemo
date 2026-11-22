@@ -35,7 +35,10 @@ import devlease  # noqa: E402
 import frame_blind  # noqa: E402
 from ios_uitest import displays  # noqa: E402
 
-SCREENS = ["unexamined", "ledger", "story", "settings"]
+SCREENS = ["unexamined", "ledger", "story", "settings", "memo", "blank"]
+# Event pages from the synthetic owner's fixture (apple/UITests/UITestSupport.swift):
+# a written memo (Denver Zoo) and an unexamined purchase.
+ITEMS = {"memo": "a3b8c10c-68b8-4bfe-9380-c87b7015a49d", "blank": "e5626ed0-b9f2-48a0-8df7-672ae6016a40"}
 OUT = app_config.REPO / "build" / "design" / date.today().isoformat()
 
 
@@ -51,7 +54,8 @@ def shoot(name, extra_env, screens, settle):
     kept = []
     with devlease.hold([bench.lease_name(entry)], task="design_shots", wait=300):
         for screen in screens:
-            env = {**owner_env(), **app_config.DOOR_DEFAULTS, "APP_START_TAB": screen, **extra_env}
+            door = {"APP_START_ITEM": ITEMS[screen]} if screen in ITEMS else {"APP_START_TAB": screen}
+            env = {**owner_env(), **app_config.DOOR_DEFAULTS, **door, **extra_env}
             ok, out = ad.launch(udid, app_config.APPLE_BUNDLE_ID, env=env)
             if not ok:
                 print(f"FAIL {name}/{screen}: launch refused: {out}")

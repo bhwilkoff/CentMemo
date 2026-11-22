@@ -86,7 +86,7 @@ the Setting page) join where they fit.
   "Ledger" and every other screen word. Ben chooses.
 - D5 ✅ (Ben chose C, with parts of A and B; https://claude.ai/artifact/TtRywFmQhiiq9Mdg1Q2jPu) Directions: three design directions drawn from the research; Ben chooses
   or mixes (propose, don't decide).
-- D6 Memo as achievement: a written memo reads as a moment in a life, not a
+- D6 🟡 (event page leads with the Setting tile and the memo; money and bank facts in a footnote; a pencil stroke draws in on save ✅ iPhone 12 + Duo; Narrative/Story rows next) Memo as achievement: a written memo reads as a moment in a life, not a
   debit.
 - D7 Writing tools: friendly regular check-in, recommendations of what to
   write about.
@@ -96,6 +96,22 @@ the Setting page) join where they fit.
 - D11 Visualization: color-coded charges or themes.
 - D13 🟡 (iOS swipe + detail menu, web detail button, Narrative 'N skipped' group, Unexamined excludes ✅; connector tool ⏳) Skip: swipe an event away as a detail; only plot points reach the Story.
 - D12 Themes (Ben's word for sets): collect stories into sets by value; share a story or a set.
+
+## Sources (Ben, 2026-11-22)
+
+> So long as the CSV pathway works from the venmo, paypal, and cashapp mobile
+> apps, we should build for it.
+
+- S1 Venmo CSV import (the monthly statement export exists on the phone; its
+  Note column arrives as the memo).
+- S2 PayPal and Cash App CSV import, once a real export from each phone app
+  confirms the pathway and the columns.
+- S3 The connector returns memos with date, amount, and Setting, so a
+  person's Claude can match them to the bank data Claude Personal Finance
+  already reads (Plaid).
+- S4 FinanceKit rows in the connector: Ben's direction is to build it whole
+  and let App Review judge it inside the app (see AUTONOMOUS_PROGRESS.md,
+  2026-11-22, for the adversarial read and the open choice).
 
 Each tick: take the top open D item, ship it with verification on BOTH phones
 (screenshots read before "done"), log it in AUTONOMOUS_PROGRESS.md.

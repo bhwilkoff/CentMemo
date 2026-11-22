@@ -41,6 +41,17 @@ enum NavigationLook {
 /// DESIGN M1: the pencil circle drawn around the Unexamined count. The same path
 /// as the web's `.pencil-circle` mask (css/styles.css), in a 100x60 box scaled to
 /// the content, so both platforms draw one hand-closed loop that overshoots its start.
+/// One loose pencil stroke: drawn in when a memo is kept (D6).
+nonisolated struct PencilStroke: Shape {
+    func path(in r: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: r.minX + 2, y: r.midY + 1))
+        path.addCurve(to: CGPoint(x: r.maxX - 2, y: r.midY), control1: CGPoint(x: r.minX + r.width * 0.3, y: r.minY),
+                      control2: CGPoint(x: r.minX + r.width * 0.65, y: r.maxY))
+        return path
+    }
+}
+
 nonisolated struct PencilCircle: Shape {
     func path(in r: CGRect) -> Path {
         func p(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: r.minX + x / 100 * r.width, y: r.minY + y / 60 * r.height) }

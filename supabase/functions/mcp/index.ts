@@ -202,7 +202,7 @@ Deno.serve(
 
         server.registerTool('unexamined_transactions', {
           title: 'Unexamined purchases',
-          description: 'Recent purchases the person has not written a memo for yet, newest first.',
+          description: 'Recent purchases the person has not written a memo for yet, newest first. Events the person skipped as details are left out.',
           inputSchema: z.object({
             from: isoDay.optional().describe('Start date, YYYY-MM-DD. Default: 30 days ago.'),
             limit: z.number().int().min(1).max(100).optional().describe('At most this many, default 20.'),
@@ -211,7 +211,7 @@ Deno.serve(
         }, async ({ from, limit }) => {
           const since = from ?? daysAgo(30);
           const r = await txns('id, txn_date, amount_minor, currency, merchant, description, category, txn_type, status, memos(transaction_id)')
-            .gte('txn_date', since).lt('amount_minor', 0).neq('status', 'rejected').order('txn_date', { ascending: false }).limit(1000);
+            .gte('txn_date', since).lt('amount_minor', 0).neq('status', 'rejected').is('skipped_at', null).order('txn_date', { ascending: false }).limit(1000);
           if (r.error) throw new Error(r.error.message);
           // deno-lint-ignore no-explicit-any
           const rows = (r.data as any[]).filter((t) => !(Array.isArray(t.memos) ? t.memos.length : t.memos));

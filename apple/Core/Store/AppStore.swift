@@ -6,6 +6,9 @@ import SwiftUI
 final class AppStore {
     var navigationPath = NavigationPath()
     var selectedTab: String? = "unexamined"
+    /// The last item a link opened: at regular width it opens in the right-hand
+    /// pane rather than on the list's stack (TwoPane reads it).
+    var openedItem: String?
 
     /// Player-level mute. A door launch sets it (APP_MUTE); every player reads
     /// it, so a harness run on someone's TV is silent unless it opts in.
@@ -35,6 +38,7 @@ final class AppStore {
             case .item(let id):
                 // FILL IN: map the id to your item route type.
                 navigationPath.append(id)
+                openedItem = id
             }
         }
     }

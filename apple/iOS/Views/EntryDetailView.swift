@@ -21,29 +21,35 @@ struct EntryDetailView: View {
     @State private var photos: [APIClient.Attachment] = []
     @State private var picked: PhotosPickerItem?
     @State private var picking = false
+    @State private var drawn: CGFloat = 0
 
     var body: some View {
         LoadState(isLoading: loading, error: entry == nil ? error : nil, retry: load) {
             if let e = entry {
                 Form {
+                    // D6: the Setting and the memo lead; the money is a footnote
+                    // (Decision 065: memo, Setting; the Chronicle direction).
                     Section {
-                        VStack(alignment: .leading, spacing: Spacing.s1) {
-                            Text(e.displayMerchant).font(DisplayType.title)
-                            MoneyText(minor: e.amountMinor, currency: e.currency, font: TypeRamp.sectionHeader)
+                        HStack(alignment: .center, spacing: Spacing.s3) {
+                            StoreTile(name: e.displayMerchant, category: e.category, size: 56)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(e.displayMerchant).font(DisplayType.title).lineLimit(2)
+                                Text(LedgerDate.display(e.txnDate)).font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
+                            }
                         }
-                        LabeledContent("Date", value: LedgerDate.display(e.txnDate))
-                        if let posted = e.postedDate, posted != e.txnDate { LabeledContent("Posted", value: LedgerDate.display(posted)) }
-                        if !e.category.isEmpty { LabeledContent("Category", value: e.category) }
-                        if !e.txnType.isEmpty { LabeledContent("Type", value: e.txnType) }
-                        if e.status != "booked" { LabeledContent("Status", value: e.status.capitalized) }
-                        if let account = e.accountName { LabeledContent("Account", value: account) }
-                        if !e.description.isEmpty, e.description != e.merchant {
-                            LabeledContent("Statement") { Text(e.description).font(TypeRamp.caption) }
-                        }
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                     }
                     Section {
                         TextEditor(text: $memo)
-                            .frame(minHeight: 140)
+                            .frame(minHeight: 160)
+                            .overlay(alignment: .topLeading) {
+                                if memo.isEmpty {
+                                    Text("What happened here?").font(DisplayType.memo)
+                                        .foregroundStyle(Color.brandTextMuted.opacity(0.7))
+                                        .padding(.top, 8).padding(.leading, 5).allowsHitTesting(false)
+                                }
+                            }
                             .font(DisplayType.memo)
                             .accessibilityLabel("Memo")
                             .accessibilityIdentifier("memo-editor")
@@ -54,7 +60,16 @@ struct EntryDetailView: View {
                         // The confirmation sits under the memo, where the person is
                         // looking (the iPhone 12 tap tier found it off-screen below).
                         if let status {
-                            Text(status).accessibilityIdentifier("memo-status")
+                            HStack(spacing: Spacing.s2) {
+                                // The moment a memo is kept: one pencil stroke draws in.
+                                if status == "Saved." {
+                                    PencilStroke().trim(from: 0, to: drawn)
+                                        .stroke(Color.brandPrimary, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                                        .frame(width: 72, height: 8)
+                                        .accessibilityHidden(true)
+                                }
+                                Text(status).accessibilityIdentifier("memo-status")
+                            }
                         }
                     }
                     Section("Themes") {
@@ -88,6 +103,27 @@ struct EntryDetailView: View {
                         .accessibilityIdentifier("add-photo")
                     }
                     if let error { Section { Text(error).foregroundStyle(Color.semanticError) } }
+                    // The money and the bank's facts: a footnote, there when wanted.
+                    Section {
+                        DisclosureGroup {
+                            LabeledContent("Date", value: LedgerDate.display(e.txnDate))
+                            if let posted = e.postedDate, posted != e.txnDate { LabeledContent("Posted", value: LedgerDate.display(posted)) }
+                            if !e.category.isEmpty { LabeledContent("Category", value: e.category) }
+                            if !e.txnType.isEmpty { LabeledContent("Type", value: e.txnType) }
+                            if e.status != "booked" { LabeledContent("Status", value: e.status.capitalized) }
+                            if let account = e.accountName { LabeledContent("Account", value: account) }
+                            if !e.description.isEmpty, e.description != e.merchant {
+                                LabeledContent("Statement") { Text(e.description).font(TypeRamp.caption) }
+                            }
+                        } label: {
+                            HStack {
+                                MoneyText(minor: e.amountMinor, currency: e.currency, font: TypeRamp.caption)
+                                Text([e.accountName, e.category.isEmpty ? nil : e.category].compactMap { $0 }.joined(separator: " · "))
+                                    .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
+                            }
+                        }
+                        .accessibilityIdentifier("event-details")
+                    }
 
                 }
             } else {
@@ -213,6 +249,8 @@ struct EntryDetailView: View {
         do {
             try await APIClient.shared.saveMemo(transactionID: entryID, body: memo, valueIDs: Array(chosen))
             status = memo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Memo removed." : "Saved."
+            drawn = 0
+            withAnimation(.easeOut(duration: 0.9).delay(0.1)) { drawn = 1 }
             UINotificationFeedbackGenerator().notificationOccurred(.success)
             session.didChangeData()
         } catch {

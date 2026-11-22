@@ -107,6 +107,25 @@ for (const [name, args] of Object.entries(calls)) {
   ok(!r.json.result?.isError && expect[name].test(text), `${name}: ${text.split('\n')[0].slice(0, 90)}`);
 }
 
+// 6b. Skip (Decision 065): an event the person skipped never reaches Claude's
+// list of purchases without a memo. The owner skips one, then restores it.
+{
+  const unexamined = async () => ((await rpc('tools/call', { name: 'unexamined_transactions', arguments: { from: '2025-01-01', limit: 100 } })).json.result?.content || []).map((c) => c.text).join('\n');
+  const before = await unexamined();
+  const m = before.match(/id: ([0-9a-f-]{36})/);
+  ok(!!m, 'an unexamined event to skip');
+  if (m) {
+    const patch = (v) => fetch(`${PROJECT}/rest/v1/transactions?id=eq.${m[1]}`, { method: 'PATCH', headers: asOwner, body: JSON.stringify({ skipped_at: v }) });
+    await patch(new Date().toISOString());
+    try {
+      ok(!(await unexamined()).includes(m[1]), 'a skipped event is left out of unexamined_transactions');
+    } finally {
+      await patch(null);
+    }
+    ok((await unexamined()).includes(m[1]), 'and comes back when the person brings it back');
+  }
+}
+
 // 7. The agent's real token reads but never writes (Decision 056)
 console.log('agent token');
 const asAgent = { apikey: KEY, authorization: 'Bearer ' + tok.access_token, 'content-type': 'application/json', prefer: 'return=representation' };
