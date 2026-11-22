@@ -17,7 +17,8 @@ The owner's requests jump the rotation.
 - Quote `docs/DESIGN.md` before UI work.
 - Audit before shipping (grep for the feature; PARITY.md can lie).
 - Verify with `tools/test_all.sh` EVERY tick, however small (ticks 1 to 4
-  skipped it and missed a manifest drift), plus the device tiers on the iPhone 12
+  skipped it and missed a manifest drift), and gate the commit on its EXIT
+  CODE, never on `| tail` (tick 18 committed over a failure that way), plus the device tiers on the iPhone 12
   (`tools/ios_uitest.py`, `tools/ios_run.py`) for iOS work.
 - One commit per tick. Bump both iOS version numbers on iOS-touching ticks.
 - The agent is never the tester of record: Ben plays.
@@ -532,3 +533,14 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
     delete a second Apple ID account on purpose, or a test-only delete
     target exists.
 - **Next:** tick 19 (web).
+
+### Tick 18 correction — 2026-11-22
+- Tick 18's entry says `tools/test_all.sh` ALL PASS. It did not: it
+  failed, and the commit went through anyway, because the command was
+  `test_all.sh | tail -1 && ...` (tail always succeeds).
+- The failure was intermittent: the web photo-note check landed on the
+  wrong view when sign-in rewrote the route (the same race tick 17 found
+  for the stranger).
+- Fixed by setting the route after the app settles. 3/3 passes, then
+  `tools/test_all.sh` exit 0.
+- The loop rule now gates commits on the exit code.

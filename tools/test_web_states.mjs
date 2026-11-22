@@ -166,6 +166,9 @@ console.log('photo attached on the iPhone');
   const made = await (await fetch(P + '/rest/v1/attachments', { method: 'POST', headers: hdr, body: JSON.stringify({ transaction_id: TXN, kind: 'photo', device_ref: 'web-test/L0/001' }) })).json();
   try {
     await openAs('owner', '#/t/' + TXN);
+    // As with Import: set the route once the app has settled (sign-in can rewrite it).
+    await evaluate(`location.hash = "#/t/${TXN}"; true`);
+    await waitFor(`!!document.querySelector("${VIS}#memo-body")`);
     ok(await waitFor(`/1 photo attached in the CentMemo iPhone app/.test(document.querySelector("${VIS}.photos-note")?.textContent || "")`), 'the web says a photo is attached, and where');
     await shot('photo-note');
     await fetch(`${P}/rest/v1/attachments?id=eq.${made[0].id}`, { method: 'DELETE', headers: hdr });
