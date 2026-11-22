@@ -56,7 +56,7 @@ struct SettingsView: View {
                 // FinanceKit Addendum 3.3: what is read, how it is used, and the policy,
                 // shown before the person is asked for access.
                 if finance.unavailableReason == nil {
-                    Text("CentMemo reads your Apple Card, Apple Cash, and Savings accounts and transactions and keeps them in your CentMemo account, so you can write memos on any device. Claude never sees them. [Privacy](https://centmemo.com/privacy/)")
+                    Text("CentMemo reads your Apple Card, Apple Cash, and Savings accounts and transactions and keeps them in your CentMemo account, so you can write memos on any device. \(ConnectorPolicy.walletDisclosure) [Privacy](https://centmemo.com/privacy/)")
                 }
             }
             Section {

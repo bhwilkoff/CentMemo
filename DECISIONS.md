@@ -92,6 +92,7 @@ Roll again past ~50 KB. Never trim, edit, or summarize an entry in place.
 - 063: Connectors Directory reviewers sign in with one reviewer account; everyone else uses Apple (amends 058)
 - 064: Reviewer credentials go in the official submission form (amends 063)
 - 065: The story vocabulary: Narrative, memo, Story, plot point, Skip, Theme, Setting
+- 066: Wallet data in the connector is built and off until Apple answers in writing
 
 ---
 
@@ -418,3 +419,26 @@ docs/design/STORY-DESIGN-BRIEF.md.
 - A skipped event is never deleted, and Skip is undoable.
 - The connector's tool names stay as they are (an external contract), but
   their descriptions use the vocabulary where it helps the reader.
+
+## 066: Wallet data in the connector is built and off until Apple answers in writing (Ben, 2026-11-22)
+
+*Date: 2026-11-22*
+
+The connector can share Apple Wallet (FinanceKit) events. It is built
+complete and stays off until Apple answers the question in Case-ID 23676235.
+One commit turns it on, flipping the server switch and the iPhone switch and
+rewriting every promise together (docs/store/WALLET-IN-CONNECTOR.md).
+
+**Why**: Ben: "let's build everything as if we can send the apple wallet data
+to claude, but let's draft the email and see what they say rather than
+turning it on before any kind of response." An adversarial read of the
+FinanceKit Addendum found the server, not the app, discloses to Anthropic
+(3.2); consent does not override it (3.3); and App Review approval is not
+"separate written permission". Losing the entitlement would cost the app its
+core, while waiting costs only Wallet rows in Claude.
+
+**How to apply**:
+- `tests/connector_policy.test.mjs` fails unless SHARE_FINANCEKIT,
+  ConnectorPolicy.sharesWallet and every page's promise agree.
+- Never flip one switch alone. Quote Apple's reply in the turn-on commit.
+- If Apple permits only memos, add a memo-only read and leave the switch off.

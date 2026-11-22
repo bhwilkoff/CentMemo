@@ -109,9 +109,9 @@ the Setting page) join where they fit.
 - S3 The connector returns memos with date, amount, and Setting, so a
   person's Claude can match them to the bank data Claude Personal Finance
   already reads (Plaid).
-- S4 FinanceKit rows in the connector: Ben's direction is to build it whole
-  and let App Review judge it inside the app (see AUTONOMOUS_PROGRESS.md,
-  2026-11-22, for the adversarial read and the open choice).
+- S4 ✅ built, off (Decision 066): FinanceKit rows in the connector wait on
+  Apple's written answer; Ben's question is drafted in his Gmail
+  (Case-ID 23676235). Turn-on steps: docs/store/WALLET-IN-CONNECTOR.md.
 
 Each tick: take the top open D item, ship it with verification on BOTH phones
 (screenshots read before "done"), log it in AUTONOMOUS_PROGRESS.md.
