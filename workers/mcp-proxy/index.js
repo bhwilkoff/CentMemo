@@ -7,6 +7,11 @@ const ORIGIN = 'https://qucsmmazfalbyduxlavl.supabase.co/functions/v1/mcp';
 export default {
   async fetch(request) {
     const url = new URL(request.url);
+    // Claude and the Connectors Directory show the favicon of the server's address;
+    // this address serves only the connector, so point to CentMemo's icon.
+    if (url.pathname === '/favicon.ico' || url.pathname === '/apple-touch-icon.png') {
+      return Response.redirect('https://centmemo.com/assets/apple-touch-icon.png', 301);
+    }
     let path = url.pathname === '/' ? '' : url.pathname;
     // RFC 9728 well-known location, for clients that look there first.
     if (path.startsWith('/.well-known/oauth-protected-resource')) path = '/oauth-protected-resource';

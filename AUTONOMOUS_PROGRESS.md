@@ -60,8 +60,8 @@ L1. ✅ (launch tick 1) First sign-in from inside Claude: the same-window Apple 
 L2. 🟡 (recording, URLs, 4+, support, screenshots ✅; privacy labels answered, Ben publishes; copy, phone, Ben's clip, submit ⏳) App Store submission: privacy labels matching PrivacyInfo.xcprivacy,
     screenshots, description, the review recording (find the recording
     skill in Ben's repos), and the cloud build (the dev Mac runs a beta OS).
-L3. 🟡 (reviewer account and sign-in ✅, Decision 063; the form and its
-    compliance acknowledgments need Ben in claude.ai) Connectors Directory submission.
+L3. 🟡 (form steps 1-5 filled with Ben present; step 6 company info filled;
+    Ben ticks the acknowledgments, reviews, submits, emails reviewer creds) Connectors Directory submission.
 L4. ⏳ iPhone checks still missing: import (file on the phone), error
     state, delete account (needs a throwaway Apple ID: Ben).
 Then, from the plan: 6 files and opt-in uploaded copies; 7 shared stories;
@@ -814,3 +814,30 @@ Apple.
   address. Steps 6 and 7 are his acknowledgments and Submit.
 - Exited without saving. Every field's answer is in docs/store/DIRECTORY.md,
   the listing words drafted from Ben's own, for a short session with him.
+
+### Launch tick 7 — 2026-11-22 — L3: the directory form, filled with Ben
+- Ben added the connector at https://mcp.centmemo.com (his Apple sign-in and
+  approval). The form detected sign-in always required and DCR, 6 tools, OAuth.
+- **Found by the form:**
+  - **Step 2:** "Missing title annotation" on all six tools. The title was
+    only top-level; now also in `annotations.title` (mcp v6).
+  - **Step 6:** one acknowledgment reads "Tool descriptions contain no
+    instructions about model behavior", and `unexamined_transactions` said
+    "Use it to invite them ...; do not write the memo for them". It now
+    says only what the tool returns (mcp v7).
+  - `test_connector.mjs` checks both; each check was seen failing against
+    the old server, then passing through both addresses.
+- **The Worker** redirects /favicon.ico and /apple-touch-icon.png to
+  CentMemo's icon. Claude shows the server address's favicon, and that
+  address serves only the connector. Deployed through the dashboard,
+  verified live (301).
+- **Filled:**
+  - Listing: one-liner and description from Ben's words, Financial
+    Services, author, links, custom icon.
+  - Test & launch: three use cases, prerequisites, Read only, self-tested.
+  - Data handling: own API, no health data, nothing sponsored.
+  - Company: name, website, contact, reviewer notes. A guessed "Founder"
+    role was cleared.
+- **Left to Ben:** the seven policy acknowledgments, Review and submit, and
+  emailing the reviewer credentials (in ~/.centmemo/test-users.json under
+  "reviewer").

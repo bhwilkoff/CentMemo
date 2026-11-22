@@ -88,7 +88,10 @@ const list = await rpc('tools/list', {});
 const tools = list.json.result?.tools || [];
 const names = tools.map((t) => t.name).sort();
 ok(names.join() === 'get_balances,get_memos,list_accounts,search_transactions,spending_summary,unexamined_transactions', `six tools listed (${names.join(', ')})`);
-ok(tools.every((t) => t.annotations?.readOnlyHint === true && t.title), 'every tool has a title and readOnlyHint');
+ok(tools.every((t) => t.annotations?.readOnlyHint === true && t.title && t.annotations?.title === t.title), 'every tool has a title (also in annotations, for the directory) and readOnlyHint');
+// Directory policy: descriptions carry no instructions about model behavior.
+const instructing = tools.filter((t) => /\b(use it|do not|don't|never|always|you should|you must|ignore)\b/i.test(t.description || ''));
+ok(!instructing.length, `no tool description instructs the model (${instructing.map((t) => t.name).join(', ') || 'none'})`);
 const calls = {
   list_accounts: {}, get_balances: {},
   search_transactions: { from: '2026-10-01', to: '2026-11-30', merchant: 'Zoo' },
