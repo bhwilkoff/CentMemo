@@ -481,3 +481,25 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
 - **New backlog (from the audit):** 11e, see the iOS empty and error
   states, import, and delete account on a device.
 - **Next:** tick 17 (web), then 11e on the next iOS tick.
+
+### Tick 17 — 2026-11-22 — web: import proven through the real file input; idempotent on re-import
+- **Context:** re-mined from PARITY. Web import's ✅ rested on a day-one
+  look; no test drove the import screen.
+- **Implementation:** `tools/test_web_states.mjs` import section. As the
+  stranger it goes to Import, chooses `tests/fixtures/applecard-sample.csv`
+  through `DOM.setFileInputFiles`, and confirms. The second import must say
+  "0 new, 7 already in CentMemo." (Decision 057). It then sees the rows in
+  the Ledger, and a `finally` deletes the stranger's csv account and batches
+  and checks it is empty again, so the empty-state test stays valid.
+- **Verification:** 7/7 import checks pass; `tools/test_all.sh` ALL PASS.
+  The re-import check discriminates: a duplicate would read "7 new.".
+- **Harness lessons:**
+  - A new, empty account lands on Unexamined after sign-in, so a route in
+    the URL is lost; set the hash once the app settles and wait for the
+    view to be visible.
+  - A `${'$'}{n}` written as if the Python heredoc were an f-string put a
+    literal `${n}` into the matcher; the first passes were false failures,
+    not false passes.
+- **Product note:** no app code changed; nothing to bump.
+- **Next:** tick 18 (infra) or 11e on iOS: device runs of iOS import,
+  delete account, empty and error states.

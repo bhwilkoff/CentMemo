@@ -120,6 +120,44 @@ await shot('offline-ledger');
 await cdp('Network.emulateNetworkConditions', { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
 ok(await waitFor('document.getElementById("offline-banner").hidden'), 'the banner clears when back online');
 
+console.log('import (stranger, through the real file input)');
+{
+  const s = await sessionFor('stranger');
+  const hdr = { apikey: K, authorization: 'Bearer ' + s.access_token };
+  const FIXTURE = path.join(ROOT, 'tests/fixtures/applecard-sample.csv');
+  const choose = async () => {
+    const doc = await cdp('DOM.getDocument', { depth: -1 });
+    const q = await cdp('DOM.querySelector', { nodeId: doc.result.root.nodeId, selector: '#import-file' });
+    await cdp('DOM.setFileInputFiles', { nodeId: q.result.nodeId, files: [FIXTURE] });
+  };
+  const clickImport = () => evaluate(`[...document.querySelectorAll("${VIS}button")].find(b => /^Import \\d+ transactions$/.test(b.textContent))?.click(), true`);
+  try {
+    await openAs('stranger', '#/import');
+    // A new, empty account lands on Unexamined; go to Import once the app has settled.
+    await evaluate('location.hash = "#/import"; true');
+    ok(await waitFor('!document.getElementById("view-import").hidden'), 'the Import view is on screen');
+    await choose();
+    ok(await waitFor(`[...document.querySelectorAll("${VIS}button")].some(b => /^Import \\d+ transactions$/.test(b.textContent))`), 'choosing the export shows a preview and Import N transactions');
+    const n = await evaluate(`Number(([...document.querySelectorAll("${VIS}button")].find(b => /^Import \\d+/.test(b.textContent))?.textContent.match(/\\d+/) || [0])[0])`);
+    await clickImport();
+    const lines = 'document.querySelector("section:not([hidden]) [data-body]")?.innerText.split("\\n") || []';
+    ok(await waitFor(`(${lines}).some(l => l.trim() === "${n} new.")`, 20000), `first import: ${n} new`);
+    await shot('import-first');
+    await evaluate('document.getElementById("import-file").value = ""; true');
+    await choose();
+    await waitFor(`[...document.querySelectorAll("${VIS}button")].some(b => /^Import \\d+ transactions$/.test(b.textContent))`);
+    await clickImport();
+    ok(await waitFor(`(${lines}).some(l => l.trim() === "0 new, ${n} already in CentMemo.")`, 20000), `second import: 0 new, ${n} already in CentMemo (Decision 057)`);
+    await cdp('Page.navigate', { url: SITE + '#/ledger' });
+    ok(await waitFor('document.querySelectorAll(".row").length > 0'), 'the imported purchases appear in the Ledger');
+  } finally {
+    await fetch(P + '/rest/v1/accounts?source=eq.csv', { method: 'DELETE', headers: hdr });
+    await fetch(P + '/rest/v1/import_batches?source=eq.csv', { method: 'DELETE', headers: hdr });
+    const left = await (await fetch(P + '/rest/v1/transactions?select=id', { headers: hdr })).json();
+    ok(Array.isArray(left) && left.length === 0, `stranger left empty (${Array.isArray(left) ? left.length : JSON.stringify(left).slice(0, 80)} transactions)`);
+  }
+}
+
 console.log('photo attached on the iPhone');
 {
   const s = await sessionFor('owner');

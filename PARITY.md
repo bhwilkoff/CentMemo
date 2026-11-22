@@ -103,7 +103,7 @@ When shipping any user-facing feature:
 
 | Feature | Web | iOS | Notes |
 |---|---|---|---|
-| Import Apple Card CSV export | ✅ | 🚧 | Same source IDs on both (golden parity test). iOS import never run on a device |
+| Import Apple Card CSV export | ✅ | 🚧 | Web: real file input, re-import adds 0 (test_web_states). Same source IDs on both (golden parity test). iOS import never run on a device |
 | Connect Apple Wallet (FinanceKit sync, history tokens) | n/a | 🚧 | Verified with the DEBUG sample source on the iPhone 12 (WalletSyncUITests); real FinanceKit waits on Apple's entitlement |
 | FinanceKit background delivery | n/a | ⏳ | iOS 26 extension, after the entitlement |
 
