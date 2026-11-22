@@ -544,3 +544,26 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
 - Fixed by setting the route after the app settles. 3/3 passes, then
   `tools/test_all.sh` exit 0.
 - The loop rule now gates commits on the exit code.
+
+### Tick 19 — 2026-11-22 — store: TestFlight 1.0 (8); loop stopped for Ben's turn
+- **Context:** every unblocked backlog item has shipped. What remains needs
+  Ben: decisions (the iPad readable width, the template push), play (the
+  TestFlight build, Sign in with Apple on the phone, the Duet live and
+  scheduled test, the iPad's UI Automation switch), or Apple (the FinanceKit
+  grant). Opt-in uploads of photos and files are planned (M2) but store
+  people's files server-side, so Ben should see the TestFlight build first.
+  The method says Ben plays: the loop stops here (autonomous-loop-cadence
+  stop condition: backlog empty after a fresh re-mine).
+- **Implementation:** `tools/submit-appstore.sh ios`, "Upload succeeded"
+  1.0 (8).
+- **Verification:**
+  - App Store Connect reads build 8 VALID.
+  - Build 8 passed the iPhone 12 tap tier 11/11 and `tools/test_all.sh`
+    exit 0 (tick 18 correction).
+- **For Ben, in order:**
+  1. TestFlight 1.0 (8): sign in with Apple on the iPhone; write a memo;
+     attach a photo; look at Settings.
+  2. Add the connector on claude.ai (centmemo.com/connect/); ask Duet once
+     live and once in a scheduled task.
+  3. Decide: the iPad readable width; push the template branch.
+  4. iPad: Settings > Developer > Enable UI Automation.

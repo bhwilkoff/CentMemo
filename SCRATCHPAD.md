@@ -20,8 +20,9 @@
   `/terms/`, `/brand/`). Apple sign-in on the web verified by Ben.
 - **Connector**: verified end to end as Claude drives it (`tools/test_connector.mjs`);
   read-only enforced in SQL; Wallet rows never shared (Addendum 3.2).
-- **iOS**: TestFlight 1.0 (1) valid, Ben invited. Builds 2 (pencil circle) and
-  3 (Connect Apple Wallet, sample source) are local only, not uploaded.
+- **iOS**: TestFlight 1.0 (8) valid (2026-11-22), Ben's group gets every
+  build: pencil circle, Connect Apple Wallet (unavailable until the
+  entitlement), photos by reference, privacy manifest, sanguine actions.
 - **Testing** (`docs/TESTING.md`): `tools/test_all.sh` off-device (RLS,
   connector, web states at 375px, Swift Core, builds); iPhone 12 tap and
   glass tiers; iPad Pro glass tier only.
