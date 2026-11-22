@@ -49,9 +49,9 @@
   const merchantOf = (t) => CentMoney.cleanMerchant(t.merchant || t.description) || 'Unknown';
   const TILE_HUES = ['clay', 'ochre', 'sage', 'slate', 'rose', 'stone'];
   // D8: the store tile, the same initials and hue as the iPhone (Money.merchantHue).
-  function tile(t) {
+  function tile(t, big) {
     const name = merchantOf(t);
-    return h('span', { class: 'tile', 'aria-hidden': 'true', style: '--tile-hue: var(--color-store-' + TILE_HUES[CentMoney.merchantHue(name, 6)] + ')' }, CentMoney.merchantInitials(name));
+    return h('span', { class: 'tile' + (big ? ' tile-big' : ''), 'aria-hidden': 'true', style: '--tile-hue: var(--color-store-' + TILE_HUES[CentMoney.merchantHue(name, 6)] + ')' }, CentMoney.merchantInitials(name));
   }
 
   /* ---- Four states (universal-feature-states) ---- */
@@ -187,6 +187,7 @@
       const chosen = new Set(memo ? (memo.memo_values || []).map((v) => v.value_id) : []);
       const area = h('textarea', { id: 'memo-body', class: 'field-input memo-input', rows: '6', maxlength: '10000' });
       area.value = memo ? memo.body : '';
+      area.placeholder = 'What happened here?';
       const status = h('p', { class: 'caption', role: 'status' });
       const error = h('div', { class: 'banner banner-error', role: 'alert', hidden: true });
 
@@ -207,7 +208,7 @@
         }));
       }
       drawChips(vals);
-      const newValue = h('input', { type: 'text', class: 'field-input field-inline', maxlength: '60', 'aria-label': 'New theme' });
+      const newValue = h('input', { type: 'text', class: 'field-input field-inline', maxlength: '60', 'aria-label': 'New theme', placeholder: 'Add a theme' });
       const addBtn = h('button', { type: 'button', class: 'btn btn-small' }, 'Add theme');
       addBtn.addEventListener('click', async () => {
         const name = newValue.value.trim();
@@ -222,7 +223,7 @@
       const save = h('button', { type: 'button', class: 'btn btn-primary' }, 'Save');
       save.addEventListener('click', async () => {
         error.hidden = true;
-        if (!area.value.trim() && chosen.size) { error.textContent = 'Write the memo first; values belong to a memo.'; error.hidden = false; return; }
+        if (!area.value.trim() && chosen.size) { error.textContent = 'Write the memo first; themes belong to a memo.'; error.hidden = false; return; }
         save.disabled = true; status.textContent = 'Saving…';
         try {
           await API.saveMemo(t.id, area.value, [...chosen]);
@@ -231,18 +232,14 @@
         save.disabled = false;
       });
 
+      // D6 (Decision 065): the Setting and the memo lead; the money and the
+      // bank's facts are a footnote, as on the iPhone.
       body.replaceChildren(
         h('div', { class: 'txn-head' },
-          h('h1', { id: 'h-txn', class: 'view-heading' }, merchantOf(t)),
-          h('p', { class: 'txn-amount' + (t.amount_minor > 0 ? ' is-credit' : '') }, money(t.amount_minor, t.currency))),
-        h('dl', { class: 'facts' },
-          fact('Date', niceDate(t.txn_date)),
-          t.posted_date && t.posted_date !== t.txn_date ? fact('Posted', niceDate(t.posted_date)) : null,
-          t.category ? fact('Category', t.category) : null,
-          t.txn_type ? fact('Type', t.txn_type) : null,
-          t.status !== 'booked' ? fact('Status', t.status) : null,
-          t.accounts ? fact('Account', t.accounts.display_name) : null,
-          t.description && t.description !== t.merchant ? fact('Statement', t.description) : null),
+          tile(t, true),
+          h('div', { class: 'txn-title' },
+            h('h1', { id: 'h-txn', class: 'view-heading' }, merchantOf(t)),
+            h('p', { class: 'caption' }, niceDate(t.txn_date)))),
         h('label', { class: 'field-label', for: 'memo-body' }, 'Memo'),
         area,
         h('p', { class: 'field-label' }, 'Themes'),
@@ -250,7 +247,19 @@
         h('div', { class: 'inline-form' }, newValue, addBtn),
         error,
         h('div', { class: 'actions' }, save, status, skipBtn),
-        photosNote(t.attachments));
+        photosNote(t.attachments) || '',
+        h('details', { class: 'txn-details' },
+          h('summary', {},
+            h('span', { class: 'txn-amount' + (t.amount_minor > 0 ? ' is-credit' : '') }, money(t.amount_minor, t.currency)),
+            ' ', h('span', { class: 'caption' }, [t.accounts && t.accounts.display_name, t.category].filter(Boolean).join(' · '))),
+          h('dl', { class: 'facts' },
+            fact('Date', niceDate(t.txn_date)),
+            t.posted_date && t.posted_date !== t.txn_date ? fact('Posted', niceDate(t.posted_date)) : null,
+            t.category ? fact('Category', t.category) : null,
+            t.txn_type ? fact('Type', t.txn_type) : null,
+            t.status !== 'booked' ? fact('Status', t.status) : null,
+            t.accounts ? fact('Account', t.accounts.display_name) : null,
+            t.description && t.description !== t.merchant ? fact('Statement', t.description) : null)));
     } catch (err) { failed(body, err, () => txnView(id)); }
   }
   function fact(k, v) { return h('div', {}, h('dt', {}, k), h('dd', {}, v)); }

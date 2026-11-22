@@ -124,6 +124,17 @@ console.log('skip (Decision 065): an event leaves Unexamined and the Narrative, 
   }
 }
 
+console.log('event page (D6): the Setting and the memo lead; the money is a footnote');
+{
+  await evaluate('location.hash = "#/t/a3b8c10c-68b8-4bfe-9380-c87b7015a49d"; true');
+  ok(await waitFor('!!document.querySelector("#memo-body") && document.querySelector("#memo-body").value.length > 0'), 'the written memo is in the editor');
+  ok(await evaluate('!!document.querySelector(".txn-head .tile")'), 'the Setting tile heads the page');
+  ok(await evaluate('(() => { const m = document.querySelector("#memo-body"), d = document.querySelector(".txn-details"); return !!(m && d && (m.compareDocumentPosition(d) & Node.DOCUMENT_POSITION_FOLLOWING)); })()'), 'the money footnote comes after the memo');
+  ok(await evaluate('/\\$/.test(document.querySelector(".txn-details summary").textContent) && !document.querySelector(".txn-details").open'), 'the amount sits in the closed footnote');
+  ok(!(await evaluate('/\\bnull\\b/.test(document.querySelector("#view-txn").innerText)')), 'no stray "null" text on the page');
+  await shot('event-memo-first');
+}
+
 console.log('error (REST blocked)');
 await openAs('owner', '#/ledger');
 await waitFor('document.querySelectorAll(".row").length > 0');

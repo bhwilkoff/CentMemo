@@ -179,6 +179,12 @@ a.row:hover .row-title { text-decoration: underline; }
   display: grid; place-items: center; background: var(--color-surface); border: 1px solid var(--color-border);
   font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--color-text);
 }
+.tile-big { width: 56px; height: 56px; border-radius: 14px; font-size: 20px; }
+.txn-head { display: flex; align-items: center; gap: var(--space-3); }
+.txn-title { min-width: 0; }
+.txn-details { margin-top: var(--space-5); border-top: 1px solid var(--color-border); padding-top: var(--space-3); }
+.txn-details summary { cursor: pointer; display: flex; gap: var(--space-2); align-items: baseline; }
+.txn-details .txn-amount { font-size: var(--type-body-size); }
 .tile::after { content: ""; position: absolute; left: 6px; right: 6px; bottom: 5px; height: 2px; border-radius: 2px; background: var(--tile-hue, var(--color-border)); }
 .row-title { font-weight: var(--type-body-strong-weight); overflow-wrap: anywhere; }
 .row-sub { font-size: var(--type-caption-size); color: var(--color-text-muted); }

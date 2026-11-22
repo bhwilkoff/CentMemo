@@ -1018,3 +1018,23 @@ Apple.
   - Narrative and Story rows as memo-first.
   - S1 Venmo CSV.
   - Ben's FinanceKit choice (S4).
+
+### Design tick 6 — 2026-11-22 — D6 on the web (parity)
+- The web event page now matches the iPhone:
+  - The big Setting tile and the name lead, with the date under them.
+  - Then the memo ("What happened here?" placeholder), Themes, then
+    Save / Skip.
+  - The amount, account and category are the summary of a closed
+    `details.txn-details` footnote holding the bank facts.
+- **Found by reading the frame:** a stray "null" on the page.
+  `body.replaceChildren` (native DOM) stringifies the null that
+  `photosNote()` returns when there are no photos; this was latent before
+  the reorder. Fixed with `|| ''`. The new check was seen failing on the
+  bug, then passing.
+- **Also fixed:** the theme input had no placeholder; "values belong to a
+  memo" now says "themes" on the web.
+- **Next:**
+  - Narrative as the Chronicle thread (D10).
+  - Memo-first rows.
+  - S1 Venmo CSV.
+  - D14 default themes for Ben.
