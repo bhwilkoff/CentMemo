@@ -57,7 +57,7 @@ F2. ⏳ FinanceKit background delivery extension (iOS 26).
 ### Ben's request (2026-11-22): "Start with item one and keep going. You can also do the recording too. The skills should be built for that in at least one of my repositories. Start an autonomous loop to make sure you get it all done."
 L1. ✅ (launch tick 1) First sign-in from inside Claude: the same-window Apple fallback asks
     no scope, so a brand-new account gets no email. Make it work with email.
-L2. 🟡 (recording, URLs, 4+, support, screenshots ✅; privacy labels answered, Ben publishes; copy, phone, Ben's clip, submit ⏳) App Store submission: privacy labels matching PrivacyInfo.xcprivacy,
+L2. ⏸ (held 2026-11-22 by Ben until the story design work, docs/design/STORY-DESIGN-BRIEF.md, is done) 🟡 (recording, URLs, 4+, support, screenshots ✅; privacy labels answered, Ben publishes; copy, phone, Ben's clip, submit ⏳) App Store submission: privacy labels matching PrivacyInfo.xcprivacy,
     screenshots, description, the review recording (find the recording
     skill in Ben's repos), and the cloud build (the dev Mac runs a beta OS).
 L3. 🟡 (form filled, acknowledgments ticked by Ben, reviewer creds in the
