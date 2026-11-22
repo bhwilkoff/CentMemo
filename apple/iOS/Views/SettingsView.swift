@@ -83,7 +83,11 @@ struct SettingsView: View {
         }
         .grounded()
         .navigationTitle("Settings")
-        .confirmationDialog("Delete your account?", isPresented: $confirmDelete, titleVisibility: .visible) {
+        // An alert, not a confirmation dialog: iOS 26 shows that dialog as a sheet with
+        // only the destructive button (cancel-role buttons hidden), and a permanent
+        // action needs a visible way back (seen on the iPhone 12, 2026-11-22).
+        .alert("Delete your account?", isPresented: $confirmDelete) {
+            Button("Keep my account", role: .cancel) { }
             Button("Delete everything, permanently", role: .destructive) { Task { await deleteAccount() } }
         } message: {
             Text("This removes every transaction, memo, and value, and can't be undone.")

@@ -57,7 +57,7 @@ F2. ⏳ FinanceKit background delivery extension (iOS 26).
 ### Ben's request (2026-11-22): "Start with item one and keep going. You can also do the recording too. The skills should be built for that in at least one of my repositories. Start an autonomous loop to make sure you get it all done."
 L1. ✅ (launch tick 1) First sign-in from inside Claude: the same-window Apple fallback asks
     no scope, so a brand-new account gets no email. Make it work with email.
-L2. ⏳ App Store submission: privacy labels matching PrivacyInfo.xcprivacy,
+L2. 🟡 (launch tick 3: recording ✅; listing, labels, Ben's clip, submit ⏳) App Store submission: privacy labels matching PrivacyInfo.xcprivacy,
     screenshots, description, the review recording (find the recording
     skill in Ben's repos), and the cloud build (the dev Mac runs a beta OS).
 L3. ⏳ Connectors Directory submission: reviewer test account, the form
@@ -648,3 +648,39 @@ Apple.
 - **Not yet verified:** the revocation delete against real FinanceKit (it
   needs a real authorization, then turning it off).
 - **Next:** TestFlight build 10 for Ben; then L2 (App Store submission).
+
+### Launch tick 3 — 2026-11-22 — L2: the App Review recording (build 1.0 (11))
+- **Context:** L2. Ben: "You can also do the recording too. The skills should
+  be built for that in at least one of my repositories." Found in Ear Drama:
+  `AppReviewTourUITests` and the store-submission-playbook's capture method.
+- **Implementation:**
+  - `ReviewTourUITests` (runs only with REVIEW_TOUR=1): Unexamined, a memo
+    written and shown with a value, Ledger, Story, Settings (the Wallet
+    disclosure, the connector address), and account deletion up to its
+    confirmation, then "Keep my account". It never taps Connect Apple Wallet
+    and removes its own memo, asserting both.
+  - `tools/record_review.sh`: devicectl's screen-record is not supported on
+    the iPhone 12, so two screenshot loops (about 0.8 fps) capture the tour.
+    The video is trimmed to the tour's own launch and end marks (no home
+    screen or notifications), blank frames are dropped (`frame_blind.py`
+    from Ear Drama), and `tools/frames_to_video.swift` (AVFoundation)
+    makes the 1920x1080 video.
+  - **App fix found by the tour:** on iOS 26 the delete confirmation sheet
+    showed only "Delete everything, permanently" (cancel-role buttons
+    hidden). It is now an alert with "Keep my account".
+  - The harness reports a self-skipped test as SKIP, not FAIL.
+- **Verification:**
+  - `build/store-video/centmemo-tour-20261122-0933.mp4`: 113 s, 1920x1080;
+    contact sheets viewed (starts on Unexamined, ends in Settings).
+  - The server shows no tour memo left. One earlier take had left one; it
+    was removed and the tour now asserts the cleanup.
+  - Full tap tier on build 11 passes; `tools/test_all.sh` exit 0.
+- **Lessons:** Homebrew's ffmpeg here is broken (a missing x265 library),
+  hence AVFoundation; a triple tap right after dismissing the keyboard
+  selects one word, so focus first.
+- **Still L2:**
+  - Ben's own clip: Sign in with Apple, then Connect Apple Wallet on his
+    phone, using iOS screen recording.
+  - The App Store version: description, keywords, screenshots, privacy
+    labels, age rating, review notes.
+  - Upload the recording, then submit through the cloud build.

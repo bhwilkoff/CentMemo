@@ -345,6 +345,11 @@ def run(entry, udid, a, outdir, bundle):
         for name, result in tests:
             hits = [v for tid, v in overlays.items() if tid and tid.split("/")[-1] == name]
             drop = next((s for tid, s in dropped.items() if tid.split("/")[-1] == name.rstrip("()")), None)
+            if result == "Skipped":
+                # A test that skips itself on purpose (ReviewTourUITests runs only for
+                # tools/record_review.sh) is neither a pass nor a failure.
+                print(f"SKIP {name} (skipped by its own condition)")
+                continue
             good = result == "Passed" and not hits
             ok_all &= good
             if drop and not good:
