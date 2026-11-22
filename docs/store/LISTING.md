@@ -46,7 +46,13 @@ memos with them, then read your month, or a value, as a story.
 
 memo,spending,journal,apple card,budget,values,reflection,money story,ledger,purchases
 
-## What the screenshots should show (for the screenshot round)
+## Screenshots (placed 2026-11-22)
 
+Real screens from the bench iPhone 12, synthetic owner's demo data, in order:
 Unexamined (the circled count), a purchase with its memo and values, Story,
-Ledger, Settings with Connect Apple Wallet.
+Ledger, Settings with Connect Apple Wallet. Native 1170x2532 in
+IPHONE_FACE_ID_MEDIUM_PROFILE; the same scaled to 1290x2796 (height-fit, 1 px
+trimmed each side) in IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE, through
+tools/asc_asset_library.py upload + place. Frames come from the tap tier
+(tab-unexamined, detail-with-memo, tab-story, tab-ledger, wallet-offer). A
+demo memo's "(synthetic test memo)" suffix was removed from the data first.

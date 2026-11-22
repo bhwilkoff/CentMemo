@@ -57,7 +57,7 @@ F2. ⏳ FinanceKit background delivery extension (iOS 26).
 ### Ben's request (2026-11-22): "Start with item one and keep going. You can also do the recording too. The skills should be built for that in at least one of my repositories. Start an autonomous loop to make sure you get it all done."
 L1. ✅ (launch tick 1) First sign-in from inside Claude: the same-window Apple fallback asks
     no scope, so a brand-new account gets no email. Make it work with email.
-L2. 🟡 (tick 3 recording ✅; tick 4 URLs, 4+ rating, support page ✅; copy, phone, labels, screenshots, Ben's clip, submit ⏳) App Store submission: privacy labels matching PrivacyInfo.xcprivacy,
+L2. 🟡 (tick 3 recording ✅; tick 4 URLs, 4+, support ✅; tick 5 screenshots ✅; copy, phone, labels, Ben's clip, submit ⏳) App Store submission: privacy labels matching PrivacyInfo.xcprivacy,
     screenshots, description, the review recording (find the recording
     skill in Ben's repos), and the cloud build (the dev Mac runs a beta OS).
 L3. ⏳ Connectors Directory submission: reviewer test account, the form
@@ -756,3 +756,21 @@ Apple.
   lacked (account kinds, missing optionals, repeated reports). Before the
   next real-data step, read the target table's constraints against
   everything the source can produce.
+
+### Launch tick 5 — 2026-11-22 — L2: App Store screenshots placed
+- **Context:** L2. Build 13 VALID (TestFlight; Ben notified).
+- **Implementation:**
+  - Five real screens from the iPhone 12 tap tier (Unexamined, a memo with
+    values, Story, Ledger, Settings with Connect Apple Wallet).
+  - Native 1170x2532 go in `IPHONE_FACE_ID_MEDIUM_PROFILE`; the same, scaled
+    to 1290x2796, in `IPHONE_DYNAMIC_ISLAND_LARGE_PROFILE` (Asset Library
+    reference data read first for the exact sizes).
+  - Uploaded and placed with the template's `asc_asset_library.py`; all 10
+    ACTIVE.
+- **Data fix:** a demo memo on the synthetic owner ended "(synthetic test
+  memo)". Removed after checking that no test relies on it, and the Ledger
+  was re-captured.
+- **Verification:** contact sheet viewed (no email, no personal data);
+  `tools/test_all.sh` exit 0.
+- **Next:** the privacy labels (App Store Connect web UI, needs Ben signed
+  in). Then the copy, phone, and Ben's clip, which wait on Ben.
