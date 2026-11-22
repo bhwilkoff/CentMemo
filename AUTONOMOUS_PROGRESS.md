@@ -924,3 +924,24 @@ Apple.
   - Build Ben's chosen direction.
   - Until he picks: the store page and "call it..." renames, and the Duo
     regular-width two-pane layout.
+
+### Design tick 3 — 2026-11-22 — D3: two panes on the open Duo
+- Ben's clarification on the directions is pending, so this tick shipped what
+  every direction shares: "The open Duo uses two panes".
+- `TwoPane` + `EntryLink` + `PaneSelection` (apple/iOS/Components/TwoPane.swift):
+  - At regular width, the list sits on the left and the tapped purchase
+    opens on the right, never pushed. The first purchase opens on its own,
+    so no half-screen is empty.
+  - Compact width keeps the push. The branch is on width only (Ear Drama
+    iOS-DESIGN 3.6).
+  - Unexamined keeps its inbox path.
+- **Verified:**
+  - `DuoTwoPaneUITests` on the Duo: PASS (the list stays, and the tapped
+    store shows in both panes).
+  - On the iPhone 12 it SKIPs by its own compact check (the control).
+    MemoUITests and TabSmokeUITests pass there.
+  - Duo ledger frame read: the list with the selected row on the left, the
+    Tattered Cover detail on the right.
+- **Seen, next (D6):** the detail is still a bank form (Date, Posted,
+  Category, Type, Account, Statement, then Memo). Every direction makes the
+  memo the headline and the amount a footnote.

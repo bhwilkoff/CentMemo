@@ -13,10 +13,10 @@ struct ContentView_iOS: View {
             TabView(selection: Binding(get: { store.selectedTab ?? "unexamined" }, set: { store.selectedTab = $0 })) {
                 Tab("Unexamined", systemImage: "tray", value: "unexamined") {
                     // The inbox (deep links, test doors) pushes onto this stack.
-                    NavigationStack(path: $store.navigationPath) { destinations { UnexaminedView() } }
+                    TwoPane(list: { UnexaminedView() }, destinations: wrap, path: $store.navigationPath)
                 }
-                Tab("Ledger", systemImage: "list.bullet", value: "ledger") { stack { LedgerView() } }
-                Tab("Story", systemImage: "book", value: "story") { stack { StoryView() } }
+                Tab("Ledger", systemImage: "list.bullet", value: "ledger") { TwoPane(list: { LedgerView() }, destinations: wrap) }
+                Tab("Story", systemImage: "book", value: "story") { TwoPane(list: { StoryView() }, destinations: wrap) }
                 Tab("Settings", systemImage: "gearshape", value: "settings") { stack { SettingsView() } }
             }
             .tint(Color.brandPrimary)
@@ -25,6 +25,8 @@ struct ContentView_iOS: View {
             SignInView()
         }
     }
+
+    private func wrap(_ v: AnyView) -> AnyView { AnyView(destinations { v }) }
 
     private func stack<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
         NavigationStack { destinations(content) }

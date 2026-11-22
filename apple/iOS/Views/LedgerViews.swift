@@ -42,10 +42,11 @@ struct UnexaminedView: View {
                     }
                     .onGround()
                     ForEach(entries) { e in
-                        NavigationLink(value: EntryRoute(id: e.id)) { EntryRow(entry: e) }.onGround()
+                        EntryLink(id: e.id) { EntryRow(entry: e) }.onGround()
                     }
                 }
                 .listStyle(.plain)
+                .opensFirst(entries.first?.id)
             }
         }
         .grounded()
@@ -96,11 +97,12 @@ struct LedgerView: View {
                     Text("Nothing recorded this month.").foregroundStyle(Color.brandTextMuted).onGround()
                 } else {
                     ForEach(entries) { e in
-                        NavigationLink(value: EntryRoute(id: e.id)) { EntryRow(entry: e, showMemo: true) }.onGround()
+                        EntryLink(id: e.id) { EntryRow(entry: e, showMemo: true) }.onGround()
                     }
                 }
             }
             .listStyle(.plain)
+            .opensFirst(entries.first?.id)
         }
         .grounded()
         .navigationTitle("Ledger")
@@ -180,7 +182,7 @@ struct StoryView: View {
                     Text("No memos here yet.").foregroundStyle(Color.brandTextMuted).onGround()
                 }
                 ForEach(entries) { e in
-                    NavigationLink(value: EntryRoute(id: e.id)) {
+                    EntryLink(id: e.id) {
                         VStack(alignment: .leading, spacing: Spacing.s2) {
                             HStack {
                                 Text("\(LedgerDate.display(e.txnDate)) · \(e.displayMerchant)")
@@ -201,6 +203,7 @@ struct StoryView: View {
                 }
             }
             .listStyle(.plain)
+            .opensFirst(entries.first?.id)
         }
         .grounded()
         .navigationTitle("Story")
