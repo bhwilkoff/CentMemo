@@ -30,7 +30,7 @@
   function parseCsv(text) {
     const rows = [];
     let row = [], field = '', i = 0, quoted = false;
-    const s = String(text).replace(/^﻿/, '');
+    const s = String(text).replace(/^\ufeff/, '');
     while (i < s.length) {
       const c = s[i];
       if (quoted) {
