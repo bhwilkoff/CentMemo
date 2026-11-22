@@ -16,7 +16,7 @@ struct UnexaminedView: View {
                     ContentUnavailableView("Every purchase has a memo.", systemImage: "checkmark")
                 } else {
                     ContentUnavailableView {
-                        Label("No transactions yet", systemImage: "tray")
+                        Label("Nothing in your Narrative yet", systemImage: "tray")
                     } description: {
                         Text("Import an Apple Card export to start writing.")
                     } actions: {
@@ -43,6 +43,7 @@ struct UnexaminedView: View {
                     .onGround()
                     ForEach(entries) { e in
                         EntryLink(id: e.id) { EntryRow(entry: e) }.onGround()
+                            .skipAction(e) { await skip(e) }
                     }
                 }
                 .listStyle(.plain)
@@ -53,6 +54,12 @@ struct UnexaminedView: View {
         .navigationTitle("Unexamined")
         .refreshable { await load() }
         .task(id: session.dataVersion) { await load() }
+    }
+
+    private func skip(_ e: LedgerEntry) async {
+        entries.removeAll { $0.id == e.id }
+        do { try await APIClient.shared.setSkipped(e.id, true); session.didChangeData() }
+        catch { self.error = session.handle(error); await load() }
     }
 
     private func load() async {
@@ -69,6 +76,7 @@ struct UnexaminedView: View {
 /// Every transaction in a month, with the month's totals as plain facts.
 struct LedgerView: View {
     @Environment(SessionStore.self) private var session
+    @State private var showSkipped = false
     @State private var month: String?
     @State private var entries: [LedgerEntry] = []
     @State private var loading = true
@@ -96,8 +104,28 @@ struct LedgerView: View {
                 if entries.isEmpty {
                     Text("Nothing recorded this month.").foregroundStyle(Color.brandTextMuted).onGround()
                 } else {
-                    ForEach(entries) { e in
+                    ForEach(entries.filter { !$0.isSkipped }) { e in
                         EntryLink(id: e.id) { EntryRow(entry: e, showMemo: true) }.onGround()
+                            .skipAction(e) { await skip(e, !e.isSkipped) }
+                    }
+                    let skipped = entries.filter(\.isSkipped)
+                    if !skipped.isEmpty {
+                        // Separate rows (not a DisclosureGroup, whose children share one
+                        // cell and cannot take their own swipe).
+                        Section {
+                            if showSkipped {
+                                ForEach(skipped) { e in
+                                    EntryLink(id: e.id) { EntryRow(entry: e).opacity(0.6) }.onGround()
+                                        .skipAction(e) { await skip(e, false) }
+                                }
+                            }
+                        } header: {
+                            Button { withAnimation { showSkipped.toggle() } } label: {
+                                Label("\(skipped.count) skipped", systemImage: showSkipped ? "chevron.down" : "chevron.right")
+                                    .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
+                            }
+                            .textCase(nil)
+                        }
                     }
                 }
             }
@@ -105,7 +133,7 @@ struct LedgerView: View {
             .opensFirst(entries.first?.id)
         }
         .grounded()
-        .navigationTitle("Ledger")
+        .navigationTitle("Narrative")
         .refreshable { await load() }
         .task(id: "\(session.dataVersion)-\(month ?? "")") { await load() }
     }
@@ -134,6 +162,11 @@ struct LedgerView: View {
         guard let month else { return }
         self.month = LedgerDate.step(month, by: n)
         UISelectionFeedbackGenerator().selectionChanged()
+    }
+
+    private func skip(_ e: LedgerEntry, _ skipped: Bool) async {
+        do { try await APIClient.shared.setSkipped(e.id, skipped); session.didChangeData() }
+        catch { self.error = session.handle(error) }
     }
 
     private func load() async {
@@ -166,7 +199,7 @@ struct StoryView: View {
                             ForEach(months, id: \.self) { Text(LedgerDate.monthName($0)).tag(APIClient.StoryScope.month($0)) }
                         }
                         if !values.isEmpty {
-                            Section("Value") {
+                            Section("Theme") {
                                 ForEach(values) { Text($0.name).tag(APIClient.StoryScope.value($0.id)) }
                             }
                         }

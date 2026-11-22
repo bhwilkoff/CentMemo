@@ -157,7 +157,7 @@ final class APIClient {
 
     // MARK: - Reading
 
-    private static let txnColumns = "id,account_id,txn_date,posted_date,amount_minor,currency,description,merchant,category,txn_type,status"
+    private static let txnColumns = "id,account_id,txn_date,posted_date,amount_minor,currency,description,merchant,category,txn_type,status,skipped_at"
 
     func unexamined(limit: Int = 200) async throws -> [LedgerEntry] {
         try await rest("unexamined_transactions", [.init(name: "select", value: Self.txnColumns),
@@ -234,6 +234,14 @@ final class APIClient {
                                  body: ["name": name.trimmingCharacters(in: .whitespaces)], prefer: "return=representation")
         guard let v = try JSONDecoder().decode([LifeValue].self, from: data).first else { throw APIError.decoding("new value") }
         return v
+    }
+
+    /// Skip (Decision 065): the event leaves the Narrative and Unexamined as a
+    /// detail; false brings it back. Never a delete.
+    func setSkipped(_ id: String, _ skipped: Bool) async throws {
+        let at: String? = skipped ? ISO8601DateFormatter().string(from: Date()) : nil
+        try await raw("rest/v1/transactions", query: [.init(name: "id", value: "eq.\(id)")], method: "PATCH",
+                      body: ["skipped_at": at])
     }
 
     func renameValue(_ id: String, to name: String) async throws {

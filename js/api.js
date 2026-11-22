@@ -106,7 +106,7 @@ const API = (() => {
   }
 
   /* ---- Reading ---- */
-  const TXN = 'id, account_id, txn_date, posted_date, amount_minor, currency, description, merchant, category, txn_type, status';
+  const TXN = 'id, account_id, txn_date, posted_date, amount_minor, currency, description, merchant, category, txn_type, status, skipped_at';
 
   async function unexamined(limit = 200) {
     const r = await client().from('unexamined_transactions').select(TXN, { count: 'exact' })
@@ -170,6 +170,10 @@ const API = (() => {
   async function addValue(name) {
     return must(await client().from('life_values').insert({ name: name.trim() }).select('id, name').single());
   }
+  // Skip (Decision 065): a detail left out of the Story; false brings it back.
+  async function setSkipped(id, skipped) {
+    must(await client().from('transactions').update({ skipped_at: skipped ? new Date().toISOString() : null }).eq('id', id));
+  }
   async function renameValue(id, name) {
     must(await client().from('life_values').update({ name: name.trim() }).eq('id', id));
   }
@@ -213,6 +217,6 @@ const API = (() => {
   return {
     MCP_URL, client, session, onAuthChange, signInWithApple, finishAppleRedirect, signOut, deleteAccount,
     unexamined, transactionCount, month, latestMonth, transaction, stories,
-    values, addValue, renameValue, deleteValue, saveMemo, importAppleCard, GROUNDS, ground, setGround,
+    values, addValue, setSkipped, renameValue, deleteValue, saveMemo, importAppleCard, GROUNDS, ground, setGround,
   };
 })();

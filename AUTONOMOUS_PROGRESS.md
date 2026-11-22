@@ -945,3 +945,47 @@ Apple.
 - **Seen, next (D6):** the detail is still a bank form (Date, Posted,
   Category, Type, Account, Statement, then Memo). Every direction makes the
   memo the headline and the amount a footnote.
+
+### Design tick 4 — 2026-11-22 — Ben's choices recorded; vocabulary applied; Skip (D13)
+- **Ben chose** (directions page feedback, verbatim in the brief): the
+  Chronicle design as the base. Words: memo, Narrative (was Ledger), Story,
+  plot points, Skip, Themes, Setting (never merchant). Recorded as Decision
+  065, in the brief's vocabulary table, and in memory story-vocabulary.
+- **Language applied** on iOS, web and tests:
+  - Narrative tab and title.
+  - Themes instead of Values (settings, the memo editor, Story scope).
+  - "Nothing in your Narrative yet".
+  - Events instead of transactions in the delete, connector, sync and
+    detail texts.
+- **Skip:**
+  - Migration 20261122010000_skip_events adds `transactions.skipped_at`
+    (additive; imports and sync upsert only their own columns, so a skip
+    survives), and the unexamined view excludes skipped events.
+  - iOS: a swipe Skip / Bring back (`skipAction`), a detail ⋯ menu item,
+    and the Narrative's "N skipped" section of separate rows.
+  - Web: a Skip / Bring back button on the event page; the Narrative
+    `details.skipped`.
+- **Verified:**
+  - test_web_states runs the skip round trip: Unexamined → the Narrative
+    group → Bring back, fixture left as found.
+  - SkipUITests on the iPhone 12: PASS after three test-side fixes, each
+    found by looking:
+    - A full swipe fires the action, so the test now reveals by a partial
+      drag.
+    - A DisclosureGroup's children share one cell, so the skipped group is
+      now a Section of separate rows.
+    - A tap under the floating glass tab bar opened Story (seen in the
+      frame), so the test now scrolls clear of it.
+  - Frames read: King Soopers gone from Unexamined (14), and "1 skipped"
+    with Bring back revealed.
+  - `tools/restore_skips.mjs` repairs the fixture after a failed run.
+- **Duo:** this run FAILED on the Duo, both DuoTwoPane and Skip. Ben's Duo is
+  now in portrait on the inner display. A design_shots frame shows the app
+  fine (two panes), so this is the known XCUITest portrait-frame quirk on
+  the open Duo (Ear Drama). Port Ear Drama's UITestScrolling and recheck.
+  The two-pane test passed earlier in landscape.
+- **⏳ next:**
+  - The connector's `unexamined_transactions` should exclude skipped events
+    (deploy).
+  - The narrow left pane in Duo portrait wraps the date and category.
+  - D6: the event page is still a bank form.

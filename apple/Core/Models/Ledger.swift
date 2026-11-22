@@ -13,6 +13,8 @@ struct LedgerEntry: Decodable, Identifiable, Hashable, Sendable {
     let category: String
     let txnType: String
     let status: String
+    /// Set when the person skipped this event as a detail (Decision 065).
+    let skippedAt: String?
     var memo: Memo?
     var accountName: String?
 
@@ -21,6 +23,7 @@ struct LedgerEntry: Decodable, Identifiable, Hashable, Sendable {
         return name.isEmpty ? "Unknown" : name
     }
     var isCredit: Bool { amountMinor > 0 }
+    var isSkipped: Bool { skippedAt != nil }
 
     struct Memo: Decodable, Hashable, Sendable {
         let body: String
@@ -46,7 +49,7 @@ struct LedgerEntry: Decodable, Identifiable, Hashable, Sendable {
     private enum Keys: String, CodingKey {
         case id, accountID = "account_id", txnDate = "txn_date", postedDate = "posted_date"
         case amountMinor = "amount_minor", currency, description, merchant, category
-        case txnType = "txn_type", status, memos, accounts
+        case txnType = "txn_type", status, memos, accounts, skippedAt = "skipped_at"
     }
     private struct AccountName: Decodable { let display_name: String }
 
@@ -63,6 +66,7 @@ struct LedgerEntry: Decodable, Identifiable, Hashable, Sendable {
         category = try c.decodeIfPresent(String.self, forKey: .category) ?? ""
         txnType = try c.decodeIfPresent(String.self, forKey: .txnType) ?? ""
         status = try c.decodeIfPresent(String.self, forKey: .status) ?? "booked"
+        skippedAt = try c.decodeIfPresent(String.self, forKey: .skippedAt)
         // One memo per transaction: PostgREST sends an object, or an array from a view.
         if let one = try? c.decodeIfPresent(Memo.self, forKey: .memos) { memo = one }
         else if let many = try? c.decodeIfPresent([Memo].self, forKey: .memos) { memo = many.first }

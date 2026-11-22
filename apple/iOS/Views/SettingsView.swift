@@ -33,12 +33,12 @@ struct SettingsView: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            Section("Values") {
+            Section("Themes") {
                 if values.isEmpty {
-                    Text("Add a value from any memo.").foregroundStyle(Color.brandTextMuted)
+                    Text("Add a theme from any memo.").foregroundStyle(Color.brandTextMuted)
                 }
                 ForEach($values) { $v in
-                    TextField("Value", text: $v.name)
+                    TextField("Theme", text: $v.name)
                         .onSubmit { Task { await rename(v) } }
                 }
                 .onDelete { idx in Task { await remove(idx) } }
@@ -68,7 +68,7 @@ struct SettingsView: View {
             } header: {
                 Text("Connect Claude")
             } footer: {
-                Text("Claude can read your transactions and memos but can never change them. In Claude, open Settings, then Connectors, then Add custom connector.")
+                Text("Claude can read your Narrative and memos but can never change them. In Claude, open Settings, then Connectors, then Add custom connector.")
             }
             Section("Account") {
                 if let email = session.email { LabeledContent("Signed in as", value: email) }
@@ -90,7 +90,7 @@ struct SettingsView: View {
             Button("Keep my account", role: .cancel) { }
             Button("Delete everything, permanently", role: .destructive) { Task { await deleteAccount() } }
         } message: {
-            Text("This removes every transaction, memo, and value, and can't be undone.")
+            Text("This removes every event, memo, and theme, and can't be undone.")
         }
         .task(id: session.dataVersion) { await load() }
     }
@@ -185,7 +185,7 @@ struct WalletSyncButton: View {
             let changes = try await finance.changes(since: UserDefaults.standard.data(forKey: tokenKey))
             let r = try await APIClient.shared.syncFinance(changes)
             if let token = changes.newToken { UserDefaults.standard.set(token, forKey: tokenKey) }
-            result = "Synced \(r.inserted) transaction\(r.inserted == 1 ? "" : "s") from \(changes.accounts.count) account\(changes.accounts.count == 1 ? "" : "s")."
+            result = "Added \(r.inserted) event\(r.inserted == 1 ? "" : "s") from \(changes.accounts.count) account\(changes.accounts.count == 1 ? "" : "s")."
             session.didChangeData()
             UINotificationFeedbackGenerator().notificationOccurred(.success)
         } catch {

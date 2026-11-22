@@ -91,6 +91,7 @@ Roll again past ~50 KB. Never trim, edit, or summarize an entry in place.
 - 062: The connector's public address is mcp.centmemo.com, a Cloudflare Worker in front of the Edge Function
 - 063: Connectors Directory reviewers sign in with one reviewer account; everyone else uses Apple (amends 058)
 - 064: Reviewer credentials go in the official submission form (amends 063)
+- 065: The story vocabulary: Narrative, memo, Story, plot point, Skip, Theme, Setting
 
 ---
 
@@ -391,3 +392,29 @@ Anthropic states.
   with the password on the clipboard. The agent does not type passwords into
   third-party fields itself; the owner's part is one paste.
 - Real secrets (API keys, live tokens) still never leave the Keychain.
+
+## 065: The story vocabulary: Narrative, memo, Story, plot point, Skip, Theme, Setting (Ben, 2026-11-22)
+
+*Date: 2026-11-22*
+
+On screen, every charge is an event in the **Narrative**. A person writes a
+**memo** on an event. All memos put together are the **Story**. Events worth a
+memo are **plot points**. **Skip** swipes an event away as a detail that stays
+out of the Story. **Themes** are the collections. Where an event happened is
+its **Setting**. "Unexamined" stays. The design base is the Chronicle mockup
+(direction C), with parts of A and B.
+
+**Why**: Ben: "The word Memo is literally in our app name ... the sum of all
+of the memos is the story of your life, not that you are turning a single
+memo into a story." "'Narrative' is probably the best word to describe all
+of the events as they come in from your Apple Card." "The 'places' that a
+story happens is generally known as the Setting." His full words are in
+docs/design/STORY-DESIGN-BRIEF.md.
+
+**How to apply**:
+- New screen words come from the brief's vocabulary table. "Ledger",
+  "Chronicle", "merchant", "vendor" and "transaction" never reach a screen;
+  code identifiers may keep their old names.
+- A skipped event is never deleted, and Skip is undoable.
+- The connector's tool names stay as they are (an external contract), but
+  their descriptions use the vocabulary where it helps the reader.

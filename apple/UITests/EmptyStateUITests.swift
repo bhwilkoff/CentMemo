@@ -10,7 +10,7 @@ final class EmptyStateUITests: DeviceTestCase {
             XCTFail("stranger credentials not handed to the runner"); return
         }
         let app = launch(["APP_TEST_EMAIL": email, "APP_TEST_PASSWORD": password, "APP_START_TAB": "unexamined"])
-        XCTAssertTrue(app.staticTexts["No transactions yet"].waitForExistence(timeout: 30), "empty Unexamined says so")
+        XCTAssertTrue(app.staticTexts["Nothing in your Narrative yet"].waitForExistence(timeout: 30), "empty Unexamined says so")
         XCTAssertTrue(text(app, matching: "Import an Apple Card export").exists, "and says what to do")
         XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'Import'")).firstMatch.exists, "with the import action")
         shot(app, "empty-unexamined")
@@ -20,6 +20,6 @@ final class EmptyStateUITests: DeviceTestCase {
         let owner = launch(["APP_START_TAB": "unexamined"])
         XCTAssertTrue(owner.staticTexts.matching(NSPredicate(format: "label CONTAINS 'waiting for a memo'")).firstMatch.waitForExistence(timeout: 30),
                       "the owner sees purchases again (the door switched back)")
-        XCTAssertFalse(owner.staticTexts["No transactions yet"].exists)
+        XCTAssertFalse(owner.staticTexts["Nothing in your Narrative yet"].exists)
     }
 }

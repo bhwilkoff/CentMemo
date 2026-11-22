@@ -57,7 +57,7 @@ struct EntryDetailView: View {
                             Text(status).accessibilityIdentifier("memo-status")
                         }
                     }
-                    Section("Values") {
+                    Section("Themes") {
                         FlowLayout(spacing: 8) {
                             ForEach(values) { v in
                                 Button { toggle(v.id) } label: { ValueChip(name: v.name, isOn: chosen.contains(v.id)) }
@@ -66,7 +66,7 @@ struct EntryDetailView: View {
                             }
                         }
                         HStack {
-                            TextField("Add a value", text: $newValue).onSubmit { Task { await addValue() } }
+                            TextField("Add a theme", text: $newValue).onSubmit { Task { await addValue() } }
                             Button("Add") { Task { await addValue() } }.disabled(newValue.trimmingCharacters(in: .whitespaces).isEmpty)
                         }
                     }
@@ -107,6 +107,17 @@ struct EntryDetailView: View {
                         .disabled(saving)
                         .fontWeight(.semibold)
                         .accessibilityIdentifier("save-memo")
+                }
+                // Skip (Decision 065), also reachable without the list's swipe.
+                ToolbarItem(placement: .secondaryAction) {
+                    let skipped = entry?.isSkipped == true
+                    Button(skipped ? "Bring back" : "Skip", systemImage: skipped ? "arrow.uturn.backward" : "forward") {
+                        Task {
+                            do { try await APIClient.shared.setSkipped(entryID, !skipped); session.didChangeData(); await load() }
+                            catch { self.error = session.handle(error) }
+                        }
+                    }
+                    .accessibilityIdentifier("skip-event")
                 }
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
@@ -187,14 +198,14 @@ struct EntryDetailView: View {
             values.append(v); values.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
             chosen.insert(v.id); newValue = ""; error = nil
         } catch {
-            self.error = error.localizedDescription.contains("duplicate") ? "You already have that value." : session.handle(error)
+            self.error = error.localizedDescription.contains("duplicate") ? "You already have that theme." : session.handle(error)
         }
     }
 
     private func save() async {
         error = nil
         if memo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !chosen.isEmpty {
-            error = "Write the memo first; values belong to a memo."
+            error = "Write the memo first; themes belong to a memo."
             UINotificationFeedbackGenerator().notificationOccurred(.error)
             return
         }

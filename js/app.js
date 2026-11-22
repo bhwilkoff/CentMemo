@@ -71,7 +71,7 @@
   /* ---- Navigation ---- */
   const TABS = [
     { id: 'unexamined', label: 'Unexamined', icon: 'inbox', href: '#/unexamined' },
-    { id: 'ledger', label: 'Ledger', icon: 'list', href: '#/ledger' },
+    { id: 'ledger', label: 'Narrative', icon: 'list', href: '#/ledger' },
     { id: 'story', label: 'Story', icon: 'book', href: '#/story' },
     { id: 'import', label: 'Import', icon: 'import', href: '#/import' },
     { id: 'settings', label: 'Settings', icon: 'gear', href: '#/settings' },
@@ -133,7 +133,7 @@
         const any = await API.transactionCount();
         return any
           ? empty(body, 'Every purchase has a memo.')
-          : empty(body, 'No transactions yet.', h('a', { class: 'btn btn-primary', href: '#/import' }, 'Import from Apple Card'));
+          : empty(body, 'Nothing in your Narrative yet.', h('a', { class: 'btn btn-primary', href: '#/import' }, 'Import from Apple Card'));
       }
       heading.replaceChildren('Unexamined ', h('span', { class: 'pencil-circle', 'aria-label': count + ' unexamined' },
         h('span', { class: 'yours-count' }, count.toLocaleString('en-US'))));
@@ -164,7 +164,11 @@
           h('div', {}, h('dt', {}, 'Spent'), h('dd', {}, money(spent))),
           h('div', {}, h('dt', {}, 'Paid or credited'), h('dd', {}, money(received))),
           h('div', {}, h('dt', {}, 'Memos'), h('dd', {}, written + ' of ' + rows.length))),
-        h('div', { class: 'list' }, rows.map((t) => txnRow(t, { memo: true }))));
+        h('div', { class: 'list' }, rows.filter((t) => !t.skipped_at).map((t) => txnRow(t, { memo: true }))),
+        rows.some((t) => t.skipped_at)
+          ? h('details', { class: 'skipped' }, h('summary', {}, rows.filter((t) => t.skipped_at).length + ' skipped'),
+              h('div', { class: 'list' }, rows.filter((t) => t.skipped_at).map((t) => txnRow(t))))
+          : null);
     } catch (err) { failed(body, err, () => ledgerView(ym)); }
   }
   document.querySelectorAll('[data-month-step]').forEach((b) => b.addEventListener('click', () => {
@@ -178,7 +182,7 @@
     loading(body);
     try {
       const [t, vals] = await Promise.all([API.transaction(id), API.values()]);
-      if (!t) return empty(body, 'This transaction is not in your CentMemo.');
+      if (!t) return empty(body, 'This event is not in your CentMemo.');
       const memo = t.memos && (Array.isArray(t.memos) ? t.memos[0] : t.memos);
       const chosen = new Set(memo ? (memo.memo_values || []).map((v) => v.value_id) : []);
       const area = h('textarea', { id: 'memo-body', class: 'field-input memo-input', rows: '6', maxlength: '10000' });
@@ -186,7 +190,12 @@
       const status = h('p', { class: 'caption', role: 'status' });
       const error = h('div', { class: 'banner banner-error', role: 'alert', hidden: true });
 
-      const chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Values' });
+      // Skip (Decision 065): the web's version of the iPhone's swipe.
+      const skipBtn = h('button', { type: 'button', class: 'btn btn-quiet', 'data-skip': '' }, t.skipped_at ? 'Bring back' : 'Skip');
+      skipBtn.addEventListener('click', async () => {
+        try { await API.setSkipped(t.id, !t.skipped_at); txnView(id); } catch (err) { failed(body, err, () => txnView(id)); }
+      });
+      const chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Themes' });
       function drawChips(list) {
         chips.replaceChildren(...list.map((v) => {
           const b = h('button', { type: 'button', class: 'chip', 'aria-pressed': chosen.has(v.id) ? 'true' : 'false' }, v.name);
@@ -198,8 +207,8 @@
         }));
       }
       drawChips(vals);
-      const newValue = h('input', { type: 'text', class: 'field-input field-inline', maxlength: '60', 'aria-label': 'New value' });
-      const addBtn = h('button', { type: 'button', class: 'btn btn-small' }, 'Add value');
+      const newValue = h('input', { type: 'text', class: 'field-input field-inline', maxlength: '60', 'aria-label': 'New theme' });
+      const addBtn = h('button', { type: 'button', class: 'btn btn-small' }, 'Add theme');
       addBtn.addEventListener('click', async () => {
         const name = newValue.value.trim();
         if (!name) return newValue.focus();
@@ -207,7 +216,7 @@
           const v = await API.addValue(name);
           vals.push(v); vals.sort((a, b) => a.name.localeCompare(b.name));
           chosen.add(v.id); newValue.value = ''; drawChips(vals);
-        } catch (err) { error.textContent = /duplicate|unique/i.test(err.message) ? 'You already have that value.' : err.message; error.hidden = false; }
+        } catch (err) { error.textContent = /duplicate|unique/i.test(err.message) ? 'You already have that theme.' : err.message; error.hidden = false; }
       });
 
       const save = h('button', { type: 'button', class: 'btn btn-primary' }, 'Save');
@@ -236,11 +245,11 @@
           t.description && t.description !== t.merchant ? fact('Statement', t.description) : null),
         h('label', { class: 'field-label', for: 'memo-body' }, 'Memo'),
         area,
-        h('p', { class: 'field-label' }, 'Values'),
+        h('p', { class: 'field-label' }, 'Themes'),
         chips,
         h('div', { class: 'inline-form' }, newValue, addBtn),
         error,
-        h('div', { class: 'actions' }, save, status),
+        h('div', { class: 'actions' }, save, status, skipBtn),
         photosNote(t.attachments));
     } catch (err) { failed(body, err, () => txnView(id)); }
   }
@@ -269,15 +278,15 @@
       if (/^\d{4}-\d{2}$/.test(scope) && !months.includes(scope)) months.unshift(scope);
       select.replaceChildren(
         h('optgroup', { label: 'Month' }, months.map((ym) => h('option', { value: ym, selected: scope === ym }, monthName(ym)))),
-        vals.length ? h('optgroup', { label: 'Value' }, vals.map((v) => h('option', { value: 'value:' + v.id, selected: scope === 'value:' + v.id }, v.name))) : null);
+        vals.length ? h('optgroup', { label: 'Theme' }, vals.map((v) => h('option', { value: 'value:' + v.id, selected: scope === 'value:' + v.id }, v.name))) : null);
       select.onchange = () => { location.hash = '#/story/' + encodeURIComponent(select.value); };
 
       const valueId = scope.startsWith('value:') ? scope.slice(6) : null;
       const rows = await API.stories(valueId ? { valueId } : { ym: scope });
-      const title = valueId ? (vals.find((v) => v.id === valueId) || {}).name || 'Value' : monthName(scope);
+      const title = valueId ? (vals.find((v) => v.id === valueId) || {}).name || 'Theme' : monthName(scope);
       $('h-story').textContent = 'Story';
       if (!rows.length) {
-        return empty(body, valueId ? 'No memos carry this value yet.' : 'No memos written for ' + title + '.',
+        return empty(body, valueId ? 'No memos carry this theme yet.' : 'No memos written for ' + title + '.',
           h('a', { class: 'btn', href: '#/unexamined' }, 'Write one'));
       }
       const spent = rows.filter((t) => t.amount_minor < 0).reduce((a, t) => a - t.amount_minor, 0);
@@ -329,7 +338,7 @@
     });
     body.replaceChildren(
       h('dl', { class: 'totals' },
-        h('div', {}, h('dt', {}, 'Transactions'), h('dd', {}, String(rows.length))),
+        h('div', {}, h('dt', {}, 'Events'), h('dd', {}, String(rows.length))),
         h('div', {}, h('dt', {}, 'From'), h('dd', {}, niceDate(dates[0]))),
         h('div', {}, h('dt', {}, 'To'), h('dd', {}, niceDate(dates[dates.length - 1]))),
         h('div', {}, h('dt', {}, 'Spent'), h('dd', {}, money(spent)))),
@@ -379,7 +388,7 @@
       del.addEventListener('click', async () => {
         if (del.dataset.confirm !== '1') {
           del.dataset.confirm = '1'; del.textContent = 'Delete everything, permanently';
-          delNote.textContent = 'This removes every transaction, memo, and value, and cannot be undone.';
+          delNote.textContent = 'This removes every event, memo, and theme, and cannot be undone.';
           return;
         }
         del.disabled = true; delNote.textContent = 'Deleting…';
@@ -390,10 +399,10 @@
       body.replaceChildren(
         h('h2', { class: 'section-heading' }, 'Ground'),
         picker,
-        h('h2', { class: 'section-heading' }, 'Values'),
-        vals.length ? valueList : h('p', { class: 'caption' }, 'Add a value from any memo.'),
+        h('h2', { class: 'section-heading' }, 'Themes'),
+        vals.length ? valueList : h('p', { class: 'caption' }, 'Add a theme from any memo.'),
         h('h2', { class: 'section-heading' }, 'Connect Claude'),
-        h('p', {}, 'Claude can read your transactions and memos, but can never change them. In Claude, open Settings, then Connectors, then Add custom connector, and paste:'),
+        h('p', {}, 'Claude can read your Narrative and memos, but can never change them. In Claude, open Settings, then Connectors, then Add custom connector, and paste:'),
         h('div', { class: 'inline-form' }, h('code', { class: 'code-line' }, API.MCP_URL), copy),
         h('h2', { class: 'section-heading' }, 'Account'),
         h('p', {}, session && session.user ? session.user.email : ''),

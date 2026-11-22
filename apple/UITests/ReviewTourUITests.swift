@@ -46,7 +46,7 @@ final class ReviewTourUITests: DeviceTestCase {
         XCTAssertEqual(app.staticTexts["memo-status"].label, "Memo removed.", "the tour leaves no memo behind")
         app.navigationBars.buttons.element(boundBy: 0).tap(); pause()
 
-        mark("ledger"); openTab(app, "Ledger"); pause(3)
+        mark("ledger"); openTab(app, "Narrative"); pause(3)
         app.collectionViews.firstMatch.swipeUp(velocity: .slow); pause(2)
         mark("story"); openTab(app, "Story"); pause(3.5)
 

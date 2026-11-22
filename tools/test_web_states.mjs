@@ -85,7 +85,7 @@ const VIS = 'section:not([hidden]) ';
 
 console.log('empty (stranger)');
 await openAs('stranger', '#/unexamined');
-ok(await waitFor(`/No transactions yet/.test(${visibleText})`), 'Unexamined shows "No transactions yet."');
+ok(await waitFor(`/Nothing in your Narrative yet/.test(${visibleText})`), 'Unexamined shows "Nothing in your Narrative yet."');
 ok(await evaluate('!!document.querySelector(".state-empty a[href=\\"#/import\\"]")'), 'the empty state offers Import');
 await shot('empty-unexamined');
 await cdp('Page.navigate', { url: SITE + '#/ledger' });
@@ -97,6 +97,32 @@ await openAs('owner', '#/unexamined');
 ok(await waitFor('document.querySelectorAll(".row").length > 0'), 'owner sees rows on Unexamined');
 ok(!(await evaluate('!!document.querySelector(".state-empty")')), 'and no empty state');
 await shot('happy-unexamined');
+
+console.log('skip (Decision 065): an event leaves Unexamined and the Narrative, then comes back');
+{
+  const first = await evaluate('(() => { const a = document.querySelector("#view-unexamined a.row"); return a && { href: a.getAttribute("href"), name: a.querySelector(".row-title").textContent }; })()');
+  ok(!!first, `an Unexamined event to skip (${first && first.name})`);
+  if (first) {
+    const id = first.href.split('/').pop();
+    const rowFor = `!!document.querySelector('#view-unexamined a.row[href="${first.href}"]')`;
+    await evaluate(`location.hash = "${first.href}"; true`);
+    ok(await waitFor('!!document.querySelector("[data-skip]") && document.querySelector("[data-skip]").textContent === "Skip"'), 'the event page offers Skip');
+    await evaluate('document.querySelector("[data-skip]").click(); true');
+    ok(await waitFor('document.querySelector("[data-skip]") && document.querySelector("[data-skip]").textContent === "Bring back"'), 'after Skip it offers Bring back');
+    await evaluate('location.hash = "#/unexamined"; true');
+    await waitFor('document.querySelectorAll("#view-unexamined a.row").length > 0');
+    ok(!(await evaluate(rowFor)), `${first.name} is gone from Unexamined`);
+    await evaluate('location.hash = "#/ledger"; true');
+    ok(await waitFor('!!document.querySelector("details.skipped")'), 'the Narrative gathers it under "skipped"');
+    await shot('skipped-narrative');
+    await evaluate(`location.hash = "#/t/${id}"; true`);
+    await waitFor('document.querySelector("[data-skip]") && document.querySelector("[data-skip]").textContent === "Bring back"');
+    await evaluate('document.querySelector("[data-skip]").click(); true');
+    ok(await waitFor('document.querySelector("[data-skip]").textContent === "Skip"'), 'Bring back restores it');
+    await evaluate('location.hash = "#/unexamined"; true');
+    ok(await waitFor(rowFor), `${first.name} is back in Unexamined (fixture left as found)`);
+  }
+}
 
 console.log('error (REST blocked)');
 await openAs('owner', '#/ledger');

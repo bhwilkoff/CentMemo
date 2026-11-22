@@ -15,7 +15,7 @@ struct ContentView_iOS: View {
                     // The inbox (deep links, test doors) pushes onto this stack.
                     TwoPane(list: { UnexaminedView() }, destinations: wrap, path: $store.navigationPath)
                 }
-                Tab("Ledger", systemImage: "list.bullet", value: "ledger") { TwoPane(list: { LedgerView() }, destinations: wrap) }
+                Tab("Narrative", systemImage: "list.bullet", value: "ledger") { TwoPane(list: { LedgerView() }, destinations: wrap) }
                 Tab("Story", systemImage: "book", value: "story") { TwoPane(list: { StoryView() }, destinations: wrap) }
                 Tab("Settings", systemImage: "gearshape", value: "settings") { stack { SettingsView() } }
             }
