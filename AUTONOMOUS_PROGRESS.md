@@ -22,6 +22,8 @@ The owner's requests jump the rotation.
 - One commit per tick. Bump both iOS version numbers on iOS-touching ticks.
 - The agent is never the tester of record: Ben plays.
 - No handwriting fonts; color is a mark, never a ground (memories).
+- DECISIONS entries are append-only (Decision 033): never edit one in place,
+  even a superseded one. Supersession shows in the newer entry and the index.
 
 ## Backlog
 
@@ -75,7 +77,7 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
     - The device-harness lessons from docs/PROVENANCE.md.
 11b. ✅ (tick 12) Web: static pages (privacy, terms, connect) set headings in system
     sans, not Newsreader (DESIGN T1). Found tick 9.
-11c. ⏳ Opt: DECISIONS.md is 1,476 lines, mostly the template's 001-053;
+11c. ✅ (tick 15) Opt: DECISIONS.md is 1,476 lines, mostly the template's 001-053;
     AUTONOMOUS-LOOPS says it stays context-sized. Archive the inherited ones
     the app does not lean on to docs/DECISIONS-ARCHIVE.md (one line each
     left behind). Found tick 10.
@@ -424,3 +426,27 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
 - **Next:** tick 15 (opt), backlog 11c, archive the inherited DECISIONS
   (the template just did the same: 001-032 rolled verbatim into
   docs/decisions/ with an index).
+
+### Tick 15 — 2026-11-22 — opt: DECISIONS archived verbatim (71 KB to 16 KB loaded); tick 10's edit undone
+- **Context:** backlog 11c; the template's 08e71455 shows the pattern.
+- **Correction first:** tick 10 trimmed Decision 059 in place. That breaks
+  Decision 033 ("never trim, edit, or summarize an entry in place"), which I
+  had not read. 059 is restored byte for byte from before tick 10; its
+  supersession shows in 060's title and the index. The loop rules now say
+  so.
+- **Implementation:**
+  - Entries 001-053 (the template's) moved whole to
+    `docs/decisions/DECISIONS-001-053.md`.
+  - DECISIONS.md keeps its header, a "Where entries live" note, a one-line
+    index of all 61, and 054 onward in full.
+- **Verification:**
+  - A script checked that each of the 61 entries in the pre-tick-10 file
+    appears exactly once, byte for byte, across the two files: none
+    missing or duplicated.
+  - No links point into the old file. `tools/test_all.sh` ALL PASS.
+- **Lines:** the always-loaded file goes from 71,238 to 16,097 bytes. The
+  repo's total lines grow slightly (index plus archive header), because a
+  verbatim move relocates text rather than deleting it; the saving is per
+  session, which is Decision 033's purpose.
+- **Next:** tick 16 (iOS). Open iOS items: files as attachments, the iPad
+  readable width (needs Ben). Re-mine the backlog sources if those stall.
