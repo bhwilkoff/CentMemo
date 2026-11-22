@@ -57,7 +57,7 @@ F2. ⏳ FinanceKit background delivery extension (iOS 26).
 ### Ben's request (2026-11-22): "Start with item one and keep going. You can also do the recording too. The skills should be built for that in at least one of my repositories. Start an autonomous loop to make sure you get it all done."
 L1. ✅ (launch tick 1) First sign-in from inside Claude: the same-window Apple fallback asks
     no scope, so a brand-new account gets no email. Make it work with email.
-L2. 🟡 (tick 3 recording ✅; tick 4 URLs, 4+, support ✅; tick 5 screenshots ✅; copy, phone, labels, Ben's clip, submit ⏳) App Store submission: privacy labels matching PrivacyInfo.xcprivacy,
+L2. 🟡 (recording, URLs, 4+, support, screenshots ✅; privacy labels answered, Ben publishes; copy, phone, Ben's clip, submit ⏳) App Store submission: privacy labels matching PrivacyInfo.xcprivacy,
     screenshots, description, the review recording (find the recording
     skill in Ben's repos), and the cloud build (the dev Mac runs a beta OS).
 L3. ⏳ Connectors Directory submission: reviewer test account, the form
@@ -774,3 +774,14 @@ Apple.
   `tools/test_all.sh` exit 0.
 - **Next:** the privacy labels (App Store Connect web UI, needs Ben signed
   in). Then the copy, phone, and Ben's clip, which wait on Ben.
+
+### Launch tick 5b — 2026-11-22 — L2: App Privacy labels answered (not published)
+- **Answers** (App Store Connect web; the API has no endpoint): Email
+  Address, Other Financial Info, Other User Content, and User ID, each used
+  for App Functionality only, linked to the user, not used for tracking.
+  Read back from the page; no type mentions tracking.
+- **Not published:** Publish asks the owner to agree the responses are
+  accurate and lawful, a legal attestation for Learning is Change, so Ben
+  presses it. The answers are saved.
+- **PrivacyInfo.xcprivacy** gains User ID, so the manifest and the labels
+  agree; it ships with the next build.
