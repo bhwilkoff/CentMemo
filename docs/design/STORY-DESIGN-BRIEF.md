@@ -97,7 +97,7 @@ the Setting page) join where they fit.
   write about.
 - D8 🟡 (name cleaning + store tiles on iPhone and web ✅; store page, renames, categories ⏳) Merchant tiles and categories.
 - D9 Filters (show only some kinds of items).
-- D10 Timeline view: progress over time.
+- D10 🟡 (iOS Narrative is the thread: filled theme marks with the memo as headline, quiet marks for waiting events ✅ iPhone 12 + Duo; web ⏳) Timeline view: progress over time.
 - D11 Visualization: color-coded charges or themes.
 - D14 Default themes (Ben, 2026-11-22: "At some point in our design process,
   we should create a full set of default themes that people can choose
@@ -116,11 +116,12 @@ the Setting page) join where they fit.
 - S1 Venmo CSV import: meets Ben's rule. In the app, Settings > Statements,
   then a year and a month; one month per file, downloaded or emailed. The Note
   column arrives as the memo. Columns and quirks: docs/research/p2p-csv-export-paths.md.
-- S2 PayPal and Cash App: no CSV export in either phone app is documented
-  (Cash App's app gives monthly PDFs only). Both export CSV on their websites
-  (PayPal: Activity > download > CSV; Cash App: cash.app/account > Activity >
-  CSV). Whether those websites work in Safari on an iPhone is unconfirmed.
-  Waiting on Ben: does a website export from the phone's browser meet his rule?
+- S2 PayPal and Cash App CSV import: approved. Ben, 2026-11-22: "So long as
+  there is a documented process to get the csv via the web, it should work just
+  fine on a mobile browser. Ideally, we would share the documented path for each
+  of the csv pathways to allow for easier import." Each source shows its own
+  documented export path beside Import (Venmo in the app; PayPal and Cash App on
+  the web), from docs/research/p2p-csv-export-paths.md.
 - S3 The connector returns memos with date, amount, and Setting, so a
   person's Claude can match them to the bank data Claude Personal Finance
   already reads (Plaid).

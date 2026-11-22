@@ -105,7 +105,9 @@ struct LedgerView: View {
                     Text("Nothing recorded this month.").foregroundStyle(Color.brandTextMuted).onGround()
                 } else {
                     ForEach(entries.filter { !$0.isSkipped }) { e in
-                        EntryLink(id: e.id) { EntryRow(entry: e, showMemo: true) }.onGround()
+                        EntryLink(id: e.id) { ThreadRow(entry: e) }.onGround()
+                            .listRowSeparator(.hidden)
+                            .listRowInsets(EdgeInsets(top: 0, leading: Spacing.s4, bottom: 0, trailing: Spacing.s4))
                             .skipAction(e) { await skip(e, !e.isSkipped) }
                     }
                     let skipped = entries.filter(\.isSkipped)

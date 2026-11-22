@@ -1054,3 +1054,20 @@ Apple.
   - Venmo has a phone path.
   - PayPal and Cash App are documented only on their websites. Cash App's
     app gives PDF statements only.
+
+### Design tick 7 — 2026-11-22 — D10 the Narrative as a thread (iOS)
+- `ThreadRow`: a continuous pencil line.
+  - A written memo is a filled mark in its first theme's hue (theme hue =
+    `Money.merchantHue(theme)` over the six store hues, until D14 gives
+    themes their own colors), with the memo in serif as the headline and a
+    small Setting tile, the date, the Setting and the theme under it.
+  - A waiting event is a hollow mark with one quiet line (date · Setting ·
+    amount).
+  - The month query now brings memo themes.
+- **Verified:** TabSmoke and Skip pass on the iPhone 12; frames read on the
+  iPhone 12 and the Duo (thread on the left, event on the right).
+- Ben approved S2 (PayPal and Cash App via their documented web exports);
+  every source shows its documented path beside Import.
+- **Next:**
+  - The web Narrative thread (parity).
+  - The S1/S2 importers, with the paths shown.

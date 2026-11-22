@@ -178,7 +178,7 @@ final class APIClient {
     }
 
     func month(_ ym: String) async throws -> [LedgerEntry] {
-        try await rest("transactions", [.init(name: "select", value: Self.txnColumns + ",memos(body)"),
+        try await rest("transactions", [.init(name: "select", value: Self.txnColumns + ",memos(body,memo_values(value_id,life_values(name)))"),
                                         .init(name: "txn_date", value: "gte.\(ym)-01"),
                                         .init(name: "txn_date", value: "lte.\(LedgerDate.lastDay(ym))"),
                                         .init(name: "order", value: "txn_date.desc"),
