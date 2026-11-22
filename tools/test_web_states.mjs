@@ -225,7 +225,7 @@ ok(await waitFor('/mcp\\.centmemo\\.com/.test(document.body.innerText)'), 'web S
 ok(!(await evaluate('/supabase\\.co\\/functions/.test(document.body.innerText)')), 'and never the Supabase address');
 
 console.log('static pages');
-for (const page of ['connect/', 'privacy/', 'terms/']) {
+for (const page of ['connect/', 'support/', 'privacy/', 'terms/']) {
   await cdp('Page.navigate', { url: SITE + page });
   await waitFor('document.readyState === "complete" && !!document.querySelector("h1")');
   await sleep(300);

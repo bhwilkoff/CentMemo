@@ -57,7 +57,7 @@ F2. ⏳ FinanceKit background delivery extension (iOS 26).
 ### Ben's request (2026-11-22): "Start with item one and keep going. You can also do the recording too. The skills should be built for that in at least one of my repositories. Start an autonomous loop to make sure you get it all done."
 L1. ✅ (launch tick 1) First sign-in from inside Claude: the same-window Apple fallback asks
     no scope, so a brand-new account gets no email. Make it work with email.
-L2. 🟡 (launch tick 3: recording ✅; listing, labels, Ben's clip, submit ⏳) App Store submission: privacy labels matching PrivacyInfo.xcprivacy,
+L2. 🟡 (tick 3 recording ✅; tick 4 URLs, 4+ rating, support page ✅; copy, phone, labels, screenshots, Ben's clip, submit ⏳) App Store submission: privacy labels matching PrivacyInfo.xcprivacy,
     screenshots, description, the review recording (find the recording
     skill in Ben's repos), and the cloud build (the dev Mac runs a beta OS).
 L3. ⏳ Connectors Directory submission: reviewer test account, the form
@@ -708,3 +708,26 @@ Apple.
 - **Lesson:** a sample source must carry the real data's variety (several
   account kinds, missing optionals), or it proves only the happy path.
 - **Next:** TestFlight 12 to Ben; the real sync on his phone.
+
+### Launch tick 4 — 2026-11-22 — L2: listing facts, support page, reviewer notes drafted
+- **Context:** L2. Version 1.0 open (PREPARE_FOR_SUBMISSION); build 12 VALID.
+- **Implementation:**
+  - App Store Connect: support https://centmemo.com/support/, marketing
+    https://centmemo.com/, privacy https://centmemo.com/privacy/, age rating
+    declared all none (Apple computes 4+).
+  - New `/support/` page from facts (contact, Wallet, import, turning access
+    off, deletion, Claude), linked in the footer and in the 375 px checks.
+  - `/review/applecard-sample.csv`: the synthetic fixture, for reviewers whose
+    accounts start empty.
+- **Held for Ben:**
+  - The description, subtitle, promotional text, and keywords are product
+    copy (AGENTS.md: no AI-written copy), so they are drafted from his own
+    sentences in docs/store/LISTING.md, marked where verbatim, for him to
+    edit and approve.
+  - The review details need a contact phone (+country code; App Store
+    Connect refuses them without one); the notes wait in
+    docs/store/REVIEW-NOTES.md.
+- **Verification:** the attributes read back; `tools/test_all.sh` exit 0
+  (support/ fits 375 px).
+- **Next:** privacy labels (App Store Connect web UI; the API has no
+  endpoint) and the screenshots.
