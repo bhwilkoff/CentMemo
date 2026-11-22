@@ -81,6 +81,10 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
     AUTONOMOUS-LOOPS says it stays context-sized. Archive the inherited ones
     the app does not lean on to docs/DECISIONS-ARCHIVE.md (one line each
     left behind). Found tick 10.
+11d. ✅ (tick 16) PARITY audit and the iOS privacy manifest (found by re-mining).
+11e. ⏳ iOS: see the empty and error states with real conditions (stranger
+    account on device; network off), and run import and delete account on
+    a device (PARITY 🚧 cells, tick 16).
 12. 🔮 Shared stories at a public URL (opt-in per story).
 13. 🔮 macOS through the universal target.
 
@@ -450,3 +454,30 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
   session, which is Decision 033's purpose.
 - **Next:** tick 16 (iOS). Open iOS items: files as attachments, the iPad
   readable width (needs Ben). Re-mine the backlog sources if those stall.
+
+### Tick 16 — 2026-11-22 — iOS: honest PARITY, privacy manifest (build 1.0 (6))
+- **Context:** the backlog had thinned to items blocked on Ben, so I
+  re-mined the documented sources (PARITY, the plan's M2 list) instead of
+  inventing work.
+- **Found:** PARITY.md was template boilerplate with false claims (email
+  sign-in, tvOS and Android ✅, a Face ID gate ✅) and stale 🚧 on features
+  verified since. The iOS app had no `PrivacyInfo.xcprivacy`, though it
+  uses `UserDefaults` (a required-reason API App Store review checks).
+- **Implementation:**
+  - PARITY sections 0 to 13 rewritten for CentMemo: web and iOS columns
+    only, with the other platforms' status in the platform set. Every ✅
+    names its test or observation; built-but-unseen stays 🚧 with the
+    reason. The legend, the parity rule, and the maintenance protocol are
+    kept. 371 to 201 lines.
+  - `apple/Resources/PrivacyInfo.xcprivacy`: no tracking; email, financial
+    info, and user content, all linked, all app functionality;
+    UserDefaults CA92.1. Photos are not declared (references only). It
+    matches centmemo.com/privacy/.
+  - Build 6.
+- **Verification:**
+  - `plutil -lint` OK; the manifest is inside CentMemo.app.
+  - iPhone 12 TabSmokeUITests 5/5, no crash logs.
+  - `tools/test_all.sh` ALL PASS.
+- **New backlog (from the audit):** 11e, see the iOS empty and error
+  states, import, and delete account on a device.
+- **Next:** tick 17 (web), then 11e on the next iOS tick.

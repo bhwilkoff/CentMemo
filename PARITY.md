@@ -38,17 +38,17 @@ returning to the platform it started on.
 
 ## 0. Platform set
 
-Decision 055. **Lead: web** (works today with Apple Card exports),
-**source of truth for FinanceKit: iOS** (iPhone is the only device with
-FinanceKit transaction APIs).
+Decision 055. Audited 2026-11-22 (tick 16): every ✅ below has a test or an
+observation from 2026-11-21/22 behind it; built-but-unseen is 🚧.
 
-- **Web** ✅ in progress: import, memo writing, ledger, story, connector consent.
-- **iOS/iPadOS** ⏳ M2: FinanceKit sync once Apple grants the entitlement; memo writing; photos by reference.
-- **macOS** ⏳: reads and writes memos through the universal Apple target; no FinanceKit on Mac.
-- **tvOS** 🚫: CentMemo is writing and reflection, not lean-back.
-- **Android** 🚫 for now: FinanceKit is Apple-only; a CSV-only Android app is possible later if asked.
+- **Web** (centmemo.com): import, write, ledger, story, connector consent.
+- **iOS/iPadOS**: TestFlight 1.0 (5). The only FinanceKit source.
+- **macOS** 🔮: through the universal Apple target, later; no FinanceKit on Mac.
+- **tvOS** 🚫: writing and reflection, not lean-back.
+- **Android** 🚫: FinanceKit is Apple-only; a CSV-only app only if asked.
 
----
+macOS, tvOS, and Android columns are left out of the tables below until a
+platform is added; their status is the line above.
 
 ## Legend
 
@@ -88,244 +88,74 @@ When shipping any user-facing feature:
 
 ---
 
-## 1. Top-level navigation
+## 1. Navigation and views
 
-| Verb | Web | iOS | macOS | tvOS | Android | Notes |
-|---|---|---|---|---|---|---|
-| Unexamined (home) | 🚧 | 🚧 | ⏳ | 🚫 | 🚫 | Purchases with no memo, newest first |
-| Ledger by month | 🚧 | 🚧 | ⏳ | 🚫 | 🚫 | |
-| Story (month or value) | 🚧 | 🚧 | ⏳ | 🚫 | 🚫 | |
-| Settings (values, connect Claude, account) | 🚧 | 🚧 | ⏳ | 🚫 | 🚫 | |
-
----
+| Verb | Web | iOS | Notes |
+|---|---|---|---|
+| Unexamined (home) | ✅ | ✅ | Web: test_web_states. iOS: tap tier (iPhone 12), glass tier (iPhone 12, iPad Pro) |
+| Ledger by month | ✅ | ✅ | |
+| Story (month or value) | ✅ | ✅ | |
+| Purchase detail | ✅ | ✅ | |
+| Settings (color, values, connect Claude, account) | ✅ | ✅ | iOS color choice persists across devices (GroundUITests) |
+| iPad layout | n/a | 🚧 | Native top tab bar seen; rows span full landscape width, a readable-width rule waits on Ben |
 
 ## 2. Money in
 
-| Feature | Web | iOS | macOS | tvOS | Android | Notes |
-|---|---|---|---|---|---|---|
-| Import Apple Card CSV export | 🚧 | 🚧 | ⏳ | 🚫 | 🚫 | `js/money/money.js`; iOS ports the same goldens |
-| FinanceKit sync (history tokens) | n/a | 🚧 | n/a | n/a | n/a | No FinanceKit on web, Mac, TV, Android; waits on Apple's entitlement grant |
-| FinanceKit background delivery | n/a | ⏳ | n/a | n/a | n/a | iOS 26 extension |
-
----
+| Feature | Web | iOS | Notes |
+|---|---|---|---|
+| Import Apple Card CSV export | ✅ | 🚧 | Same source IDs on both (golden parity test). iOS import never run on a device |
+| Connect Apple Wallet (FinanceKit sync, history tokens) | n/a | 🚧 | Verified with the DEBUG sample source on the iPhone 12 (WalletSyncUITests); real FinanceKit waits on Apple's entitlement |
+| FinanceKit background delivery | n/a | ⏳ | iOS 26 extension, after the entitlement |
 
 ## 3. Telling the story
 
-| Feature | Web | iOS | macOS | tvOS | Android | Notes |
-|---|---|---|---|---|---|---|
-| Write a memo on a purchase | 🚧 | 🚧 | ⏳ | 🚫 | 🚫 | Only the person writes (Decision 056) |
-| Values the person names, tagged on memos | 🚧 | 🚧 | ⏳ | 🚫 | 🚫 | |
-| Attach a photo or file | 🟡 | ✅ | ⏳ | 🚫 | 🚫 | iOS: photo by PhotoKit reference (tick 11). Web: says how many photos are attached in the iPhone app (tick 12); it cannot draw a device photo. Files and opt-in upload later |
-| Share one story | 🔮 | 🔮 | 🔮 | 🚫 | 🚫 | Opt-in, per story |
-| Claude connector (read-only MCP) | 🚧 | n/a | n/a | n/a | n/a | Server-side; every platform's data is readable once synced |
-| Delete account | 🚧 | 🚧 | ⏳ | 🚫 | 🚫 | Decision 035 |
-
----
-
-## 3b. Teaching surfaces
-
-Teaching is a parity domain with DELIBERATE asymmetry. Track it so
-a future session doesn't "harmonize" a rejection into a port (see
-`universal-feature-states`).
-
-| Surface | Web | iOS | macOS | tvOS | Android | Notes |
-|---|---|---|---|---|---|---|
-| EmptyState (productive next action) | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | Required everywhere from the first list/grid |
-| ErrorBanner / OfflinePill | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | Required everywhere |
-| HintBanner (one-shot tip) | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | Persisted dismissals + a global reset in Settings |
-| Multi-step anchored walkthroughs | 🚫 | ⏳ | 🚫 | 🚫 | 🚫 | iOS-only where its idioms are novel; other platforms use EmptyState + hints + a `?` explainer. Record the rejection in each platform's design doc |
-
----
-
-## 4. Authentication + profile
-
-| Feature | Web | iOS | macOS | tvOS | Android | Notes |
-|---|---|---|---|---|---|---|
-| Sign in with Apple | ✅ | ✅ | ✅ | ✅ | 🚫 | Apple ecosystem; Android uses Sign in with Google instead |
-| Sign in with Google | 🔮 | 🔮 | 🔮 | 🚫 | ✅ | Android Credential Manager one-tap; web/desktop GIS when sync ships |
-| Email/password | ✅ | ✅ | ✅ | 🚫 | ✅ | Typing a password with a Siri Remote is hostile, so tvOS uses SiwA only |
-| Biometric gate for sensitive actions | n/a | ✅ Face ID | ✅ Touch ID | n/a | ✅ BiometricPrompt | macOS uses LocalAuthentication (Touch ID / password) |
-| Account deletion | ✅ | ✅ | ✅ | ✅ | ✅ | App Store + Play review requirement when sign-in exists |
-
-Sign-in is **optional and gates only sync**. Every browse/use verb
-works signed-out on every platform (see `per-ecosystem-sync-islands`).
-macOS joins the **Apple CloudKit sync island** for free (same iCloud
-container as iOS/tvOS), with no new sync backend.
-
----
-
-## 5. Universal Links / App Links / deep linking
-
-| Feature | Web | iOS | macOS | tvOS | Android | Notes |
-|---|---|---|---|---|---|---|
-| Universal Links / App Links (HTTPS) | n/a | ⏳ | ⏳ | n/a | ⏳ | `/.well-known/` files; tvOS has no Safari hand-off (custom scheme only) |
-| Custom scheme | n/a | ⏳ | ⏳ | ⏳ | ⏳ | `appname://`; tvOS needs it for Top Shelf + Siri deep links |
-| URL params reflect filter state | ✅ | n/a | n/a | n/a | n/a | Web-specific affordance |
-| Canonical share URLs (`https://…/item/{id}`) | ✅ renders | ✅ emits | ✅ emits | ✅ emits (QR code, since a TV can't "send" a link) | ✅ emits | Web is the landing twin for every native share (DEEP_LINKS.md) |
-| Companion-app deep link | n/a | ✅ `canOpenURL`/`open` | ✅ `NSWorkspace` | n/a | ✅ `Intent` | macOS probes install via `NSWorkspace.urlForApplication(toOpen:)`; NO `LSApplicationQueriesSchemes` entry needed |
-
----
-
-## 6. Notifications
-
-| Feature | Web | iOS | macOS | tvOS | Android | Notes |
-|---|---|---|---|---|---|---|
-| Push notifications | 🚫 | 🔮 APNs | 🔮 APNs | 🚫 | 🔮 FCM | Web push too inconsistent; TV notifications are hostile in a living room |
-| Cross-platform dispatcher | n/a | 🔮 | 🔮 | n/a | 🔮 | One Worker, two transports (APNs + FCM), symmetric payload |
-| Notification permission request | n/a | 🔮 | 🔮 | n/a | 🔮 | At opt-in moment, NOT app launch |
-
----
-
-## 7. Payments / subscription
-
-| Feature | Web | iOS | macOS | tvOS | Android | Notes |
-|---|---|---|---|---|---|---|
-| In-app purchase | n/a | 🔮 IAP | 🔮 IAP (same StoreKit) | 🔮 IAP (same StoreKit) | 🔮 Play Billing | |
-| Web subscription | 🔮 | n/a | n/a | n/a | n/a | Stripe / Paddle when scoped |
-| Cross-platform subscription state sync | 🔮 | 🔮 | 🔮 | 🔮 | 🔮 | Webhooks → `user_subscriptions` table |
-
----
-
-## 7b. Platform reach
-
-I want the oldest device someone still owns to be served, not
-abandoned. This row says how far back each platform reaches, so a floor
-change is a visible decision rather than a side effect of a new API.
-Choose floors with `multiplatform-expansion-method`.
-
-| Feature | Web | iOS | macOS | tvOS | Android | Notes |
-|---|---|---|---|---|---|---|
-| Oldest hardware served | <!-- e.g. any evergreen browser --> | <!-- iOS NN floor = oldest iPhone it runs on --> | <!-- macOS NN floor --> | <!-- tvOS NN floor = e.g. Apple TV HD (2015) --> | <!-- minSdk NN = Android N --> | Name the test or CI step that holds each floor, and the DECISIONS entry that chose it |
-
----
-
-## 7c. Capability definitions
-
-<!-- Add one table per feature whose name covers several modes, where
-     which modes a device gets is decided by hardware or OS, not by how
-     much we have built. Delete this section if no feature needs it. -->
-
-One name can mean different things on different devices. This table is
-the canonical answer to "what does [FEATURE] mean here". The rows
-elsewhere in this file carry the engineering detail.
-
-A capability a device can never have (no camera, no API on that OS) is
-🚫 here with the reason, and the app omits the entry. A capability a
-device could have and currently lacks (not signed in, permission not
-granted) stays visible in the app with one sentence saying why.
-
-| Platform | [Mode A] | [Mode B] | Host | Join | Reason for each 🚫 |
-|---|---|---|---|---|---|
-| iOS / iPadOS | | | | | |
-| macOS | | | | | |
-| tvOS | | | | | |
-| Android phone | | | | | |
-| Android TV / Fire TV | | | | | |
-| Web | | | | | |
-
-Keep Host and Join as separate columns when they differ: a television
-with no camera may be unable to host and still be the best device to
-join from.
-
----
-
-## 7d. Ported platforms (one row each)
-
-When a platform is a port with its own ledger
-(`docs/templates/PORT-PARITY-LEDGER-template.md`), this file holds ONE
-summary row for it. The per-surface detail lives in the ledger, and
-only there, so the two cannot disagree.
-
-| Port | Reference platform | Ledger | Feature ledger | Owner feedback ledger | Status in one sentence |
-|---|---|---|---|---|---|
-| <!-- e.g. Roku --> | <!-- tvOS --> | `docs/<PLATFORM>-PARITY.md` | `docs/<PLATFORM>-FEATURE-PARITY.md` | `docs/<PLATFORM>-FEEDBACK-LEDGER.md` | |
-
----
-
-## 8. Backend services / shared data plane
-
-All clients consume the same backend / published data. List the
-canonical services and assets here so references stay aligned.
-If the app has a content data plane, the full contract lives in
-`docs/DATA-CONTRACT.md`. This table just indexes it. All five
-clients are **consumers only**: none re-implements or re-hosts the
-pipeline (see `shared-data-plane-contract`).
-
-| Service / asset | Purpose | Where | Consumed by |
+| Feature | Web | iOS | Notes |
 |---|---|---|---|
-| <!-- e.g. catalog.sqlite.zz | full content DB, query-on-disk | GitHub Release (rolling) | iOS, macOS, tvOS, Android download+inflate; web via index --> | | | |
+| Write and remove a memo | ✅ | ✅ | Only the person writes (Decision 056). iOS: MemoUITests, read back after relaunch |
+| Values the person names, tagged on memos | ✅ | ✅ | |
+| Attach a photo | 🟡 | ✅ | iOS: by PhotoKit reference (PhotoAttachUITests; denied path). Web says how many are attached in the iPhone app; it cannot draw one |
+| Attach a file, upload a copy | ⏳ | ⏳ | money-story-design: reference first, upload an explicit per-item choice |
+| Share one story | 🔮 | 🔮 | Opt-in, per story |
+| Delete account | ✅ | 🚧 | `delete_my_account` proven (supabase/tests/delete_my_account.sql); web button wired; iOS button never pressed on a device |
 
----
+## 4. Claude connector
 
-## 9. Web-specific affordances
-
-These are web-only by design; other platforms handle the same
-need natively.
-
-| Feature | Web | Why |
+| Feature | Server | Notes |
 |---|---|---|
-| URL params reflect filter state | ✅ | Shareable deep links; native apps use in-memory state |
-| Web Share API + clipboard fallback | ✅ | iOS/macOS/Android use the system share sheet; tvOS shows a QR code |
-| View Transitions API (cross-view) | ✅ | iOS uses `.navigationTransition(.zoom)`; Android `sharedBounds` |
-| Container queries on components | ✅ | Native platforms use size-class branching |
-| Installable PWA + offline shell | ✅ | The zero-install reach play; stores cover the rest |
+| Read-only MCP, OAuth 2.1, six tools | ✅ | tools/test_connector.mjs end to end; agent writes refused in SQL |
+| Wallet (FinanceKit) rows never shared | ✅ | FinanceKit Addendum 3.2; `SHARE_FINANCEKIT = false` |
+| Public docs | ✅ | centmemo.com/connect/ |
+| Live in Claude Duet (chat and scheduled task) | 🚧 | Waits on Ben adding the connector |
 
----
+## 5. States (universal-feature-states)
 
-## 10. iOS-specific affordances
+| Surface | Web | iOS | Notes |
+|---|---|---|---|
+| Empty state with a next action | ✅ | 🚧 | Web: stranger user in test_web_states. iOS built (ContentUnavailableView), not seen with an empty account |
+| Error with Try again | ✅ | 🚧 | iOS `LoadState` built, not seen failing |
+| Offline | ✅ | 🚧 | Web banner and message tested. iOS shows the error state; no dedicated offline indicator |
+| Hints and walkthroughs | 🚫 | 🚫 | The Unexamined count is the only prompt CentMemo needs (DESIGN C4) |
 
-| Feature | iOS | Why |
+## 6. Sign-in
+
+| Feature | Web | iOS | Notes |
+|---|---|---|---|
+| Sign in with Apple (only method, Decision 058) | ✅ | 🚧 | Web verified by Ben. iOS not yet signed in on a real Apple ID (TestFlight) |
+
+## 7. Not built, on purpose or not yet
+
+| Feature | Status | Notes |
 |---|---|---|
-| Liquid Glass tab bar / toolbar | ✅ | Web uses `backdrop-filter`; Android M3 tonal elevation |
-| Live Activities / Dynamic Island | 🔮 | No equivalent elsewhere; accept the asymmetry |
-| WidgetKit home-screen widgets | 🔮 | tvOS analog is Top Shelf; Android analog is Glance widgets |
-| Hardware-keyboard shortcuts | ✅ | Web n/a (browser conflicts); macOS uses menu-bar `.commands`; Android Ctrl+1..5 on tablets |
-| Picture-in-Picture + background audio | 🔮 | macOS PiP + background audio native; tvOS apps suspend in background |
+| Universal links / deep links | 🔮 | Web routes are hash links; iOS has DEBUG launch doors only |
+| Notifications | 🔮 | Never with transaction details (Apple Developer Program License Agreement); only if a real need appears |
+| Payments, subscriptions | 🚫 | Not scoped |
 
----
+## 8. Platform reach
 
-## 11. macOS-specific affordances
-
-macOS is a pointer + keyboard + menu-bar + resizable-multi-window app.
-It is NOT the iOS app resized. See `macos-platform-patterns`.
-
-| Feature | macOS | Why |
+| | Web | iOS |
 |---|---|---|
-| Menu-bar commands + full keyboard scheme | ✅ | `.commands { }`; iOS uses hardware-shortcut chords, tvOS/web have none |
-| `NavigationSplitView` sidebar + detail | ✅ | iOS uses a tab bar, tvOS a focus sidebar: same verbs, Mac idiom |
-| Multi-window / document scenes | 🔮 | `WindowGroup` + optional `DocumentGroup`; a heavy pro/creation surface belongs ONLY here (filesystem + subprocess + long compute) |
-| Player replaces window root while playing | ✅ | Not an overlay. The split view's toolbar/sidebar/prev-title would bleed through |
-| Title via window title bar (no `externalMetadata`) | ✅ | macOS `AVPlayerItem` has no `externalMetadata`; iOS/tvOS set it, web/Android use their own player chrome |
-
----
-
-## 12. tvOS-specific affordances
-
-These are ten-foot / lean-back idioms by design. The general rule:
-**idle/ambient surfaces belong to lean-back devices** (TV first,
-iPad/tablet/desktop second, phones rarely).
-
-| Feature | tvOS | Why |
-|---|---|---|
-| Top Shelf extension | ⏳ | The marquee surface when your icon is focused on the TV home screen; reads an App Group snapshot the app refreshes via `BGAppRefreshTask` |
-| Siri "Up Next" via NSUserActivity | ⏳ | System watchlist integration; tiny code surface |
-| App Intents voice launches ("surprise me") | ⏳ | Pairs with any random/serendipity verb |
-| Focus-driven UI (no pointer, no touch) | ✅ | The defining constraint (see `tvos-platform-patterns`) |
-| Idle screensaver / ambient mode | 🔮 | Lean-back idiom; opt-in, never over playback |
-| Layered parallax app icon (imagestack) | ⏳ | tvOS icons are layered; see `branding/README.md` |
-
----
-
-## 13. Android-specific affordances
-
-| Feature | Android | Why |
-|---|---|---|
-| Predictive back gesture | ⏳ | iOS swipe-back is fixed-animation; Android is user-driven (`enableOnBackInvokedCallback`) |
-| Adaptive icon (foreground / background / monochrome) | ⏳ | iOS uses static; tvOS uses layered imagestack |
-| App Shortcuts (long-press app icon) | ⏳ | iOS has AppIntents; tvOS has Top Shelf |
-| Material You dynamic color (opt-in) | ⏳ | Other platforms have brand-only theming |
-| Google Cast sender | 🔮 | AirPlay analog; needs Cast SDK + device-tested receiver |
-| 16 KB page size support | ⏳ | Mandatory for new releases targeting Android 15+ |
+| Oldest served | Evergreen browsers (Safari, Chrome, Firefox) | iOS 18 (iPhone XS/XR and newer); FinanceKit needs iOS 17.4+ |
+| Bench devices | Headless Chrome at 375 px | iPhone 12 (tap and glass tiers), iPad Pro 12.9 (glass tier; UI Automation waits on Ben) |
 
 ---
 
