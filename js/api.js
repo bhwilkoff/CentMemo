@@ -50,6 +50,9 @@ const API = (() => {
     try { res = await window.AppleID.auth.signIn(); }
     catch (e) {
       const code = e && (e.error || e.message);
+      // In-app browsers (Claude's connector sheet among them) block the popup.
+      // Fall back to a same-window round trip to Apple; it never returns here.
+      if (code === 'popup_blocked_by_browser') return signInWithAppleRedirect(redirectURI);
       throw new Error(code === 'popup_closed_by_user' || code === 'user_cancelled_authorize'
         ? 'Sign-in was canceled. Choose Sign in with Apple to try again.'
         : 'Apple couldn\u2019t sign you in (' + (code || 'unknown error') + ').');
@@ -57,6 +60,40 @@ const API = (() => {
     const token = res && res.authorization && res.authorization.id_token;
     if (!token) throw new Error('Apple didn\u2019t return a sign-in token. Try again.');
     must(await client().auth.signInWithIdToken({ provider: 'apple', token, nonce: raw }));
+  }
+  /**
+   * The same-window fallback: Apple's authorize page, then back to redirectURI
+   * with the identity token in the fragment. Apple allows a fragment response
+   * only when no scope is asked, so no email comes back; an existing account is
+   * found by its Apple ID alone. The page's query (the consent request's
+   * authorization_id) and the nonce wait in sessionStorage, checked by state.
+   */
+  const APPLE_RETURN_KEY = 'cm_apple_return';
+  const randomHex = (n) => Array.from(crypto.getRandomValues(new Uint8Array(n)), b => b.toString(16).padStart(2, '0')).join('');
+  async function signInWithAppleRedirect(redirectURI) {
+    const raw = randomHex(24), state = randomHex(16);
+    sessionStorage.setItem(APPLE_RETURN_KEY, JSON.stringify({ raw, state, back: location.search }));
+    const u = new URL('https://appleid.apple.com/auth/authorize');
+    u.search = new URLSearchParams({ client_id: APPLE_WEB_CLIENT_ID, redirect_uri: redirectURI,
+      response_type: 'code id_token', response_mode: 'fragment', state, nonce: await sha256Hex(raw) }).toString();
+    location.assign(u.href);
+    return new Promise(() => {});
+  }
+  /** Finishes a same-window Apple sign-in. Returns the page query to restore, or null when this load is not a return from Apple. */
+  async function finishAppleRedirect() {
+    const h = new URLSearchParams(location.hash.slice(1));
+    if (!h.get('id_token') && !h.get('error')) return null;
+    let saved = null;
+    try { saved = JSON.parse(sessionStorage.getItem(APPLE_RETURN_KEY) || 'null'); sessionStorage.removeItem(APPLE_RETURN_KEY); } catch (_) {}
+    history.replaceState(null, '', location.pathname + location.search);
+    if (h.get('error')) {
+      throw new Error(h.get('error') === 'user_cancelled_authorize'
+        ? 'Sign-in was canceled. Choose Sign in with Apple to try again.'
+        : 'Apple couldn\u2019t sign you in (' + h.get('error') + ').');
+    }
+    if (!saved || saved.state !== h.get('state')) throw new Error('That sign-in didn\u2019t start on this page. Choose Sign in with Apple again.');
+    must(await client().auth.signInWithIdToken({ provider: 'apple', token: h.get('id_token'), nonce: saved.raw }));
+    return saved.back || '';
   }
   async function signOut() { await client().auth.signOut(); }
   async function deleteAccount() {
@@ -170,7 +207,7 @@ const API = (() => {
   }
 
   return {
-    MCP_URL, client, session, onAuthChange, signInWithApple, signOut, deleteAccount,
+    MCP_URL, client, session, onAuthChange, signInWithApple, finishAppleRedirect, signOut, deleteAccount,
     unexamined, transactionCount, month, latestMonth, transaction, stories,
     values, addValue, renameValue, deleteValue, saveMemo, importAppleCard, GROUNDS, ground, setGround,
   };

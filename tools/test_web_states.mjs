@@ -181,6 +181,29 @@ console.log('photo attached on the iPhone');
   }
 }
 
+console.log('Apple same-window return (the fallback when a popup is blocked)');
+{
+  const consent = SITE + 'oauth/consent/';
+  const sentText = 'document.querySelector("[data-sent]")?.textContent || ""';
+  // A real return from appleid.apple.com is a full page load; a hash-only
+  // navigation would keep the document, so leave first, then arrive.
+  const arrive = async (url) => { await cdp('Page.navigate', { url: 'about:blank' }); await cdp('Page.navigate', { url }); await waitFor('document.readyState === "complete"'); };
+  await cdp('Page.navigate', { url: consent + '?authorization_id=test' });
+  await waitFor('document.readyState === "complete"');
+  await evaluate('localStorage.clear(); sessionStorage.clear(); true');
+  await arrive(consent + '#error=user_cancelled_authorize&state=x');
+  ok(await waitFor(`/canceled/.test(${sentText})`), 'a canceled Apple sign-in says so');
+  ok(await evaluate('location.hash === ""'), 'and the token-bearing hash is cleared');
+  await arrive(consent + '#id_token=abc&state=forged');
+  ok(await waitFor(`/didn.t start on this page/.test(${sentText})`), 'a return this page did not start is refused (state check)');
+  await evaluate(`sessionStorage.setItem("cm_apple_return", JSON.stringify({ raw: "r", state: "s1", back: "?authorization_id=test" })); true`);
+  await arrive(consent + '#id_token=not.a.token&state=s1');
+  ok(await waitFor(`${sentText}.length > 0 && !/didn.t start|canceled/.test(${sentText})`), 'a matching return reaches Supabase, which refuses a token Apple did not sign');
+  await arrive(SITE + '#id_token=abc&state=forged');
+  ok(await waitFor('!document.getElementById("auth-error").hidden'), 'the main site finishes the return before routing');
+  ok(await evaluate('location.hash === ""'), 'and its router never sees the token');
+}
+
 console.log('static pages');
 for (const page of ['connect/', 'privacy/', 'terms/']) {
   await cdp('Page.navigate', { url: SITE + page });

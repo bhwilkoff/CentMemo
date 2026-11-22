@@ -424,6 +424,13 @@
   async function start() {
     buildTabs();
     try {
+      // A return from Apple's same-window sign-in carries a token in the hash,
+      // which the router would read as a route: finish it first.
+      await API.finishAppleRedirect();
+    } catch (err) {
+      const e = $('auth-error'); e.textContent = err.message; e.hidden = false;
+    }
+    try {
       const s = await API.session();
       if (s) showApp(); else showAuth();
       API.onAuthChange((session) => {

@@ -40,6 +40,14 @@
   $('[data-approve]').addEventListener('click', function () { answer(true); });
   $('[data-deny]').addEventListener('click', function () { answer(false); });
 
+  // A return from Apple's same-window sign-in (used when the popup is blocked,
+  // as in Claude's connector sheet): finish it, then put the request back.
+  API.finishAppleRedirect().then(function (back) {
+    if (back !== null) { location.replace(location.pathname + back); return; }
+    begin();
+  }).catch(function (e) { show('signed-out'); $('[data-sent]').textContent = e.message; });
+
+  function begin() {
   if (!id) return fail('This page opens from Claude when you connect it to CentMemo, so there is nothing to answer here yet.');
 
   db.auth.getSession().then(function (s) {
@@ -55,4 +63,5 @@
       show('ask');
     });
   }).catch(function (err) { fail('Something went wrong: ' + (err && err.message ? err.message : 'no details') + '.'); });
+  }
 })();
