@@ -63,6 +63,36 @@
         "light": "#FDECEA",
         "dark": "#3A1D1B",
         "use": "the error banner's fill"
+      },
+      "storeClay": {
+        "light": "#B5523B",
+        "dark": "#E58A72",
+        "use": "store tile mark: which store, by Money.merchantHue order (D8); a 2pt pencil mark, never a fill or text"
+      },
+      "storeOchre": {
+        "light": "#A8761A",
+        "dark": "#E2B550",
+        "use": "store tile mark: which store, by Money.merchantHue order (D8); a 2pt pencil mark, never a fill or text"
+      },
+      "storeSage": {
+        "light": "#2F7A6B",
+        "dark": "#6CC2AE",
+        "use": "store tile mark: which store, by Money.merchantHue order (D8); a 2pt pencil mark, never a fill or text"
+      },
+      "storeSlate": {
+        "light": "#3D5A9E",
+        "dark": "#8EA8E6",
+        "use": "store tile mark: which store, by Money.merchantHue order (D8); a 2pt pencil mark, never a fill or text"
+      },
+      "storeRose": {
+        "light": "#A8437A",
+        "dark": "#E48BBB",
+        "use": "store tile mark: which store, by Money.merchantHue order (D8); a 2pt pencil mark, never a fill or text"
+      },
+      "storeStone": {
+        "light": "#6F6964",
+        "dark": "#B3ACA6",
+        "use": "store tile mark: which store, by Money.merchantHue order (D8); a 2pt pencil mark, never a fill or text"
       }
     }
   },

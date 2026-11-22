@@ -896,3 +896,31 @@ Apple.
   - Meanwhile build what's inferable either way: merchant name cleaning
     and the monogram tile.
   - Port Ear Drama's UITestScrolling and regular-width rules for the Duo.
+
+### Design tick 2 — 2026-11-22 — D5 mockups for Ben; D8 store names and tiles
+- **D5:** published three directions for Ben, each on iPhone and the open
+  Duo, with a language table and the pieces every direction shares:
+  https://claude.ai/artifact/TtRywFmQhiiq9Mdg1Q2jPu
+  - Notebook: writing first, three suggestions with reasons, the memo as
+    the headline.
+  - Collection: keepsake stubs, sets, store pages.
+  - Chronicle: a pencil thread, a theme calendar, a month strip.
+
+  Waiting on his pick, the Ledger word, and the 14 themes.
+- **D8 (shared by every direction):**
+  - `cleanMerchant`, `merchantInitials` and `merchantHue` (FNV-1a) in
+    js/money/money.js and Money.swift, one algorithm. The golden is
+    `tests/fixtures/merchant-names.json`, read by both suites; a planted
+    wrong value fails node and Swift (seen).
+  - Six store hues in design-tokens.json (color.semantic.store*),
+    regenerated; the contrast test passes.
+  - `StoreTile` (iOS): initials, the hue mark, and the category SF
+    Symbol. The web `.tile` has initials and the hue mark; the web glyph
+    is ⏳ (Material/inline SVG).
+  - Seen on the iPhone 12 (ledger, after a fix where the glyph crowded
+    the initials), on the Duo's inner display (unexamined), and on the web
+    at 375px.
+- **Next:**
+  - Build Ben's chosen direction.
+  - Until he picks: the store page and "call it..." renames, and the Duo
+    regular-width two-pane layout.

@@ -16,7 +16,10 @@ struct LedgerEntry: Decodable, Identifiable, Hashable, Sendable {
     var memo: Memo?
     var accountName: String?
 
-    var displayMerchant: String { merchant.isEmpty ? (description.isEmpty ? "Unknown" : description) : merchant }
+    var displayMerchant: String {
+        let name = Money.cleanMerchant(merchant.isEmpty ? description : merchant)
+        return name.isEmpty ? "Unknown" : name
+    }
     var isCredit: Bool { amountMinor > 0 }
 
     struct Memo: Decodable, Hashable, Sendable {

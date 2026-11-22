@@ -39,13 +39,13 @@ Ben, 2026-11-22, verbatim:
   other repos; every screen checked on the Duo AND the iPhone 12.
 - D4 Language: keep "Unexamined" (the unexamined life); propose options for
   "Ledger" and every other screen word. Ben chooses.
-- D5 Directions: three design directions drawn from the research; Ben chooses
+- D5 🟡 (mockups published for Ben: https://claude.ai/artifact/TtRywFmQhiiq9Mdg1Q2jPu; waiting on his pick) Directions: three design directions drawn from the research; Ben chooses
   or mixes (propose, don't decide).
 - D6 Memo as achievement: a written memo reads as a moment in a life, not a
   debit.
 - D7 Writing tools: friendly regular check-in, recommendations of what to
   write about.
-- D8 Merchant tiles and categories.
+- D8 🟡 (name cleaning + store tiles on iPhone and web ✅; store page, renames, categories ⏳) Merchant tiles and categories.
 - D9 Filters (show only some kinds of items).
 - D10 Timeline view: progress over time.
 - D11 Visualization: color-coded charges or themes.

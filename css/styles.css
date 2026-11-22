@@ -21,6 +21,12 @@
   --color-warning: #8A5A00;
   --color-error: #B42318;
   --color-error-surface: #FDECEA;
+  --color-store-clay: #B5523B;
+  --color-store-ochre: #A8761A;
+  --color-store-sage: #2F7A6B;
+  --color-store-slate: #3D5A9E;
+  --color-store-rose: #A8437A;
+  --color-store-stone: #6F6964;
   --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --type-page-title-size: 1.75rem;
@@ -58,6 +64,12 @@ html[data-theme="dark"] {
   --color-warning: #E8B04B;
   --color-error: #FF8A80;
   --color-error-surface: #3A1D1B;
+  --color-store-clay: #E58A72;
+  --color-store-ochre: #E2B550;
+  --color-store-sage: #6CC2AE;
+  --color-store-slate: #8EA8E6;
+  --color-store-rose: #E48BBB;
+  --color-store-stone: #B3ACA6;
 }
 @media (prefers-color-scheme: dark) {
   html:not([data-theme="light"]) {
@@ -74,6 +86,12 @@ html[data-theme="dark"] {
     --color-warning: #E8B04B;
     --color-error: #FF8A80;
     --color-error-surface: #3A1D1B;
+    --color-store-clay: #E58A72;
+    --color-store-ochre: #E2B550;
+    --color-store-sage: #6CC2AE;
+    --color-store-slate: #8EA8E6;
+    --color-store-rose: #E48BBB;
+    --color-store-stone: #B3ACA6;
   }
 }
 /* END design-tokens */
@@ -153,7 +171,15 @@ html[data-theme="dark"] .btn-apple { background: #fff; border-color: #fff; color
 }
 a.row:hover .row-title { text-decoration: underline; }
 .row-static { align-items: center; }
-.row-main { display: flex; flex-direction: column; min-width: 0; }
+.row-main { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+/* D8: the store tile, same as the iPhone's StoreTile: initials in ink on paper,
+   the store's hue as a pencil mark, never a fill. */
+.tile {
+  flex: none; width: 40px; height: 40px; border-radius: 10px; position: relative;
+  display: grid; place-items: center; background: var(--color-surface); border: 1px solid var(--color-border);
+  font-family: var(--font-display); font-weight: 600; font-size: 15px; color: var(--color-text);
+}
+.tile::after { content: ""; position: absolute; left: 6px; right: 6px; bottom: 5px; height: 2px; border-radius: 2px; background: var(--tile-hue, var(--color-border)); }
 .row-title { font-weight: var(--type-body-strong-weight); overflow-wrap: anywhere; }
 .row-sub { font-size: var(--type-caption-size); color: var(--color-text-muted); }
 .row-memo { font-size: var(--type-caption-size); margin-top: var(--space-1); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }

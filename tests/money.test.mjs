@@ -47,3 +47,14 @@ test('source_id is stable and separates identical same-day rows', async () => {
 test('refuses a file that is not an Apple Card export', async () => {
   await assert.rejects(M.parseAppleCardCsv('Date,Amount\n1/1/2026,5'), /not an Apple Card export/);
 });
+
+test('store names: cleaned, initials, hue match the golden (D8; Swift reads the same file)', () => {
+  const golden = JSON.parse(readFileSync(new URL('./fixtures/merchant-names.json', import.meta.url), 'utf8'));
+  assert.ok(golden.length >= 12);
+  for (const g of golden) {
+    const name = M.cleanMerchant(g.raw);
+    assert.equal(name, g.name, g.raw);
+    assert.equal(M.merchantInitials(name), g.initials, g.raw);
+    assert.equal(M.merchantHue(name, 6), g.hue, g.raw);
+  }
+});

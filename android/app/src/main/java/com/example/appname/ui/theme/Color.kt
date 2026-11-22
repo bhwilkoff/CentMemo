@@ -30,6 +30,12 @@ data class SemanticColors(
     val warning: Color,
     val error: Color,
     val errorSurface: Color,
+    val storeClay: Color,
+    val storeOchre: Color,
+    val storeSage: Color,
+    val storeSlate: Color,
+    val storeRose: Color,
+    val storeStone: Color,
 )
 
 val LightSemanticColors = SemanticColors(
@@ -37,6 +43,12 @@ val LightSemanticColors = SemanticColors(
     warning = Color(0xFF8A5A00),
     error = Color(0xFFB42318),
     errorSurface = Color(0xFFFDECEA),
+    storeClay = Color(0xFFB5523B),
+    storeOchre = Color(0xFFA8761A),
+    storeSage = Color(0xFF2F7A6B),
+    storeSlate = Color(0xFF3D5A9E),
+    storeRose = Color(0xFFA8437A),
+    storeStone = Color(0xFF6F6964),
 )
 
 val DarkSemanticColors = SemanticColors(
@@ -44,6 +56,12 @@ val DarkSemanticColors = SemanticColors(
     warning = Color(0xFFE8B04B),
     error = Color(0xFFFF8A80),
     errorSurface = Color(0xFF3A1D1B),
+    storeClay = Color(0xFFE58A72),
+    storeOchre = Color(0xFFE2B550),
+    storeSage = Color(0xFF6CC2AE),
+    storeSlate = Color(0xFF8EA8E6),
+    storeRose = Color(0xFFE48BBB),
+    storeStone = Color(0xFFB3ACA6),
 )
 
 object Spacing {

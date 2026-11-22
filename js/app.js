@@ -46,7 +46,13 @@
     return d.toISOString().slice(0, 7);
   }
   const thisMonth = () => new Date().toISOString().slice(0, 7);
-  const merchantOf = (t) => t.merchant || t.description || 'Unknown';
+  const merchantOf = (t) => CentMoney.cleanMerchant(t.merchant || t.description) || 'Unknown';
+  const TILE_HUES = ['clay', 'ochre', 'sage', 'slate', 'rose', 'stone'];
+  // D8: the store tile, the same initials and hue as the iPhone (Money.merchantHue).
+  function tile(t) {
+    const name = merchantOf(t);
+    return h('span', { class: 'tile', 'aria-hidden': 'true', style: '--tile-hue: var(--color-store-' + TILE_HUES[CentMoney.merchantHue(name, 6)] + ')' }, CentMoney.merchantInitials(name));
+  }
 
   /* ---- Four states (universal-feature-states) ---- */
   function loading(body) { body.replaceChildren(h('p', { class: 'state state-loading', role: 'status' }, 'Loading…')); }
@@ -107,6 +113,7 @@
     // DESIGN C3.1: in the Ledger, a purchase still waiting for a memo is highlighted.
     const waiting = opts && opts.memo && !memo && t.amount_minor < 0 && t.status !== 'rejected';
     return h('a', { class: 'row' + (waiting ? ' is-unexamined' : ''), href: '#/t/' + t.id },
+      tile(t),
       h('span', { class: 'row-main' },
         h('span', { class: 'row-title' }, merchantOf(t)),
         h('span', { class: 'row-sub' }, [niceDate(t.txn_date), t.category, t.status === 'pending' ? 'Pending' : null].filter(Boolean).join(' · ')),

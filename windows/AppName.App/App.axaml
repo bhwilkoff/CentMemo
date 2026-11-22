@@ -42,6 +42,18 @@
                     <SolidColorBrush x:Key="SemanticErrorBrush" Color="#B42318"/>
                     <Color x:Key="SemanticErrorSurface">#FDECEA</Color>
                     <SolidColorBrush x:Key="SemanticErrorSurfaceBrush" Color="#FDECEA"/>
+                    <Color x:Key="SemanticStoreClay">#B5523B</Color>
+                    <SolidColorBrush x:Key="SemanticStoreClayBrush" Color="#B5523B"/>
+                    <Color x:Key="SemanticStoreOchre">#A8761A</Color>
+                    <SolidColorBrush x:Key="SemanticStoreOchreBrush" Color="#A8761A"/>
+                    <Color x:Key="SemanticStoreSage">#2F7A6B</Color>
+                    <SolidColorBrush x:Key="SemanticStoreSageBrush" Color="#2F7A6B"/>
+                    <Color x:Key="SemanticStoreSlate">#3D5A9E</Color>
+                    <SolidColorBrush x:Key="SemanticStoreSlateBrush" Color="#3D5A9E"/>
+                    <Color x:Key="SemanticStoreRose">#A8437A</Color>
+                    <SolidColorBrush x:Key="SemanticStoreRoseBrush" Color="#A8437A"/>
+                    <Color x:Key="SemanticStoreStone">#6F6964</Color>
+                    <SolidColorBrush x:Key="SemanticStoreStoneBrush" Color="#6F6964"/>
                     <SolidColorBrush x:Key="BrandPrimaryHoverBrush" Color="#43131D"/>
                     <SolidColorBrush x:Key="BrandPrimaryPressedBrush" Color="#3B111A"/>
                     <SolidColorBrush x:Key="BrandPrimaryDisabledBrush" Color="#664A1520"/>
@@ -71,6 +83,18 @@
                     <SolidColorBrush x:Key="SemanticErrorBrush" Color="#FF8A80"/>
                     <Color x:Key="SemanticErrorSurface">#3A1D1B</Color>
                     <SolidColorBrush x:Key="SemanticErrorSurfaceBrush" Color="#3A1D1B"/>
+                    <Color x:Key="SemanticStoreClay">#E58A72</Color>
+                    <SolidColorBrush x:Key="SemanticStoreClayBrush" Color="#E58A72"/>
+                    <Color x:Key="SemanticStoreOchre">#E2B550</Color>
+                    <SolidColorBrush x:Key="SemanticStoreOchreBrush" Color="#E2B550"/>
+                    <Color x:Key="SemanticStoreSage">#6CC2AE</Color>
+                    <SolidColorBrush x:Key="SemanticStoreSageBrush" Color="#6CC2AE"/>
+                    <Color x:Key="SemanticStoreSlate">#8EA8E6</Color>
+                    <SolidColorBrush x:Key="SemanticStoreSlateBrush" Color="#8EA8E6"/>
+                    <Color x:Key="SemanticStoreRose">#E48BBB</Color>
+                    <SolidColorBrush x:Key="SemanticStoreRoseBrush" Color="#E48BBB"/>
+                    <Color x:Key="SemanticStoreStone">#B3ACA6</Color>
+                    <SolidColorBrush x:Key="SemanticStoreStoneBrush" Color="#B3ACA6"/>
                     <SolidColorBrush x:Key="BrandPrimaryHoverBrush" Color="#D8A7AB"/>
                     <SolidColorBrush x:Key="BrandPrimaryPressedBrush" Color="#C09498"/>
                     <SolidColorBrush x:Key="BrandPrimaryDisabledBrush" Color="#66F0B9BE"/>

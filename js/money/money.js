@@ -110,7 +110,36 @@
     return out;
   }
 
-  const api = { toMinor, formatMinor, parseCsv, isoDate, parseAppleCardCsv, sha256Hex };
+  // Store names (D8): the bank's descriptor cleaned for people, conservatively.
+  // The raw string is always kept beside it; a rename the person makes wins.
+  const PROCESSOR = /^(?:SQ|TST|SP|PP|PAYPAL|DD|GOOGLE|IC|POS|PY|BT)\s*\*\s*/i;
+  function cleanMerchant(raw) {
+    let s = String(raw || '').replace(/\s+/g, ' ').trim().replace(PROCESSOR, '').replace(/\s*\*.*$/, '');
+    s = s.replace(/\s+(?:#\s*)?\d{3,}$/, '').replace(/\s+#\d+$/, '').trim();
+    if (s && !/[a-z]/.test(s)) {
+      s = s.toLowerCase().replace(/(^|[\s\-\/&('])([a-z])/g, (m, p1, c) => p1 + c.toUpperCase())
+        .replace(/'([A-Z])(?=\s|$)/g, (m, c) => "'" + c.toLowerCase());
+    }
+    return s;
+  }
+  // One or two letters for the tile: first letters of the first two words
+  // ("King Soopers" -> "KS"), skipping a leading "The".
+  function merchantInitials(name) {
+    const words = String(name || '').replace(/\.(?:com|net|org)$/i, '').split(/[^A-Za-z0-9]+/).filter(Boolean);
+    if (words.length > 1 && /^the$/i.test(words[0])) words.shift();
+    return words.slice(0, 2).map((w) => w[0].toUpperCase()).join('') || '?';
+  }
+  // Which of the tile hues a store wears: FNV-1a (32-bit) of its lowercased
+  // name, mod `count`. Same on every platform (golden: tests/fixtures/merchant-names.json).
+  function merchantHue(name, count) {
+    let h = 0x811c9dc5;
+    for (const b of new TextEncoder().encode(String(name || '').toLowerCase())) {
+      h ^= b; h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return h % (count || 6);
+  }
+
+  const api = { toMinor, formatMinor, parseCsv, isoDate, parseAppleCardCsv, sha256Hex, cleanMerchant, merchantInitials, merchantHue };
   if (typeof module === 'object' && module.exports) module.exports = api;
   root.CentMoney = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

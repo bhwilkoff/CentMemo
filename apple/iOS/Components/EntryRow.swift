@@ -12,7 +12,8 @@ struct EntryRow: View {
     private var waiting: Bool { showMemo && entry.memo == nil && entry.amountMinor < 0 && entry.status != "rejected" }
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: Spacing.s3) {
+        HStack(alignment: .center, spacing: Spacing.s3) {
+            StoreTile(name: entry.displayMerchant, category: entry.category)
             VStack(alignment: .leading, spacing: 2) {
                 Text(entry.displayMerchant).font(TypeRamp.bodyStrong)
                 Text(subtitle).font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)

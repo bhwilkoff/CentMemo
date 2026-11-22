@@ -118,6 +118,54 @@ enum Money {
         }
         return out
     }
+
+    // MARK: Store names (D8), one algorithm with js/money/money.js
+    // (golden: tests/fixtures/merchant-names.json, read by both suites).
+
+    private static func replacing(_ s: String, _ pattern: String, with t: String = "", options: NSRegularExpression.Options = []) -> String {
+        let rx = try! NSRegularExpression(pattern: pattern, options: options)
+        return rx.stringByReplacingMatches(in: s, range: NSRange(s.startIndex..., in: s), withTemplate: t)
+    }
+
+    /// The bank's descriptor cleaned for people, conservatively; the raw string is
+    /// kept beside it and a rename the person makes wins.
+    static func cleanMerchant(_ raw: String) -> String {
+        var s = replacing(raw, #"\s+"#, with: " ").trimmingCharacters(in: .whitespaces)
+        s = replacing(s, #"^(?:SQ|TST|SP|PP|PAYPAL|DD|GOOGLE|IC|POS|PY|BT)\s*\*\s*"#, options: .caseInsensitive)
+        s = replacing(s, #"\s*\*.*$"#)
+        s = replacing(s, #"\s+(?:#\s*)?\d{3,}$"#)
+        s = replacing(s, #"\s+#\d+$"#).trimmingCharacters(in: .whitespaces)
+        if !s.isEmpty, s.rangeOfCharacter(from: CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyz")) == nil {
+            var out = "", prev: Character? = nil
+            for c in s.lowercased() {
+                let boundary = prev == nil || " -/&('".contains(prev!)
+                out.append(boundary && c.isLowercase && c.isASCII ? Character(c.uppercased()) : c)
+                prev = c
+            }
+            // "Joe'S" -> "Joe's": a capital after an apostrophe at a word's end.
+            while let m = out.range(of: #"'[A-Z](?=\s|$)"#, options: .regularExpression) {
+                out.replaceSubrange(m, with: out[m].lowercased())
+            }
+            s = out
+        }
+        return s
+    }
+
+    /// One or two letters for the tile ("King Soopers" -> "KS"), skipping a leading "The".
+    static func merchantInitials(_ name: String) -> String {
+        let trimmed = replacing(name, #"\.(?:com|net|org)$"#, options: .caseInsensitive)
+        var words = trimmed.split(whereSeparator: { !($0.isASCII && ($0.isLetter || $0.isNumber)) }).map(String.init)
+        if words.count > 1, words[0].lowercased() == "the" { words.removeFirst() }
+        let s = words.prefix(2).map { $0.prefix(1).uppercased() }.joined()
+        return s.isEmpty ? "?" : s
+    }
+
+    /// FNV-1a (32-bit) of the lowercased name, mod `count`: which tile hue a store wears.
+    static func merchantHue(_ name: String, count: Int = 6) -> Int {
+        var h: UInt32 = 0x811c9dc5
+        for b in name.lowercased().utf8 { h ^= UInt32(b); h = h &* 0x01000193 }
+        return Int(h % UInt32(count))
+    }
 }
 
 /// One transaction on its way into the ledger, from a CSV export or FinanceKit.

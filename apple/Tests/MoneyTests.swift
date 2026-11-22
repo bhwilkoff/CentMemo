@@ -131,3 +131,20 @@ struct ErrorWordsTests {
         #expect(SessionStore.describe(APIClient.APIError.server("Nope")) == APIClient.APIError.server("Nope").localizedDescription)
     }
 }
+
+/// The web's store-name golden, read from the same file (tests/fixtures/merchant-names.json).
+struct MerchantNameTests {
+    struct Golden: Decodable { let raw: String, name: String, initials: String, hue: Int }
+    @Test func matchesTheWebGolden() throws {
+        let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+            .appendingPathComponent("../../tests/fixtures/merchant-names.json").standardized
+        let golden = try JSONDecoder().decode([Golden].self, from: Data(contentsOf: url))
+        #expect(golden.count >= 12)
+        for g in golden {
+            let name = Money.cleanMerchant(g.raw)
+            #expect(name == g.name, "\(g.raw)")
+            #expect(Money.merchantInitials(name) == g.initials, "\(g.raw)")
+            #expect(Money.merchantHue(name) == g.hue, "\(g.raw)")
+        }
+    }
+}

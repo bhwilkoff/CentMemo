@@ -25,6 +25,12 @@ extension Color {
     nonisolated static let semanticWarning = Color.tokenPair(light: 0x8A5A00, dark: 0xE8B04B)
     nonisolated static let semanticError = Color.tokenPair(light: 0xB42318, dark: 0xFF8A80)
     nonisolated static let semanticErrorSurface = Color.tokenPair(light: 0xFDECEA, dark: 0x3A1D1B)
+    nonisolated static let semanticStoreClay = Color.tokenPair(light: 0xB5523B, dark: 0xE58A72)
+    nonisolated static let semanticStoreOchre = Color.tokenPair(light: 0xA8761A, dark: 0xE2B550)
+    nonisolated static let semanticStoreSage = Color.tokenPair(light: 0x2F7A6B, dark: 0x6CC2AE)
+    nonisolated static let semanticStoreSlate = Color.tokenPair(light: 0x3D5A9E, dark: 0x8EA8E6)
+    nonisolated static let semanticStoreRose = Color.tokenPair(light: 0xA8437A, dark: 0xE48BBB)
+    nonisolated static let semanticStoreStone = Color.tokenPair(light: 0x6F6964, dark: 0xB3ACA6)
 
     nonisolated private static func tokenPair(light: UInt32, dark: UInt32) -> Color {
         #if canImport(UIKit)
