@@ -3,7 +3,8 @@
 Form: claude.ai/directory/manage > Submit new > MCP connector (7 steps).
 Ben's parts: adding the connector at the new address (his Apple sign-in),
 the listing words (AGENTS.md: no AI-written copy), the Compliance
-acknowledgments, sending the reviewer credentials by email, and Submit.
+acknowledgments, pasting the reviewer password into Additional notes
+(Decision 064), and Submit.
 
 ## 1. Source
 - Server: add a custom connector at **https://mcp.centmemo.com** (Ben's

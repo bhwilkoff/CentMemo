@@ -90,6 +90,7 @@ Roll again past ~50 KB. Never trim, edit, or summarize an entry in place.
 - 061: The mark is a sanguine cent sign circled once in pencil, in the person's color
 - 062: The connector's public address is mcp.centmemo.com, a Cloudflare Worker in front of the Edge Function
 - 063: Connectors Directory reviewers sign in with one reviewer account; everyone else uses Apple (amends 058)
+- 064: Reviewer credentials go in the official submission form (amends 063)
 
 ---
 
@@ -369,3 +370,24 @@ password cannot disturb the RLS and device-test fixture.
   authorization, sign-in, approval, the code back) with a refusal control.
 - Rotate the reviewer password after a review if it was shared widely:
   change it in Supabase, update test-users.json, and re-send it.
+
+## 064: Reviewer credentials go in the official submission form (amends 063)
+
+*Date: 2026-11-22*
+
+The reviewer account's email and password go in the Connectors Directory
+form's Additional notes, as test credentials go into every App Store
+submission. Not by a separate email.
+
+**Why**: Ben: "Test credentials that cannot do anything within the app mean
+that they are harmless to have in a chat transcript, to be sent via this
+form... This is not sensitive materials." The account holds only synthetic
+data, and the database refuses writes from agent tokens. 063's "by email,
+never in the portal" was a precaution from the connector skill, not a rule
+Anthropic states.
+
+**How to apply**:
+- The agent fills the form and leaves the cursor after "Reviewer password: ",
+  with the password on the clipboard. The agent does not type passwords into
+  third-party fields itself; the owner's part is one paste.
+- Real secrets (API keys, live tokens) still never leave the Keychain.

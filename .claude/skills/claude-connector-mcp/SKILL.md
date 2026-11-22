@@ -99,9 +99,9 @@ handling, Test & launch, Compliance, Review. Have ready:
 - OAuth 2.0 (DCR or CIMD; PKCE S256); tool titles and hints on every tool;
 - public docs page, privacy policy that names the AI recipient, support
   contact, icon;
-- **a test account with sample data** for reviewers, credentials sent by
-  email, never in the portal (seed a synthetic user; it doubles as your
-  RLS test fixture);
+- **a test account with sample data** for reviewers, its credentials in the
+  form's Additional notes, as with any App Store review account (seed a
+  synthetic user that can do no harm; it doubles as your RLS test fixture);
 - the Compliance acknowledgments (financial transactions, prompt
   injection, conversation data collection).
 Listings start as **Community**; Anthropic may escalate to **Verified**
