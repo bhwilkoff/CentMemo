@@ -314,3 +314,8 @@ html[data-ground="pistachio"] { --color-yours: #B4C875; }
 .doc-table th { font-weight: 700; }
 .doc-table td:first-child { white-space: nowrap; font-weight: 600; }
 .page ol { padding-left: 1.6em; }
+
+/* Consent page: the reviewer sign-in stays one quiet line until opened (Decision 063). */
+.reviewer { margin-top: var(--space-6); }
+.reviewer summary { color: var(--color-text-muted); cursor: pointer; }
+.reviewer form { display: grid; gap: var(--space-2); margin-top: var(--space-3); max-width: 360px; }

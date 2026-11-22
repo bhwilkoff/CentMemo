@@ -89,6 +89,7 @@ Roll again past ~50 KB. Never trim, edit, or summarize an entry in place.
 - 060: The person's color is a mark, never a background (replaces 059's full-screen ground)
 - 061: The mark is a sanguine cent sign circled once in pencil, in the person's color
 - 062: The connector's public address is mcp.centmemo.com, a Cloudflare Worker in front of the Edge Function
+- 063: Connectors Directory reviewers sign in with one reviewer account; everyone else uses Apple (amends 058)
 
 ---
 
@@ -342,3 +343,29 @@ metadata option reaches, hence the rewrite in the Worker.
 - The function honors only `mcp.centmemo.com`; never widen that to whatever
   host a request names.
 - GitHub Pages records stay DNS only in Cloudflare.
+
+---
+
+## 063: Connectors Directory reviewers sign in with one reviewer account; everyone else uses Apple (amends 058)
+*Date: 2026-11-22*
+
+The consent page has a collapsed "Reviewer sign-in" (email and password) that
+accepts only `review@centmemo.com`, a dedicated account seeded with the
+synthetic sample data (`node tools/seed_demo.mjs reviewer`). Its credentials
+live in `~/.centmemo/test-users.json` (never in git) and go to Anthropic by
+email, never in the portal. Every other person still signs in with Apple
+(Decision 058).
+
+**Why**: Ben chose "Reviewer-only sign-in" when the directory's requirement
+(a reviewer test account with sample data) met Apple-only sign-in. The
+reviewer account is separate from the test owner, so reviewers holding its
+password cannot disturb the RLS and device-test fixture.
+
+**How to apply**:
+- The allowlist is in `js/consent.js` (REVIEWER). The page refuses other
+  emails and points to Apple; the server would accept any password account,
+  and the only password accounts are the synthetic ones.
+- `tools/test_web_states.mjs` drives the reviewer path end to end (a real
+  authorization, sign-in, approval, the code back) with a refusal control.
+- Rotate the reviewer password after a review if it was shared widely:
+  change it in Supabase, update test-users.json, and re-send it.

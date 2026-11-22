@@ -60,8 +60,8 @@ L1. ✅ (launch tick 1) First sign-in from inside Claude: the same-window Apple 
 L2. 🟡 (recording, URLs, 4+, support, screenshots ✅; privacy labels answered, Ben publishes; copy, phone, Ben's clip, submit ⏳) App Store submission: privacy labels matching PrivacyInfo.xcprivacy,
     screenshots, description, the review recording (find the recording
     skill in Ben's repos), and the cloud build (the dev Mac runs a beta OS).
-L3. ⏳ Connectors Directory submission: reviewer test account, the form
-    (after L1).
+L3. 🟡 (reviewer account and sign-in ✅, Decision 063; the form and its
+    compliance acknowledgments need Ben in claude.ai) Connectors Directory submission.
 L4. ⏳ iPhone checks still missing: import (file on the phone), error
     state, delete account (needs a throwaway Apple ID: Ben).
 Then, from the plan: 6 files and opt-in uploaded copies; 7 shared stories;
@@ -785,3 +785,24 @@ Apple.
   presses it. The answers are saved.
 - **PrivacyInfo.xcprivacy** gains User ID, so the manifest and the labels
   agree; it ships with the next build.
+
+### Launch tick 6 — 2026-11-22 — L3: reviewer account and reviewer sign-in (Decision 063)
+- **Ben chose:** "Reviewer-only sign-in".
+- **Implementation:**
+  - `review@centmemo.com` created (signup API, confirmed in SQL, password
+    only in ~/.centmemo/test-users.json at mode 600).
+  - Seeded with `seed_demo.mjs reviewer`: 22 purchases, 4 memos; re-run
+    adds nothing.
+  - The consent page has a collapsed `<details>` "Reviewer sign-in" that
+    accepts only that address.
+- **Verification:**
+  - `test_web_states`: a real authorization opens; another email is
+    refused toward Apple; the reviewer signs in, sees the ask, approves,
+    and the browser requests the callback with a code and the same state
+    (read from the network record, since the callback has no listener).
+  - `tools/test_all.sh` exit 0 on the final run. One earlier run failed a web
+    check that the 15-line tail hid; four web runs and the next suite run
+    passed. `test_all.sh` now prints every failing line first, so a recurrence
+    names itself. The flake is still unidentified, not fixed.
+- **Next:** the directory form at claude.ai/directory/manage (Ben's
+  account; the compliance acknowledgments are his to make).

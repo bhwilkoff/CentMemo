@@ -1,19 +1,22 @@
 // Seeds the synthetic test owner's ledger through the same parser and
 // upsert the web app uses, so seeding also exercises the import path.
-// Idempotent: re-running inserts nothing new (Decision 057). The account
-// doubles as the Connectors Directory's reviewer test account.
-// Run: node tools/seed_demo.mjs
+// Idempotent: re-running inserts nothing new (Decision 057).
+// Run: node tools/seed_demo.mjs [owner|reviewer]   (default owner; the
+// reviewer account is the Connectors Directory's, separate from the test
+// owner so reviewers can't disturb the RLS and device-test fixture; Decision 063).
 import { readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { createRequire } from 'node:module';
 const M = createRequire(import.meta.url)('../js/money/money.js');
 const URL_ = 'https://qucsmmazfalbyduxlavl.supabase.co';
 const KEY = 'sb_publishable_XuubuEBTUKXkzttN2MUdzw_Aq7-q6YT';
-const { owner } = JSON.parse(readFileSync(homedir() + '/.centmemo/test-users.json', 'utf8'));
+const WHO = process.argv[2] || 'owner';
+const owner = JSON.parse(readFileSync(homedir() + '/.centmemo/test-users.json', 'utf8'))[WHO];
+if (!owner) throw new Error('no ' + WHO + ' in ~/.centmemo/test-users.json');
 
 const tok = (await (await fetch(URL_ + '/auth/v1/token?grant_type=password', {
   method: 'POST', headers: { apikey: KEY, 'content-type': 'application/json' }, body: JSON.stringify(owner) })).json()).access_token;
-if (!tok) throw new Error('owner sign-in failed');
+if (!tok) throw new Error(WHO + ' sign-in failed');
 async function rest(path, method, body, prefer = 'return=representation') {
   const r = await fetch(URL_ + '/rest/v1/' + path, { method, headers: { apikey: KEY, authorization: 'Bearer ' + tok, 'content-type': 'application/json', prefer }, body: body && JSON.stringify(body) });
   const t = await r.text();

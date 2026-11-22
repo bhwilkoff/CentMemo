@@ -218,6 +218,42 @@ console.log('Apple same-window return (the fallback when a popup is blocked)');
   ok(await evaluate('location.hash === ""'), 'and its router never sees the token');
 }
 
+console.log('reviewer sign-in (Decision 063): a real authorization, approved by the reviewer account');
+{
+  const { createHash, randomBytes } = await import('node:crypto');
+  const b64 = (b) => b.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const REDIRECT = 'http://localhost:8799/callback';
+  const reg = await (await fetch(P + '/auth/v1/oauth/clients/register', { method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ client_name: 'CentMemo reviewer-path test', redirect_uris: [REDIRECT], grant_types: ['authorization_code', 'refresh_token'], response_types: ['code'], token_endpoint_auth_method: 'none' }) })).json();
+  const verifier = b64(randomBytes(32)), state = b64(randomBytes(9));
+  const auth = new URL(P + '/auth/v1/oauth/authorize');
+  for (const [k, v] of Object.entries({ response_type: 'code', client_id: reg.client_id, redirect_uri: REDIRECT, state,
+    code_challenge: b64(createHash('sha256').update(verifier).digest()), code_challenge_method: 'S256' })) auth.searchParams.set(k, v);
+  const loc = (await fetch(auth, { redirect: 'manual' })).headers.get('location') || '';
+  const authId = new URL(loc, P).searchParams.get('authorization_id');
+  ok(!!authId, 'an authorization opens on the consent page');
+  await cdp('Page.navigate', { url: 'about:blank' });
+  await cdp('Page.navigate', { url: SITE + 'oauth/consent/?authorization_id=' + authId });
+  await waitFor('document.readyState === "complete"');
+  await evaluate('localStorage.clear(); sessionStorage.clear(); location.reload(); true');
+  await waitFor('!document.querySelector("[data-state=signed-out]").hidden');
+  // Control: another account is turned back to Apple.
+  await evaluate(`document.querySelector("details.reviewer").open = true; document.getElementById("rv-email").value = ${JSON.stringify(users.stranger.email)}; document.getElementById("rv-password").value = "x"; document.querySelector("[data-reviewer] button").click(); true`);
+  ok(await waitFor('/Please use Sign in with Apple/.test(document.querySelector("[data-sent]").textContent)'), 'any other email is refused with a pointer to Apple');
+  await evaluate(`document.getElementById("rv-email").value = ${JSON.stringify(users.reviewer.email)}; document.getElementById("rv-password").value = ${JSON.stringify(users.reviewer.password)}; document.querySelector("[data-reviewer] button").click(); true`);
+  ok(await waitFor('!document.querySelector("[data-state=ask]").hidden', 20000), 'the reviewer signs in and is asked whether to connect');
+  ok(/review@centmemo\.com/.test(await evaluate('document.querySelector("[data-who]").textContent')), 'as the reviewer account');
+  // The callback has no listener, so read the browser's own record of the request.
+  const seen = [];
+  const onMsg = (e) => { const m = JSON.parse(e.data); if (m.method === 'Network.requestWillBeSent') seen.push(m.params.request.url); };
+  ws.addEventListener('message', onMsg);
+  await evaluate('document.querySelector("[data-approve]").click(); true');
+  for (let t = 0; t < 20000 && !seen.some((u) => u.startsWith(REDIRECT)); t += 250) await sleep(250);
+  ws.removeEventListener('message', onMsg);
+  const back = seen.find((u) => u.startsWith(REDIRECT)) || '';
+  ok(/[?&]code=/.test(back) && back.includes('state=' + state), `approving returns to the client with a code and the same state (${back ? 'callback requested' : 'no callback'})`);
+}
+
 console.log('connector address');
 await openAs('owner', '#/settings');
 await evaluate('location.hash = "#/settings"; true');

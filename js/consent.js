@@ -25,6 +25,18 @@
       .catch(function (e) { $('[data-sent]').textContent = e.message; });
   });
 
+  // Decision 063: the reviewer account only. Other accounts sign in with Apple.
+  var REVIEWER = 'review@centmemo.com';
+  $('[data-reviewer]').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var email = $('#rv-email').value.trim().toLowerCase();
+    if (email !== REVIEWER) { $('[data-sent]').textContent = 'This sign-in is for the reviewer account. Please use Sign in with Apple.'; return; }
+    db.auth.signInWithPassword({ email: email, password: $('#rv-password').value }).then(function (r) {
+      if (r.error) { $('[data-sent]').textContent = 'That email and password did not match.'; return; }
+      location.reload();
+    });
+  });
+
   function answer(approve) {
     root.querySelectorAll('[data-approve], [data-deny]').forEach(function (b) { b.disabled = true; });
     var call = approve ? db.auth.oauth.approveAuthorization(id) : db.auth.oauth.denyAuthorization(id);

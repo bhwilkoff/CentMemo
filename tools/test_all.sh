@@ -6,7 +6,9 @@ set -u
 cd "$(dirname "$0")/.."
 export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}"
 fail=0
-run() { name="$1"; shift; if out=$("$@" 2>&1); then echo "PASS $name"; else echo "FAIL $name"; echo "$out" | tail -15; fail=1; fi; }
+# On a failure, every failing line first (a long suite's culprit can sit far
+# above its last 15 lines), then the tail for context.
+run() { name="$1"; shift; if out=$("$@" 2>&1); then echo "PASS $name"; else echo "FAIL $name"; echo "$out" | grep -E "^\s*FAIL|Error|error:" | head -10; echo "  ..."; echo "$out" | tail -8; fail=1; fi; }
 
 run "money core + connector guard (node)" node --test tests/money.test.mjs tests/connector_guard.test.mjs
 run "design tokens: drift + contrast" node tools/test_design_tokens.mjs
