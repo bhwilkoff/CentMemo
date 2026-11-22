@@ -19,6 +19,23 @@ struct FinanceChanges: Sendable {
     var inserted: [ImportRow] = []
     var deletedSourceIDs: [String] = []
     var newToken: Data?
+
+    /// One row per purchase, in its latest state. FinanceKit's history reports a
+    /// purchase as inserted and then updated (pending, then booked), and one upsert
+    /// may not touch a row twice ("ON CONFLICT DO UPDATE command cannot affect row a
+    /// second time": Ben's real sync, 2026-11-22).
+    func normalized() -> FinanceChanges {
+        let deleted = Set(deletedSourceIDs)
+        var latest: [String: ImportRow] = [:], order: [String] = []
+        for row in inserted where !deleted.contains(row.sourceID) {
+            if latest[row.sourceID] == nil { order.append(row.sourceID) }
+            latest[row.sourceID] = row            // a later report is the newer state
+        }
+        var seen = Set<String>()
+        return FinanceChanges(accounts: accounts.filter { seen.insert($0.sourceID).inserted },
+                              inserted: order.compactMap { latest[$0] },
+                              deletedSourceIDs: Array(deleted).sorted(), newToken: newToken)
+    }
 }
 
 struct FinanceAccount: Sendable, Hashable {
@@ -71,6 +88,8 @@ struct SampleFinanceSource: FinanceSource {
             ("sample-2", "2026-11-20", -6800, "Denver Botanic Gardens", "Entertainment", true, "sample-card"),
             ("sample-3", "2026-11-19", 25000, "Payment", "Payment", true, "sample-card"),
             ("sample-4", "2026-11-21", -1200, "Sent to a friend", "", false, "sample-cash"),
+            // The same purchase reported again once it posts (inserted, then updated).
+            ("sample-4", "2026-11-21", -1200, "Sent to a friend", "", true, "sample-cash"),
         ]
         return FinanceChanges(
             accounts: [FinanceAccount(sourceID: "sample-card", kind: "liability", displayName: "Apple Card (sample)",
@@ -144,14 +163,25 @@ struct FinanceKitSource: FinanceSource {
         return false
     }
 
+    /// Fits the accounts table's checks (display_name 1-120, institution <= 120,
+    /// currency three capitals): one out-of-range value would fail the whole sync.
+    private static func name(_ s: String, or fallback: String) -> String {
+        let t = s.trimmingCharacters(in: .whitespacesAndNewlines)
+        return String((t.isEmpty ? fallback : t).prefix(120))
+    }
+    private static func currency(_ c: String) -> String {
+        let u = c.uppercased()
+        return u.range(of: "^[A-Z]{3}$", options: .regularExpression) != nil ? u : "USD"
+    }
+
     private static func account(_ a: Account) -> FinanceAccount {
         switch a {
         case .asset(let x):
-            FinanceAccount(sourceID: x.id.uuidString, kind: "asset", displayName: x.displayName,
-                           institution: x.institutionName, currency: x.currencyCode, creditLimitMinor: nil)
+            FinanceAccount(sourceID: x.id.uuidString, kind: "asset", displayName: name(x.displayName, or: x.institutionName.isEmpty ? "Account" : x.institutionName),
+                           institution: String(x.institutionName.prefix(120)), currency: currency(x.currencyCode), creditLimitMinor: nil)
         case .liability(let x):
-            FinanceAccount(sourceID: x.id.uuidString, kind: "liability", displayName: x.displayName,
-                           institution: x.institutionName, currency: x.currencyCode,
+            FinanceAccount(sourceID: x.id.uuidString, kind: "liability", displayName: name(x.displayName, or: x.institutionName.isEmpty ? "Account" : x.institutionName),
+                           institution: String(x.institutionName.prefix(120)), currency: currency(x.currencyCode),
                            creditLimitMinor: x.creditInformation.creditLimit.map { minor($0.amount) })
         @unknown default:
             FinanceAccount(sourceID: UUID().uuidString, kind: "asset", displayName: "Account", institution: "", currency: "USD")
@@ -172,7 +202,7 @@ struct FinanceKitSource: FinanceSource {
         }
         return ImportRow(sourceID: t.id.uuidString, txnDate: iso(t.transactionDate), postedDate: t.postedDate.map(iso),
                          amountMinor: t.creditDebitIndicator == .debit ? -amount : amount,
-                         currency: t.transactionAmount.currencyCode,
+                         currency: currency(t.transactionAmount.currencyCode),
                          description: String(t.transactionDescription.prefix(500)),
                          merchant: String((t.merchantName ?? "").prefix(200)), category: "",
                          txnType: String(describing: t.transactionType).prefix(40).description, status: status,

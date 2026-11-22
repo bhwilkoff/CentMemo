@@ -731,3 +731,28 @@ Apple.
   (support/ fits 375 px).
 - **Next:** privacy labels (App Store Connect web UI; the API has no
   endpoint) and the screenshots.
+
+### Fix — 2026-11-22 — Ben's second real sync: "ON CONFLICT DO UPDATE command cannot affect row a second time" (build 1.0 (13))
+- **Found by Ben** on TestFlight 12. The accounts step now succeeds, so the
+  previous fix held.
+- **Cause:** FinanceKit's history reports a purchase as inserted and then
+  updated (pending, then booked). Both went into one upsert, which may not
+  touch a row twice.
+- **Fix:**
+  - `FinanceChanges.normalized()`: one row per purchase in its latest
+    reported state; none that end deleted; accounts de-duplicated. Called
+    by `APIClient.syncFinance` before anything is sent.
+  - The sample reports a purchase twice, as FinanceKit does.
+  - Account names, institution names, and currencies are clamped to the
+    table's checks, so one odd value can't fail the whole sync (status
+    values were already allowed).
+- **Verification:**
+  - `FinanceChangesTests` seen failing on a stub, then passing.
+  - iPhone 12 `WalletSyncUITests` against the real database, with the
+    duplicate report: 4 transactions from 2 accounts, idempotent, cleaned
+    up.
+  - Full tap tier passes; `tools/test_all.sh` exit 0.
+- **Lesson (now twice):** real FinanceKit data has a variety the sample
+  lacked (account kinds, missing optionals, repeated reports). Before the
+  next real-data step, read the target table's constraints against
+  everything the source can produce.

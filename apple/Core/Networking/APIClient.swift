@@ -332,7 +332,8 @@ final class APIClient {
     /// Writes one batch of FinanceKit changes: accounts upserted by their
     /// FinanceKit id, transactions upserted as `source = 'financekit'`, and
     /// deletions applied. The connector never reads these rows (Addendum 3.2).
-    func syncFinance(_ changes: FinanceChanges) async throws -> ImportResult {
+    func syncFinance(_ reported: FinanceChanges) async throws -> ImportResult {
+        let changes = reported.normalized()   // one row per purchase per upsert
         struct IDRow: Decodable { let id: String; let source_id: String }
         var accountIDs: [String: String] = [:]
         if !changes.accounts.isEmpty {

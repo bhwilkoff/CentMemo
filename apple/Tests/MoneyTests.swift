@@ -96,3 +96,29 @@ struct UniformKeysTests {
         #expect(try keys(card) == keys(cash))
     }
 }
+
+/// FinanceKit reports one purchase more than once; the upload must carry it once,
+/// in its latest state, and never a purchase that ends deleted.
+struct FinanceChangesTests {
+    private func row(_ id: String, _ status: String, posted: String? = nil) -> ImportRow {
+        ImportRow(sourceID: id, txnDate: "2026-11-20", postedDate: posted, amountMinor: -100, currency: "USD",
+                  description: "d", merchant: "m", category: "", txnType: "pointOfSale", status: status, mcc: nil)
+    }
+
+    @Test func eachPurchaseOnceInItsLatestState() {
+        var c = FinanceChanges()
+        c.inserted = [row("a", "pending"), row("b", "booked"), row("a", "booked", posted: "2026-11-21")]
+        let n = c.normalized()
+        #expect(n.inserted.map(\.sourceID).sorted() == ["a", "b"])
+        #expect(n.inserted.first { $0.sourceID == "a" }?.status == "booked")
+    }
+
+    @Test func aPurchaseThatEndsDeletedIsNotUploaded() {
+        var c = FinanceChanges()
+        c.inserted = [row("a", "pending"), row("b", "booked")]
+        c.deletedSourceIDs = ["a"]
+        let n = c.normalized()
+        #expect(n.inserted.map(\.sourceID) == ["b"])
+        #expect(n.deletedSourceIDs == ["a"])
+    }
+}
