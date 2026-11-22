@@ -284,11 +284,16 @@ final class APIClient {
     struct ImportResult { let inserted: Int; let skipped: Int }
 
     func importAppleCard(_ rows: [ImportRow], filename: String) async throws -> ImportResult {
+        try await importExport(.applecard, rows, filename: filename)
+    }
+
+    /// Any exported source (S1/S2), each into its own account.
+    func importExport(_ kind: Money.ExportKind, _ rows: [ImportRow], filename: String) async throws -> ImportResult {
         struct IDRow: Decodable { let id: String }
         let accountData = try await raw("rest/v1/accounts", query: [.init(name: "on_conflict", value: "user_id,source,source_id"),
                                                                     .init(name: "select", value: "id")], method: "POST",
-                                        body: ["source": "csv", "source_id": "applecard", "kind": "liability",
-                                               "display_name": "Apple Card", "institution": "Apple"],
+                                        body: ["source": "csv", "source_id": kind.rawValue, "kind": kind.accountKind,
+                                               "display_name": kind.displayName, "institution": kind.institution],
                                         prefer: "return=representation,resolution=merge-duplicates")
         guard let account = try JSONDecoder().decode([IDRow].self, from: accountData).first else { throw APIError.decoding("account") }
         let batchData = try await raw("rest/v1/import_batches", query: [.init(name: "select", value: "id")], method: "POST",

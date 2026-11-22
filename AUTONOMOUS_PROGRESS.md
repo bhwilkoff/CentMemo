@@ -1160,5 +1160,22 @@ Apple.
   contamination. The message is now "Synced N events from M accounts."
   ("Added" misread on a re-sync).
 - **Lesson:** after any wording change, run the full iPhone tap tier, not
-  only the suites touched. Full tier on the iPhone 12: 19 PASS, 3 SKIP by
+  only the suites touched. Full tier on the iPhone 12: 17 PASS (corrected from "19"), 3 SKIP by
   design, no crashes, data left as found.
+
+### Design tick 10 — 2026-11-22 — S1/S2 on the iPhone
+- Money.swift: `looseMinor`, `parseVenmoCSV`, `parsePayPalCSV`,
+  `parseCashAppCSV`, `detectExport` and `parseAnyExport`, one algorithm
+  with the web. `OtherSourcesTests` read the same fixtures as the node
+  goldens; a planted FAILED row is caught (seen).
+- `APIClient.importExport(kind)` (an account per source).
+- Settings: "Import a CSV" takes any of the four. "Where to get a CSV"
+  lists each documented path, in the same words as the web.
+- **Verified:**
+  - The full iPhone 12 tier: 18 PASS (new testExportPaths) and 3 SKIP by
+    design.
+  - Frames read on the iPhone 12 (paths open) and the Duo (Ben's account).
+- **Correction:** the previous entry's "19 PASS" was 17. The tier then had
+  17 tests plus 3 skips.
+- **⏳:** an import of a real file through the Files picker hasn't run on a
+  device.

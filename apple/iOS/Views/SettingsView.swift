@@ -45,6 +45,17 @@ struct SettingsView: View {
             }
             Section {
                 ImportButton()
+                // Ben: "share the documented path for each of the csv pathways to
+                // allow for easier import." Same words as the web's Import page.
+                DisclosureGroup("Where to get a CSV") {
+                    ForEach(ExportPath.all, id: \.name) { p in
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(p.name).font(TypeRamp.bodyStrong)
+                            Text(p.steps).font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
+                        }
+                    }
+                }
+                .accessibilityIdentifier("export-paths")
                 if let reason = finance.unavailableReason {
                     LabeledContent("Apple Wallet") { Text(reason).font(TypeRamp.caption).multilineTextAlignment(.trailing) }
                 } else {
@@ -112,6 +123,17 @@ struct SettingsView: View {
     }
 }
 
+/// Each source's documented CSV export path (docs/research/p2p-csv-export-paths.md).
+struct ExportPath {
+    let name: String, steps: String
+    static let all = [
+        ExportPath(name: "Apple Card", steps: "In Wallet, open Apple Card, then Card Balance, then Export Transactions (CSV). Or export from card.apple.com."),
+        ExportPath(name: "Venmo", steps: "In Venmo, tap Me, then the gear, then Statements. Pick a month and download it, once for each month you want."),
+        ExportPath(name: "PayPal", steps: "On paypal.com (the app can't export): open Activity, tap the download icon, choose Custom, pick up to 12 months and CSV. Big reports can take a while; PayPal emails you."),
+        ExportPath(name: "Cash App", steps: "On cash.app/account (the app gives PDFs only): open Activity and tap the CSV button next to search."),
+    ]
+}
+
 /// Picks an Apple Card CSV export with the system file importer and imports
 /// it through the same idempotent path as the web (Decision 057).
 struct ImportButton: View {
@@ -122,7 +144,7 @@ struct ImportButton: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.s1) {
-            Button(working ? "Importing…" : "Import Apple Card export") { picking = true }.disabled(working)
+            Button(working ? "Importing…" : "Import a CSV") { picking = true }.disabled(working)
             if let result { Text(result).font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted) }
         }
         .fileImporter(isPresented: $picking, allowedContentTypes: [.commaSeparatedText, .plainText]) { picked in
@@ -137,9 +159,9 @@ struct ImportButton: View {
             let url = try picked.get()
             let scoped = url.startAccessingSecurityScopedResource()
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-            let rows = try Money.parseAppleCardCSV(try String(contentsOf: url, encoding: .utf8))
-            let r = try await APIClient.shared.importAppleCard(rows, filename: url.lastPathComponent)
-            result = "\(r.inserted) new" + (r.skipped > 0 ? ", \(r.skipped) already in CentMemo." : ".")
+            let (kind, rows) = try Money.parseAnyExport(try String(contentsOf: url, encoding: .utf8))
+            let r = try await APIClient.shared.importExport(kind, rows, filename: url.lastPathComponent)
+            result = "\(kind.displayName): \(r.inserted) new" + (r.skipped > 0 ? ", \(r.skipped) already in CentMemo." : ".")
             session.didChangeData()
             UINotificationFeedbackGenerator().notificationOccurred(.success)
         } catch {

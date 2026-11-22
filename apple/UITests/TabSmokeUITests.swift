@@ -28,6 +28,20 @@ final class TabSmokeUITests: DeviceTestCase {
         shot(app, "connector-address")
     }
 
+    /// Settings tells where each source's CSV comes from (S1/S2).
+    func testExportPaths() {
+        let app = launch(["APP_START_TAB": "settings"])
+        XCTAssertTrue(text(app, matching: "Ground|Connect Claude").waitForExistence(timeout: 25))
+        let group = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Where to get a CSV'")).firstMatch
+        let form = app.collectionViews.firstMatch
+        for _ in 0..<6 where !(group.exists && group.isHittable && group.frame.maxY < app.frame.height * 0.7) { form.swipeUp(velocity: .slow); sleep(1) }
+        XCTAssertTrue(group.exists, "Where to get a CSV")
+        group.tap()
+        XCTAssertTrue(text(app, matching: "Statements").waitForExistence(timeout: 5), "Venmo's path")
+        XCTAssertTrue(text(app, matching: "cash\\.app/account").exists, "Cash App's path")
+        shot(app, "export-paths")
+    }
+
     /// The tab bar itself: every tab is reachable by tapping from Unexamined.
     func testTapThroughTabs() {
         let app = launch()

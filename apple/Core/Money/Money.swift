@@ -7,13 +7,14 @@ import CryptoKit
 /// including the web parser's exact source IDs, so the two stay one algorithm.
 enum Money {
     enum ParseError: Error, LocalizedError, Equatable {
-        case notAnAmount(String), notADate(String), empty, notAppleCard(String)
+        case notAnAmount(String), notADate(String), empty, notAppleCard(String), notAnExport
         var errorDescription: String? {
             switch self {
             case .notAnAmount(let s): "Not an amount: \(s)"
             case .notADate(let s): "Not a date: \(s)"
             case .empty: "The file is empty."
             case .notAppleCard(let col): "This is not an Apple Card export: no \"\(col)\" column."
+            case .notAnExport: "This file is not an Apple Card, Venmo, PayPal, or Cash App export."
             }
         }
     }
@@ -117,6 +118,121 @@ enum Money {
             out.append(row)
         }
         return out
+    }
+
+    // MARK: Other sources (S1/S2): Venmo, PayPal, Cash App. One algorithm with
+    // js/money/money.js; goldens: tests/fixtures/{venmo,paypal,cashapp}-sample.csv,
+    // read by both suites. Formats: docs/research/p2p-csv-export-paths.md.
+
+    enum ExportKind: String, Sendable { case applecard, venmo, paypal, cashapp
+        var displayName: String {
+            switch self { case .applecard: "Apple Card"; case .venmo: "Venmo"; case .paypal: "PayPal"; case .cashapp: "Cash App" }
+        }
+        var accountKind: String { self == .applecard ? "liability" : "asset" }
+        var institution: String {
+            switch self { case .applecard: "Apple"; case .venmo: "Venmo"; case .paypal: "PayPal"; case .cashapp: "Block" }
+        }
+    }
+
+    /// "- $65.00", "+ $10.00", "-$2.90", "($2.90)", "-6.99", "1,234.50" -> cents.
+    static func looseMinor(_ text: String) throws -> Int {
+        var s = text.trimmingCharacters(in: .whitespaces)
+        guard !s.isEmpty else { throw ParseError.notAnAmount("(empty)") }
+        let paren = s.hasPrefix("(") && s.hasSuffix(")")
+        s = s.filter { !"()$, ".contains($0) }
+        let neg = paren || s.hasPrefix("-")
+        if s.hasPrefix("-") || s.hasPrefix("+") { s.removeFirst() }
+        let n = try toMinor(s)
+        return neg ? -n : n
+    }
+
+    private static func header(_ rows: [[String]], _ must: [String]) throws -> (Int, [String: Int]) {
+        guard let i = rows.firstIndex(where: { r in must.allSatisfy { m in r.contains { $0.trimmingCharacters(in: .whitespaces) == m } } }) else {
+            throw ParseError.notAppleCard(must.joined(separator: "\", \""))
+        }
+        var col: [String: Int] = [:]
+        for (k, c) in rows[i].enumerated() {
+            let t = c.trimmingCharacters(in: .whitespaces)
+            if !t.isEmpty, col[t] == nil { col[t] = k }
+        }
+        return (i, col)
+    }
+
+    private static func cell(_ r: [String], _ col: [String: Int], _ name: String) -> String {
+        guard let k = col[name], k < r.count else { return "" }
+        return r[k].trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private static func row(_ id: String, _ date: String, _ amount: Int, _ currency: String, note: String,
+                            merchant: String, type: String, booked: Bool) -> ImportRow {
+        ImportRow(sourceID: id, txnDate: date, postedDate: nil, amountMinor: amount, currency: currency,
+                  description: String(note.prefix(500)), merchant: String(merchant.prefix(200)), category: "",
+                  txnType: String(type.prefix(40)), status: booked ? "booked" : "pending", mcc: nil)
+    }
+
+    static func parseVenmoCSV(_ text: String) throws -> [ImportRow] {
+        let rows = parseCSV(text)
+        let (i, col) = try header(rows, ["ID", "Datetime", "Amount (total)"])
+        return try rows.dropFirst(i + 1).compactMap { r in
+            let id = cell(r, col, "ID")
+            guard id.count >= 6, id.allSatisfy(\.isNumber) else { return nil }
+            let amount = try looseMinor(cell(r, col, "Amount (total)"))
+            let status = cell(r, col, "Status").lowercased()
+            return row("venmo:" + id, String(cell(r, col, "Datetime").prefix(10)), amount, "USD",
+                       note: cell(r, col, "Note"), merchant: cell(r, col, amount < 0 ? "To" : "From"),
+                       type: cell(r, col, "Type"), booked: status == "complete" || status == "completed")
+        }
+    }
+
+    static func parsePayPalCSV(_ text: String) throws -> [ImportRow] {
+        let rows = parseCSV(text)
+        let (i, col) = try header(rows, ["Date", "Gross", "Transaction ID"])
+        return try rows.dropFirst(i + 1).compactMap { r in
+            let id = cell(r, col, "Transaction ID")
+            guard !id.isEmpty, cell(r, col, "Balance Impact").lowercased() != "memo" else { return nil }
+            let note = [cell(r, col, "Note"), cell(r, col, "Subject"), cell(r, col, "Item Title")].first { !$0.isEmpty } ?? ""
+            let currency = cell(r, col, "Currency")
+            return row("paypal:" + id, try isoDate(cell(r, col, "Date")), try looseMinor(cell(r, col, "Gross")),
+                       currency.isEmpty ? "USD" : currency, note: note, merchant: cell(r, col, "Name"),
+                       type: cell(r, col, "Type"), booked: cell(r, col, "Status").lowercased() == "completed")
+        }
+    }
+
+    static func parseCashAppCSV(_ text: String) throws -> [ImportRow] {
+        let rows = parseCSV(text)
+        let (i, col) = try header(rows, ["Transaction ID", "Date", "Amount"])
+        return try rows.dropFirst(i + 1).compactMap { r in
+            let id = cell(r, col, "Transaction ID"), status = cell(r, col, "Status"), type = cell(r, col, "Transaction Type")
+            guard !id.isEmpty, status.lowercased() != "failed", !type.lowercased().contains("notification") else { return nil }
+            let name = cell(r, col, "Name of sender/receiver"), notes = cell(r, col, "Notes")
+            let currency = cell(r, col, "Currency")
+            // On Cash Card purchases Notes holds the store, not a note.
+            return row("cashapp:" + id, String(cell(r, col, "Date").prefix(10)), try looseMinor(cell(r, col, "Amount")),
+                       currency.isEmpty ? "USD" : currency, note: name.isEmpty ? "" : notes,
+                       merchant: name.isEmpty ? notes : name, type: type,
+                       booked: !(status.lowercased().contains("refund") || status.lowercased().contains("fail")))
+        }
+    }
+
+    /// Which export a file is, by its header.
+    static func detectExport(_ text: String) -> ExportKind? {
+        let head = parseCSV(String(text.prefix(20000))).prefix(12).map { $0.map { $0.trimmingCharacters(in: .whitespaces) } }
+        func has(_ names: String...) -> Bool { head.contains { r in names.allSatisfy(r.contains) } }
+        if has("Transaction Date", "Clearing Date", "Amount (USD)") { return .applecard }
+        if has("ID", "Datetime", "Amount (total)") { return .venmo }
+        if has("Gross", "Balance Impact") { return .paypal }
+        if has("Transaction ID", "Name of sender/receiver") { return .cashapp }
+        return nil
+    }
+
+    static func parseAnyExport(_ text: String) throws -> (ExportKind, [ImportRow]) {
+        switch detectExport(text) {
+        case .applecard: return (.applecard, try parseAppleCardCSV(text))
+        case .venmo: return (.venmo, try parseVenmoCSV(text))
+        case .paypal: return (.paypal, try parsePayPalCSV(text))
+        case .cashapp: return (.cashapp, try parseCashAppCSV(text))
+        case nil: throw ParseError.notAnExport
+        }
     }
 
     // MARK: Store names (D8), one algorithm with js/money/money.js

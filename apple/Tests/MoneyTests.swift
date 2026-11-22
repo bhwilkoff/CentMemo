@@ -158,3 +158,43 @@ struct SyntheticAccountTests {
         #expect(!SessionStore.isSynthetic(nil))
     }
 }
+
+/// The web's goldens for Venmo, PayPal, and Cash App, from the same fixture files.
+struct OtherSourcesTests {
+    private func fx(_ name: String) throws -> String {
+        try String(contentsOf: URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+            .appendingPathComponent("../../tests/fixtures/" + name).standardized, encoding: .utf8)
+    }
+    private func shape(_ r: [ImportRow]) -> [String] { r.map { "\($0.sourceID)|\($0.txnDate)|\($0.amountMinor)|\($0.merchant)|\($0.description)" } }
+
+    @Test func detectsEachSource() throws {
+        #expect(Money.detectExport(try fx("applecard-sample.csv")) == .applecard)
+        #expect(Money.detectExport(try fx("venmo-sample.csv")) == .venmo)
+        #expect(Money.detectExport(try fx("paypal-sample.csv")) == .paypal)
+        #expect(Money.detectExport(try fx("cashapp-sample.csv")) == .cashapp)
+        #expect(Money.detectExport("Name,Amount\nCoffee,3.00\n") == nil)
+    }
+    @Test func venmo() throws {
+        #expect(shape(try Money.parseVenmoCSV(try fx("venmo-sample.csv"))) == [
+            "venmo:3912345678901234567|2026-11-03|-1850|Alex Rivera|Pizza night 🍕, my half",
+            "venmo:3912345678901234568|2026-11-05|4000|Jordan Lee|Concert tickets",
+            "venmo:3912345678901234569|2026-11-09|-102150||"])
+    }
+    @Test func payPal() throws {
+        #expect(shape(try Money.parsePayPalCSV(try fx("paypal-sample.csv"))) == [
+            "paypal:8AB12345CD678901E|2026-11-02|-2399|Riverside Bookshop|Used poetry book",
+            "paypal:9XY12345CD678901F|2026-11-02|2399||",
+            "paypal:1ZZ12345CD678901G|2026-11-04|-125000|Sam Okafor|November rent, thank you!"])
+    }
+    @Test func cashApp() throws {
+        #expect(shape(try Money.parseCashAppCSV(try fx("cashapp-sample.csv"))) == [
+            "cashapp:rmgsrz|2026-11-01|-290|MTA*NYCT PAYGO|",
+            "cashapp:7jdb8q|2026-11-03|-1500|Dana Park|Lunch with Dana",
+            "cashapp:4pp9tt|2026-11-07|100000|Mom|Birthday gift 🎂"])
+    }
+    @Test func looseMinorEverySign() throws {
+        for (t, v) in [("- $65.00", -6500), ("+ $10.00", 1000), ("-$2.90", -290), ("($2.90)", -290), ("$1", 100), ("-6.99", -699), ("1,234.50", 123450)] {
+            #expect(try Money.looseMinor(t) == v, "\(t)")
+        }
+    }
+}
