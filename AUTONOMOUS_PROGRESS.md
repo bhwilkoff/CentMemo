@@ -806,3 +806,11 @@ Apple.
     names itself. The flake is still unidentified, not fixed.
 - **Next:** the directory form at claude.ai/directory/manage (Ben's
   account; the compliance acknowledgments are his to make).
+
+### Launch tick 6b — 2026-11-22 — L3: the directory form, answered in docs/store/DIRECTORY.md
+- Opened claude.ai/directory/manage > MCP connector: 7 steps. Step 1 needs a
+  connector added at https://mcp.centmemo.com under Ben's account (his
+  Apple sign-in); Ben's existing "Centmemo" connector still uses the old
+  address. Steps 6 and 7 are his acknowledgments and Submit.
+- Exited without saving. Every field's answer is in docs/store/DIRECTORY.md,
+  the listing words drafted from Ben's own, for a short session with him.
