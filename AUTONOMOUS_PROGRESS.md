@@ -60,10 +60,10 @@ L1. ✅ (launch tick 1) First sign-in from inside Claude: the same-window Apple 
 L2. 🟡 (recording, URLs, 4+, support, screenshots ✅; privacy labels answered, Ben publishes; copy, phone, Ben's clip, submit ⏳) App Store submission: privacy labels matching PrivacyInfo.xcprivacy,
     screenshots, description, the review recording (find the recording
     skill in Ben's repos), and the cloud build (the dev Mac runs a beta OS).
-L3. 🟡 (form steps 1-5 filled with Ben present; step 6 company info filled;
-    Ben ticks the acknowledgments, reviews, submits, emails reviewer creds) Connectors Directory submission.
-L4. ⏳ iPhone checks still missing: import (file on the phone), error
-    state, delete account (needs a throwaway Apple ID: Ben).
+L3. 🟡 (form filled, acknowledgments ticked by Ben, reviewer creds in the
+    notes and proven live by tools/test_reviewer_live.mjs; Ben pastes the password and submits) Connectors Directory submission.
+L4. 🟡 (error state ✅ launch tick 8) iPhone checks still missing: import (file on the phone),
+    delete account (needs a throwaway Apple ID: Ben).
 Then, from the plan: 6 files and opt-in uploaded copies; 7 shared stories;
 8 iPad readable width (Ben's answer); 9 macOS (later). FinanceKit waits on
 Apple.
@@ -841,3 +841,27 @@ Apple.
 - **Left to Ben:** the seven policy acknowledgments, Review and submit, and
   emailing the reviewer credentials (in ~/.centmemo/test-users.json under
   "reviewer").
+
+### Launch tick 8 — 2026-11-22 — L3 reviewer proof + L4 iPhone error state
+- **L3:** Ben asked whether the reviewer credentials really work.
+  `tools/test_reviewer_live.mjs` follows the reviewer's Claude, live:
+  - mcp.centmemo.com discovery, then client registration.
+  - The live consent page in headless Chrome, where Reviewer sign-in uses
+    the exact credentials in the form, then Allow reading.
+  - The token, then all six tools on the sample data.
+
+  A wrong password is refused (the control). PASS; it now runs in test_all.
+  The credentials sit in the form's notes (Decision 064), and the password
+  is on Ben's clipboard.
+- **L4:** the iPhone showed URLSession's own error text, where the web says
+  "CentMemo couldn't reach its server." / "You're offline."
+  - `SessionStore.describe` maps URLError to the web's words.
+    `ErrorWordsTests` passes in the Core suite.
+  - A DEBUG door `APP_FAIL_NETWORK=offline|unreachable` fails REST calls
+    only; sign-in still works.
+  - `ErrorStateUITests` on the iPhone 12: unreachable, offline, and a
+    no-door control all PASS, Try again survives, and there are no crash
+    logs. Screenshot read: "Couldn't load / CentMemo couldn't reach its
+    server. / Try again".
+- **Next:** L4 import on the phone (a file in Files), and F2 background
+  delivery. L2 and L3 wait on Ben.

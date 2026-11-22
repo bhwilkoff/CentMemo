@@ -52,6 +52,19 @@ final class SessionStore {
         if case APIClient.APIError.signedOut = error {
             isSignedIn = false
         }
+        return Self.describe(error)
+    }
+
+    /// The same words the web uses (js/app.js failed()): a dropped connection
+    /// reads as offline, an unreachable server as CentMemo's, never URLSession's.
+    static func describe(_ error: Error) -> String {
+        if let url = error as? URLError {
+            switch url.code {
+            case .notConnectedToInternet, .dataNotAllowed, .internationalRoamingOff: return "You're offline."
+            case .cancelled: return "Canceled."
+            default: return "CentMemo couldn't reach its server."
+            }
+        }
         return error.localizedDescription
     }
 }

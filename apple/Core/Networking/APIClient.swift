@@ -123,6 +123,13 @@ final class APIClient {
         if authed, let token = session?.accessToken { req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
         if let prefer { req.setValue(prefer, forHTTPHeaderField: "Prefer") }
         if let body { req.httpBody = try JSONEncoder().encode(body) }
+        #if DEBUG
+        // DEBUG door: APP_FAIL_NETWORK=offline|unreachable fails data requests
+        // (sign-in still works), so the error state can be seen on a device.
+        if path.hasPrefix("rest/v1"), let fail = ProcessInfo.processInfo.environment["APP_FAIL_NETWORK"] {
+            throw URLError(fail == "offline" ? .notConnectedToInternet : .cannotConnectToHost)
+        }
+        #endif
         let (data, response) = try await URLSession.shared.data(for: req)
         let code = (response as? HTTPURLResponse)?.statusCode ?? 0
         if code == 401, authed, !retried {

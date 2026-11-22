@@ -122,3 +122,12 @@ struct FinanceChangesTests {
         #expect(n.deletedSourceIDs == ["a"])
     }
 }
+
+struct ErrorWordsTests {
+    @Test func offlineAndUnreachableReadLikeTheWeb() {
+        #expect(SessionStore.describe(URLError(.notConnectedToInternet)) == "You're offline.")
+        #expect(SessionStore.describe(URLError(.cannotConnectToHost)) == "CentMemo couldn't reach its server.")
+        #expect(SessionStore.describe(URLError(.timedOut)) == "CentMemo couldn't reach its server.")
+        #expect(SessionStore.describe(APIClient.APIError.server("Nope")) == APIClient.APIError.server("Nope").localizedDescription)
+    }
+}
