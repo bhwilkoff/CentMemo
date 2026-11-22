@@ -106,12 +106,17 @@ the Setting page) join where they fit.
   meaning and a mark color; chosen at first run and in Settings, renamable,
   never forced. Ben approves the set and its words before it ships.
 - D15 Place (Ben, 2026-11-22: "can we get location data from Apple Wallet? I'd
-  like for place-based purchases to pull in information whenever possible."):
-  FinanceKit gives no location for a transaction (merchant name and category
-  code only). Proposal for Ben: an on-device Apple Maps lookup of a Setting's
-  name, which the person confirms once per Setting ("Lazy Dog, Arapahoe Rd?"),
-  stored with the Setting. It needs his yes, and location permission only if
-  he wants "near me" matching.
+  like for place-based purchases to pull in information whenever possible.").
+  The Wallet tour (tools/wallet_tour.py) found that Wallet's purchase screen
+  shows an Apple Maps place with a map, the city and state, the time, Apple's
+  plain category ("Shopping"), the statement text, and the Daily Cash. FinanceKit
+  gives none of the place data: merchant name, category code, description and
+  date only. The statement text often carries the city ("crumbl greenwood
+  villa"), and the CSV carries street and ZIP. Proposal for Ben: an on-device
+  Apple Maps lookup (store name + city from the statement), which the person
+  confirms once per Setting and every later purchase there inherits; a small
+  map on the event page. No location permission is needed. Also: show the time
+  of day, and map the category code to plain categories.
 - D9 note: deposits and interest (FinanceKit types deposit, interest: Daily
   Cash into Apple Cash and Savings) are hidden from the Narrative by default
   (Ben, 2026-11-22); the filters will show them.

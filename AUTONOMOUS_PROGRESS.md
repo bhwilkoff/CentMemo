@@ -1106,3 +1106,18 @@ Apple.
   with "N deposits and interest hidden · Show" on iOS and web.
 - **Ben's direction:** design on his real data from now on (the Duo, his own
   session); the synthetic accounts stay on the iPhone 12 and the web tests.
+
+### 2026-11-22 — Wallet tour (Ben's request): what Apple Wallet shows that CentMemo could use
+- `tools/wallet_tour.py` + `WalletTourUITests`:
+  - Read-only: it opens the Apple Card and up to five purchases, recording
+    each screen's accessibility labels.
+  - A forbidden-label list keeps it off anything that moves money or shows
+    card numbers. It never launches CentMemo and runs only with
+    WALLET_TOUR=1 and CENTMEMO_UITEST_DUO=1 (Ben's say-so).
+  - Output stays in build/qa/ (local).
+  - Two fixes: it first opened the Card Balance row (now it targets
+    identifier "transaction" by label), and a key-path build error.
+- **Found:** a purchase screen shows the Maps place and map, city/state,
+  time, status, card last four, Daily Cash, "Shown on Statement as", and
+  Apple's category. FinanceKit exposes no place. D15 is updated with a
+  lookup-and-confirm proposal for Ben.
