@@ -10,7 +10,8 @@ const API = (() => {
   const SUPABASE_URL = 'https://qucsmmazfalbyduxlavl.supabase.co';
   // Publishable key: safe in the browser; RLS is the guard.
   const SUPABASE_KEY = 'sb_publishable_XuubuEBTUKXkzttN2MUdzw_Aq7-q6YT';
-  const MCP_URL = SUPABASE_URL + '/functions/v1/mcp';
+  // The connector's public address (workers/mcp-proxy on Cloudflare); the old Supabase address still works.
+  const MCP_URL = 'https://mcp.centmemo.com';
 
   let db = null;
   function client() {

@@ -52,6 +52,9 @@ ws.addEventListener('message', (e) => { const m = JSON.parse(e.data); if (m.id &
 const cdp = (method, params = {}) => new Promise((r) => { const n = ++id; waiting.set(n, r); ws.send(JSON.stringify({ id: n, method, params })); });
 const evaluate = async (expr) => (await cdp('Runtime.evaluate', { expression: expr, returnByValue: true, awaitPromise: true })).result?.result?.value;
 await cdp('Page.enable'); await cdp('Network.enable');
+// Test the files on disk, never a cached copy from an earlier run (an unversioned
+// HTML page was served stale from the reused profile, 2026-11-22).
+await cdp('Network.setCacheDisabled', { cacheDisabled: true });
 await cdp('Emulation.setDeviceMetricsOverride', { width: 375, height: 812, deviceScaleFactor: 2, mobile: true });
 
 async function waitFor(expr, ms = 15000) {
@@ -204,6 +207,12 @@ console.log('Apple same-window return (the fallback when a popup is blocked)');
   ok(await evaluate('location.hash === ""'), 'and its router never sees the token');
 }
 
+console.log('connector address');
+await openAs('owner', '#/settings');
+await evaluate('location.hash = "#/settings"; true');
+ok(await waitFor('/mcp\\.centmemo\\.com/.test(document.body.innerText)'), 'web Settings shows https://mcp.centmemo.com');
+ok(!(await evaluate('/supabase\\.co\\/functions/.test(document.body.innerText)')), 'and never the Supabase address');
+
 console.log('static pages');
 for (const page of ['connect/', 'privacy/', 'terms/']) {
   await cdp('Page.navigate', { url: SITE + page });
@@ -217,6 +226,7 @@ for (const page of ['connect/', 'privacy/', 'terms/']) {
 }
 ok(/never shared with Claude/.test(await (async () => { await cdp('Page.navigate', { url: SITE + 'connect/' }); await waitFor('!!document.querySelector("h1")'); return evaluate('document.body.innerText'); })()),
   'connect/ states that Wallet purchases are never shared with Claude');
+ok(await evaluate('/https:\\/\\/mcp\\.centmemo\\.com/.test(document.body.innerText)'), 'connect/ gives the public address');
 
 ok(await evaluate('document.documentElement.scrollWidth <= 375'), `no horizontal scroll at 375 (${await evaluate('document.documentElement.scrollWidth')})`);
 console.log(failures ? `FAIL: ${failures} web state check(s); frames in ${OUT}` : `PASS: four states at 375px; frames in ${OUT}`);

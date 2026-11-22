@@ -14,4 +14,10 @@ Snapshot taken 2026-11-22 before moving DNS from WordPress.com to Cloudflare
 | _github-pages-challenge-bhwilkoff | TXT | 2ea05411896053e40c5a13fa5fae0e | n/a (GitHub Pages domain verification) |
 | centmemo.com | TXT | google-site-verification=NviqFNA8QitgoJR2qTEUL2MmPedjwud--m0IFHHdXdg | n/a |
 
-Registrar: WordPress.com (nameservers ns1-3.wordpress.com before the move).
+| mcp | Worker custom domain | centmemo-mcp (Cloudflare Worker) | proxied, managed by Cloudflare |
+
+Registrar: WordPress.com. Nameservers moved 2026-11-22 from ns1-3.wordpress.com to
+heather.ns.cloudflare.com and shane.ns.cloudflare.com (Cloudflare account
+benwilkoff@gmail.com, free plan). Verified after the move through 1.1.1.1 and 8.8.8.8:
+the same A, MX, and TXT answers; centmemo.com 200; www 301. DNSSEC was off.
+Keep the GitHub Pages records DNS only (grey cloud) or the Pages certificate breaks.

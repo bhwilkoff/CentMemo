@@ -13,7 +13,8 @@ final class APIClient {
     static let projectURL = URL(string: "https://qucsmmazfalbyduxlavl.supabase.co")!
     /// Publishable key: safe in the app; RLS is the guard.
     static let publishableKey = "sb_publishable_XuubuEBTUKXkzttN2MUdzw_Aq7-q6YT"
-    static var mcpURL: String { projectURL.absoluteString + "/functions/v1/mcp" }
+    /// The connector's public address (workers/mcp-proxy on Cloudflare); the old Supabase address still works.
+    static let mcpURL = "https://mcp.centmemo.com"
 
     struct Session: Codable {
         var accessToken: String

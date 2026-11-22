@@ -16,6 +16,18 @@ final class TabSmokeUITests: DeviceTestCase {
     func testStory() { check("story", "memos? ·|No memos here yet") }
     func testSettings() { check("settings", "Connect Claude") }
 
+    /// Settings shows the connector's public address, not the database host's.
+    func testConnectorAddress() {
+        let app = launch(["APP_START_TAB": "settings"])
+        XCTAssertTrue(text(app, matching: "Ground|Connect Claude").waitForExistence(timeout: 25))
+        let address = text(app, matching: "mcp\\.centmemo\\.com")
+        let form = app.collectionViews.firstMatch
+        for _ in 0..<8 where !address.exists { form.swipeUp(velocity: .slow); sleep(1) }
+        XCTAssertTrue(address.exists, "Settings shows https://mcp.centmemo.com")
+        XCTAssertFalse(text(app, matching: "supabase\\.co").exists, "and never the Supabase address")
+        shot(app, "connector-address")
+    }
+
     /// The tab bar itself: every tab is reachable by tapping from Unexamined.
     func testTapThroughTabs() {
         let app = launch()

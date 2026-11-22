@@ -6,13 +6,14 @@
 // real token is shown to read but never write (Decision 056).
 //
 // Needs ~/.centmemo/test-users.json. Run: node tools/test_connector.mjs
+// (public address by default; CONNECTOR_MCP_URL=<direct Supabase URL> checks the old one).
 import { readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { createHash, randomBytes } from 'node:crypto';
 
 const PROJECT = 'https://qucsmmazfalbyduxlavl.supabase.co';
 const KEY = 'sb_publishable_XuubuEBTUKXkzttN2MUdzw_Aq7-q6YT';
-const MCP = PROJECT + '/functions/v1/mcp';
+const MCP = process.env.CONNECTOR_MCP_URL || 'https://mcp.centmemo.com';
 const REDIRECT = 'http://localhost:8799/callback';
 const { owner } = JSON.parse(readFileSync(homedir() + '/.centmemo/test-users.json', 'utf8'));
 let failures = 0;

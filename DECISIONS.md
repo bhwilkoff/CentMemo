@@ -88,6 +88,7 @@ Roll again past ~50 KB. Never trim, edit, or summarize an entry in place.
 - 059: A sanguine pencil on a ground the person chooses; aqua by default
 - 060: The person's color is a mark, never a background (replaces 059's full-screen ground)
 - 061: The mark is a sanguine cent sign circled once in pencil, in the person's color
+- 062: The connector's public address is mcp.centmemo.com, a Cloudflare Worker in front of the Edge Function
 
 ---
 
@@ -311,3 +312,33 @@ CentMemo draws a circle around a glyph in its own colors.
 - The icon stays paper with one aqua circle. Color stays a mark, even on the
   icon.
 - No handwriting fonts anywhere (memory `no-handwriting-fonts`).
+
+---
+
+## 062: The connector's public address is mcp.centmemo.com, a Cloudflare Worker in front of the Edge Function
+*Date: 2026-11-22*
+
+People add `https://mcp.centmemo.com`. A Cloudflare Worker (`workers/mcp-proxy`)
+forwards every request, streamed, to the Supabase Edge Function. It sends
+`x-centmemo-public-host`, which makes the function name the public address in its
+OAuth metadata, and it rewrites the 401 challenge, so a client that comes in
+through mcp.centmemo.com only ever sees that address. The old Supabase address
+keeps working, and keeps advertising itself, for connections already made.
+centmemo.com's DNS moved from WordPress.com to Cloudflare for this
+(docs/DNS.md); WordPress.com is still the registrar.
+
+**Why**: Ben, after the first real Duet connection: "I do think that the link
+needs to get cleaned up for other people to want to use it." He chose
+Cloudflare over a Vercel proxy and over Supabase's custom domain (about $35 a
+month). Supabase's gateway overwrites `x-forwarded-host`, hence the
+CentMemo-only header; the challenge is written by a later layer than the
+metadata option reaches, hence the rewrite in the Worker.
+
+**How to apply**:
+- A change to the Worker is made in `workers/mcp-proxy/index.js` and then
+  deployed (the dashboard editor, or `wrangler deploy` once signed in).
+- `node tools/test_connector.mjs` tests the public address by default;
+  `CONNECTOR_MCP_URL=<Supabase URL>` tests the old one. Both must pass.
+- The function honors only `mcp.centmemo.com`; never widen that to whatever
+  host a request names.
+- GitHub Pages records stay DNS only in Cloudflare.
