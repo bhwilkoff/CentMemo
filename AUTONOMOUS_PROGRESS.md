@@ -1145,3 +1145,20 @@ Apple.
   - The iPhone import still takes only Apple Card (Swift port of the
     three parsers, with goldens, next).
   - "Use this note as my memo" on events that carry one.
+
+### 2026-11-22 — Test accounts hold only fake data (Ben: "Yes. The test account should only have fake data.")
+- With Ben's yes, deleted the copy of his Wallet from the synthetic test
+  owner, as the owner through REST: 6,979 events, 3 FinanceKit accounts, no
+  balances. It now holds only its 22 fake Apple Card CSV events. A SQL check
+  across accounts: real Wallet rows exist only in Ben's own account.
+- New guard in tools/test_rls.mjs (runs in test_all): a synthetic account's
+  Wallet rows must all be the app's samples (`sample-…`). A negative control
+  catches a real id.
+- **Found while re-checking:** WalletSyncUITests had failed since design
+  tick 4, because the vocabulary pass changed the sync message and the test
+  still expected "Synced 4 transactions". I had blamed its failure on the
+  contamination. The message is now "Synced N events from M accounts."
+  ("Added" misread on a re-sync).
+- **Lesson:** after any wording change, run the full iPhone tap tier, not
+  only the suites touched. Full tier on the iPhone 12: 19 PASS, 3 SKIP by
+  design, no crashes, data left as found.

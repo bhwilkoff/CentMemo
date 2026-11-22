@@ -192,7 +192,7 @@ struct WalletSyncButton: View {
             let changes = try await finance.changes(since: UserDefaults.standard.data(forKey: tokenKey))
             let r = try await APIClient.shared.syncFinance(changes)
             if let token = changes.newToken { UserDefaults.standard.set(token, forKey: tokenKey) }
-            result = "Added \(r.inserted) event\(r.inserted == 1 ? "" : "s") from \(changes.accounts.count) account\(changes.accounts.count == 1 ? "" : "s")."
+            result = "Synced \(r.inserted) event\(r.inserted == 1 ? "" : "s") from \(changes.accounts.count) account\(changes.accounts.count == 1 ? "" : "s")."
             session.didChangeData()
             UINotificationFeedbackGenerator().notificationOccurred(.success)
         } catch {

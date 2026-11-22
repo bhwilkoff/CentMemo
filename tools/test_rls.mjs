@@ -80,5 +80,17 @@ for (const t of ['transactions', 'memos']) {
 const still = await rows(owner, 'transactions?select=merchant&id=eq.' + target.id);
 ok(still.length === 1 && still[0].merchant !== 'probe', 'owner row unchanged after the probes');
 
+// Synthetic accounts hold only fake data (Ben, 2026-11-22: "The test account should
+// only have fake data."). A real Wallet once synced into the test owner from a test
+// build left signed in on a personal phone; any Wallet row here must be the app's
+// own sample (sample-…), never a real FinanceKit id.
+console.log('synthetic accounts hold only fake data');
+export const realRows = (list) => list.filter((t) => !String(t.source_id).startsWith('sample-'));
+for (const [who, token] of [['owner', owner], ['stranger', stranger]]) {
+  const fk = await rows(token, 'transactions?select=source_id&source=eq.financekit&limit=2000');
+  ok(Array.isArray(fk) && realRows(fk).length === 0, `${who}: no real Wallet rows (${Array.isArray(fk) ? realRows(fk).length : '?'})`);
+}
+ok(realRows([{ source_id: 'sample-1' }, { source_id: '7F3A-real' }]).length === 1, 'negative control: a real id is caught');
+
 console.log(failures ? `FAIL: ${failures} check(s)` : 'PASS: row-level security holds on the deployed project');
 process.exit(failures ? 1 : 0);

@@ -13,11 +13,11 @@ final class WalletSyncUITests: DeviceTestCase {
         button.tap()
         let result = app.staticTexts["wallet-result"]
         XCTAssertTrue(result.waitForExistence(timeout: 20))
-        XCTAssertTrue(result.label.hasPrefix("Synced 4 transactions from 2 accounts"), result.label)
+        XCTAssertTrue(result.label.hasPrefix("Synced 4 events from 2 accounts"), result.label)
         shot(app, "wallet-synced")
         button.tap()
         sleep(3)
-        XCTAssertTrue(result.label.hasPrefix("Synced 4 transactions"), "upsert, not duplicate: \(result.label)")
+        XCTAssertTrue(result.label.hasPrefix("Synced 4 events"), "upsert, not duplicate: \(result.label)")
         XCTAssertTrue(removeSampleAccount(), "sample account removed")
     }
 
