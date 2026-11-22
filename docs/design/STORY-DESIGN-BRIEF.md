@@ -93,7 +93,7 @@ the Setting page) join where they fit.
   or mixes (propose, don't decide).
 - D6 🟡 (event page leads with the Setting tile and the memo; money and bank facts in a footnote; a pencil stroke draws in on save ✅ iPhone 12 + Duo; Narrative/Story rows next) Memo as achievement: a written memo reads as a moment in a life, not a
   debit.
-- D7 Writing tools: friendly regular check-in, recommendations of what to
+- D7 🟡 (Unexamined: up to three suggestions with reasons, no count, iOS + web ✅; the reason and prompt words await Ben's approval) Writing tools: friendly regular check-in, recommendations of what to
   write about.
 - D8 🟡 (name cleaning + store tiles on iPhone and web ✅; store page, renames, categories ⏳) Merchant tiles and categories.
 - D9 Filters (show only some kinds of items).

@@ -1179,3 +1179,34 @@ Apple.
   17 tests plus 3 skips.
 - **⏳:** an import of a real file through the Files picker hasn't run on a
   device.
+
+### Design tick 11 — 2026-11-22 — D7 suggestions with reasons on Unexamined
+- `memo_suggestions()` (migration 20261122020000), one algorithm in SQL that
+  both clients show. At most one event per rule:
+  - first visit to a place
+  - biggest this month
+  - busiest day (3+)
+  - a memo from a year ago, quoted
+
+  Details (deposits, interest, payments, transfers, refunds, skipped)
+  never count. "Today" is the person's latest event. Security invoker;
+  anon gets 401; the stranger gets none.
+- **iOS:** `SuggestionCard` (reason in pencil, the Setting tile, a prompt
+  or the quoted memo), swipe Skip included. Words in `SuggestionWords`.
+- **Web:** `.suggestion` cards with the same words. The count circle is
+  gone on both, so Unexamined doesn't show a to-do number.
+- **Verified:**
+  - Web: test_web_states asserts suggestions with reasons and no count;
+    frame read.
+  - iPhone 12: TabSmoke, Skip and EmptyState pass. Skip first failed
+    because King Soopers now shows twice (card + row) and the card had no
+    swipe; cards can be skipped now.
+  - Duo, on Ben's real data: three suggestions (first time at AutoNation
+    Toyota, biggest at the Apple Store, busiest day at State Farm); frame
+    read.
+- **Not verified:** the follow-up so the Duo opens the first suggestion
+  (the list and suggestions now load together). The Duo refused launches
+  (likely locked).
+- **For Ben:** the reason and prompt words ("First time here / What brought
+  you here?", "Biggest this month / What was it for?", "Your busiest day
+  this month / What was the day about?", "A year ago you wrote").

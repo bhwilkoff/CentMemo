@@ -11,7 +11,7 @@ final class TabSmokeUITests: DeviceTestCase {
         XCTAssertEqual(app.state, .runningForeground)
     }
 
-    func testUnexamined() { check("unexamined", "waiting for a memo|Every purchase has a memo|Nothing in your Narrative yet") }
+    func testUnexamined() { check("unexamined", "Biggest this month|First time here|Your busiest day|A year ago you wrote|Every purchase has a memo|Nothing in your Narrative yet") }
     func testLedger() { check("ledger", "Spent|Paid or credited") }
     func testStory() { check("story", "memos? ·|No memos here yet") }
     func testSettings() { check("settings", "Connect Claude") }
@@ -45,8 +45,8 @@ final class TabSmokeUITests: DeviceTestCase {
     /// The tab bar itself: every tab is reachable by tapping from Unexamined.
     func testTapThroughTabs() {
         let app = launch()
-        XCTAssertTrue(text(app, matching: "waiting for a memo|Every purchase has a memo").waitForExistence(timeout: 25))
-        for (tab, rx) in [("Narrative", "Spent"), ("Story", "memos? ·|No memos here yet"), ("Settings", "Connect Claude"), ("Unexamined", "waiting for a memo|Every purchase")] {
+        XCTAssertTrue(text(app, matching: "Biggest this month|First time here|Your busiest day|A year ago you wrote|Every purchase has a memo").waitForExistence(timeout: 25))
+        for (tab, rx) in [("Narrative", "Spent"), ("Story", "memos? ·|No memos here yet"), ("Settings", "Connect Claude"), ("Unexamined", "Biggest this month|First time here|Your busiest day|A year ago you wrote|Every purchase")] {
             openTab(app, tab)
             XCTAssertTrue(text(app, matching: rx).waitForExistence(timeout: 15), "after tapping \(tab): /\(rx)/")
             shot(app, "tapped-\(tab)")

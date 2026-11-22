@@ -125,6 +125,12 @@ const API = (() => {
     return must(await client().from('transactions').select(TXN + ', memos(body, memo_values(value_id, life_values(name)))')
       .gte('txn_date', from).lte('txn_date', to).order('txn_date', { ascending: false }).limit(2000));
   }
+  // D7: what to write about (the database picks, by readable rules; memo_suggestions).
+  async function suggestions() {
+    const rows = must(await client().rpc('memo_suggestions'));
+    const seen = new Set();
+    return rows.filter((r) => !seen.has(r.transaction_id) && seen.add(r.transaction_id));
+  }
   async function latestMonth() {
     const rows = must(await client().from('transactions').select('txn_date').order('txn_date', { ascending: false }).limit(1));
     return rows.length ? rows[0].txn_date.slice(0, 7) : null;
@@ -224,7 +230,7 @@ const API = (() => {
 
   return {
     MCP_URL, client, session, onAuthChange, signInWithApple, finishAppleRedirect, signOut, deleteAccount,
-    unexamined, transactionCount, month, latestMonth, transaction, stories,
+    unexamined, suggestions, transactionCount, month, latestMonth, transaction, stories,
     values, addValue, setSkipped, renameValue, deleteValue, saveMemo, importAppleCard, importExport, GROUNDS, ground, setGround,
   };
 })();

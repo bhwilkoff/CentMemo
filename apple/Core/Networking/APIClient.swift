@@ -165,6 +165,20 @@ final class APIClient {
                                                    .init(name: "limit", value: String(limit))])
     }
 
+    /// D7: what to write about, chosen in the database by readable rules (memo_suggestions).
+    struct Suggestion: Decodable, Hashable, Sendable {
+        let kind: String
+        let transactionID: String
+        let memoBody: String?
+        enum CodingKeys: String, CodingKey { case kind, transactionID = "transaction_id", memoBody = "memo_body" }
+    }
+
+    func suggestions() async throws -> [Suggestion] {
+        let data = try await raw("rest/v1/rpc/memo_suggestions", method: "POST", body: [String: String]())
+        var seen = Set<String>()
+        return try JSONDecoder().decode([Suggestion].self, from: data).filter { seen.insert($0.transactionID).inserted }
+    }
+
     func hasAnyTransactions() async throws -> Bool {
         let rows: [[String: String]] = try await rest("transactions", [.init(name: "select", value: "id"), .init(name: "limit", value: "1")])
         return !rows.isEmpty

@@ -5,6 +5,7 @@ import SwiftUI
 struct UnexaminedView: View {
     @Environment(SessionStore.self) private var session
     @State private var entries: [LedgerEntry] = []
+    @State private var picked: [(APIClient.Suggestion, LedgerEntry)] = []
     @State private var hasAny = true
     @State private var loading = true
     @State private var error: String?
@@ -25,29 +26,26 @@ struct UnexaminedView: View {
                 }
             } else {
                 List {
-                    // DESIGN C3.1 + C4: the count is this screen's one bold mark.
-                    HStack(spacing: Spacing.s2) {
-                        Text("\(entries.count)")
-                            .font(TypeRamp.bodyStrong).monospacedDigit()
-                            .foregroundStyle(Ground.onColor)
-                            .padding(.horizontal, 10).padding(.vertical, 2)
-                            .background(session.ground.color, in: Capsule())
-                            // DESIGN M1: circled in sanguine pencil, like the web.
-                            .overlay(PencilCircle().stroke(Color.brandPrimary, style: StrokeStyle(lineWidth: 2, lineCap: .round))
-                                .padding(-6))
-                            .padding(6)
-                            .accessibilityLabel("\(entries.count) unexamined")
-                        Text(entries.count == 1 ? "purchase waiting for a memo" : "purchases waiting for a memo")
-                            .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
+                    // D7: up to three moments worth a memo, each with its reason; no
+                    // count of what is left (story-design-research: no to-do lists).
+                    if !picked.isEmpty {
+                        Section {
+                            ForEach(picked, id: \.0.transactionID) { s, e in
+                                EntryLink(id: e.id) { SuggestionCard(suggestion: s, entry: e) }
+                                    .skipAction(e) { await skip(e) }
+                                    .listRowSeparator(.hidden)
+                                    .listRowBackground(Color.clear)
+                                    .listRowInsets(EdgeInsets(top: Spacing.s1, leading: Spacing.s4, bottom: Spacing.s1, trailing: Spacing.s4))
+                            }
+                        }
                     }
-                    .onGround()
                     ForEach(entries) { e in
                         EntryLink(id: e.id) { EntryRow(entry: e) }.onGround()
                             .skipAction(e) { await skip(e) }
                     }
                 }
                 .listStyle(.plain)
-                .opensFirst(entries.first?.id)
+                .opensFirst(picked.first?.1.id ?? entries.first?.id)
             }
         }
         .grounded()
@@ -56,8 +54,20 @@ struct UnexaminedView: View {
         .task(id: session.dataVersion) { await load() }
     }
 
+    /// Suggestions are a garnish: if they fail to load, the list still shows.
+    private func suggestionsFor(_ list: [LedgerEntry]) async -> [(APIClient.Suggestion, LedgerEntry)] {
+        guard let found = try? await APIClient.shared.suggestions() else { return [] }
+        var out: [(APIClient.Suggestion, LedgerEntry)] = []
+        for s in found.prefix(3) {
+            if let e = list.first(where: { $0.id == s.transactionID }) { out.append((s, e)) }
+            else if let e = try? await APIClient.shared.transaction(s.transactionID) { out.append((s, e)) }
+        }
+        return out
+    }
+
     private func skip(_ e: LedgerEntry) async {
         entries.removeAll { $0.id == e.id }
+        picked.removeAll { $0.1.id == e.id }
         do { try await APIClient.shared.setSkipped(e.id, true); session.didChangeData() }
         catch { self.error = session.handle(error); await load() }
     }
@@ -65,7 +75,11 @@ struct UnexaminedView: View {
     private func load() async {
         loading = true
         do {
-            entries = try await APIClient.shared.unexamined()
+            // The list and its suggestions arrive together, so at regular width the
+            // first suggestion (not the first row) opens on the right.
+            let list = try await APIClient.shared.unexamined()
+            picked = await suggestionsFor(list)
+            entries = list
             if entries.isEmpty { hasAny = try await APIClient.shared.hasAnyTransactions() }
             error = nil
         } catch { self.error = session.handle(error) }

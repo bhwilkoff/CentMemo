@@ -17,7 +17,7 @@ final class ReviewTourUITests: DeviceTestCase {
         try XCTSkipUnless(ProcessInfo.processInfo.environment["REVIEW_TOUR"] == "1", "recorded by tools/record_review.sh only")
         let app = launch(["APP_START_TAB": "unexamined"])
         mark("launch")
-        XCTAssertTrue(text(app, matching: "waiting for a memo").waitForExistence(timeout: 30))
+        XCTAssertTrue(text(app, matching: "Biggest this month|First time here|Your busiest day|A year ago you wrote").waitForExistence(timeout: 30))
         pause(3)
 
         // A purchase, its memo, and a value: the core of the app.

@@ -18,7 +18,7 @@ final class EmptyStateUITests: DeviceTestCase {
 
         // Control: the owner (back on the next launch) sees purchases, not the empty state.
         let owner = launch(["APP_START_TAB": "unexamined"])
-        XCTAssertTrue(owner.staticTexts.matching(NSPredicate(format: "label CONTAINS 'waiting for a memo'")).firstMatch.waitForExistence(timeout: 30),
+        XCTAssertTrue(text(owner, matching: "Biggest this month|First time here|Your busiest day|A year ago you wrote").waitForExistence(timeout: 30),
                       "the owner sees purchases again (the door switched back)")
         XCTAssertFalse(owner.staticTexts["Nothing in your Narrative yet"].exists)
     }

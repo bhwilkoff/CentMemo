@@ -96,6 +96,9 @@ console.log('happy (owner, the control)');
 await openAs('owner', '#/unexamined');
 ok(await waitFor('document.querySelectorAll(".row").length > 0'), 'owner sees rows on Unexamined');
 ok(!(await evaluate('!!document.querySelector(".state-empty")')), 'and no empty state');
+ok(await waitFor('document.querySelectorAll("#view-unexamined .suggestion").length > 0'), 'Unexamined suggests moments worth a memo (D7)');
+ok(await evaluate('[...document.querySelectorAll("#view-unexamined .suggestion-reason")].every(r => /First time here|Biggest this month|Your busiest day|A year ago you wrote/.test(r.textContent))'), 'each suggestion says why it was picked');
+ok(!(await evaluate('!!document.querySelector("#h-unexamined .pencil-circle")')), 'no count of what is left');
 await shot('happy-unexamined');
 
 console.log('skip (Decision 065): an event leaves Unexamined and the Narrative, then comes back');

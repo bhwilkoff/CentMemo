@@ -5,7 +5,7 @@ import XCTest
 final class SkipUITests: DeviceTestCase {
     func testSwipeSkipThenBringBack() {
         let app = launch(["APP_START_TAB": "unexamined"])
-        XCTAssertTrue(text(app, matching: "waiting for a memo").waitForExistence(timeout: 30))
+        XCTAssertTrue(text(app, matching: "Biggest this month|First time here|Your busiest day|A year ago you wrote").waitForExistence(timeout: 30))
         let row = app.buttons.matching(NSPredicate(format: "label CONTAINS 'King Soopers'")).firstMatch
         XCTAssertTrue(row.waitForExistence(timeout: 10), "King Soopers waits in Unexamined")
         reveal(row)

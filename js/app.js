@@ -122,6 +122,24 @@
   }
 
   /* ---- Unexamined (home) ---- */
+  // The words for each rule; human-written, Ben approves them (as SuggestionWords).
+  const REASONS = { first_visit: 'First time here', biggest_month: 'Biggest this month', busy_day: 'Your busiest day this month', year_ago: 'A year ago you wrote' };
+  const PROMPTS = { first_visit: 'What brought you here?', biggest_month: 'What was it for?', busy_day: 'What was the day about?' };
+  async function suggestionCards(rows) {
+    const out = [];
+    for (const s of (await API.suggestions()).slice(0, 3)) {
+      const t = rows.find((r) => r.id === s.transaction_id) || await API.transaction(s.transaction_id).catch(() => null);
+      if (!t) continue;
+      out.push(h('a', { class: 'suggestion', href: '#/t/' + t.id, 'data-kind': s.kind },
+        h('span', { class: 'suggestion-reason' }, REASONS[s.kind] || ''),
+        s.memo_body
+          ? [h('span', { class: 'suggestion-quote' }, '\u201C' + s.memo_body + '\u201D'), h('span', { class: 'caption' }, niceDate(t.txn_date) + ' · ' + merchantOf(t))]
+          : [h('span', { class: 'suggestion-place' }, tile(t), h('span', {}, h('b', {}, merchantOf(t)), h('br'), h('span', { class: 'caption' }, niceDate(t.txn_date)))),
+             PROMPTS[s.kind] ? h('span', { class: 'suggestion-prompt' }, PROMPTS[s.kind]) : null]));
+    }
+    return out;
+  }
+
   async function unexaminedView() {
     const body = showView('unexamined', 'unexamined');
     const heading = $('h-unexamined');
@@ -135,9 +153,11 @@
           ? empty(body, 'Every purchase has a memo.')
           : empty(body, 'Nothing in your Narrative yet.', h('a', { class: 'btn btn-primary', href: '#/import' }, 'Import from Apple Card'));
       }
-      heading.replaceChildren('Unexamined ', h('span', { class: 'pencil-circle', 'aria-label': count + ' unexamined' },
-        h('span', { class: 'yours-count' }, count.toLocaleString('en-US'))));
-      body.replaceChildren(h('div', { class: 'list' }, rows.map((t) => txnRow(t))),
+      // D7: up to three moments worth a memo, each with its reason; no count of
+      // what is left (as the iPhone's SuggestionCard).
+      const picks = await suggestionCards(rows).catch(() => []);
+      body.replaceChildren(picks.length ? h('div', { class: 'suggestions' }, picks) : '',
+        h('div', { class: 'list' }, rows.map((t) => txnRow(t))),
         count > rows.length ? h('p', { class: 'caption' }, 'Showing the newest ' + rows.length + '.') : null);
     } catch (err) { failed(body, err, unexaminedView); }
   }
