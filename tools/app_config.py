@@ -60,6 +60,7 @@ PLAY_REPORTS_BUCKET = ""                          # e.g. "pubsite_prod_rev_0978.
 # one device per kind. A manifest (tools/bench.py) overrides it when present.
 DEVICES = {
     "iphone":  "00008101-000339320188801E",  # iPhone 12 (owner 2026-11-21: "use the iPhone 12 for the initial push"; also Ear Drama's live-test phone)
+    "duo":     "00008160-001814623AA00036",  # Ben's iPhone Duo (iPhone19,4, two displays), offered 2026-11-22 for design and testing; open = inner display, XCUITest frames come from the outer one (Ear Drama docs/research/IPHONE-DUO.md)
     "ipad":    "00008103-0019388E3CF1001E",  # iPad Pro 12.9 (5th gen), paired; the iPhone 12 stand-in when it is off
     "appletv": None,      # CentMemo has no tvOS app (Decision 055)
     "android": None,      # no Android app (Decision 055)

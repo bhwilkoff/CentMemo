@@ -31,11 +31,11 @@ Ben, 2026-11-22, verbatim:
 
 ## Work items (D = design before submission; L2 waits on all of them)
 
-- D1 Research: journaling apps, check-in habits, prompts for what to write
+- D1 ✅ Research: journaling apps, check-in habits, prompts for what to write
   (`docs/research/story-design-research.md`).
-- D2 Research: merchant recognition and tiles (vendor/company/store), richer
+- D2 ✅ Research: merchant recognition and tiles (vendor/company/store), richer
   categories, timeline and color-coded visualization, sets and sharing.
-- D3 Device tools: the iPhone Duo design and test harness, ported from Ben's
+- D3 🟡 (design_shots.py on both phones ✅; Duo layout rules ⏳) Device tools: the iPhone Duo design and test harness, ported from Ben's
   other repos; every screen checked on the Duo AND the iPhone 12.
 - D4 Language: keep "Unexamined" (the unexamined life); propose options for
   "Ledger" and every other screen word. Ben chooses.

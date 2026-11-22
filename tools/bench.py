@@ -81,6 +81,7 @@ PLATFORMS = ("ios", "ipados", "tvos", "macos", "android", "androidtv", "firetv",
 # reachable as "atv", the lease key every runner uses.
 _LEGACY = {
     "iphone":  ("ios", "udid"),
+    "duo":     ("ios", "udid"),
     "ipad":    ("ipados", "udid"),
     "appletv": ("tvos", "udid"),
     "android": ("android", "serial"),

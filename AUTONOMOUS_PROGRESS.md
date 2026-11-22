@@ -865,3 +865,34 @@ Apple.
     server. / Try again".
 - **Next:** L4 import on the phone (a file in Files), and F2 background
   delivery. L2 and L3 wait on Ben.
+
+### Design tick 1 — 2026-11-22 — D1, D2 research; D3 Duo harness
+- **D1:** `docs/research/story-design-research.md` covers journaling apps,
+  data-rule writing suggestions, 14 starter value themes, memo-as-moment
+  precedents, and collections and sharing. Agent caveat: four URLs and the
+  FinanceKit field names came from memory; check them before building.
+- **D2:** `docs/research/merchant-tiles-and-views-research.md` covers:
+  - Clearbit's logo API is gone; logo APIs need web domains we don't have,
+    and they leak the merchant list. So the default is an on-device monogram
+    tile: initials, a pencil-hue mark hashed from the cleaned merchant, and
+    a category glyph.
+  - A local name cleaner, with the person's renames becoming rules.
+  - Swift Charts marks; color is never the only signal (WCAG 1.4.1).
+  - Filters: a scope plus search tokens.
+  - Names for "Ledger": Timeline or Chronicle. Ben's call.
+- **D3:**
+  - "duo" registered (app_config.DEVICES, bench _LEGACY → ios).
+    `ios_uitest.py --device duo` runs; its XCUITest frames are blind because
+    the outer display is off when the phone is open (correctly failed).
+  - New `tools/design_shots.py`: every screen on iphone and duo, every
+    display by id, only while CentMemo is in front; flat frames are dropped
+    and named. First run: 8 frames, with the Duo inner display at
+    2853x2007.
+  - Read duo-unexamined: one full-width list, names far left, debits far
+    right. That confirms Ben's "everything ... seems like a list".
+- **Next:**
+  - D4/D5: put language options and three directions in front of Ben, as
+    mockups.
+  - Meanwhile build what's inferable either way: merchant name cleaning
+    and the monogram tile.
+  - Port Ear Drama's UITestScrolling and regular-width rules for the Duo.
