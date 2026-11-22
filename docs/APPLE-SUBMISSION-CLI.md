@@ -212,8 +212,12 @@ starve each other of it. Ship the product-carrying platform first
 
 The submission runs in CI because the credentials live in GitHub secrets and belong in one place:
 `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` (**base64**, not raw PEM; raw fails with `Unable to
-load PEM file ... MalformedFraming`). Running locally works too, with the `.p8` in
-`~/.appstoreconnect/private_keys/` and the two ids in the gitignored `tools/asc-credentials.env`.
+load PEM file ... MalformedFraming`). Running locally works too, from the login
+Keychain and no file: `tools/with_asc.sh COMMAND` (and every `tools/asc*.py`, through `tools/asc_key.py`) reads this
+app's items (`centmemo:ASC_KEY_P8`, `:ASC_KEY_ID`, `:ASC_ISSUER_ID`, from `tools/secrets.sh keychain-import-asc`),
+and without them the one shared Apple-team key: account `archivewatch`, services `archivewatch:ASC_KEY_P8`,
+`archivewatch:ASC_KEY_ID`, `archivewatch:ASC_ISSUER_ID` (a chunk count, then base64 pieces `.0`, `.1`, ...).
+The environment and `ASC_KEY_PATH` come first, and CI never touches the Keychain.
 
 ---
 

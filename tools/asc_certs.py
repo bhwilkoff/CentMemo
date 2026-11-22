@@ -14,17 +14,19 @@ xcodebuild to sign). The generated .p12/.cer live under build/ (gitignored).
 """
 import sys, os, time, json, base64, subprocess, tempfile, urllib.request, urllib.error
 import jwt
+import asc_key
 
 TYPE = {"distribution": "DISTRIBUTION", "mac_installer": "MAC_INSTALLER_DISTRIBUTION"}
 ORG = os.environ.get("ASC_ORG_NAME", "<ORG_NAME>")
 
 def token():
-    kid = os.environ["ASC_KEY_ID"]; iss = os.environ["ASC_ISSUER_ID"]
-    kp = os.environ.get("ASC_KEY_PATH", os.path.expanduser(f"~/.appstoreconnect/private_keys/AuthKey_{kid}.p8"))
+    kid = asc_key.value("ASC_KEY_ID") or sys.exit("set ASC_KEY_ID (or tools/secrets.sh keychain-import-asc)")
+    iss = asc_key.value("ASC_ISSUER_ID") or sys.exit("set ASC_ISSUER_ID (or tools/secrets.sh keychain-import-asc)")
+    pem = asc_key.key_pem(kid)
     now = int(time.time())
     # ES256 JWT — the ASC API requires an EC P-256 signature (the .p8 is an EC key); PyJWT + cryptography do this.
     return jwt.encode({"iss": iss, "iat": now, "exp": now + 600, "aud": "appstoreconnect-v1"},
-                      open(kp).read(), algorithm="ES256", headers={"kid": kid, "typ": "JWT"})
+                      pem, algorithm="ES256", headers={"kid": kid, "typ": "JWT"})
 
 def api(method, path, body=None):
     data = json.dumps(body).encode() if body else None

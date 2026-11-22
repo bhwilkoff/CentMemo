@@ -11,17 +11,18 @@ Env:    ASC_KEY_ID, ASC_ISSUER_ID, and the .p8 at ~/.appstoreconnect/private_key
 """
 import sys, os, time, json, base64, urllib.request, urllib.error, urllib.parse
 import jwt
+import asc_key
 
 PROFILE_TYPE = {"ios": "IOS_APP_STORE", "tvos": "TVOS_APP_STORE", "mac": "MAC_APP_STORE"}
 EXT = {"ios": "mobileprovision", "tvos": "mobileprovision", "mac": "provisionprofile"}
 
 def token():
-    kid = os.environ["ASC_KEY_ID"]; iss = os.environ["ASC_ISSUER_ID"]
-    kp = os.environ.get("ASC_KEY_PATH", os.path.expanduser(f"~/.appstoreconnect/private_keys/AuthKey_{kid}.p8"))
-    key = open(kp).read()
+    kid = asc_key.value("ASC_KEY_ID") or sys.exit("set ASC_KEY_ID (or tools/secrets.sh keychain-import-asc)")
+    iss = asc_key.value("ASC_ISSUER_ID") or sys.exit("set ASC_ISSUER_ID (or tools/secrets.sh keychain-import-asc)")
+    pem = asc_key.key_pem(kid)
     now = int(time.time())
     return jwt.encode({"iss": iss, "iat": now, "exp": now + 600, "aud": "appstoreconnect-v1"},
-                      key, algorithm="ES256", headers={"kid": kid, "typ": "JWT"})
+                      pem, algorithm="ES256", headers={"kid": kid, "typ": "JWT"})
 
 def api(method, path, body=None):
     data = json.dumps(body).encode() if body else None
