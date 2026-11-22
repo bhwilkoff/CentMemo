@@ -90,7 +90,12 @@ struct RootView: View {
                 #if DEBUG
                 // Harness door: sign the synthetic test account in (never a real one).
                 let env = ProcessInfo.processInfo.environment
-                if !session.isSignedIn, let email = env["APP_TEST_EMAIL"], let password = env["APP_TEST_PASSWORD"] {
+                // Signs in as the account the test names, switching if another synthetic
+                // account is signed in (the stranger test must not leave the owner tests
+                // running as the stranger).
+                if let email = env["APP_TEST_EMAIL"], let password = env["APP_TEST_PASSWORD"],
+                   !session.isSignedIn || session.email?.lowercased() != email.lowercased() {
+                    if session.isSignedIn { await session.signOut() }
                     try? await APIClient.shared.signInForTesting(email: email, password: password)
                     session.didSignIn()
                 }

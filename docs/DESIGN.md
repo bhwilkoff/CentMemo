@@ -18,6 +18,10 @@ makes the text harder to read."
 **C2. Sanguine is the pencil (brand).** Page titles, actions, links, the
 selected tab, focus rings, and every drawn mark (the circled count, rules)
 are sanguine. It never carries content meaning.
+*iOS*: ink is the system label color, set by nothing. A screen-wide
+`.foregroundStyle(ink)` outranks the tint, which turned every button ink
+(measured on the iPhone 12, 2026-11-22); give ink only to the views that
+need it, never to a whole screen.
 
 **C3. The person's color (aqua by default) has exactly two jobs, both
 meaning, never chrome:**

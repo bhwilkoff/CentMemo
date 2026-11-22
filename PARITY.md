@@ -131,7 +131,7 @@ When shipping any user-facing feature:
 
 | Surface | Web | iOS | Notes |
 |---|---|---|---|
-| Empty state with a next action | ✅ | 🚧 | Web: stranger user in test_web_states. iOS built (ContentUnavailableView), not seen with an empty account |
+| Empty state with a next action | ✅ | ✅ | Both seen with the empty stranger account: test_web_states, EmptyStateUITests (iPhone 12) |
 | Error with Try again | ✅ | 🚧 | iOS `LoadState` built, not seen failing |
 | Offline | ✅ | 🚧 | Web banner and message tested. iOS shows the error state; no dedicated offline indicator |
 | Hints and walkthroughs | 🚫 | 🚫 | The Unexamined count is the only prompt CentMemo needs (DESIGN C4) |

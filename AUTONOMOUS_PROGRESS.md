@@ -82,7 +82,7 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
     the app does not lean on to docs/DECISIONS-ARCHIVE.md (one line each
     left behind). Found tick 10.
 11d. ✅ (tick 16) PARITY audit and the iOS privacy manifest (found by re-mining).
-11e. ⏳ iOS: see the empty and error states with real conditions (stranger
+11e. 🟡 (tick 18: empty state ✅; error, import, delete still open) iOS: see the empty and error states with real conditions (stranger
     account on device; network off), and run import and delete account on
     a device (PARITY 🚧 cells, tick 16).
 12. 🔮 Shared stories at a public URL (opt-in per story).
@@ -503,3 +503,32 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
 - **Product note:** no app code changed; nothing to bump.
 - **Next:** tick 18 (infra) or 11e on iOS: device runs of iOS import,
   delete account, empty and error states.
+
+### Tick 18 — 2026-11-22 — iOS: empty state seen on device; every iOS action was ink, now sanguine (build 1.0 (8))
+- **Context:** backlog 11e (PARITY 🚧 iOS cells).
+- **Implementation:**
+  - The DEBUG sign-in door now switches to whichever synthetic account the
+    test names, so a stranger test can't leave the owner tests signed in as
+    the stranger.
+  - `test_account_env()` hands the runner the stranger too.
+  - `EmptyStateUITests`: the stranger sees "No transactions yet", the next
+    step, and Import; the control has the owner back to purchases.
+- **Found (measured, not eyeballed):** on the empty state's frame, the
+  Import action was `#231B1C` (ink), not sanguine. Cause: `Grounded` set a
+  screen-wide `.foregroundStyle(ink)`, which outranks the tint, so every
+  button on every screen was ink (DESIGN C2). DESIGN.md got an iOS note
+  first, then the override came out.
+- **Verification (iPhone 12, build 8):**
+  - Full tap tier 11/11, no crash logs.
+  - Pixel check: the empty-state Import and Settings' Import and Connect
+    Apple Wallet now read `#4A1520`; body text is the system label
+    `#000000`, as the doc note says.
+  - `tools/test_all.sh` ALL PASS.
+- **Still 🚧:**
+  - iOS error state (no way yet to fail the network on the device).
+  - iOS import (system file picker; the file must be on the phone).
+  - iOS delete account: Apple-only sign-in means no throwaway account, and
+    the stranger is needed by the RLS tests. It stays 🚧 until Ben can
+    delete a second Apple ID account on purpose, or a test-only delete
+    target exists.
+- **Next:** tick 19 (web).

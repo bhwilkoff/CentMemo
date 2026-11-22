@@ -199,11 +199,16 @@ HOOK_TEST_PASSWORD = "APP_TEST_PASSWORD"
 
 
 def test_account_env():
-    """{APP_TEST_EMAIL, APP_TEST_PASSWORD} for the synthetic owner, or {} when absent."""
+    """The synthetic owner (APP_TEST_EMAIL/PASSWORD) and stranger (APP_TEST_STRANGER_*), or {} when absent."""
     import json
     f = Path.home() / ".centmemo" / "test-users.json"
     try:
-        owner = json.loads(f.read_text())["owner"]
-        return {HOOK_TEST_EMAIL: owner["email"], HOOK_TEST_PASSWORD: owner["password"]}
+        users = json.loads(f.read_text())
+        owner, stranger = users["owner"], users.get("stranger", {})
+        env = {HOOK_TEST_EMAIL: owner["email"], HOOK_TEST_PASSWORD: owner["password"]}
+        if stranger:
+            env["APP_TEST_STRANGER_EMAIL"] = stranger["email"]
+            env["APP_TEST_STRANGER_PASSWORD"] = stranger["password"]
+        return env
     except (OSError, KeyError, ValueError):
         return {}

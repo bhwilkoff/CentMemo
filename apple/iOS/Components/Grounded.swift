@@ -1,14 +1,14 @@
 #if os(iOS)
 import SwiftUI
 
-/// Paper behind every list and form, ink text on it (DESIGN C1). The
-/// person's color is never a background (Decision 060).
+/// Paper behind every list and form (DESIGN C1). No screen-wide foreground:
+/// it would outrank the sanguine tint on every button (DESIGN C2, iOS note).
+/// The person's color is never a background (Decision 060).
 struct Grounded: ViewModifier {
     func body(content: Content) -> some View {
         content
             .scrollContentBackground(.hidden)
             .background(Color.brandBackground.ignoresSafeArea())
-            .foregroundStyle(Color.brandText)
     }
 }
 
