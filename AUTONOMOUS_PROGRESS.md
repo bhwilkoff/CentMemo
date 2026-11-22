@@ -68,7 +68,7 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
    device, never yet run).
 10. 🟡 (tick 11: iOS photos by reference ✅; files, upload, web ⏳) Photos and files attached to a memo by reference (M2, Decision 055
     attachments table; `money-story-design`).
-11. ⏳ Upstream to UniversalAppTemplate:
+11. 🟡 (tick 14: committed on a local template branch, awaiting Ben) Upstream to UniversalAppTemplate:
     - The three new skills.
     - The color-search tools.
     - The test_grounds pattern.
@@ -83,6 +83,9 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
 13. 🔮 macOS through the universal target.
 
 ### Blocked on Ben (not loop work)
+- Push the template upstream: branch `upstream/centmemo-finance-connector`
+  in ~/Documents/GitHub/UniversalAppTemplate (commit 7718d588). Ben looks
+  at the three skills first (the plan), then: push and merge, or a PR.
 - iPad Pro UI automation: unlock the iPad, then Settings > Developer >
   Enable UI Automation (and allow it if a prompt appears). The tap tier
   times out with "Timed out while enabling automation mode" until then.
@@ -396,3 +399,28 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
   data); photos ask for access when he adds one.
 - **Next:** tick 14 (infrastructure), backlog item 11, upstream to
   UniversalAppTemplate.
+
+### Tick 14 — 2026-11-22 — infra: upstream prepared for UniversalAppTemplate (not pushed)
+- **Context:** backlog item 11. The plan says upstream "after Ben sees
+  them", and pushing to another repo is outward-facing, so the change is
+  committed on a local branch only.
+- **Implementation:** template branch `upstream/centmemo-finance-connector`
+  (7718d588):
+  - The three skills, copied whole (their CentMemo mentions are incident
+    citations, the template's convention).
+  - `tools/colorsearch/` (header made generic).
+  - The skill catalog rows and the AGENTS.md routing row, "Money, Claude
+    connectors". It was shortened three times to keep the template's
+    AGENTS.md under 24,000 bytes (23,998).
+  - A PROVENANCE coverage row.
+  - Bench lessons in DEVICE-HARNESSES.md (UI Automation gate, leftover
+    prompts, caret placement, tab bar and lazy Form, failed-run data and
+    stale logs, the headless window floor).
+- **Left out:** `test_grounds` and `test_web_states` (bound to this app's
+  data and selectors; the lessons went up instead).
+- **Verification (template):** test_agent_files PASS, test_us_english PASS,
+  skills frontmatter present, colorsearch compiles. CentMemo's
+  `tools/test_all.sh` ALL PASS.
+- **Next:** tick 15 (opt), backlog 11c, archive the inherited DECISIONS
+  (the template just did the same: 001-032 rolled verbatim into
+  docs/decisions/ with an index).
