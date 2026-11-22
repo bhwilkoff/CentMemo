@@ -8,7 +8,7 @@
 # NOTE: needs `chmod +x tools/submit-appstore.sh` once (git preserves the bit thereafter).
 #
 # Setup: a RELEASED Xcode (App Review rejects beta builds), the App Store Connect API key in
-# tools/asc-credentials.env (gitignored) + ~/.appstoreconnect/private_keys/. See docs/CLOUD-SUBMISSION.md.
+# tools/asc-credentials.env (CI runner only) or the login Keychain via tools/with_asc.sh. See docs/CLOUD-SUBMISSION.md.
 #
 # Signing is MANUAL, by design: cloud-managed/automatic signing can fail for a team's ASC API key
 # ("Cloud signing permission error"), but the SAME key can create certs + profiles via the REST API.

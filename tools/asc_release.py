@@ -490,7 +490,7 @@ def main(argv=None):
 
     for var in ("ASC_KEY_ID", "ASC_ISSUER_ID"):
         if not os.environ.get(var):
-            sys.exit(f"set {var} (see tools/asc-credentials.env)")
+            sys.exit(f"set {var} (a Mac supplies them from the login Keychain: run under tools/with_asc.sh)")
 
     aid = app_id()
     return status(aid, a.build) if a.mode == "status" else ship(aid, a)

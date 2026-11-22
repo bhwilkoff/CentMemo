@@ -35,8 +35,7 @@
 ## Checking a build's processing state
 
 ```sh
-set -a; . tools/asc-credentials.env; set +a
-tools/.asc-venv/bin/python -c "import sys; sys.path.insert(0,'tools'); import asc_release as a; b=a.find_build(a.app_id(),'5','IOS'); print(b['attributes']['processingState'])"
+tools/with_asc.sh tools/.asc-venv/bin/python -c "import sys; sys.path.insert(0,'tools'); import asc_release as a; b=a.find_build(a.app_id(),'5','IOS'); print(b['attributes']['processingState'])"
 ```
 
 Homebrew's python3 lacks PyJWT (submit-appstore.sh provisions
