@@ -73,7 +73,7 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
     - The color-search tools.
     - The test_grounds pattern.
     - The device-harness lessons from docs/PROVENANCE.md.
-11b. ⏳ Web: static pages (privacy, terms, connect) set headings in system
+11b. ✅ (tick 12) Web: static pages (privacy, terms, connect) set headings in system
     sans, not Newsreader (DESIGN T1). Found tick 9.
 11c. ⏳ Opt: DECISIONS.md is 1,476 lines, mostly the template's 001-053;
     AUTONOMOUS-LOOPS says it stays context-sized. Archive the inherited ones
@@ -353,3 +353,23 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
   attached (PARITY ⏳).
 - **Next:** tick 12 (web), 11b (static-page headings in Newsreader) or the
   web side of attachments.
+
+### Tick 12 — 2026-11-22 — web: photo parity note; static-page headings in Newsreader
+- **Context:** cross-platform parity for tick 11's photos, plus backlog 11b.
+- **Implementation:**
+  - `API.transaction` also selects `attachments(kind)`. The detail view shows
+    "1 photo attached in the CentMemo iPhone app." (a fact the person cannot
+    discover on the web, which cannot draw a PhotoKit reference); nothing
+    when there are none.
+  - `.page-inner h1, h2` join the display-face rule (DESIGN T1), and
+    `.page code` uses `--font-mono`. Assets `?v=20261121g`.
+- **Verification:** `tools/test_web_states.mjs`:
+  - The note appears for a photo reference created as the owner, with a
+    control that it is absent once removed; the row is cleaned in `finally`
+    and the server holds 0 attachments.
+  - connect/, privacy/, and terms/ headings name Newsreader; the frame shows
+    it rendered.
+  - `tools/test_all.sh` ALL PASS. PARITY row updated.
+- **Next:** tick 13 (iOS). Candidates: files on iOS, or the iPad
+  readable width once Ben answers. Otherwise item 11, upstream to the
+  template (infrastructure, tick 14).

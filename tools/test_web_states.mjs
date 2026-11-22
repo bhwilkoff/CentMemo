@@ -120,6 +120,26 @@ await shot('offline-ledger');
 await cdp('Network.emulateNetworkConditions', { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
 ok(await waitFor('document.getElementById("offline-banner").hidden'), 'the banner clears when back online');
 
+console.log('photo attached on the iPhone');
+{
+  const s = await sessionFor('owner');
+  const hdr = { apikey: K, authorization: 'Bearer ' + s.access_token, 'content-type': 'application/json', prefer: 'return=representation' };
+  const TXN = 'a3b8c10c-68b8-4bfe-9380-c87b7015a49d';
+  const made = await (await fetch(P + '/rest/v1/attachments', { method: 'POST', headers: hdr, body: JSON.stringify({ transaction_id: TXN, kind: 'photo', device_ref: 'web-test/L0/001' }) })).json();
+  try {
+    await openAs('owner', '#/t/' + TXN);
+    ok(await waitFor(`/1 photo attached in the CentMemo iPhone app/.test(document.querySelector("${VIS}.photos-note")?.textContent || "")`), 'the web says a photo is attached, and where');
+    await shot('photo-note');
+    await fetch(`${P}/rest/v1/attachments?id=eq.${made[0].id}`, { method: 'DELETE', headers: hdr });
+    await cdp('Page.reload', { ignoreCache: true });
+    await waitFor('document.readyState === "complete" && !document.getElementById("app-screen").hidden');
+    await waitFor(`!!document.querySelector("${VIS}#memo-body")`);
+    ok(!(await evaluate(`!!document.querySelector("${VIS}.photos-note")`)), 'and says nothing when there is none (control)');
+  } finally {
+    if (made?.[0]?.id) await fetch(`${P}/rest/v1/attachments?id=eq.${made[0].id}`, { method: 'DELETE', headers: hdr });
+  }
+}
+
 console.log('static pages');
 for (const page of ['connect/', 'privacy/', 'terms/']) {
   await cdp('Page.navigate', { url: SITE + page });
@@ -127,6 +147,8 @@ for (const page of ['connect/', 'privacy/', 'terms/']) {
   await sleep(300);
   const w = await evaluate('document.documentElement.scrollWidth');
   ok(w <= 375, `${page} fits 375px (${w})`);
+  const face = await evaluate('getComputedStyle(document.querySelector("h1")).fontFamily');
+  ok(/Newsreader/.test(face), `${page} heading in Newsreader (DESIGN T1)`);
   await shot('page-' + page.replace('/', ''));
 }
 ok(/never shared with Claude/.test(await (async () => { await cdp('Page.navigate', { url: SITE + 'connect/' }); await waitFor('!!document.querySelector("h1")'); return evaluate('document.body.innerText'); })()),

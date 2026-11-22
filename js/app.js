@@ -233,11 +233,20 @@
         chips,
         h('div', { class: 'inline-form' }, newValue, addBtn),
         error,
-        h('div', { class: 'actions' }, save, status));
+        h('div', { class: 'actions' }, save, status),
+        photosNote(t.attachments));
     } catch (err) { failed(body, err, () => txnView(id)); }
   }
   function fact(k, v) { return h('div', {}, h('dt', {}, k), h('dd', {}, v)); }
   document.querySelector('[data-back]').addEventListener('click', () => { location.hash = lastList; });
+
+  // Photos are attached on the iPhone by PhotoKit reference (money-story-design);
+  // the web cannot draw them, so it says they exist and where they live.
+  function photosNote(list) {
+    const n = (list || []).filter((a) => a.kind === 'photo').length;
+    if (!n) return null;
+    return h('p', { class: 'caption photos-note' }, n === 1 ? '1 photo attached in the CentMemo iPhone app.' : n + ' photos attached in the CentMemo iPhone app.');
+  }
 
   /* ---- Story: the memos, read in order ---- */
   async function storyView(scope) {
