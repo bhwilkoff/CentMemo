@@ -1704,3 +1704,11 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
     the Narrative loaded his November (113 events, his memo). Frame
     `duo-ledger-1.png` read.
   - `tools/test_all.sh` rc=0.
+- **FinanceKit request for the extension, pre-filled in Ben's Chrome:**
+  - Bundle `com.learningischange.centmemo.walletdelivery`, App Apple ID
+    6837824241, US, privacy link, iOS yes, financial management tools yes,
+    no financial products, not sold, no marketing, 0–10,000 users.
+  - The explanation cites case 23676235 and says nothing changes but the
+    timing. No notifications; the connector carve-out is unchanged.
+  - **Ben's step:** read the addendum, press Agree, then Submit.
+- **Next:** D14 default themes, while Apple reviews.
