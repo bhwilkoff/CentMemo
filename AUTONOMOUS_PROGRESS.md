@@ -51,7 +51,7 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
      later goes through the cloud build (`cloud-appstore-submission`).
 
 ### FinanceKit (2026-11-22): Ben: "Finance kit entitlement approval just came in!"
-F1. 🟡 (launch tick 2) Real FinanceKit in the app; Ben runs the first real sync on his phone.
+F1. ✅ (launch tick 2; Ben's real syncs on TestFlight 12 and 13, his Wallet rows in his account) Real FinanceKit in the app. Revocation delete still unseen on real data.
 F2. ⏳ FinanceKit background delivery extension (iOS 26).
 
 ### Ben's request (2026-11-22): "Start with item one and keep going. You can also do the recording too. The skills should be built for that in at least one of my repositories. Start an autonomous loop to make sure you get it all done."
@@ -1663,3 +1663,28 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   - Readable frame names: `setting-door.png` was exported beside its UUID
     copy (testSettingDoor passed on the iPhone 12).
   - Recorded in docs/TESTING.md. `tools/test_all.sh` rc=0.
+
+### Tick 29 — 2026-11-23 — F2 background delivery built; waits on two portal settings
+- **F1:** already done. Ben's real syncs ran on TestFlight 12 and 13, and
+  the backlog's 🟡 was stale.
+- **F2, built on branch `f2-wallet-delivery`:**
+  - The ExtensionKit target `CentMemoWalletDelivery`, extension point
+    `com.apple.financekit.background-delivery`, iOS 26. It runs the app's
+    own sync (Core) as `FinanceBackgroundSync.run()`, never for a synthetic
+    account, and never notifies.
+  - Shared through the App Group `group.com.learningischange.centmemo`:
+    - The Keychain session; older items still load.
+    - The history tokens, moved over from standard defaults on first read.
+  - APIClient adopts a newer stored session before refreshing, and retries
+    with it, so the app and extension don't revoke each other's refresh
+    token.
+  - Delivery is enabled hourly after a successful Wallet sync and disabled
+    on revocation.
+- **Blocked:** Duo build rc 65. The ASC API has no FinanceKit capability
+  type, and automatic signing can't add a managed capability or an App
+  Group. Two developer-portal changes (Ben's account) are needed:
+  1. FinanceKit on the App ID `com.learningischange.centmemo.walletdelivery`.
+     If it isn't offered, Apple must extend the grant to that bundle id.
+  2. Register `group.com.learningischange.centmemo` and assign it to both
+     App IDs.
+- main is untouched and still builds for the devices.
