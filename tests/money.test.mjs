@@ -56,7 +56,12 @@ test('store names: cleaned, initials, hue match the golden (D8; Swift reads the 
     assert.equal(name, g.name, g.raw);
     assert.equal(M.merchantInitials(name), g.initials, g.raw);
     assert.equal(M.merchantHue(name, 6), g.hue, g.raw);
+    assert.equal(M.settingPattern(name), g.pattern, g.raw);
+    // The pattern must find the raw descriptor it came from (PostgREST ilike, * = any).
+    const rx = new RegExp('^' + g.pattern.split('*').map((w) => w.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('.*') + '$', 'is');
+    assert.ok(rx.test(g.raw), g.pattern + ' finds ' + g.raw);
   }
+  assert.equal(M.settingPattern('&&'), '', 'no words, no pattern');
 });
 
 const fx = (f) => readFileSync(new URL('./fixtures/' + f, import.meta.url), 'utf8');

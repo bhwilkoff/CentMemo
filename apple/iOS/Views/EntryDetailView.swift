@@ -32,13 +32,21 @@ struct EntryDetailView: View {
                     // D6: the Setting and the memo lead; the money is a footnote
                     // (Decision 065: memo, Setting; the Chronicle direction).
                     Section {
-                        HStack(alignment: .center, spacing: Spacing.s3) {
-                            StoreTile(name: e.displayMerchant, category: e.category, size: 56)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(e.displayMerchant).font(DisplayType.title).lineLimit(2)
-                                Text(LedgerDate.display(e.txnDate)).font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
+                        // D8: the Setting heads the page and opens every visit there.
+                        NavigationLink(value: SettingRoute(name: e.displayMerchant)) {
+                            HStack(alignment: .center, spacing: Spacing.s3) {
+                                StoreTile(name: e.displayMerchant, category: e.category, size: 56)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(e.displayMerchant).font(DisplayType.title).lineLimit(2)
+                                    HStack(spacing: 0) {
+                                        Text(LedgerDate.display(e.txnDate) + " · ").foregroundStyle(Color.brandTextMuted)
+                                        Text("Every visit").foregroundStyle(Color.brandPrimary)
+                                    }
+                                    .font(TypeRamp.caption)
+                                }
                             }
                         }
+                        .accessibilityIdentifier("every-visit")
                         .listRowBackground(Color.clear)
                         // In a pane the Form's cards stand 16pt off the divider; the header
                         // stands with them (Ear Drama iOS-DESIGN §3.6e).

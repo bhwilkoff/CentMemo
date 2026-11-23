@@ -249,7 +249,15 @@
     return h % (count || 6);
   }
 
-  const api = { toMinor, formatMinor, parseCsv, isoDate, parseAppleCardCsv, sha256Hex, cleanMerchant, merchantInitials, merchantHue,
+  // D8: a PostgREST ilike pattern that finds every raw descriptor a Setting's
+  // name came from ("Blue Bottle Coffee" -> "*Blue*Bottle*Coffee*"); callers keep
+  // only the rows whose cleaned name is exactly the Setting.
+  function settingPattern(name) {
+    const words = String(name || '').split(/[^A-Za-z0-9]+/).filter(Boolean);
+    return words.length ? '*' + words.join('*') + '*' : '';
+  }
+
+  const api = { toMinor, formatMinor, parseCsv, isoDate, parseAppleCardCsv, sha256Hex, cleanMerchant, merchantInitials, merchantHue, settingPattern,
     looseMinor, parseVenmoCsv, parsePayPalCsv, parseCashAppCsv, detectExport, parseAnyExport };
   if (typeof module === 'object' && module.exports) module.exports = api;
   root.CentMoney = api;

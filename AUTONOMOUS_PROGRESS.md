@@ -1326,3 +1326,36 @@ Apple.
   - sharing a memo
   - Venmo, PayPal and Cash App import with the paths
   - the test-account guards
+
+### Design tick 17 — 2026-11-23 — D8 a Setting's page
+- **Audit first:** the brief's D10 web mark was stale (the web Narrative has
+  been a thread since tick 13). D13's connector cell was stale too: mcp v8
+  already leaves skipped events out of unexamined. Both are now marked.
+- **Built:** "Every visit" on the event page opens the Setting's page:
+  - the tile and the name
+  - "N visits · since <first> · M memos"
+  - every visit as the thread, the place said once at the top
+  - Web: `#/setting/<name>`; Back walks the app's own history.
+  - iOS: `SettingPageView` via `SettingRoute`, plus a DEBUG door
+    `APP_START_SETTING` (design_shots `--screen setting`).
+- **The query:** one rule on both stacks. `settingPattern` builds an ilike
+  pattern from the name's words; it is golden-tested in JS and Swift against
+  merchant-names.json, and checked to find its own raw descriptor. Only exact
+  cleaned-name matches are kept.
+- **Verified:**
+  - `tools/test_all.sh` passes (rc=0).
+  - test_web_states: Every visit → Setting with its count and memos; Back
+    returns. setting.png read.
+  - iPhone 12: `SettingUITests.testSettingDoor` passed.
+- **Not verified:**
+  - **The iPhone 12 tap test:** a Screen Time "Time Limit: You've reached
+    your limit on CentMemo" overlay covered the app during the run. Ben
+    needs to lift the limit; changing Screen Time is not mine to do.
+  - **The Duo:** it runs Ben's TestFlight 15, so the new page isn't on it.
+    I didn't overwrite the build he's trying.
+- **Seen on the Duo frame:** a long Setting name hyphenates in the pane header
+  ("AutoNa-tion Toyo…"). Next tick: fit the name without breaking words.
+- **Next:**
+  - the header fit
+  - re-run SettingUITests once the limit is lifted
+  - D14 when Ben answers

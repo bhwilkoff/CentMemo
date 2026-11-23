@@ -276,6 +276,13 @@ enum Money {
         return s.isEmpty ? "?" : s
     }
 
+    /// D8: the ilike pattern that finds every raw descriptor a Setting's name came
+    /// from ("Blue Bottle Coffee" -> "*Blue*Bottle*Coffee*"), as the web's settingPattern.
+    static func settingPattern(_ name: String) -> String {
+        let words = name.split(whereSeparator: { !($0.isASCII && ($0.isLetter || $0.isNumber)) })
+        return words.isEmpty ? "" : "*" + words.joined(separator: "*") + "*"
+    }
+
     /// FNV-1a (32-bit) of the lowercased name, mod `count`: which tile hue a store wears.
     static func merchantHue(_ name: String, count: Int = 6) -> Int {
         var h: UInt32 = 0x811c9dc5

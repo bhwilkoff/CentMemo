@@ -136,6 +136,15 @@ const API = (() => {
     const rows = must(await client().from('memo_values').select('value_id').limit(10000));
     return rows.reduce((m, r) => (m[r.value_id] = (m[r.value_id] || 0) + 1, m), {});
   }
+  // D8: every event at one Setting. The pattern finds each raw descriptor the name
+  // came from; only rows whose cleaned name is exactly the Setting are kept.
+  async function atSetting(name) {
+    const p = CentMoney.settingPattern(name);
+    if (!p) return [];
+    const rows = must(await client().from('transactions').select(TXN + ', memos(body, memo_values(value_id, life_values(name)))')
+      .or('merchant.ilike.' + p + ',description.ilike.' + p).order('txn_date', { ascending: false }).limit(1000));
+    return rows.filter((t) => CentMoney.cleanMerchant(t.merchant || t.description) === name);
+  }
   async function latestMonth() {
     const rows = must(await client().from('transactions').select('txn_date').order('txn_date', { ascending: false }).limit(1));
     return rows.length ? rows[0].txn_date.slice(0, 7) : null;
@@ -235,7 +244,7 @@ const API = (() => {
 
   return {
     MCP_URL, client, session, onAuthChange, signInWithApple, finishAppleRedirect, signOut, deleteAccount,
-    unexamined, suggestions, themeCounts, transactionCount, month, latestMonth, transaction, stories,
+    unexamined, suggestions, themeCounts, transactionCount, month, latestMonth, atSetting, transaction, stories,
     values, addValue, setSkipped, renameValue, deleteValue, saveMemo, importAppleCard, importExport, GROUNDS, ground, setGround,
   };
 })();

@@ -36,10 +36,13 @@ import frame_blind  # noqa: E402
 from ios_uitest import displays  # noqa: E402
 
 PERSONAL = {"duo"}  # phones whose owner's own session is what we design with
-SCREENS = ["unexamined", "ledger", "story", "settings", "memo", "blank"]
+SCREENS = ["unexamined", "ledger", "story", "settings", "memo", "blank", "setting"]
 # Event pages from the synthetic owner's fixture (apple/UITests/UITestSupport.swift):
 # a written memo (Denver Zoo) and an unexamined purchase.
 ITEMS = {"memo": "a3b8c10c-68b8-4bfe-9380-c87b7015a49d", "blank": "e5626ed0-b9f2-48a0-8df7-672ae6016a40"}
+# D8: a Setting page per phone: the synthetic owner's zoo; on the Duo a place in
+# Ben's own data (override with --env APP_START_SETTING=...).
+SETTINGS = {"duo": "Apple Store"}
 OUT = app_config.REPO / "build" / "design" / date.today().isoformat()
 
 
@@ -55,7 +58,12 @@ def shoot(name, extra_env, screens, settle):
     kept = []
     with devlease.hold([bench.lease_name(entry)], task="design_shots", wait=300):
         for screen in screens:
-            door = {"APP_START_ITEM": ITEMS[screen]} if screen in ITEMS else {"APP_START_TAB": screen}
+            if screen == "setting":
+                door = {app_config.HOOK_START_SETTING: SETTINGS.get(name, "Denver Zoo")}
+            elif screen in ITEMS:
+                door = {"APP_START_ITEM": ITEMS[screen]}
+            else:
+                door = {"APP_START_TAB": screen}
             # Ben's Duo is his own phone, signed into his real account: never send it
             # the test sign-in (a door session there once copied his Wallet into the
             # synthetic owner, 2026-11-22). Test accounts only on test phones.

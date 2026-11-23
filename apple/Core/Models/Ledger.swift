@@ -124,3 +124,6 @@ enum LedgerDate {
     }
     static var thisMonth: String { String(string(Date()).prefix(7)) }
 }
+
+/// D8: a push to one Setting's page (every visit there), by its cleaned name.
+struct SettingRoute: Hashable, Sendable { let name: String }

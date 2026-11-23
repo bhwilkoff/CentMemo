@@ -170,6 +170,14 @@ console.log('event page (D6): the Setting and the memo lead; the money is a foot
   await evaluate('document.getElementById("share-where").click(); true');
   ok(await waitFor('document.querySelector(".share-line").textContent === "Nov 16, 2026 · Denver Zoo"'), 'Show where adds the place');
   await shot('share-card');
+  // D8: the Setting's page, every visit there; Back returns to the event.
+  await evaluate('document.querySelector("[data-setting]").click(); true');
+  ok(await waitFor('location.hash === "#/setting/Denver%20Zoo" && /\\bvisits?\\b/.test(document.querySelector("[data-setting-summary]")?.textContent || "")'), 'Every visit opens the Setting with its count');
+  ok(await evaluate('/penguins/.test(document.querySelector("#view-setting .thread").innerText) && !/Denver Zoo/.test(document.querySelector("#view-setting .thread").innerText)'), 'with its memos, the place said once at the top');
+  ok(!(await evaluate('/\\bnull\\b/.test(document.querySelector("#view-setting").innerText)')), 'no stray "null" on the Setting page');
+  await shot('setting');
+  await evaluate('document.querySelector("#view-setting [data-back]").click(); true');
+  ok(await waitFor('location.hash === "#/t/a3b8c10c-68b8-4bfe-9380-c87b7015a49d" && !document.getElementById("view-txn").hidden'), 'Back returns to the event');
 }
 
 console.log('error (REST blocked)');

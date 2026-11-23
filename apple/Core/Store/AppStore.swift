@@ -22,6 +22,7 @@ final class AppStore {
     enum InboxRequest: Hashable, Sendable {
         case tab(String)
         case item(String)
+        case setting(String)
     }
 
     func post(_ request: InboxRequest) { inbox.append(request) }
@@ -39,6 +40,8 @@ final class AppStore {
                 // FILL IN: map the id to your item route type.
                 navigationPath.append(id)
                 openedItem = id
+            case .setting(let name):
+                navigationPath.append(SettingRoute(name: name))
             }
         }
     }
@@ -53,6 +56,7 @@ final class AppStore {
         if doors.mute { isMuted = true }
         if let tab = doors.startTab { post(.tab(tab)) }
         if let item = doors.startItem { post(.item(item)) }
+        if let name = doors.startSetting { post(.setting(name)) }
         return true
     }
 

@@ -95,9 +95,9 @@ the Setting page) join where they fit.
   debit.
 - D7 🟡 (Unexamined: up to three suggestions with reasons, no count, iOS + web ✅; the reason and prompt words await Ben's approval) Writing tools: friendly regular check-in, recommendations of what to
   write about.
-- D8 🟡 (name cleaning + store tiles on iPhone and web ✅; store page, renames, categories ⏳) Merchant tiles and categories.
+- D8 🟡 (name cleaning + store tiles on iPhone and web ✅; a Setting's page, every visit there, from the event page's "Every visit", web ✅ + iPhone built (door test seen on the iPhone 12; the full tap test and the Duo wait on a Screen Time limit and a new install) ; renames, categories ⏳) Merchant tiles and categories.
 - D9 ✅ (Narrative: All / Written / Unwritten, a theme, deposits and interest on request; iOS toolbar menu + web controls) Filters (show only some kinds of items).
-- D10 🟡 (iOS Narrative is the thread: filled theme marks with the memo as headline, quiet marks for waiting events ✅ iPhone 12 + Duo; web ⏳) Timeline view: progress over time.
+- D10 🟡 (iOS Narrative is the thread: filled theme marks with the memo as headline, quiet marks for waiting events ✅ iPhone 12 + Duo; web thread ✅, audited 2026-11-23) Timeline view: progress over time.
 - D11 🟡 (the month strip by theme with a named legend, iOS + web ✅; theme colors collide by name hash until D14 gives each theme its own color) Visualization: color-coded charges or themes.
 - D14 (next: also fixes D11's color collisions) Default themes (Ben, 2026-11-22: "At some point in our design process,
   we should create a full set of default themes that people can choose
@@ -120,7 +120,7 @@ the Setting page) join where they fit.
 - D9 note: deposits and interest (FinanceKit types deposit, interest: Daily
   Cash into Apple Cash and Savings) are hidden from the Narrative by default
   (Ben, 2026-11-22); the filters will show them.
-- D13 🟡 (iOS swipe + detail menu, web detail button, Narrative 'N skipped' group, Unexamined excludes ✅; connector tool ⏳) Skip: swipe an event away as a detail; only plot points reach the Story.
+- D13 🟡 (iOS swipe + detail menu, web detail button, Narrative 'N skipped' group, Unexamined excludes ✅; the connector leaves skipped events out of unexamined, mcp v8 ✅) Skip: swipe an event away as a detail; only plot points reach the Story.
 - D12 🟡 (Themes as collections ✅; sharing a memo as a card, private by default, iOS + web ✅; sharing a whole theme and public links ⏳) Themes (Ben's word for sets): collect stories into sets by value; share a story or a set.
 
 ## Sources (Ben, 2026-11-22)

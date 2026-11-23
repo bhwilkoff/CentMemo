@@ -7,6 +7,11 @@ import SwiftUI
 /// mark and one quiet line. The money stays a footnote (Decision 065).
 struct ThreadRow: View {
     let entry: LedgerEntry
+    /// On a Setting's own page the rows leave out the place (said once at the top).
+    var showsPlace = true
+    private var meta: String {
+        showsPlace ? "\(LedgerDate.display(entry.txnDate)) · \(entry.displayMerchant)" : LedgerDate.display(entry.txnDate)
+    }
 
     private var written: Bool { entry.memo != nil }
     /// A theme wears a store hue chosen the same way as a Setting's (Money.merchantHue),
@@ -32,8 +37,8 @@ struct ThreadRow: View {
                 VStack(alignment: .leading, spacing: Spacing.s1) {
                     Text(memo.body).font(DisplayType.memo).foregroundStyle(Color.brandText).lineLimit(4)
                     HStack(spacing: Spacing.s2) {
-                        StoreTile(name: entry.displayMerchant, category: entry.category, size: 24)
-                        Text("\(LedgerDate.display(entry.txnDate)) · \(entry.displayMerchant)")
+                        if showsPlace { StoreTile(name: entry.displayMerchant, category: entry.category, size: 24) }
+                        Text(meta)
                             .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
                         if let theme = memo.valueNames.first {
                             Text(theme).font(TypeRamp.caption).foregroundStyle(hue)
@@ -43,7 +48,7 @@ struct ThreadRow: View {
                 .padding(.vertical, Spacing.s2)
             } else {
                 HStack(spacing: Spacing.s2) {
-                    Text("\(LedgerDate.display(entry.txnDate)) · \(entry.displayMerchant)")
+                    Text(meta)
                         .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
                     Spacer(minLength: Spacing.s2)
                     MoneyText(minor: entry.amountMinor, currency: entry.currency, font: TypeRamp.caption)

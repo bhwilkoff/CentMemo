@@ -38,6 +38,7 @@ struct ContentView_iOS: View {
             .navigationDestination(for: EntryRoute.self) { EntryDetailView(entryID: $0.id) }
             // Inbox items arrive as bare ids (AppStore lives in Core and can't name EntryRoute).
             .navigationDestination(for: String.self) { EntryDetailView(entryID: $0) }
+            .navigationDestination(for: SettingRoute.self) { SettingPageView(name: $0.name) }
     }
 }
 

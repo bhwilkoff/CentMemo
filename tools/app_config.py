@@ -100,6 +100,7 @@ DEVELOPER_DIR = os.environ.get("DEVELOPER_DIR", "/Applications/Xcode.app/Content
 HOOK_SKIP_ONBOARD = "APP_SKIP_ONBOARD"
 HOOK_START_TAB = "APP_START_TAB"
 HOOK_START_ITEM = "APP_START_ITEM"
+HOOK_START_SETTING = "APP_START_SETTING"  # D8: a Setting's page by its cleaned name
 HOOK_AUTOPLAY = "APP_AUTOPLAY"
 # Labels the device's glass with what it is testing (tools/devreset.py label()).
 HOOK_QA_LABEL = "APP_QA_LABEL"

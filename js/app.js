@@ -1,7 +1,7 @@
 /**
  * CentMemo web app. Vanilla JS (Decision 001), one IIFE.
  * Views are <section> elements; the hash is the route:
- *   #/unexamined  #/ledger/2026-11  #/t/<id>  #/story/<month|value:id>
+ *   #/unexamined  #/ledger/2026-11  #/t/<id>  #/setting/<name>  #/story/<month|value:id>
  *   #/import  #/settings
  * All network calls go through API (js/api.js). DOM text is set with
  * textContent; nothing from the database is ever parsed as HTML.
@@ -91,12 +91,16 @@
   }
 
   let lastList = '#/unexamined';
+  let depth = 0;
   async function route() {
+    if (history.state && history.state.depth) depth = history.state.depth;
+    else history.replaceState({ depth: ++depth }, '');
     const parts = (location.hash.replace(/^#\/?/, '') || 'unexamined').split('/');
     const [name, arg] = parts;
     try {
       if (name === 'ledger') { lastList = location.hash; return await ledgerView(arg); }
       if (name === 't' && arg) return await txnView(arg);
+      if (name === 'setting' && arg) return await settingView(decodeURIComponent(arg));
       if (name === 'story') { lastList = location.hash; return await storyView(arg ? decodeURIComponent(arg) : null); }
       if (name === 'import') return importView();
       if (name === 'settings') return await settingsView();
@@ -231,9 +235,11 @@
   }
 
   /* ---- The Narrative as a thread (D10), as on the iPhone's ThreadRow ---- */
-  function threadRow(t) {
+  // On a Setting's own page (place: false) the rows leave out the place.
+  function threadRow(t, opts) {
+    const place = !(opts && opts.place === false);
     const memo = t.memos && (Array.isArray(t.memos) ? t.memos[0] : t.memos);
-    const meta = niceDate(t.txn_date) + ' · ' + merchantOf(t);
+    const meta = niceDate(t.txn_date) + (place ? ' · ' + merchantOf(t) : '');
     if (!memo || !memo.body) {
       return h('a', { class: 'trow is-waiting', href: '#/t/' + t.id },
         h('span', { class: 'trow-mark', 'aria-hidden': 'true' }),
@@ -246,7 +252,7 @@
       h('span', { class: 'trow-mark', 'aria-hidden': 'true' }),
       h('span', { class: 'trow-body' },
         h('span', { class: 'trow-memo' }, memo.body),
-        h('span', { class: 'trow-meta' }, tile(t), meta, theme ? h('span', { class: 'trow-theme' }, theme.name) : null)));
+        h('span', { class: 'trow-meta' }, place ? tile(t) : null, meta, theme ? h('span', { class: 'trow-theme' }, theme.name) : null)));
   }
 
   /* ---- Ledger ---- */
@@ -254,7 +260,7 @@
     const body = showView('ledger', 'ledger');
     if (!ym || !/^\d{4}-\d{2}$/.test(ym)) {
       ym = (await API.latestMonth().catch(() => null)) || thisMonth();
-      history.replaceState(null, '', '#/ledger/' + ym);
+      history.replaceState(history.state, '', '#/ledger/' + ym);
     }
     $('h-ledger').textContent = monthName(ym);
     $('view-ledger').dataset.month = ym;
@@ -347,7 +353,8 @@
           tile(t, true),
           h('div', { class: 'txn-title' },
             h('h1', { id: 'h-txn', class: 'view-heading' }, merchantOf(t)),
-            h('p', { class: 'caption' }, niceDate(t.txn_date)))),
+            h('p', { class: 'caption' }, niceDate(t.txn_date) + ' · ',
+              h('a', { href: '#/setting/' + encodeURIComponent(merchantOf(t)), 'data-setting': '' }, 'Every visit')))),
         h('label', { class: 'field-label', for: 'memo-body' }, 'Memo'),
         area,
         h('p', { class: 'field-label' }, 'Themes'),
@@ -370,6 +377,25 @@
             t.accounts ? fact('Account', t.accounts.display_name) : null,
             t.description && t.description !== t.merchant ? fact('Statement', t.description) : null)));
     } catch (err) { failed(body, err, () => txnView(id)); }
+  }
+  // D8: a Setting's page, every visit there as a thread (as the iPhone's SettingView).
+  async function settingView(name) {
+    const body = showView('setting', null);
+    loading(body);
+    try {
+      const rows = (await API.atSetting(name)).filter((t) => !t.skipped_at);
+      if (!rows.length) return empty(body, 'Nothing at ' + name + ' in your CentMemo.');
+      const written = rows.filter((t) => { const m = t.memos && (Array.isArray(t.memos) ? t.memos[0] : t.memos); return m && m.body; }).length;
+      const first = rows[rows.length - 1].txn_date;
+      body.replaceChildren(
+        h('div', { class: 'txn-head' }, tile(rows[0], true),
+          h('div', { class: 'txn-title' },
+            h('h1', { id: 'h-setting', class: 'view-heading' }, name),
+            h('p', { class: 'caption', 'data-setting-summary': '' },
+              [rows.length === 1 ? '1 visit' : rows.length + ' visits', rows.length > 1 ? 'since ' + niceDate(first) : null,
+                written ? (written === 1 ? '1 memo' : written + ' memos') : null].filter(Boolean).join(' · ')))),
+        h('div', { class: 'thread' }, rows.map((t) => threadRow(t, { place: false }))));
+    } catch (err) { failed(body, err, () => settingView(name)); }
   }
   // D12: share a memo as a card; private by default (as the iPhone's ShareMemoSheet).
   function sharePanel(t, memo) {
@@ -399,7 +425,11 @@
       h('div', { class: 'actions' }, send, status));
   }
   function fact(k, v) { return h('div', {}, h('dt', {}, k), h('dd', {}, v)); }
-  document.querySelector('[data-back]').addEventListener('click', () => { location.hash = lastList; });
+  // Back walks the app's own history (a Setting opened from an event returns to
+  // it); a page reached directly goes to the last list instead.
+  document.querySelectorAll('[data-back]').forEach((b) => b.addEventListener('click', () => {
+    if ((history.state && history.state.depth) > 1) history.back(); else location.hash = lastList;
+  }));
 
   // Photos are attached on the iPhone by PhotoKit reference (money-story-design);
   // the web cannot draw them, so it says they exist and where they live.

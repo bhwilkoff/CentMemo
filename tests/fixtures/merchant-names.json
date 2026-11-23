@@ -3,96 +3,112 @@
   "raw": "SQ *BLUE BOTTLE COFFEE 1234",
   "name": "Blue Bottle Coffee",
   "initials": "BB",
-  "hue": 3
+  "hue": 3,
+  "pattern": "*Blue*Bottle*Coffee*"
  },
  {
   "raw": "TST* FARM HOUSE DENVER",
   "name": "Farm House Denver",
   "initials": "FH",
-  "hue": 5
+  "hue": 5,
+  "pattern": "*Farm*House*Denver*"
  },
  {
   "raw": "King Soopers",
   "name": "King Soopers",
   "initials": "KS",
-  "hue": 1
+  "hue": 1,
+  "pattern": "*King*Soopers*"
  },
  {
   "raw": "PAYPAL *SPOTIFY",
   "name": "Spotify",
   "initials": "S",
-  "hue": 1
+  "hue": 1,
+  "pattern": "*Spotify*"
  },
  {
   "raw": "THE HOME DEPOT #1532",
   "name": "The Home Depot",
   "initials": "HD",
-  "hue": 3
+  "hue": 3,
+  "pattern": "*The*Home*Depot*"
  },
  {
   "raw": "Patagonia",
   "name": "Patagonia",
   "initials": "P",
-  "hue": 3
+  "hue": 3,
+  "pattern": "*Patagonia*"
  },
  {
   "raw": "Starbucks",
   "name": "Starbucks",
   "initials": "S",
-  "hue": 3
+  "hue": 3,
+  "pattern": "*Starbucks*"
  },
  {
   "raw": "AMAZON.COM",
   "name": "Amazon.com",
   "initials": "A",
-  "hue": 0
+  "hue": 0,
+  "pattern": "*Amazon*com*"
  },
  {
   "raw": "Party City",
   "name": "Party City",
   "initials": "PC",
-  "hue": 4
+  "hue": 4,
+  "pattern": "*Party*City*"
  },
  {
   "raw": "TRADER JOE'S #552",
   "name": "Trader Joe's",
   "initials": "TJ",
-  "hue": 5
+  "hue": 5,
+  "pattern": "*Trader*Joe*s*"
  },
  {
   "raw": "Water Grill",
   "name": "Water Grill",
   "initials": "WG",
-  "hue": 4
+  "hue": 4,
+  "pattern": "*Water*Grill*"
  },
  {
   "raw": "Apple Services",
   "name": "Apple Services",
   "initials": "AS",
-  "hue": 1
+  "hue": 1,
+  "pattern": "*Apple*Services*"
  },
  {
   "raw": "UBER   *TRIP",
   "name": "Uber",
   "initials": "U",
-  "hue": 5
+  "hue": 5,
+  "pattern": "*Uber*"
  },
  {
   "raw": "DD *DOORDASH CHIPOTLE",
   "name": "Doordash Chipotle",
   "initials": "DC",
-  "hue": 3
+  "hue": 3,
+  "pattern": "*Doordash*Chipotle*"
  },
  {
   "raw": "",
   "name": "",
   "initials": "?",
-  "hue": 1
+  "hue": 1,
+  "pattern": ""
  },
  {
   "raw": " 7-ELEVEN 34012",
   "name": "7-Eleven",
   "initials": "7E",
-  "hue": 2
+  "hue": 2,
+  "pattern": "*7*Eleven*"
  }
 ]

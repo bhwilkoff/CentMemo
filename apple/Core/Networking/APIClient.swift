@@ -206,6 +206,18 @@ final class APIClient {
                                         .init(name: "limit", value: "2000")])
     }
 
+    /// D8: every event at one Setting (as the web's atSetting): the pattern finds each
+    /// raw descriptor the name came from; only exact cleaned matches are kept.
+    func atSetting(_ name: String) async throws -> [LedgerEntry] {
+        let p = Money.settingPattern(name)
+        guard !p.isEmpty else { return [] }
+        let rows: [LedgerEntry] = try await rest("transactions", [
+            .init(name: "select", value: Self.txnColumns + ",memos(body,memo_values(value_id,life_values(name)))"),
+            .init(name: "or", value: "(merchant.ilike.\(p),description.ilike.\(p))"),
+            .init(name: "order", value: "txn_date.desc"), .init(name: "limit", value: "1000")])
+        return rows.filter { $0.displayMerchant == name }
+    }
+
     func transaction(_ id: String) async throws -> LedgerEntry? {
         let rows: [LedgerEntry] = try await rest("transactions", [
             .init(name: "select", value: Self.txnColumns + ",accounts(display_name),memos(body,memo_values(value_id,life_values(name)))"),

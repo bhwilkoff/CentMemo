@@ -134,7 +134,7 @@ struct ErrorWordsTests {
 
 /// The web's store-name golden, read from the same file (tests/fixtures/merchant-names.json).
 struct MerchantNameTests {
-    struct Golden: Decodable { let raw: String, name: String, initials: String, hue: Int }
+    struct Golden: Decodable { let raw: String, name: String, initials: String, hue: Int, pattern: String }
     @Test func matchesTheWebGolden() throws {
         let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
             .appendingPathComponent("../../tests/fixtures/merchant-names.json").standardized
@@ -145,7 +145,9 @@ struct MerchantNameTests {
             #expect(name == g.name, "\(g.raw)")
             #expect(Money.merchantInitials(name) == g.initials, "\(g.raw)")
             #expect(Money.merchantHue(name) == g.hue, "\(g.raw)")
+            #expect(Money.settingPattern(name) == g.pattern, "\(g.raw)")
         }
+        #expect(Money.settingPattern("&&") == "")
     }
 }
 

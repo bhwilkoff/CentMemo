@@ -11,6 +11,8 @@ import Foundation
 struct LaunchDoors: Sendable, Equatable {
     var startTab: String?
     var startItem: String?
+    /// D8: a Setting's page by its cleaned name (APP_START_SETTING).
+    var startSetting: String?
     var mute = false
     var doorSeconds: Int?
 
@@ -22,6 +24,7 @@ struct LaunchDoors: Sendable, Equatable {
         return LaunchDoors(
             startTab: environment["APP_START_TAB"],
             startItem: environment["APP_START_ITEM"],
+            startSetting: environment["APP_START_SETTING"],
             mute: environment["APP_MUTE"] == "1",
             doorSeconds: environment["APP_DOOR_SECONDS"].flatMap { Int($0) }
         )
