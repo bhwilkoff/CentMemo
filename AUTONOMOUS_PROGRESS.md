@@ -1210,3 +1210,26 @@ Apple.
 - **For Ben:** the reason and prompt words ("First time here / What brought
   you here?", "Biggest this month / What was it for?", "Your busiest day
   this month / What was the day about?", "A year ago you wrote").
+
+### Design tick 12 — 2026-11-22/23 — D9 filters; the Duo checks closed
+- **Duo (Ben's account):**
+  - Unexamined now opens the first suggestion on the right (the list and
+    suggestions load together).
+  - Folded, the outer display shows the compact layout cleanly. Frames
+    read.
+- **D9:**
+  - `NarrativeFilter` (Core): All / Written / Unwritten, one theme, and
+    deposits and interest (off by default). Skipped events are always
+    apart. Unit tested.
+  - iOS: a native toolbar Menu on the Narrative; the icon fills when a
+    filter is on.
+  - Web: the same rule (`narrativeFilter`) as selects above the thread.
+- **Verified:**
+  - FilterUITests on the iPhone 12 (Written hides King Soopers and keeps
+    the penguins memo); frame read.
+  - test_web_states (Written, then back to All); frame read.
+  - Duo: the filter button is in the toolbar strip.
+  - A test-side bug: two `const s` in separate CDP evaluates collide (the
+    page keeps globals). Each step is now its own function.
+- **Next:** D11 the color-coded month strip, or D12 Themes as collections;
+  D14 default themes for Ben's review.

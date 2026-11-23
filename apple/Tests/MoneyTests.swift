@@ -198,3 +198,23 @@ struct OtherSourcesTests {
         }
     }
 }
+
+struct NarrativeFilterTests {
+    private func entry(_ id: String, type: String = "pointOfSale", memo: String? = nil, themes: [String] = [], skipped: Bool = false) throws -> LedgerEntry {
+        var json: [String: Any] = ["id": id, "txn_date": "2026-11-20", "amount_minor": -100, "txn_type": type]
+        if skipped { json["skipped_at"] = "2026-11-22T00:00:00Z" }
+        if let memo { json["memos"] = ["body": memo, "memo_values": themes.map { ["value_id": $0, "life_values": ["name": $0]] }] }
+        return try JSONDecoder().decode(LedgerEntry.self, from: JSONSerialization.data(withJSONObject: json))
+    }
+    @Test func defaultHidesDetailsAndSkipped() throws {
+        let list = [try entry("a"), try entry("b", type: "deposit"), try entry("c", skipped: true), try entry("d", type: "interest")]
+        #expect(NarrativeFilter().apply(list).map(\.id) == ["a"])
+        #expect(NarrativeFilter(details: true).apply(list).map(\.id) == ["a", "b", "d"])
+    }
+    @Test func writtenUnwrittenAndTheme() throws {
+        let list = [try entry("a"), try entry("b", memo: "Zoo", themes: ["People I love"]), try entry("c", memo: "Pizza", themes: ["Great meals"])]
+        #expect(NarrativeFilter(show: .written).apply(list).map(\.id) == ["b", "c"])
+        #expect(NarrativeFilter(show: .unwritten).apply(list).map(\.id) == ["a"])
+        #expect(NarrativeFilter(theme: "Great meals").apply(list).map(\.id) == ["c"])
+    }
+}

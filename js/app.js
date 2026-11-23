@@ -172,6 +172,40 @@
     return box;
   }
 
+  // D9: show only some kinds of events; the same rule as the iPhone's NarrativeFilter.
+  const filter = { show: 'all', theme: '', details: false };
+  const memoOf = (t) => t.memos && (Array.isArray(t.memos) ? t.memos[0] : t.memos);
+  const themesOf = (t) => ((memoOf(t) || {}).memo_values || []).map((v) => v.life_values && v.life_values.name).filter(Boolean);
+  function narrativeFilter(rows) {
+    return rows.filter((t) => {
+      if (t.skipped_at) return false;
+      if (!filter.details && isQuietDetail(t)) return false;
+      const written = !!(memoOf(t) && memoOf(t).body);
+      if (filter.show === 'written' && !written) return false;
+      if (filter.show === 'unwritten' && written) return false;
+      return !filter.theme || themesOf(t).includes(filter.theme);
+    });
+  }
+  function narrativeFilters(rows) {
+    const thread = h('div', { class: 'thread' });
+    const draw = () => thread.replaceChildren(...narrativeFilter(rows).map(threadRow));
+    const show = h('select', { id: 'filter-show', 'aria-label': 'Show' },
+      ['all', 'written', 'unwritten'].map((v) => h('option', { value: v, selected: filter.show === v }, v[0].toUpperCase() + v.slice(1))));
+    const names = [...new Set(rows.flatMap(themesOf))].sort();
+    const theme = h('select', { id: 'filter-theme', 'aria-label': 'Theme' },
+      h('option', { value: '' }, 'Every theme'), names.map((n) => h('option', { value: n, selected: filter.theme === n }, n)));
+    const quiet = rows.filter((t) => !t.skipped_at && isQuietDetail(t)).length;
+    const details = h('input', { type: 'checkbox', id: 'filter-details', checked: filter.details });
+    show.addEventListener('change', () => { filter.show = show.value; draw(); });
+    theme.addEventListener('change', () => { filter.theme = theme.value; draw(); });
+    details.addEventListener('change', () => { filter.details = details.checked; draw(); });
+    draw();
+    return h('div', {},
+      h('div', { class: 'filters', role: 'group', 'aria-label': 'Filter the Narrative' }, show, names.length ? theme : null,
+        quiet ? h('label', { class: 'filter-check' }, details, ' ' + quiet + ' deposits and interest') : null),
+      thread);
+  }
+
   /* ---- The Narrative as a thread (D10), as on the iPhone's ThreadRow ---- */
   function threadRow(t) {
     const memo = t.memos && (Array.isArray(t.memos) ? t.memos[0] : t.memos);
@@ -213,8 +247,7 @@
           h('div', {}, h('dt', {}, 'Spent'), h('dd', {}, money(spent))),
           h('div', {}, h('dt', {}, 'Paid or credited'), h('dd', {}, money(received))),
           h('div', {}, h('dt', {}, 'Memos'), h('dd', {}, written + ' of ' + rows.length))),
-        h('div', { class: 'thread' }, rows.filter((t) => !t.skipped_at && !isQuietDetail(t)).map(threadRow)),
-        quietToggle(rows.filter((t) => !t.skipped_at && isQuietDetail(t))),
+        narrativeFilters(rows),
         rows.some((t) => t.skipped_at)
           ? h('details', { class: 'skipped' }, h('summary', {}, rows.filter((t) => t.skipped_at).length + ' skipped'),
               h('div', { class: 'list' }, rows.filter((t) => t.skipped_at).map((t) => txnRow(t))))

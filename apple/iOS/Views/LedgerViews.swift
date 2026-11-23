@@ -91,7 +91,7 @@ struct UnexaminedView: View {
 struct LedgerView: View {
     @Environment(SessionStore.self) private var session
     @State private var showSkipped = false
-    @State private var showDetails = false
+    @State private var filter = NarrativeFilter()
     @State private var month: String?
     @State private var entries: [LedgerEntry] = []
     @State private var loading = true
@@ -120,7 +120,7 @@ struct LedgerView: View {
                 if entries.isEmpty {
                     Text("Nothing recorded this month.").foregroundStyle(Color.brandTextMuted).onGround()
                 } else {
-                    ForEach(entries.filter { !$0.isSkipped && (showDetails || !$0.isQuietDetail) }) { e in
+                    ForEach(filter.apply(entries)) { e in
                         EntryLink(id: e.id) { ThreadRow(entry: e) }.onGround()
                             .listRowSeparator(.hidden)
                             .listRowInsets(EdgeInsets(top: 0, leading: Spacing.s4, bottom: 0, trailing: Spacing.s4))
@@ -128,8 +128,8 @@ struct LedgerView: View {
                     }
                     let quiet = entries.filter { !$0.isSkipped && $0.isQuietDetail }.count
                     if quiet > 0 {
-                        Button { withAnimation { showDetails.toggle() } } label: {
-                            Text(showDetails ? "Hide deposits and interest" : "\(quiet) deposits and interest hidden · Show")
+                        Button { withAnimation { filter.details.toggle() } } label: {
+                            Text(filter.details ? "Hide deposits and interest" : "\(quiet) deposits and interest hidden · Show")
                                 .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
                         }
                         .buttonStyle(.plain).onGround().listRowSeparator(.hidden)
@@ -161,6 +161,28 @@ struct LedgerView: View {
         }
         .grounded()
         .navigationTitle("Narrative")
+        // D9: show only some kinds of events (a native filter menu).
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Picker("Show", selection: $filter.show) {
+                        ForEach(NarrativeFilter.Show.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                    }
+                    let themes = Array(Set(entries.flatMap { $0.memo?.valueNames ?? [] })).sorted()
+                    if !themes.isEmpty {
+                        Picker("Theme", selection: $filter.theme) {
+                            Text("Every theme").tag(String?.none)
+                            ForEach(themes, id: \.self) { Text($0).tag(String?.some($0)) }
+                        }
+                    }
+                    Toggle("Include deposits and interest", isOn: $filter.details)
+                } label: {
+                    Image(systemName: filter.isDefault ? "line.3.horizontal.decrease.circle" : "line.3.horizontal.decrease.circle.fill")
+                }
+                .accessibilityLabel("Filter")
+                .accessibilityIdentifier("narrative-filter")
+            }
+        }
         .refreshable { await load() }
         .task(id: "\(session.dataVersion)-\(month ?? "")") { await load() }
     }

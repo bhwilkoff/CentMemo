@@ -135,6 +135,12 @@ console.log('Narrative thread (D10): written memos are marks with the memo as he
   ok(await evaluate('/penguins/.test(document.querySelector("#view-ledger .thread").innerText)'), 'a memo is the headline');
   ok(await evaluate('getComputedStyle(document.querySelector(".trow.is-written .trow-mark")).backgroundColor !== getComputedStyle(document.querySelector(".trow.is-waiting .trow-mark")).backgroundColor'), 'written and waiting marks differ');
   await shot('narrative-thread');
+  // D9: Written only, then back to All.
+  await evaluate('(() => { const s = document.getElementById("filter-show"); s.value = "written"; s.dispatchEvent(new Event("change")); return true; })()');
+  ok(await waitFor('document.querySelectorAll("#view-ledger .trow.is-waiting").length === 0 && document.querySelectorAll("#view-ledger .trow.is-written").length > 0'), 'filter Written shows only written memos');
+  await shot('narrative-written');
+  await evaluate('(() => { const s = document.getElementById("filter-show"); s.value = "all"; s.dispatchEvent(new Event("change")); return true; })()');
+  ok(await waitFor('document.querySelectorAll("#view-ledger .trow.is-waiting").length > 0'), 'back to All');
 }
 
 console.log('event page (D6): the Setting and the memo lead; the money is a footnote');
