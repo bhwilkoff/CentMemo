@@ -99,7 +99,7 @@ the Setting page) join where they fit.
 - D9 ✅ (Narrative: All / Written / Unwritten, a theme, deposits and interest on request; iOS toolbar menu + web controls) Filters (show only some kinds of items).
 - D10 🟡 (iOS Narrative is the thread: filled theme marks with the memo as headline, quiet marks for waiting events ✅ iPhone 12 + Duo; web thread ✅, audited 2026-11-23) Timeline view: progress over time.
 - D11 🟡 (the month strip by theme with a named legend, iOS + web ✅; theme colors collide by name hash until D14 gives each theme its own color) Visualization: color-coded charges or themes.
-- D14 🟡 (draft for Ben: https://claude.ai/artifact/BmXyQZdab1uCcF9gLcRM5R, 13 themes + per-theme colors; awaiting his choices; also fixes D11) Default themes (Ben, 2026-11-22: "At some point in our design process,
+- D14 🟡 (Ben approved the set 2026-11-23: "I like the list. Let's keep it and implement it everywhere?"; 13 themes + per-theme colors, https://claude.ai/artifact/BmXyQZdab1uCcF9gLcRM5R; building on web + iOS; also fixes D11) Default themes (Ben, 2026-11-22: "At some point in our design process,
   we should create a full set of default themes that people can choose
   from."): a full starter set people pick from (the research's 14 are the
   draft: docs/research/story-design-research.md section 3), each with a one-line

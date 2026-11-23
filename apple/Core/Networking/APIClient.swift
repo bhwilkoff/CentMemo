@@ -74,6 +74,7 @@ final class APIClient {
         _ = try? await raw("auth/v1/logout", method: "POST", body: [String: String](), authed: true)
         session = nil
         settingNames = nil
+        settingPlaces = nil
     }
 
     /// In-app account deletion (Decision 035): every row cascades.
@@ -180,6 +181,16 @@ final class APIClient {
     // MARK: - Setting names (D8 renames): the person's name for a place, keyed by its cleaned name
 
     private(set) var settingNames: [String: String]?
+    /// D15: confirmed places, keyed like settingNames.
+    private(set) var settingPlaces: [String: SettingPlace]?
+
+    struct SettingPlace: Codable, Hashable, Sendable {
+        var setting: String
+        var name: String
+        var address: String?
+        var lat: Double
+        var lon: Double
+    }
 
     func loadSettingNames() async throws -> [String: String] {
         if let settingNames { return settingNames }
@@ -188,6 +199,29 @@ final class APIClient {
         let names = Dictionary(rows.map { ($0.setting, $0.name) }, uniquingKeysWith: { a, _ in a })
         settingNames = names
         return names
+    }
+
+    func loadSettingPlaces() async throws -> [String: SettingPlace] {
+        if let settingPlaces { return settingPlaces }
+        let rows: [SettingPlace] = try await rest("setting_places", [.init(name: "select", value: "setting,name,address,lat,lon")])
+        let places = Dictionary(rows.map { ($0.setting, $0) }, uniquingKeysWith: { a, _ in a })
+        settingPlaces = places
+        return places
+    }
+
+    /// The person confirmed where a Setting is; nil forgets it.
+    func setPlace(_ setting: String, to place: SettingPlace?) async throws {
+        if let place {
+            struct Body: Encodable { let setting, name: String; let address: String?; let lat, lon: Double; let updated_at: String }
+            try await raw("rest/v1/setting_places", query: [.init(name: "on_conflict", value: "user_id,setting")], method: "POST",
+                          body: Body(setting: setting, name: place.name, address: place.address, lat: place.lat, lon: place.lon,
+                                     updated_at: ISO8601DateFormatter().string(from: Date())),
+                          prefer: "resolution=merge-duplicates")
+            settingPlaces?[setting] = place
+        } else {
+            try await raw("rest/v1/setting_places", query: [.init(name: "setting", value: "eq.\(setting)")], method: "DELETE")
+            settingPlaces?[setting] = nil
+        }
     }
 
     /// An empty name, or the bank's own, clears the rename.

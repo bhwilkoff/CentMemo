@@ -16,7 +16,7 @@ import { homedir } from 'node:os';
 const URL_ = 'https://qucsmmazfalbyduxlavl.supabase.co';
 const KEY = 'sb_publishable_XuubuEBTUKXkzttN2MUdzw_Aq7-q6YT';
 const users = JSON.parse(readFileSync(homedir() + '/.centmemo/test-users.json', 'utf8'));
-const TABLES = ['accounts', 'balances', 'import_batches', 'transactions', 'memos', 'life_values', 'memo_values', 'attachments', 'unexamined_transactions', 'profiles', 'setting_names'];
+const TABLES = ['accounts', 'balances', 'import_batches', 'transactions', 'memos', 'life_values', 'memo_values', 'attachments', 'unexamined_transactions', 'profiles', 'setting_names', 'setting_places'];
 let failures = 0;
 const ok = (cond, msg) => { console.log((cond ? '  ok   ' : '  FAIL ') + msg); if (!cond) failures++; };
 

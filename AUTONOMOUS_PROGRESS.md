@@ -1730,3 +1730,40 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   of things is offered at first run.
 - **Next:** D15 place prediction (Ben's direction, 2026-11-23) while D14
   waits.
+
+- **Ben (2026-11-23), on D14:** "I like the list. Let's keep it and
+  implement it everywhere?" The 13 themes and their colors are approved.
+  His two open choices take the proposal's defaults until he says
+  otherwise:
+  - first run asks "Which of these sound like you?" with every theme
+    unticked;
+  - Taking care of things is offered like the others.
+
+### Tick 31 — 2026-11-23 — D15 place prediction on iOS (first slice)
+- Ben (2026-11-23): "predict a specific location for each one of the
+  purchases based upon an algorthmic search combined with other data
+  factors".
+- **Built:**
+  - `setting_places` table, keyed like setting_names, with owner RLS,
+    refusing agents, and added to test_rls.
+  - `PlaceHint` in Core reads street, city, ZIP and state after the store
+    name. PlaceHintTests pass, including the negative cases.
+  - The Setting page's guess is an Apple Maps search on the phone (store
+    name plus the statement's place words), keeping only results named
+    like the Setting. With no address, the search is biased toward the
+    centroid of the person's confirmed places.
+  - "Is this the place?" offers That's it / Another / Not here. A
+    confirmed place shows a small map that opens Maps; a long press
+    chooses again. No location permission is used.
+  - The privacy page names the confirmed places and the Apple Maps lookup.
+- **Fix found on the device:** the first try never searched. Its view
+  started empty, so SwiftUI dropped the row and its task never ran. The
+  search now lives in a page-owned SettingPlaceModel.
+- **Verified:**
+  - iPhone 12, `SettingUITests.testPlaceGuessConfirmAndForget` passes:
+    guessed "Denver Zoo, 2300 Steele St, Denver", confirmed, saved map
+    shown, forgotten. Frames place-guess and place-saved read.
+  - `tools/test_all.sh` rc=0.
+- **Next slices:** the confirmed place on the event page and on the web
+  Setting page; the Duo check on Ben's data (it writes only if he
+  confirms). Then D14 themes, now approved.

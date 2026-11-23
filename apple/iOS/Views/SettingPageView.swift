@@ -12,6 +12,8 @@ struct SettingPageView: View {
     @State private var placeName: String?
     @State private var renaming = false
     @State private var draft = ""
+    /// D15: a SettingPlaceModel on iOS 26 (typed loosely for the iOS 18 floor).
+    @State private var places: AnyObject? = nil
 
     private var shown: String { placeName ?? name }
 
@@ -40,6 +42,10 @@ struct SettingPageView: View {
                     }
                 }
                 .onGround().listRowSeparator(.hidden).columnRowInsets()
+                if #available(iOS 26.0, *), let model = places as? SettingPlaceModel, model.place != nil || model.guess != nil {
+                    SettingPlaceSection(model: model, setting: name, shownName: shown, entries: entries)
+                        .onGround().listRowSeparator(.hidden).columnRowInsets()
+                }
                 if entries.isEmpty {
                     Text("Nothing at \(name) in your CentMemo.").foregroundStyle(Color.brandTextMuted).onGround()
                 } else {
@@ -85,6 +91,11 @@ struct SettingPageView: View {
             placeName = (try? await APIClient.shared.loadSettingNames())?[name]
             entries = try await APIClient.shared.atSetting(name).filter { !$0.isSkipped }
             error = nil
+            if #available(iOS 26.0, *) {
+                let model = (places as? SettingPlaceModel) ?? SettingPlaceModel()
+                places = model
+                await model.load(setting: name, shownName: shown, entries: entries)
+            }
         } catch { self.error = session.handle(error) }
         loading = false
     }

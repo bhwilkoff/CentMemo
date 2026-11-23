@@ -39,6 +39,25 @@ final class SettingUITests: DeviceTestCase {
         XCTAssertFalse(text(app, matching: "On the statement").exists)
     }
 
+    /// D15: the Setting page guesses the place from the statement (Apple Maps,
+    /// on the phone), the person confirms it, and can choose again.
+    func testPlaceGuessConfirmAndForget() {
+        let app = launch(["APP_START_SETTING": "Denver Zoo"])
+        let guess = app.descendants(matching: .any)["place-guess"].firstMatch
+        XCTAssertTrue(guess.waitForExistence(timeout: 30), "a guess from the statement's address")
+        XCTAssertTrue(text(app, matching: "Denver Zoo").exists)
+        shot(app, "place-guess")
+        app.buttons["place-confirm"].tap()
+        let saved = app.descendants(matching: .any)["setting-place"].firstMatch
+        XCTAssertTrue(saved.waitForExistence(timeout: 15), "the confirmed place stays on the page")
+        shot(app, "place-saved")
+        saved.press(forDuration: 1.2)
+        let again = app.buttons["Choose a different place"]
+        XCTAssertTrue(again.waitForExistence(timeout: 5))
+        again.tap()
+        XCTAssertTrue(guess.waitForExistence(timeout: 30), "forgotten: the guess returns")
+    }
+
     /// The door opens a Setting directly (for design_shots).
     func testSettingDoor() {
         let app = launch(["APP_START_SETTING": "Denver Zoo"])
