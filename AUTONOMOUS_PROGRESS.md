@@ -1817,3 +1817,24 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
     until the Duo is back.
 - **Next:** D15 slices (the confirmed place on the event page and the
   web), then D12 theme sharing.
+
+### Tick 33 — 2026-11-23 — D15: every visit carries the place (event page, web)
+- **iOS event page:** the confirmed place's map and address sit under the
+  memo, themes and photos (D6: the memo leads). The first try put the map
+  above the memo; the frame showed it pushing the memo down, so it moved.
+- **Web:** `API.settingPlaces()` (cached, cleared on sign-out). The
+  Setting and event pages show "Denver Zoo · 2300 Steele St, Denver"
+  linked to Apple Maps at the place's coordinates.
+- **Verified:**
+  - test_web_states inserts a place as the owner, sees it on both pages
+    (Maps link checked), then deletes it. Frame setting-place read.
+  - iPhone 12: testPlaceGuessConfirmAndForget now also opens the event
+    and finds entry-place. Frame entry-place read with the memo first.
+  - `tools/test_all.sh` rc=0.
+- **Harness note:** a fresh openAs straight to a deep route (#/setting/…,
+  #/settings) lands on Unexamined in the headless harness; the tests
+  navigate in-app instead. Not reproduced in the app code; worth checking
+  a real deep link once Ben is signed in on the web.
+- D15 is done on web and iPhone 12; the Duo (Ben's places) waits until
+  it's back.
+- **Next:** D12, sharing a whole theme and public links.

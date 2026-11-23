@@ -105,7 +105,7 @@ the Setting page) join where they fit.
   draft: docs/research/story-design-research.md section 3), each with a one-line
   meaning and a mark color; chosen at first run and in Settings, renamable,
   never forced. Ben approves the set and its words before it ships.
-- D15 Place (Ben, 2026-11-22: "can we get location data from Apple Wallet? I'd
+- D15 ✅ (web + iPhone 12, 2026-11-23: guess from the statement + Apple Maps, confirm once per Setting, map on the event page; Duo when back) Place (Ben, 2026-11-22: "can we get location data from Apple Wallet? I'd
   like for place-based purchases to pull in information whenever possible.").
   The Wallet tour (tools/wallet_tour.py) found that Wallet's purchase screen
   shows an Apple Maps place with a map, the city and state, the time, Apple's

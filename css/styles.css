@@ -469,3 +469,7 @@ html[data-ground="pistachio"] { --color-yours: #B4C875; }
 .starter-pick { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; border-bottom: 1px solid var(--color-border); cursor: pointer; }
 .starter-pick input { width: 1.1rem; height: 1.1rem; accent-color: var(--color-primary); flex: none; }
 .row-static .theme-mark { margin-right: var(--space-2); }
+
+/* D15: a confirmed place */
+.place-line { margin: var(--space-1) 0 0; font-size: var(--type-caption-size); }
+.place-line a { color: var(--color-primary); }

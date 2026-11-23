@@ -99,7 +99,7 @@ const API = (() => {
     must(await client().auth.signInWithIdToken({ provider: 'apple', token: h.get('id_token'), nonce: saved.raw }));
     return saved.back || '';
   }
-  async function signOut() { names = null; vals = null; await client().auth.signOut(); }
+  async function signOut() { names = null; vals = null; places = null; await client().auth.signOut(); }
   async function deleteAccount() {
     must(await client().rpc('delete_my_account'));
     await client().auth.signOut({ scope: 'local' });
@@ -209,6 +209,15 @@ const API = (() => {
     vals = null;
     must(await client().from('life_values').delete().eq('id', id));
   }
+  // D15: places the person confirmed on the iPhone (Apple Maps), keyed like names.
+  let places = null;
+  async function settingPlaces() {
+    if (!places) {
+      const rows = must(await client().from('setting_places').select('setting, name, address, lat, lon'));
+      places = Object.fromEntries(rows.map((r) => [r.setting, r]));
+    }
+    return places;
+  }
   // D8 renames: the person's name for a Setting, keyed by its cleaned name.
   let names = null;
   async function settingNames() {
@@ -269,6 +278,6 @@ const API = (() => {
   return {
     MCP_URL, client, session, onAuthChange, signInWithApple, finishAppleRedirect, signOut, deleteAccount,
     unexamined, suggestions, themeCounts, transactionCount, month, latestMonth, atSetting, transaction, stories,
-    values, addValue, setSkipped, renameValue, deleteValue, settingNames, renameSetting, saveMemo, importAppleCard, importExport, GROUNDS, ground, setGround,
+    values, addValue, settingPlaces, setSkipped, renameValue, deleteValue, settingNames, renameSetting, saveMemo, importAppleCard, importExport, GROUNDS, ground, setGround,
   };
 })();

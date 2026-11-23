@@ -196,6 +196,24 @@ console.log('event page (D6): the Setting and the memo lead; the money is a foot
   ok(await waitFor('document.querySelector("#h-setting")?.textContent === "Denver Zoo" && !/On the statement/.test(document.querySelector("#view-setting").innerText)'), 'a cleared name brings the bank\'s name back');
   await evaluate('document.querySelector("#view-setting [data-back]").click(); true');
   ok(await waitFor('location.hash === "#/t/a3b8c10c-68b8-4bfe-9380-c87b7015a49d" && !document.getElementById("view-txn").hidden'), 'Back returns to the event');
+  // D15: a place confirmed on the iPhone shows on the web's Setting and event pages.
+  const os = await sessionFor('owner');
+  const oh = { apikey: K, Authorization: 'Bearer ' + os.access_token, 'content-type': 'application/json' };
+  try {
+    await fetch(P + '/rest/v1/setting_places', { method: 'POST', headers: oh, body: JSON.stringify({ setting: 'Denver Zoo', name: 'Denver Zoo', address: '2300 Steele St, Denver', lat: 39.7496, lon: -104.9508 }) });
+    // A fresh openAs to a deep route lands on Unexamined in this harness (as #/settings does
+    // above); open the app, then go to the Setting the way a tap does.
+    await openAs('owner', '#/ledger');
+    await evaluate('location.hash = "#/setting/Denver%20Zoo"; true');
+    const sawPlace = await waitFor('/Denver Zoo · 2300 Steele St, Denver/.test(document.querySelector("#view-setting [data-place]")?.innerText || "")');
+    ok(sawPlace, 'the Setting page names the confirmed place' + (sawPlace ? '' : ' (saw: ' + String(await evaluate('location.hash + " | " + (document.querySelector("#view-setting")?.innerText || "").slice(0, 200)')).replace(/\n/g, ' / ') + ')'));
+    ok(await evaluate('document.querySelector("#view-setting [data-place] a").href.startsWith("https://maps.apple.com/?ll=39.749600,-104.950800")'), 'and links to it in Apple Maps');
+    await shot('setting-place');
+    await evaluate('location.hash = "#/t/a3b8c10c-68b8-4bfe-9380-c87b7015a49d"; true');
+    ok(await waitFor('/Denver Zoo · 2300 Steele St/.test(document.querySelector("#view-txn [data-place]")?.innerText || "")'), 'every visit there carries the place (event page)');
+  } finally {
+    await fetch(P + '/rest/v1/setting_places?setting=eq.Denver%20Zoo', { method: 'DELETE', headers: oh });
+  }
 }
 
 console.log('error (REST blocked)');

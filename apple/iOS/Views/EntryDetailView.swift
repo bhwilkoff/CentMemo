@@ -24,6 +24,8 @@ struct EntryDetailView: View {
     @State private var picking = false
     @State private var drawn: CGFloat = 0
     @State private var sharing = false
+    /// D15: the Setting's confirmed place, if the person confirmed one.
+    @State private var place: APIClient.SettingPlace?
 
     var body: some View {
         LoadState(isLoading: loading, error: entry == nil ? error : nil, retry: load) {
@@ -115,6 +117,13 @@ struct EntryDetailView: View {
                         .accessibilityIdentifier("add-photo")
                     }
                     if let error { Section { Text(error).foregroundStyle(Color.semanticError) } }
+                    // D15: where it happened, under the memo (D6: the memo leads).
+                    if #available(iOS 26.0, *), let place {
+                        Section {
+                            PlaceMap(name: place.name, address: place.address, lat: place.lat, lon: place.lon)
+                                .accessibilityIdentifier("entry-place")
+                        }
+                    }
                     // The money and the bank's facts: a footnote, there when wanted.
                     Section {
                         DisclosureGroup {
@@ -224,6 +233,7 @@ struct EntryDetailView: View {
             photos = try await p
             memo = entry?.memo?.body ?? ""
             chosen = Set(entry?.memo?.valueIDs ?? [])
+            if let key = entry?.settingKey { place = (try? await APIClient.shared.loadSettingPlaces())?[key] }
             error = nil
         } catch { self.error = session.handle(error) }
         loading = false

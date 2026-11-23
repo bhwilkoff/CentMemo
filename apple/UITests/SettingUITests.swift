@@ -51,6 +51,14 @@ final class SettingUITests: DeviceTestCase {
         let saved = app.descendants(matching: .any)["setting-place"].firstMatch
         XCTAssertTrue(saved.waitForExistence(timeout: 15), "the confirmed place stays on the page")
         shot(app, "place-saved")
+        // Every visit carries the place: the event page shows it too.
+        app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS 'penguins'")).firstMatch.tap()
+        let entryPlace = app.descendants(matching: .any)["entry-place"].firstMatch
+        for _ in 0..<5 where !entryPlace.exists { app.swipeUp() }
+        XCTAssertTrue(entryPlace.waitForExistence(timeout: 15), "the event page shows the confirmed place, under the memo")
+        shot(app, "entry-place")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(saved.waitForExistence(timeout: 10))
         saved.press(forDuration: 1.2)
         let again = app.buttons["Choose a different place"]
         XCTAssertTrue(again.waitForExistence(timeout: 5))

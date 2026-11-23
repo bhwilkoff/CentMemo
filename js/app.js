@@ -436,7 +436,8 @@
           h('div', { class: 'txn-title' },
             h('h1', { id: 'h-txn', class: 'view-heading' }, merchantOf(t)),
             h('p', { class: 'caption' }, niceDate(t.txn_date) + ' · ',
-              h('a', { href: '#/setting/' + encodeURIComponent(placeKey(t)), 'data-setting': '' }, 'Every visit')))),
+              h('a', { href: '#/setting/' + encodeURIComponent(placeKey(t)), 'data-setting': '' }, 'Every visit')),
+            placeLine(await API.settingPlaces().then((p) => p[placeKey(t)]).catch(() => null)))),
         h('label', { class: 'field-label', for: 'memo-body' }, 'Memo'),
         area,
         h('p', { class: 'field-label' }, 'Themes'),
@@ -490,9 +491,17 @@
               [rows.length === 1 ? '1 visit' : rows.length + ' visits', rows.length > 1 ? 'since ' + niceDate(first) : null,
                 written ? (written === 1 ? '1 memo' : written + ' memos') : null].filter(Boolean).join(' · ')),
             shown !== name ? h('p', { class: 'caption' }, 'On the statement: ' + name) : null,
+            placeLine(await API.settingPlaces().then((p) => p[name]).catch(() => null)),
             rename)),
         h('div', { class: 'thread' }, rows.map((t) => threadRow(t, { place: false }))));
     } catch (err) { failed(body, err, () => settingView(name)); }
+  }
+  // D15: a confirmed place, as words and a link that opens Apple Maps there.
+  function placeLine(p) {
+    if (!p) return null;
+    const href = 'https://maps.apple.com/?ll=' + p.lat.toFixed(6) + ',' + p.lon.toFixed(6) + '&q=' + encodeURIComponent(p.name);
+    return h('p', { class: 'place-line', 'data-place': '' },
+      h('a', { href, target: '_blank', rel: 'noopener' }, p.name), p.address ? h('span', { class: 'caption' }, ' · ' + p.address) : null);
   }
   // D12: share a memo as a card; private by default (as the iPhone's ShareMemoSheet).
   function sharePanel(t, memo) {
