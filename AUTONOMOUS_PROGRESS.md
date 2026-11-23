@@ -1383,3 +1383,14 @@ Apple.
 - **Waiting on Ben:**
   - lift the iPhone 12's limit
   - or say whether to install a debug build on the Duo, or ship TestFlight 16
+
+### Design tick 19 — 2026-11-23 — the iPhone 12 is still blocked after midnight
+- Reran `SettingUITests` on the iPhone 12 at 12:03am. The harness flagged
+  the "Time Limit: You've reached your limit on CentMemo" screen again; I
+  read the frame. It has "Ask for More Time" and the status bar shows Sleep,
+  so this is not a daily limit that resets at midnight. It needs Ben (Screen
+  Time is a system setting, not mine to change).
+- No code changed. The Setting page and the header fix are still not seen on
+  a phone.
+- **Next:** rerun once Ben lifts the limit, or ships TestFlight 16, or says
+  to install a debug build on the Duo.
