@@ -163,6 +163,13 @@ console.log('event page (D6): the Setting and the memo lead; the money is a foot
   ok(await evaluate('/\\$/.test(document.querySelector(".txn-details summary").textContent) && !document.querySelector(".txn-details").open'), 'the amount sits in the closed footnote');
   ok(!(await evaluate('/\\bnull\\b/.test(document.querySelector("#view-txn").innerText)')), 'no stray "null" text on the page');
   await shot('event-memo-first');
+  // D12: the share card is private by default; Show where adds the place.
+  await evaluate('document.querySelector(".share-panel").open = true; true');
+  ok(await waitFor('document.querySelector(".share-line")?.textContent === "Nov 16, 2026"'), 'the share card shows only the date by default');
+  ok(await evaluate('/penguins/.test(document.querySelector(".share-card blockquote").textContent) && !!document.querySelector(".share-theme")'), 'with the memo and its theme');
+  await evaluate('document.getElementById("share-where").click(); true');
+  ok(await waitFor('document.querySelector(".share-line").textContent === "Nov 16, 2026 · Denver Zoo"'), 'Show where adds the place');
+  await shot('share-card');
 }
 
 console.log('error (REST blocked)');

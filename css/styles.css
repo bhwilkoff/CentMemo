@@ -182,6 +182,14 @@ a.row:hover .row-title { text-decoration: underline; }
 .tile-big { width: 56px; height: 56px; border-radius: 14px; font-size: 20px; }
 .txn-head { display: flex; align-items: center; gap: var(--space-3); }
 .txn-title { min-width: 0; }
+.share-panel { margin-top: var(--space-4); }
+.share-panel summary { cursor: pointer; color: var(--color-primary); padding: var(--space-2) 0; }
+.share-panel .filter-check { margin-top: var(--space-2); }
+.share-card { margin: var(--space-2) 0; padding: 28px; background: #FBFAF7; color: #231B1C; display: grid; gap: var(--space-2); max-width: 360px; border: 1px solid var(--color-border); }
+.share-card blockquote { font-family: var(--font-display); font-size: 1.4rem; line-height: 1.3; margin: 0; }
+.share-theme, .share-line { font-size: 0.9rem; color: #5E5455; display: flex; align-items: center; gap: 6px; }
+.share-theme i { width: 18px; height: 4px; border-radius: 2px; }
+.share-brand { font-family: var(--font-display); font-weight: 600; color: #4A1520; }
 .theme-shelf { display: grid; margin-bottom: var(--space-4); }
 .theme-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; border-bottom: 1px solid var(--color-border); color: var(--color-text); text-decoration: none; font-weight: var(--type-body-strong-weight); }
 .theme-row i { width: 4px; height: 22px; border-radius: 2px; }

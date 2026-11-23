@@ -208,7 +208,7 @@ final class APIClient {
 
     func transaction(_ id: String) async throws -> LedgerEntry? {
         let rows: [LedgerEntry] = try await rest("transactions", [
-            .init(name: "select", value: Self.txnColumns + ",accounts(display_name),memos(body,memo_values(value_id))"),
+            .init(name: "select", value: Self.txnColumns + ",accounts(display_name),memos(body,memo_values(value_id,life_values(name)))"),
             .init(name: "id", value: "eq.\(id)"), .init(name: "limit", value: "1")])
         return rows.first
     }

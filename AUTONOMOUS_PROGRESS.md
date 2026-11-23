@@ -1287,3 +1287,27 @@ Apple.
 - **Seen:** theme tags on memos are still aqua pills (the ground color),
   while collections use per-theme marks. That's two color systems for one
   idea; D14's theme colors settle it.
+
+### Design tick 16 — 2026-11-23 — D12 sharing a memo, private by default
+- **iOS:** ⋯ → Share opens "Share this memo": a paper-and-ink card
+  (`MemoShareCard`; the memo in serif, its theme, the date, the CentMemo
+  mark) with "Show where" and "Show the amount", both off by default, and a
+  ShareLink sending the rendered image. The event query now brings theme
+  names.
+- **Web:** a "Share this memo" panel with the same card and switches; it
+  shares via navigator.share, or copies the text where there is none.
+- **Verified:**
+  - ShareUITests on the iPhone 12 (the date line alone by default, "Show
+    where" adds the place); frames read.
+  - test_web_states (the same checks).
+- **Three test-side lessons:**
+  - Overflow-menu items keep their label, not their accessibility id.
+  - A tap at a Toggle row's center hits the label; tap the switch.
+  - A check by on-screen text matched the page behind the sheet; check the
+    card's own line.
+- MemoUITests flaked once more on the first launch after install (passed
+  on the rerun).
+- **Not seen:** the share sheet on the Duo (design_shots can't open the ⋯
+  menu; the tap tier stays off Ben's phone).
+- **Next:** D14 themes, once Ben answers; sharing a whole theme; public links
+  later (they need server pages).

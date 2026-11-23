@@ -108,6 +108,7 @@ When shipping any user-facing feature:
 | Narrative filters (D9) | ✅ | ✅ | All / Written / Unwritten, theme, deposits and interest on request. iOS toolbar menu (FilterUITests), web selects (test_web_states) |
 | Month strip by theme (D11) | ✅ | ✅ | ThemeStrip (Core) / themeStrip (web); named legend; colors collide until D14 |
 | Themes as collections (D12) | ✅ | ✅ | Story shelf with counts; tap a theme to read only its memos; ThemesUITests, test_web_states |
+| Share a memo as a card (D12) | ✅ | ✅ | Private by default (place and amount off); iOS renders an image via ShareLink, web uses navigator.share or copies text |
 | Suggestions on Unexamined (D7) | ✅ | ✅ | memo_suggestions() in the database; same cards and words on both; no count |
 | Connect Apple Wallet (FinanceKit sync, history tokens) | n/a | 🚧 | Entitlement granted 2026-11-22 and signed into build 10; the iPhone 12 offers Connect (WalletAvailabilityUITests). Sync path verified with the sample source; the real sync is Ben's to run on his own phone |
 | FinanceKit background delivery | n/a | ⏳ | iOS 26 extension, after the entitlement |

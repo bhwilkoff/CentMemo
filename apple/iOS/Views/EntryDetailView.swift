@@ -23,6 +23,7 @@ struct EntryDetailView: View {
     @State private var picked: PhotosPickerItem?
     @State private var picking = false
     @State private var drawn: CGFloat = 0
+    @State private var sharing = false
 
     var body: some View {
         LoadState(isLoading: loading, error: entry == nil ? error : nil, retry: load) {
@@ -150,6 +151,13 @@ struct EntryDetailView: View {
                         .fontWeight(.semibold)
                         .accessibilityIdentifier("save-memo")
                 }
+                // D12: share a written memo as a card (private by default).
+                if let e = entry, let body = e.memo?.body, !body.isEmpty {
+                    ToolbarItem(placement: .secondaryAction) {
+                        Button("Share", systemImage: "square.and.arrow.up") { sharing = true }
+                            .accessibilityIdentifier("share-memo")
+                    }
+                }
                 // Skip (Decision 065), also reachable without the list's swipe.
                 ToolbarItem(placement: .secondaryAction) {
                     let skipped = entry?.isSkipped == true
@@ -165,6 +173,11 @@ struct EntryDetailView: View {
                     Spacer()
                     Button("Done") { writing = false }
                 }
+            }
+        }
+        .sheet(isPresented: $sharing) {
+            if let e = entry, let body = e.memo?.body {
+                ShareMemoSheet(entry: e, memo: body, theme: e.memo?.valueNames.first)
             }
         }
         .task { await load() }

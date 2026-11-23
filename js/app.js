@@ -356,6 +356,7 @@
         error,
         h('div', { class: 'actions' }, save, status, skipBtn),
         photosNote(t.attachments) || '',
+        memo && memo.body ? sharePanel(t, memo) : '',
         h('details', { class: 'txn-details' },
           h('summary', {},
             h('span', { class: 'txn-amount' + (t.amount_minor > 0 ? ' is-credit' : '') }, money(t.amount_minor, t.currency)),
@@ -369,6 +370,33 @@
             t.accounts ? fact('Account', t.accounts.display_name) : null,
             t.description && t.description !== t.merchant ? fact('Statement', t.description) : null)));
     } catch (err) { failed(body, err, () => txnView(id)); }
+  }
+  // D12: share a memo as a card; private by default (as the iPhone's ShareMemoSheet).
+  function sharePanel(t, memo) {
+    const theme = ((memo.memo_values || [])[0] || {}).life_values;
+    const where = h('input', { type: 'checkbox', id: 'share-where' });
+    const amount = h('input', { type: 'checkbox', id: 'share-amount' });
+    const line = h('span', { class: 'share-line' });
+    const status = h('span', { class: 'caption', role: 'status' });
+    const text = () => [niceDate(t.txn_date), where.checked ? merchantOf(t) : null, amount.checked ? money(-t.amount_minor) : null].filter(Boolean).join(' · ');
+    const draw = () => { line.textContent = text(); };
+    where.addEventListener('change', draw); amount.addEventListener('change', draw); draw();
+    const send = h('button', { type: 'button', class: 'btn' }, 'Share');
+    send.addEventListener('click', async () => {
+      const body = memo.body + '\n' + (theme ? theme.name + ' · ' : '') + text() + '\nCentMemo';
+      try {
+        if (navigator.share) { await navigator.share({ text: body }); status.textContent = ''; }
+        else { await navigator.clipboard.writeText(body); status.textContent = 'Copied.'; }
+      } catch (_) { /* the person closed the share sheet */ }
+    });
+    return h('details', { class: 'share-panel' }, h('summary', {}, 'Share this memo'),
+      h('figure', { class: 'share-card' }, h('blockquote', {}, memo.body),
+        theme ? h('span', { class: 'share-theme' }, h('i', { style: 'background: ' + themeHue(theme.name) }), theme.name) : null,
+        line, h('span', { class: 'share-brand' }, 'CentMemo')),
+      h('label', { class: 'filter-check' }, where, ' Show where'),
+      h('label', { class: 'filter-check' }, amount, ' Show the amount'),
+      h('p', { class: 'caption' }, 'Only the memo, its date, and its theme are shared unless you turn these on.'),
+      h('div', { class: 'actions' }, send, status));
   }
   function fact(k, v) { return h('div', {}, h('dt', {}, k), h('dd', {}, v)); }
   document.querySelector('[data-back]').addEventListener('click', () => { location.hash = lastList; });
