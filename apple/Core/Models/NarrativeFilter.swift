@@ -25,3 +25,20 @@ struct NarrativeFilter: Equatable, Sendable {
         }
     }
 }
+
+/// D11: how a month's written memos divide among themes, by money spent, for the
+/// month strip. A memo counts under its first theme only, so the parts add up to
+/// the whole. Same rule as js/app.js themeStrip.
+enum ThemeStrip {
+    struct Part: Equatable, Sendable { let theme: String; let spentMinor: Int }
+
+    static func parts(_ entries: [LedgerEntry]) -> [Part] {
+        var sums: [String: Int] = [:]
+        for e in entries where !e.isSkipped && e.amountMinor < 0 {
+            guard let theme = e.memo?.valueNames.first else { continue }
+            sums[theme, default: 0] -= e.amountMinor
+        }
+        return sums.map { Part(theme: $0.key, spentMinor: $0.value) }
+            .sorted { $0.spentMinor != $1.spentMinor ? $0.spentMinor > $1.spentMinor : $0.theme < $1.theme }
+    }
+}

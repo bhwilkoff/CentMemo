@@ -182,6 +182,12 @@ a.row:hover .row-title { text-decoration: underline; }
 .tile-big { width: 56px; height: 56px; border-radius: 14px; font-size: 20px; }
 .txn-head { display: flex; align-items: center; gap: var(--space-3); }
 .txn-title { min-width: 0; }
+.month-strip { margin-bottom: var(--space-4); display: grid; gap: var(--space-2); }
+.strip-bar { display: flex; gap: 2px; height: 10px; border-radius: 3px; overflow: hidden; }
+.strip-bar span { min-width: 4px; }
+.strip-legend { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); font-size: var(--type-caption-size); }
+.strip-legend li { display: flex; align-items: center; gap: 6px; }
+.strip-legend i { width: 14px; height: 4px; border-radius: 2px; display: inline-block; }
 .filters { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; margin-bottom: var(--space-3); }
 .filters select { font: inherit; font-size: var(--type-caption-size); padding: var(--space-1) var(--space-2); border-radius: var(--radius-card); border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); }
 .filter-check { font-size: var(--type-caption-size); color: var(--color-text-muted); display: flex; gap: var(--space-1); align-items: center; }

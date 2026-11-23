@@ -115,6 +115,10 @@ struct LedgerView: View {
                     .buttonStyle(.borderless)
                     .onGround().listRowSeparator(.hidden).columnRowInsets()
                     totals.onGround().columnRowInsets()
+                    let parts = ThemeStrip.parts(entries)
+                    if !parts.isEmpty {
+                        MonthStrip(parts: parts).onGround().listRowSeparator(.hidden).columnRowInsets()
+                    }
                 }
                 if entries.isEmpty {
                     Text("Nothing recorded this month.").foregroundStyle(Color.brandTextMuted).onGround()

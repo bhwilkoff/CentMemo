@@ -134,6 +134,7 @@ console.log('Narrative thread (D10): written memos are marks with the memo as he
   ok(await evaluate('document.querySelectorAll("#view-ledger .trow.is-waiting").length > 0'), 'waiting events show as quiet marks');
   ok(await evaluate('/penguins/.test(document.querySelector("#view-ledger .thread").innerText)'), 'a memo is the headline');
   ok(await evaluate('getComputedStyle(document.querySelector(".trow.is-written .trow-mark")).backgroundColor !== getComputedStyle(document.querySelector(".trow.is-waiting .trow-mark")).backgroundColor'), 'written and waiting marks differ');
+  ok(await evaluate('document.querySelectorAll("#view-ledger .strip-bar span").length >= 2 && document.querySelectorAll("#view-ledger .strip-legend li").length === document.querySelectorAll("#view-ledger .strip-bar span").length'), 'the month strip has a part per theme, each named in the legend (D11)');
   await shot('narrative-thread');
   // D9: Written only, then back to All.
   await evaluate('(() => { const s = document.getElementById("filter-show"); s.value = "written"; s.dispatchEvent(new Event("change")); return true; })()');

@@ -106,6 +106,7 @@ When shipping any user-facing feature:
 | Import Apple Card CSV export | ✅ | 🚧 | Web: real file input, re-import adds 0 (test_web_states). Same source IDs on both (golden parity test). iOS import never run on a device |
 | Import Venmo, PayPal, Cash App CSV (S1/S2) | ✅ | 🚧 | Web: auto-detected by header, own account per source, documented export paths; end-to-end import test. iOS: same parsers (Swift goldens read the same fixtures), Settings shows the paths (testExportPaths); importing a real file through the Files picker not yet run on a device |
 | Narrative filters (D9) | ✅ | ✅ | All / Written / Unwritten, theme, deposits and interest on request. iOS toolbar menu (FilterUITests), web selects (test_web_states) |
+| Month strip by theme (D11) | ✅ | ✅ | ThemeStrip (Core) / themeStrip (web); named legend; colors collide until D14 |
 | Suggestions on Unexamined (D7) | ✅ | ✅ | memo_suggestions() in the database; same cards and words on both; no count |
 | Connect Apple Wallet (FinanceKit sync, history tokens) | n/a | 🚧 | Entitlement granted 2026-11-22 and signed into build 10; the iPhone 12 offers Connect (WalletAvailabilityUITests). Sync path verified with the sample source; the real sync is Ben's to run on his own phone |
 | FinanceKit background delivery | n/a | ⏳ | iOS 26 extension, after the entitlement |

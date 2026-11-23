@@ -1252,3 +1252,19 @@ Apple.
   account), every edge on its line; the iPhone 12 unchanged (guides); the
   iPhone tap tier subset passes.
 - **Bound:** docs/DESIGN.md section L (L1–L5).
+
+### Design tick 14 — 2026-11-23 — D11 the month strip by theme
+- `ThemeStrip.parts` (Core, unit tested): money spent under each written
+  memo's first theme; parts add up; skipped, unwritten and money in are left
+  out. The web's `themeStrip` follows the same rule.
+- `MonthStrip` (iOS) and `.month-strip` (web) go under the Narrative's
+  totals: one bar split by theme, and a legend naming each part with its
+  amount (WCAG 1.4.1: never color alone). `ThemeHue` is now the one color
+  rule for the thread marks and the strip.
+- **Verified:** test_web_states (a part per theme, each named); frames read
+  on the web and the iPhone 12; iPhone tests pass. The Duo refused the
+  launch (locked), so it's not seen there yet.
+- **Found by reading the frames:** "Being outside" and "Time with my kids"
+  share a color. With 6 hues, a name hash collides, so D14 must give each
+  theme its own color (stored with the theme). D14 is next, with Ben
+  approving the set.

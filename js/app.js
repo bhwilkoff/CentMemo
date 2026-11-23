@@ -186,6 +186,30 @@
       return !filter.theme || themesOf(t).includes(filter.theme);
     });
   }
+  // D11: the month by theme (as the iPhone's ThemeStrip / MonthStrip): money spent
+  // under each written memo's first theme; a legend names every part.
+  const themeHue = (name) => 'var(--color-store-' + TILE_HUES[CentMoney.merchantHue(name, 6)] + ')';
+  function themeStrip(rows) {
+    const sums = new Map();
+    for (const t of rows) {
+      if (t.skipped_at || t.amount_minor >= 0) continue;
+      const first = themesOf(t)[0];
+      if (first) sums.set(first, (sums.get(first) || 0) - t.amount_minor);
+    }
+    return [...sums].map(([theme, spent]) => ({ theme, spent }))
+      .sort((a, b) => b.spent - a.spent || a.theme.localeCompare(b.theme));
+  }
+  function monthStrip(rows) {
+    const parts = themeStrip(rows);
+    if (!parts.length) return '';
+    const total = parts.reduce((a, p) => a + p.spent, 0);
+    return h('div', { class: 'month-strip' },
+      h('div', { class: 'strip-bar', 'aria-hidden': 'true' },
+        parts.map((p) => h('span', { style: 'flex: ' + (p.spent / total) + '; background: ' + themeHue(p.theme) }))),
+      h('ul', { class: 'strip-legend' }, parts.map((p) =>
+        h('li', {}, h('i', { style: 'background: ' + themeHue(p.theme) }), p.theme, ' ', h('span', { class: 'caption' }, money(p.spent))))));
+  }
+
   function narrativeFilters(rows) {
     const thread = h('div', { class: 'thread' });
     const draw = () => thread.replaceChildren(...narrativeFilter(rows).map(threadRow));
@@ -217,7 +241,7 @@
         h('span', { class: 'row-amount' + (t.amount_minor > 0 ? ' is-credit' : '') }, money(t.amount_minor, t.currency)));
     }
     const theme = ((memo.memo_values || [])[0] || {}).life_values;
-    const hue = theme ? 'var(--color-store-' + TILE_HUES[CentMoney.merchantHue(theme.name, 6)] + ')' : 'var(--color-primary)';
+    const hue = theme ? themeHue(theme.name) : 'var(--color-primary)';
     return h('a', { class: 'trow is-written', href: '#/t/' + t.id, style: '--mark: ' + hue },
       h('span', { class: 'trow-mark', 'aria-hidden': 'true' }),
       h('span', { class: 'trow-body' },
@@ -247,6 +271,7 @@
           h('div', {}, h('dt', {}, 'Spent'), h('dd', {}, money(spent))),
           h('div', {}, h('dt', {}, 'Paid or credited'), h('dd', {}, money(received))),
           h('div', {}, h('dt', {}, 'Memos'), h('dd', {}, written + ' of ' + rows.length))),
+        monthStrip(rows),
         narrativeFilters(rows),
         rows.some((t) => t.skipped_at)
           ? h('details', { class: 'skipped' }, h('summary', {}, rows.filter((t) => t.skipped_at).length + ' skipped'),

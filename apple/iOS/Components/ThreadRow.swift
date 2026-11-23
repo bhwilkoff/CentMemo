@@ -13,7 +13,7 @@ struct ThreadRow: View {
     /// until D14's default themes carry their own colors.
     private var hue: Color {
         guard let theme = entry.memo?.valueNames.first else { return Color.brandPrimary }
-        return StoreTile.hues[Money.merchantHue(theme, count: StoreTile.hues.count)]
+        return ThemeHue.color(theme)
     }
 
     var body: some View {

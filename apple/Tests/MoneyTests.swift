@@ -218,3 +218,21 @@ struct NarrativeFilterTests {
         #expect(NarrativeFilter(theme: "Great meals").apply(list).map(\.id) == ["c"])
     }
 }
+
+struct ThemeStripTests {
+    private func entry(_ id: String, _ minor: Int, memo: String? = nil, themes: [String] = [], skipped: Bool = false) throws -> LedgerEntry {
+        var json: [String: Any] = ["id": id, "txn_date": "2026-11-20", "amount_minor": minor]
+        if skipped { json["skipped_at"] = "2026-11-22T00:00:00Z" }
+        if let memo { json["memos"] = ["body": memo, "memo_values": themes.map { ["value_id": $0, "life_values": ["name": $0]] }] }
+        return try JSONDecoder().decode(LedgerEntry.self, from: JSONSerialization.data(withJSONObject: json))
+    }
+    @Test func firstThemeOnlyBiggestFirst() throws {
+        let list = [try entry("a", -1000, memo: "Zoo", themes: ["People I love", "Adventure"]),
+                    try entry("b", -2500, memo: "Pizza", themes: ["Great meals"]),
+                    try entry("c", -500, memo: "Book", themes: ["People I love"]),
+                    try entry("d", -9999),                       // unwritten: not in the strip
+                    try entry("e", 4000, memo: "Refund", themes: ["Great meals"]),  // money in: not spending
+                    try entry("f", -700, memo: "x", themes: ["Joy"], skipped: true)]
+        #expect(ThemeStrip.parts(list) == [.init(theme: "Great meals", spentMinor: 2500), .init(theme: "People I love", spentMinor: 1500)])
+    }
+}
