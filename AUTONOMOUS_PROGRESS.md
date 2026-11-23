@@ -1641,3 +1641,15 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
     seen on both phones.
 - **Next:** press Rename → Save on the iPhone 12. It runs as the synthetic
   owner, so no real data is touched, and closes D8's iOS save. Then D12.
+
+### Design tick 28 — 2026-11-23 — D8 rename saved on the iPhone 12
+- New test `SettingUITests.testRenameSavesAndClears`, run as the synthetic
+  owner: it renames Denver Zoo to "The Zoo", checks "On the statement:
+  Denver Zoo", then uses "Use the statement name" to clear it.
+  - It passes on the iPhone 12. Frames read: the alert with "Every visit
+    here takes this name." and the renamed page.
+  - The tile follows the name: "The Zoo" gives "Z" and a different mark
+    color. That's acceptable; D14 theme colors don't touch tiles.
+  - PARITY: Rename iOS ✅. Brief: D8 ✅.
+- `tools/test_all.sh` rc=0, ALL PASS (full speed now).
+- **Next:** F1, real FinanceKit (Ben's order).
