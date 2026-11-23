@@ -1793,3 +1793,6 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   ThemesStarterUITests is written; the iPhone 12 was leased by an Ear
   Drama session, so the device run is queued.
 - `tools/test_all.sh` rc=0.
+- **Ben (2026-11-23, about 4:00pm):** the Duo leaves the house in about 15
+  minutes. Duo checks (D14 themes, D15 place on Ben's data) wait until it's
+  back; the iPhone 12 carries the device verification meanwhile.
