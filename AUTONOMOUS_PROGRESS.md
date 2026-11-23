@@ -1475,3 +1475,30 @@ Apple.
     iPhone 12 is under Screen Time.
 - **Wallet in the connector:** Kavya's reply (2026-11-23) declines to
   interpret the Addendum. Ben chose to keep it off until L2.
+
+### Design tick 22 — 2026-11-23 — D8 categories for Wallet purchases
+- **Found:** about 6,979 of Ben's events had an empty category. FinanceKit
+  gives a merchant category code but no category.
+- **Built:** `transactions.plain_category`, a generated column (migration
+  20261123020000, applied; nothing rewritten). It is the bank's category,
+  else Apple Card's own word read from the code: Restaurants, Grocery, Gas,
+  Airlines, Hotels, Transportation, Utilities, Insurance, Medical,
+  Entertainment, Shopping, Services, Other. The view now carries it.
+  - iOS: LedgerEntry reads it as the category, so rows, the event page and
+    the tile glyph all get it.
+  - Web: the catOf(t) helper.
+- **Result:** about 3,400 events now have a category. The ~3,600 without
+  one have no merchant code (deposits, older Wallet rows).
+- **Verified:** the Duo's outer display (Ben's data, frame read) shows
+  "Restaurants" with a fork and knife, "Transportation" with a car, and
+  "Grocery" with a cart. test_web_states passes, and `tools/test_all.sh`
+  passes (rc=0).
+- **Known miss:** Crumbl reads as Grocery (bakery code 5462). It should
+  probably be Restaurants; it's a one-line change in the next migration.
+- **Resources (Ben: "be aware of the resources you are using"):**
+  - Every build, capture and suite ran under `nice -n 19` with
+    xcodebuild `-jobs 2`, one job at a time.
+  - Before the captures I waited for another session's Ear Drama build
+    (two swift-frontend processes, load 35) to finish.
+  - test_all now compiles for `generic/platform=iOS`, never the simulator,
+    and the CentMemo simulator is deleted.

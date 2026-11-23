@@ -157,7 +157,7 @@ final class APIClient {
 
     // MARK: - Reading
 
-    private static let txnColumns = "id,account_id,txn_date,posted_date,amount_minor,currency,description,merchant,category,txn_type,status,skipped_at"
+    private static let txnColumns = "id,account_id,txn_date,posted_date,amount_minor,currency,description,merchant,category,plain_category,txn_type,status,skipped_at"
 
     func unexamined(limit: Int = 200) async throws -> [LedgerEntry] {
         try await rest("unexamined_transactions", [.init(name: "select", value: Self.txnColumns),

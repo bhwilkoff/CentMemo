@@ -52,7 +52,7 @@ struct LedgerEntry: Decodable, Identifiable, Hashable, Sendable {
 
     private enum Keys: String, CodingKey {
         case id, accountID = "account_id", txnDate = "txn_date", postedDate = "posted_date"
-        case amountMinor = "amount_minor", currency, description, merchant, category
+        case amountMinor = "amount_minor", currency, description, merchant, category, plainCategory = "plain_category"
         case txnType = "txn_type", status, memos, accounts, skippedAt = "skipped_at"
     }
     private struct AccountName: Decodable { let display_name: String }
@@ -67,7 +67,10 @@ struct LedgerEntry: Decodable, Identifiable, Hashable, Sendable {
         currency = try c.decodeIfPresent(String.self, forKey: .currency) ?? "USD"
         description = try c.decodeIfPresent(String.self, forKey: .description) ?? ""
         merchant = try c.decodeIfPresent(String.self, forKey: .merchant) ?? ""
-        category = try c.decodeIfPresent(String.self, forKey: .category) ?? ""
+        // D8: Apple Card's category words for every event, read from the merchant
+        // category code when the bank gave none (plain_category, in the database).
+        let plain = try c.decodeIfPresent(String.self, forKey: .plainCategory) ?? ""
+        category = plain.isEmpty ? (try c.decodeIfPresent(String.self, forKey: .category) ?? "") : plain
         txnType = try c.decodeIfPresent(String.self, forKey: .txnType) ?? ""
         status = try c.decodeIfPresent(String.self, forKey: .status) ?? "booked"
         skippedAt = try c.decodeIfPresent(String.self, forKey: .skippedAt)

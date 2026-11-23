@@ -106,7 +106,7 @@ const API = (() => {
   }
 
   /* ---- Reading ---- */
-  const TXN = 'id, account_id, txn_date, posted_date, amount_minor, currency, description, merchant, category, txn_type, status, skipped_at';
+  const TXN = 'id, account_id, txn_date, posted_date, amount_minor, currency, description, merchant, category, plain_category, txn_type, status, skipped_at';
 
   async function unexamined(limit = 200) {
     const r = await client().from('unexamined_transactions').select(TXN, { count: 'exact' })

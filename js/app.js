@@ -32,6 +32,8 @@
     return svg;
   }
   const money = (minor, cur) => M.formatMinor(minor, cur || 'USD');
+  // D8: Apple Card's category words for every event (plain_category, in the database).
+  const catOf = (t) => t.plain_category || t.category || '';
   function niceDate(iso) {
     const [y, m, d] = iso.split('-').map(Number);
     return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
@@ -120,7 +122,7 @@
       tile(t),
       h('span', { class: 'row-main' },
         h('span', { class: 'row-title' }, merchantOf(t)),
-        h('span', { class: 'row-sub' }, [niceDate(t.txn_date), t.category, t.status === 'pending' ? 'Pending' : null].filter(Boolean).join(' · ')),
+        h('span', { class: 'row-sub' }, [niceDate(t.txn_date), catOf(t), t.status === 'pending' ? 'Pending' : null].filter(Boolean).join(' · ')),
         opts && opts.memo && memo ? h('span', { class: 'row-memo' }, memo.body) : null),
       h('span', { class: 'row-amount' + (t.amount_minor > 0 ? ' is-credit' : '') }, money(t.amount_minor, t.currency)));
   }
@@ -389,11 +391,11 @@
         h('details', { class: 'txn-details' },
           h('summary', {},
             h('span', { class: 'txn-amount' + (t.amount_minor > 0 ? ' is-credit' : '') }, money(t.amount_minor, t.currency)),
-            ' ', h('span', { class: 'caption' }, [t.accounts && t.accounts.display_name, t.category].filter(Boolean).join(' · '))),
+            ' ', h('span', { class: 'caption' }, [t.accounts && t.accounts.display_name, catOf(t)].filter(Boolean).join(' · '))),
           h('dl', { class: 'facts' },
             fact('Date', niceDate(t.txn_date)),
             t.posted_date && t.posted_date !== t.txn_date ? fact('Posted', niceDate(t.posted_date)) : null,
-            t.category ? fact('Category', t.category) : null,
+            catOf(t) ? fact('Category', catOf(t)) : null,
             t.txn_type ? fact('Type', t.txn_type) : null,
             t.status !== 'booked' ? fact('Status', t.status) : null,
             t.accounts ? fact('Account', t.accounts.display_name) : null,
