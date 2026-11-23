@@ -1561,3 +1561,8 @@ Apple.
     that recipe once.
 - **Verified:** test_connector passes, and `tools/test_all.sh` passes
   (rc=0, niced, load about 8).
+
+- **Correction (Ben, 2026-11-23):** "I DO NOT want to create tokens and
+  manage them myself." The keychain-paste recipe and the "Ben's step" above
+  are withdrawn. Edge Function deploys go through the signed-in Supabase
+  connector, with no token, and deploy-mcp.sh says so.

@@ -15,8 +15,6 @@
 #                                                 base64, <name>:ASC_KEY_ID from the file name,
 #                                                 <name>:ASC_ISSUER_ID); --delete removes the .p8 once the
 #                                                 Keychain copy is checked byte for byte (the owner approves it)
-#   tools/secrets.sh keychain-paste NAME          the token on the clipboard into the Keychain, then the clipboard
-#                                                 is cleared (NAME: SUPABASE_ACCESS_TOKEN, read by tools/deploy-mcp.sh)
 #   tools/secrets.sh renew-signing                mint new CI distribution AND Mac installer certificates
 #                                                 (they share APPLE_P12_PASSWORD) and set the four GitHub secrets
 #
@@ -33,7 +31,6 @@ WORKER_NAME="$(cfg WORKER_NAME)"
 [ -n "$REPO" ] || { echo "secrets.sh: set GITHUB_REPO in tools/app_config.py" >&2; exit 2; }
 GEN_NAMES=(SESSION_SECRET)
 FILE_NAMES=(APPLE_PRIVATE_KEY)
-PASTE_NAMES=(SUPABASE_ACCESS_TOKEN)
 
 die() { echo "secrets.sh: $*" >&2; exit 2; }
 in_list() { local x=$1; shift; local n; for n in "$@"; do [ "$n" = "$x" ] && return 0; done; return 1; }
@@ -114,14 +111,6 @@ case "$recipe" in
     if [ "$delete" = 1 ]; then rm -f -- "$p8"; echo "the .p8 file is deleted"; else echo "the .p8 file is kept (--delete removes it)"; fi
     ;;
 
-  keychain-paste)
-    [ $# -eq 1 ] || die "keychain-paste takes one name"
-    in_list "$1" "${PASTE_NAMES[@]}" || die "keychain-paste stores only: ${PASTE_NAMES[*]}"
-    pbpaste | tr -d ' \r\n' | { cat; echo; } | kc_put "$1"
-    pbcopy < /dev/null
-    kc_get "$1" >/dev/null && echo "$1 is in the Keychain (not shown); the clipboard is cleared"
-    ;;
-
   renew-signing)
     [ $# -eq 0 ] || die "renew-signing takes no arguments: both certificates share one password"
     dir="$(mktemp -d)"
@@ -140,6 +129,6 @@ case "$recipe" in
     ;;
 
   *)
-    die "unknown recipe; one of: list, gen, put-file, keychain-import-asc, keychain-paste, renew-signing"
+    die "unknown recipe; one of: list, gen, put-file, keychain-import-asc, renew-signing"
     ;;
 esac
