@@ -1888,3 +1888,28 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   account).
 - **Next:** L2 prep while Ben reviews (public links, FinanceKit
   extension), or file attachments.
+
+### Tick 36 — 2026-11-23 — Item 10: files on a memo (iPhone + web)
+- **iOS:** a Files section with "Add a file" (PDF or image). A file is kept
+  as a private copy, because a file reference only works on one device;
+  images are re-encoded as JPEG with no metadata, and the limit is 5 MB.
+  Files are listed by name, open through an hour-long signed link, and
+  can be removed (copy too). One line says "Files you add are kept in
+  CentMemo, privately."
+- **Bucket:** now accepts application/pdf as well as JPEG.
+- **Web:** the event page lists files by name with signed links.
+- **Verified:**
+  - test_web_states: a kept file lists with a token link.
+  - iPhone 12: FileAttachUITests passes; the DEBUG door attaches a
+    generated one-page PDF, then removes it. Frame file-kept read. The
+    first run failed only because the footer was below the fold; the
+    test now scrolls to it.
+  - After the runs: no test attachments and 0 storage objects left (SQL
+    check).
+  - `tools/test_all.sh` rc=0.
+- Item 10 is done, apart from the iOS photo-copy upload, which waits on a
+  phone with Photos access.
+- **Next:** the backlog order reaches L2 (held until Ben signs off on the
+  design). Open for Ben: public links (D12), the FinanceKit extension
+  request, D7 suggestion words. The loop moves to the remaining smaller
+  items (D10/D13 polish, iPhone import and delete-account checks).

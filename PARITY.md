@@ -126,7 +126,7 @@ When shipping any user-facing feature:
 | Values the person names, tagged on memos | ✅ | ✅ | |
 | Attach a photo | 🟡 | ✅ | iOS: by PhotoKit reference (PhotoAttachUITests; denied path). Web says how many are attached in the iPhone app; it cannot draw one |
 | Keep a copy of a photo in CentMemo (item 10) | ✅ | 🚧 | Opt-in per photo ("Keep a copy in CentMemo"): a resized JPEG with no location or camera metadata, private bucket `attachments/<user id>/` (owner-only policies, agents refused; test_rls checks stranger and public reads). Web shows copies through hour-long signed links (test_web_states). iOS menu and the no-access message seen on the iPhone 12; the upload itself waits on a phone with Photos access (the bench declines it). Copies go with the photo and with the account. |
-| Attach a file | ⏳ | ⏳ | money-story-design: by reference first; next after photo copies |
+| Attach a file (item 10) | ✅ | ✅ | iOS "Add a file" (PDF or image; images re-encoded as JPEG, no metadata), kept as a private copy since a file reference works only on one device; opens through an hour-long signed link; web lists files by name with signed links. FileAttachUITests (iPhone 12, DEBUG door APP_ATTACH_SAMPLE_FILE) + test_web_states. |
 | Share one story | 🔮 | 🔮 | Opt-in, per story |
 | Delete account | ✅ | 🚧 | `delete_my_account` proven (supabase/tests/delete_my_account.sql); web button wired; iOS button never pressed on a device |
 

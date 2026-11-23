@@ -234,6 +234,11 @@ console.log('event page (D6): the Setting and the memo lead; the money is a foot
     await openAs('owner', '#/ledger');
     await evaluate('location.hash = "#/t/a3b8c10c-68b8-4bfe-9380-c87b7015a49d"; true');
     ok(await waitFor('[...document.querySelectorAll("#view-txn [data-photo-copies] img")].some(i => i.complete && i.naturalWidth > 0 && /token=/.test(i.src))'), 'a kept photo copy shows on the web, through a signed link');
+    // A file (kind file, caption its name) lists by name and links privately.
+    await fetch(P + '/rest/v1/attachments?id=eq.' + att.id, { method: 'PATCH', headers: oh, body: JSON.stringify({ kind: 'file', caption: 'Receipt.jpg' }) });
+    await openAs('owner', '#/ledger');
+    await evaluate('location.hash = "#/t/a3b8c10c-68b8-4bfe-9380-c87b7015a49d"; true');
+    ok(await waitFor('[...document.querySelectorAll("#view-txn [data-files] a")].some(a => a.textContent === "Receipt.jpg" && /token=/.test(a.href))'), 'a kept file lists by its name with a signed link');
   } finally {
     if (att) {
       await fetch(P + '/storage/v1/object/attachments', { method: 'DELETE', headers: { apikey: K, Authorization: 'Bearer ' + os.access_token, 'content-type': 'application/json' }, body: JSON.stringify({ prefixes: [uid + '/' + att.id + '.jpg'] }) });

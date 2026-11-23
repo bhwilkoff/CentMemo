@@ -446,6 +446,7 @@
         error,
         h('div', { class: 'actions' }, save, status, skipBtn),
         photosNote(t.attachments) || '',
+        filesList(t.attachments) || '',
         memo && memo.body ? sharePanel(t, memo) : '',
         h('details', { class: 'txn-details' },
           h('summary', {},
@@ -573,6 +574,20 @@
 
   // Photos are attached on the iPhone by PhotoKit reference (money-story-design);
   // the web cannot draw them, so it says they exist and where they live.
+  // Item 10: files the person added on the iPhone, kept privately; each opens
+  // through a link that lasts an hour.
+  function filesList(list) {
+    const files = (list || []).filter((a) => a.kind === 'file' && a.storage_path);
+    if (!files.length) return null;
+    const ul = h('ul', { class: 'files-list', 'data-files': '' }, files.map((a) => h('li', { 'data-file': a.storage_path }, a.caption || 'File')));
+    API.copyUrls(files.map((a) => a.storage_path)).then((urls) => {
+      ul.querySelectorAll('[data-file]').forEach((li) => {
+        const url = urls[li.dataset.file];
+        if (url) li.replaceChildren(h('a', { href: url, target: '_blank', rel: 'noopener' }, li.textContent));
+      });
+    }).catch(() => {});
+    return h('div', {}, h('p', { class: 'field-label' }, 'Files'), ul);
+  }
   function photosNote(list) {
     const photos = (list || []).filter((a) => a.kind === 'photo');
     if (!photos.length) return null;

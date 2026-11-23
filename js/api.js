@@ -164,7 +164,7 @@ const API = (() => {
   }
   async function transaction(id) {
     const rows = must(await client().from('transactions')
-      .select(TXN + ', accounts(display_name), memos(body, updated_at, memo_values(value_id, life_values(name))), attachments(id, kind, storage_path)').eq('id', id).limit(1));
+      .select(TXN + ', accounts(display_name), memos(body, updated_at, memo_values(value_id, life_values(name))), attachments(id, kind, storage_path, caption)').eq('id', id).limit(1));
     return rows[0] || null;
   }
   async function stories({ ym, valueId }) {

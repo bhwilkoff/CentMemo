@@ -448,12 +448,13 @@ final class APIClient {
         let deviceRef: String?
         /// Item 10: set only when the person chose to keep a copy in CentMemo.
         var storagePath: String? = nil
-        enum CodingKeys: String, CodingKey { case id, kind, deviceRef = "device_ref", storagePath = "storage_path" }
+        var caption: String? = nil
+        enum CodingKeys: String, CodingKey { case id, kind, deviceRef = "device_ref", storagePath = "storage_path", caption }
     }
 
     func attachments(for transactionID: String) async throws -> [Attachment] {
         try await rest("attachments", [.init(name: "transaction_id", value: "eq." + transactionID),
-                                      .init(name: "select", value: "id,kind,device_ref,storage_path"),
+                                      .init(name: "select", value: "id,kind,device_ref,storage_path,caption"),
                                       .init(name: "order", value: "created_at")])
     }
 
@@ -464,6 +465,35 @@ final class APIClient {
                                  body: Row(transaction_id: transactionID, device_ref: deviceRef), prefer: "return=representation")
         guard let made = try JSONDecoder().decode([Attachment].self, from: data).first else { throw APIError.decoding("no attachment returned") }
         return made
+    }
+
+    /// Item 10: a file the person adds (a receipt, a ticket) is kept as a copy:
+    /// its reference would only work on this device. `name` is shown with it.
+    func attachFile(transactionID: String, name: String, data: Data, isPDF: Bool) async throws -> Attachment {
+        struct Row: Encodable { let transaction_id: String; let kind = "file"; let device_ref: String; let caption: String }
+        let made: Data = try await raw("rest/v1/attachments", query: [.init(name: "select", value: "id,kind,device_ref,storage_path,caption")], method: "POST",
+                                       body: Row(transaction_id: transactionID, device_ref: String(name.prefix(300)), caption: String(name.prefix(500))),
+                                       prefer: "return=representation")
+        guard var a = try JSONDecoder().decode([Attachment].self, from: made).first, let uid = session?.userID else { throw APIError.decoding("no attachment returned") }
+        let path = "\(uid)/\(a.id).\(isPDF ? "pdf" : "jpg")"
+        do {
+            _ = try await storage("POST", "object/attachments/" + path, body: data, contentType: isPDF ? "application/pdf" : "image/jpeg", upsert: true)
+        } catch {
+            try? await raw("rest/v1/attachments", query: [.init(name: "id", value: "eq." + a.id)], method: "DELETE")
+            throw error
+        }
+        try await raw("rest/v1/attachments", query: [.init(name: "id", value: "eq." + a.id)], method: "PATCH", body: ["storage_path": path])
+        a.storagePath = path
+        return a
+    }
+
+    /// A link to a kept copy that works for an hour.
+    func copyURL(_ path: String) async throws -> URL {
+        struct Signed: Decodable { let signedURL: String }
+        let data = try await storage("POST", "object/sign/attachments/" + path, body: try JSONEncoder().encode(["expiresIn": 3600]), contentType: "application/json")
+        let signed = try JSONDecoder().decode(Signed.self, from: data)
+        guard let url = URL(string: Self.projectURL.absoluteString + "/storage/v1" + signed.signedURL) else { throw APIError.decoding("signed link") }
+        return url
     }
 
     func removeAttachment(_ id: String, copy: String? = nil) async throws {

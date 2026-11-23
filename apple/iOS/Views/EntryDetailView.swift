@@ -22,6 +22,8 @@ struct EntryDetailView: View {
     @State private var photos: [APIClient.Attachment] = []
     @State private var picked: PhotosPickerItem?
     @State private var picking = false
+    @State private var choosingFile = false
+    @Environment(\.openURL) private var openURL
     @State private var drawn: CGFloat = 0
     @State private var sharing = false
     /// D15: the Setting's confirmed place, if the person confirmed one.
@@ -100,9 +102,9 @@ struct EntryDetailView: View {
                         }
                     }
                     Section("Photos") {
-                        if !photos.isEmpty {
+                        if photos.contains(where: { $0.kind == "photo" }) {
                             LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: 8)], spacing: 8) {
-                                ForEach(photos) { a in
+                                ForEach(photos.filter { $0.kind == "photo" }) { a in
                                     AttachedPhoto(ref: a.deviceRef ?? "")
                                         .overlay(alignment: .bottomTrailing) {
                                             if a.storagePath != nil {
@@ -128,6 +130,27 @@ struct EntryDetailView: View {
                             Label("Add a photo", systemImage: "photo.badge.plus")
                         }
                         .accessibilityIdentifier("add-photo")
+                    }
+                    // Item 10: files (a receipt, a ticket), kept as private copies.
+                    Section {
+                        ForEach(photos.filter { $0.kind == "file" }) { a in
+                            Button { Task { await openFile(a) } } label: {
+                                Label(a.caption ?? a.deviceRef ?? "File", systemImage: (a.storagePath ?? "").hasSuffix(".pdf") ? "doc.richtext" : "photo")
+                            }
+                            .contextMenu {
+                                Button("Remove from this memo", role: .destructive) { Task { await remove(a) } }
+                            }
+                            .accessibilityIdentifier("attached-file")
+                        }
+                        Button { choosingFile = true } label: { Label("Add a file", systemImage: "doc.badge.plus") }
+                            .accessibilityIdentifier("add-file")
+                    } header: {
+                        Text("Files")
+                    } footer: {
+                        Text("Files you add are kept in CentMemo, privately.")
+                    }
+                    .fileImporter(isPresented: $choosingFile, allowedContentTypes: [.pdf, .image]) { result in
+                        if case .success(let url) = result { Task { await addFile(url) } }
                     }
                     if let error { Section { Text(error).foregroundStyle(Color.semanticError) } }
                     // D15: where it happened, under the memo (D6: the memo leads).
@@ -247,6 +270,15 @@ struct EntryDetailView: View {
             memo = entry?.memo?.body ?? ""
             chosen = Set(entry?.memo?.valueIDs ?? [])
             if let key = entry?.settingKey { place = (try? await APIClient.shared.loadSettingPlaces())?[key] }
+            #if DEBUG
+            if ProcessInfo.processInfo.environment["APP_ATTACH_SAMPLE_FILE"] == "1", !photos.contains(where: { $0.kind == "file" }) {
+                let pdf = UIGraphicsPDFRenderer(bounds: CGRect(x: 0, y: 0, width: 300, height: 200)).pdfData { ctx in
+                    ctx.beginPage()
+                    ("Sample receipt" as NSString).draw(at: CGPoint(x: 24, y: 24), withAttributes: [.font: UIFont.systemFont(ofSize: 18)])
+                }
+                await upload(name: "Sample receipt.pdf", raw: pdf, isPDF: true)
+            }
+            #endif
             error = nil
         } catch { self.error = session.handle(error) }
         loading = false
@@ -274,6 +306,34 @@ struct EntryDetailView: View {
     private func remove(_ a: APIClient.Attachment) async {
         do { try await APIClient.shared.removeAttachment(a.id, copy: a.storagePath); photos.removeAll { $0.id == a.id } }
         catch { self.error = session.handle(error) }
+    }
+
+    /// Item 10: a file the person chose; an image is re-encoded (no metadata).
+    private func addFile(_ url: URL) async {
+        let scoped = url.startAccessingSecurityScopedResource()
+        defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+        guard let raw = try? Data(contentsOf: url) else { self.error = "CentMemo couldn't open that file."; return }
+        await upload(name: url.lastPathComponent, raw: raw, isPDF: url.pathExtension.lowercased() == "pdf")
+    }
+
+    private func upload(name: String, raw: Data, isPDF: Bool) async {
+        let data: Data?
+        if isPDF { data = raw } else { data = UIImage(data: raw)?.jpegData(compressionQuality: 0.8) }
+        guard let data, data.count <= 5_000_000 else {
+            self.error = "That file is too large to keep (5 MB at most)."
+            UINotificationFeedbackGenerator().notificationOccurred(.error)
+            return
+        }
+        do {
+            let a = try await APIClient.shared.attachFile(transactionID: entryID, name: name, data: data, isPDF: isPDF)
+            photos.append(a)
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        } catch { self.error = session.handle(error); UINotificationFeedbackGenerator().notificationOccurred(.error) }
+    }
+
+    private func openFile(_ a: APIClient.Attachment) async {
+        guard let path = a.storagePath else { return }
+        do { openURL(try await APIClient.shared.copyURL(path)) } catch { self.error = session.handle(error) }
     }
 
     /// Item 10: the person chose to keep a copy, so the web can show it too.
