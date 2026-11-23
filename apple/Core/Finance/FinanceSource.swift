@@ -221,15 +221,52 @@ struct FinanceKitSource: FinanceSource {
 /// Keeps the entitlement request's promise: when the person turns CentMemo's
 /// Wallet access off, the Wallet data synced to CentMemo is deleted (their own
 /// memos on those purchases go with it; imported exports are untouched).
+/// F2: FinanceKit wakes the Wallet extension when Wallet data changes, and the
+/// extension runs the same sync the app's Sync now runs, with no screen. It
+/// never syncs into a synthetic account, and stops when access is turned off.
+enum FinanceBackgroundSync {
+    static func run() async {
+        #if canImport(FinanceKit) && os(iOS)
+        guard let email = await APIClient.shared.email, !SessionStore.isSynthetic(email),
+              FinanceStore.isDataAvailable(.financialData),
+              (try? await FinanceStore.shared.authorizationStatus()) == .authorized else { return }
+        let key = FinanceSources.tokenKey(email)
+        do {
+            let changes = try await FinanceKitSource().changes(since: Shared.financeToken(key))
+            _ = try await APIClient.shared.syncFinance(changes)
+            if let token = changes.newToken { Shared.setFinanceToken(token, key) }
+        } catch {
+            print("FinanceBackgroundSync: \(error)")
+        }
+        #endif
+    }
+
+    /// After the person connects Wallet: hourly, for new purchases and accounts.
+    static func enable() {
+        #if canImport(FinanceKit) && os(iOS)
+        if #available(iOS 26.0, *) {
+            FinanceStore.shared.enableBackgroundDelivery(for: [.transactions, .accounts], frequency: .hourly)
+        }
+        #endif
+    }
+
+    static func disable() {
+        #if canImport(FinanceKit) && os(iOS)
+        if #available(iOS 26.0, *) { FinanceStore.shared.disableAllBackgroundDelivery() }
+        #endif
+    }
+}
+
 enum FinanceRevocation {
     @MainActor
     static func check(email: String?) async {
         #if canImport(FinanceKit) && os(iOS)
         let key = FinanceSources.tokenKey(email)
-        guard UserDefaults.standard.data(forKey: key) != nil, await FinanceKitSource.accessRevoked() else { return }
+        guard Shared.financeToken(key) != nil, await FinanceKitSource.accessRevoked() else { return }
+        FinanceBackgroundSync.disable()
         do {
             try await APIClient.shared.deleteFinanceKitData()
-            UserDefaults.standard.removeObject(forKey: key)
+            Shared.setFinanceToken(nil, key)
         } catch {
             print("FinanceRevocation: delete failed, will retry next launch: \(error)")
         }

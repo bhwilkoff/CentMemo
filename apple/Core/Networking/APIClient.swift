@@ -83,16 +83,33 @@ final class APIClient {
     }
 
     private func refreshIfNeeded(force: Bool = false) async throws {
+        adoptNewerStoredSession()
         guard let s = session else { throw APIError.signedOut }
         guard force || s.expiresAt < Date().timeIntervalSince1970 + 60 else { return }
         do {
-            let data = try await raw("auth/v1/token", query: [URLQueryItem(name: "grant_type", value: "refresh_token")],
-                                     method: "POST", body: ["refresh_token": s.refreshToken], authed: false)
-            try adoptAuthResponse(data)
+            try await refresh(with: s.refreshToken)
         } catch {
+            // The Wallet extension (F2) may have rotated the refresh token while
+            // this process held the old one; try the stored one before signing out.
+            adoptNewerStoredSession()
+            if let now = session, now.refreshToken != s.refreshToken, (try? await refresh(with: now.refreshToken)) != nil { return }
             session = nil
             throw APIError.signedOut
         }
+    }
+
+    private func refresh(with token: String) async throws {
+        let data = try await raw("auth/v1/token", query: [URLQueryItem(name: "grant_type", value: "refresh_token")],
+                                 method: "POST", body: ["refresh_token": token], authed: false)
+        try adoptAuthResponse(data)
+    }
+
+    /// The app and the Wallet extension share one Keychain session; whichever
+    /// refreshed last holds the live refresh token.
+    private func adoptNewerStoredSession() {
+        guard let stored = Keychain.load(account: "session").flatMap({ try? JSONDecoder().decode(Session.self, from: $0) }),
+              stored.userID == session?.userID, stored.expiresAt > (session?.expiresAt ?? 0) else { return }
+        session = stored
     }
 
     private func adoptAuthResponse(_ data: Data) throws {

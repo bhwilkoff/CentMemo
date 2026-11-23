@@ -13,5 +13,11 @@
 	<array>
 		<string>financial-data</string>
 	</array>
+	<!-- F2: shared with the Wallet extension (session in the Keychain, history
+	     tokens in defaults). -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.learningischange.centmemo</string>
+	</array>
 </dict>
 </plist>
