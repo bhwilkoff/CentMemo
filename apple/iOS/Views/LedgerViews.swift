@@ -42,12 +42,15 @@ struct UnexaminedView: View {
                                 // band and clipped the button at the divider (open Duo, 2026-11-23).
                                 HStack {
                                     Spacer()
-                                    Button("Another", systemImage: "arrow.clockwise") {
+                                    // The icon alone (Ben, 2026-11-23: why does it "also need a text label").
+                                    Button("Another suggestion", systemImage: "arrow.clockwise") {
                                         shown += 1
                                         UISelectionFeedbackGenerator().selectionChanged()
                                     }
+                                    .labelStyle(.iconOnly)
                                     .buttonStyle(.borderless)
-                                    .font(TypeRamp.caption).foregroundStyle(Color.brandPrimary)
+                                    .font(TypeRamp.bodyStrong).foregroundStyle(Color.brandPrimary)
+                                    .frame(minWidth: 44, minHeight: 44)
                                     .accessibilityIdentifier("suggestion-another")
                                 }
                                 .onGround().listRowSeparator(.hidden).columnRowInsets(vertical: 0)

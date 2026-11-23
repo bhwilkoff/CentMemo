@@ -156,7 +156,9 @@
     if (out.length < 2) return out;
     let shown = 0;
     const box = h('div', { class: 'suggestions' }, out[0]);
-    const another = h('button', { class: 'btn-link suggestion-another', type: 'button', 'data-another': '' }, 'Another');
+    // The icon alone (Ben, 2026-11-23), named for screen readers.
+    const another = h('button', { class: 'suggestion-another', type: 'button', 'data-another': '', 'aria-label': 'Another suggestion', title: 'Another suggestion' });
+    another.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v4h-4"/></svg>';
     another.addEventListener('click', () => { shown = (shown + 1) % out.length; box.replaceChildren(out[shown], another); });
     box.append(another);
     return [box];

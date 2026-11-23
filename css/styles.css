@@ -221,7 +221,7 @@ a.row:hover .row-title { text-decoration: underline; }
 .suggestion-place .tile { width: 28px; height: 28px; font-size: .7rem; }
 .suggestion-amount { margin-left: auto; }
 .suggestion-act { font-weight: 600; color: var(--color-primary); }
-.suggestion-another { justify-self: end; font-size: var(--type-caption-size); color: var(--color-primary); background: none; border: 0; cursor: pointer; padding: var(--space-1); }
+.suggestion-another { justify-self: end; display: grid; place-items: center; width: 44px; height: 44px; color: var(--color-primary); background: none; border: 0; cursor: pointer; }
 .export-paths { margin-top: var(--space-3); display: grid; gap: var(--space-1); }
 .export-paths summary { cursor: pointer; font-weight: var(--type-body-strong-weight); padding: var(--space-2) 0; }
 .export-paths p { font-size: var(--type-caption-size); color: var(--color-text-muted); margin-bottom: var(--space-2); }
