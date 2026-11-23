@@ -1796,3 +1796,24 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Ben (2026-11-23, about 4:00pm):** the Duo leaves the house in about 15
   minutes. Duo checks (D14 themes, D15 place on Ben's data) wait until it's
   back; the iPhone 12 carries the device verification meanwhile.
+- **D14 on the iPhone 12:** ThemesStarterUITests found a real flaw in the
+  first rule: a starter's preview (Home, clay) could take a color an
+  existing theme already showed (Time with my kids). Adding Home would
+  have recolored Ben's theme.
+  - Fix: `nextColor`, a twin in JS and Swift with golden tests. A new
+    theme stores its color when created: its starter color if no theme
+    shows it, else the first free color. Every add path (memo editor,
+    first run, Settings) stores it, and the Settings preview uses it.
+  - Two golden mistakes caught on the way: my expected "clay" when Time
+    with my kids already held it, and a case whose input already
+    contained Home. Both corrected.
+  - Verified:
+    - Web: the kept theme stores moss; the previews shift nothing.
+    - iPhone 12: both UI tests pass. Frames first-themes,
+      first-themes-end and settings-starters read; Home now previews
+      olive.
+    - `tools/test_all.sh` rc=0.
+  - D14 is done on web and iPhone 12. The Duo check on Ben's data waits
+    until the Duo is back.
+- **Next:** D15 slices (the confirmed place on the event page and the
+  web), then D12 theme sharing.

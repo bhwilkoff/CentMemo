@@ -179,7 +179,7 @@
     const have = new Set(held.map((v) => v.name.trim().toLowerCase()));
     return CentThemes.STARTERS.filter((t) => !have.has(t.name.toLowerCase())).map((t) => {
       // The color it would take if added now, by the same rule.
-      const color = CentThemes.assignColors([...held, { name: t.name, created_at: '9999' }])[t.name.toLowerCase()];
+      const color = CentThemes.nextColor(held, t.name);
       const add = h('button', { type: 'button', class: 'btn btn-small' }, 'Add');
       add.addEventListener('click', () => onAdd(t, add));
       return h('li', { class: 'row row-static starter', 'data-starter': t.name },

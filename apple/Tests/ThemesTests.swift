@@ -26,4 +26,16 @@ struct ThemesTests {
         #expect(Themes.assignColors(input) == ["clay pot": "clay", "great meals": "persimmon", "time with my kids": "ochre",
                                                "being outside": "olive", "home": "moss"])
     }
+
+    @Test func nextColor() {
+        let input: [Themes.Input] = [
+            .init(name: "Time with my kids", createdAt: "2026-11-21T10:00:00Z"),
+            .init(name: "Great meals", createdAt: "2026-11-21T10:01:00Z"),
+            .init(name: "Being outside", createdAt: "2026-11-21T10:02:00Z"),
+            .init(name: "Clay pot", color: "clay", createdAt: "2026-11-22T09:00:00Z"),
+            .init(name: "Home", createdAt: "2026-11-22T09:01:00Z"),
+        ]
+        #expect(Themes.nextColor(Array(input.prefix(4)), name: "Home") == "moss")
+        #expect(Themes.nextColor(Array(input.prefix(3)), name: "Home") == "olive")
+    }
 }

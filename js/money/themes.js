@@ -49,7 +49,17 @@
     return out;
   }
 
-  const api = { PALETTE, STARTERS, assignColors };
+  // The color a new theme stores when it is created: its starter color if no
+  // theme shows it, else the first color none shows. Stored, so adding a theme
+  // never shifts the colors the person already sees.
+  function nextColor(themes, name) {
+    const shown = new Set(Object.values(assignColors(themes)));
+    const s = STARTERS.find((x) => key(x.name) === key(name));
+    if (s && !shown.has(s.color)) return s.color;
+    return PALETTE.find((c) => !shown.has(c)) || PALETTE[themes.length % PALETTE.length];
+  }
+
+  const api = { PALETTE, STARTERS, assignColors, nextColor };
   if (typeof module === 'object' && module.exports) module.exports = api;
   root.CentThemes = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

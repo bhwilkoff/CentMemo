@@ -190,9 +190,12 @@ const API = (() => {
     if (!vals) vals = must(await client().from('life_values').select('id, name, color, created_at').order('name'));
     return vals;
   }
+  // D14: a new theme stores its color now (CentThemes.nextColor), so adding one
+  // never shifts the colors of the themes the person already has.
   async function addValue(name) {
+    const color = CentThemes.nextColor(await values(), name);
     vals = null;
-    return must(await client().from('life_values').insert({ name: name.trim() }).select('id, name, color, created_at').single());
+    return must(await client().from('life_values').insert({ name: name.trim(), color }).select('id, name, color, created_at').single());
   }
   // Skip (Decision 065): a detail left out of the Story; false brings it back.
   async function setSkipped(id, skipped) {

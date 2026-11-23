@@ -261,8 +261,9 @@ console.log('import (stranger, through the real file input)');
     await shot('first-themes');
     await evaluate('document.getElementById("starter-moss").click(); [...document.querySelectorAll(".first-themes button")].find(b => b.textContent === "Keep these").click(); true');
     ok(await waitFor('!document.querySelector("#view-unexamined .first-themes")'), 'Keep these closes the card');
-    const kept = await (await fetch(P + '/rest/v1/life_values?select=name', { headers: hdr })).json();
+    const kept = await (await fetch(P + '/rest/v1/life_values?select=name,color', { headers: hdr })).json();
     ok(Array.isArray(kept) && kept.length === 1 && kept[0].name === 'Health', 'and keeps exactly the ticked theme (Health)');
+    ok(kept[0]?.color === 'moss', `which stores its own color at creation (moss; got ${kept[0]?.color})`);
     // S1: a Venmo statement through the same file input lands in its own account, with its notes.
     await evaluate('location.hash = "#/import"; true');
     await waitFor('!document.getElementById("view-import").hidden');
@@ -388,6 +389,7 @@ ok(await waitFor('/mcp\\.centmemo\\.com/.test(document.body.innerText)'), 'web S
 ok(!(await evaluate('/supabase\\.co\\/functions/.test(document.body.innerText)')), 'and never the Supabase address');
 ok(await waitFor('document.querySelectorAll(".starters [data-starter]").length > 0 && !!document.querySelector(\'.starters [data-starter="People I love"]\')'), 'Settings offers the starter themes the person does not have yet');
 ok(await evaluate('getComputedStyle(document.querySelector(\'.starters [data-starter="People I love"] .theme-mark\')).backgroundColor !== "rgba(0, 0, 0, 0)"'), 'each with its own color mark');
+ok(await evaluate(`(() => { const home = document.querySelector('.starters [data-starter="Home"] .theme-mark')?.style.background; const used = [...document.querySelectorAll('#view-settings .list:not(.starters) .theme-mark')].map(i => getComputedStyle(i).backgroundColor); return !!home && !home.includes('clay') || !used.includes(getComputedStyle(document.querySelector('.starters [data-starter="Home"] .theme-mark')).backgroundColor); })()`), 'a starter previews a color no current theme shows, so adding it shifts nothing');
 await shot('settings-starters');
 
 console.log('static pages');

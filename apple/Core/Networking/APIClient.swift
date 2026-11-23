@@ -351,9 +351,13 @@ final class APIClient {
         return vals
     }
 
+    /// D14: a new theme stores its color now (Themes.nextColor), so adding one
+    /// never shifts the colors of the themes the person already has.
     func addValue(_ name: String) async throws -> LifeValue {
+        let held = try await values()
+        let color = Themes.nextColor(held.map { .init(name: $0.name, color: $0.color, createdAt: $0.createdAt ?? "") }, name: name)
         let data = try await raw("rest/v1/life_values", query: [.init(name: "select", value: "id,name,color,created_at")], method: "POST",
-                                 body: ["name": name.trimmingCharacters(in: .whitespaces)], prefer: "return=representation")
+                                 body: ["name": name.trimmingCharacters(in: .whitespaces), "color": color], prefer: "return=representation")
         guard let v = try JSONDecoder().decode([LifeValue].self, from: data).first else { throw APIError.decoding("new value") }
         return v
     }

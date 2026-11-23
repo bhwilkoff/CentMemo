@@ -31,3 +31,12 @@ test('no two of 13 themes share a color; the 14th repeats', () => {
   assert.equal(new Set(colors.slice(0, 13)).size, 13);
   assert.equal(colors.length, 14);
 });
+
+test('a new theme stores a color nobody shows, so nothing shifts', () => {
+  // Golden twin in ThemesTests.nextColor.
+  assert.equal(T.nextColor(GOLDEN_IN.slice(0, 4), 'Home'), 'moss'); // clay chosen by Clay pot
+  assert.equal(T.nextColor(GOLDEN_IN.slice(0, 3), 'Home'), 'olive'); // clay is shown by Time with my kids
+  const before = T.assignColors(GOLDEN_IN.slice(0, 3));
+  const after = T.assignColors([...GOLDEN_IN.slice(0, 3), { name: 'People I love', color: T.nextColor(GOLDEN_IN.slice(0, 3), 'People I love'), created_at: '2026-11-23' }]);
+  for (const k of Object.keys(before)) assert.equal(after[k], before[k], k + ' kept its color');
+});

@@ -112,7 +112,7 @@ struct SettingsView: View {
                 Section("Starter themes") {
                     ForEach(offered, id: \.name) { s in
                         HStack {
-                            StarterThemeLabel(starter: s, color: Themes.preview(s, joining: values))
+                            StarterThemeLabel(starter: s, color: Themes.nextColor(joining: values, name: s.name))
                             Spacer()
                             Button("Add") { Task { await addStarter(s) } }
                                 .buttonStyle(.bordered)

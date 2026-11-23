@@ -34,10 +34,17 @@ enum Themes {
             ?? palette[Money.merchantHue(k, count: palette.count)]
     }
 
-    /// The color a starter would take if the person added it now.
-    static func preview(_ starter: Starter, joining held: [LifeValue]) -> String {
-        assignColors(held.map { .init(name: $0.name, color: $0.color, createdAt: $0.createdAt ?? "") }
-                     + [.init(name: starter.name, createdAt: "9999")])[key(starter.name)] ?? starter.color
+    /// The color a new theme stores when it is created: its starter color if no
+    /// theme shows it, else the first color none shows. Stored, so adding a
+    /// theme never shifts the colors the person already sees.
+    nonisolated static func nextColor(_ themes: [Input], name: String) -> String {
+        let shown = Set(assignColors(themes).values)
+        if let s = starters.first(where: { key($0.name) == key(name) }), !shown.contains(s.color) { return s.color }
+        return palette.first { !shown.contains($0) } ?? palette[themes.count % palette.count]
+    }
+
+    static func nextColor(joining held: [LifeValue], name: String) -> String {
+        nextColor(held.map { .init(name: $0.name, color: $0.color, createdAt: $0.createdAt ?? "") }, name: name)
     }
 
     struct Input: Sendable { let name: String; var color: String? = nil; var createdAt: String = "" }

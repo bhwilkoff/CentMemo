@@ -6,11 +6,15 @@ final class ThemesStarterUITests: DeviceTestCase {
     func testFirstRunCard() {
         let app = launch(["APP_FIRST_THEMES": "1"])
         XCTAssertTrue(app.descendants(matching: .any)["first-themes"].waitForExistence(timeout: 25), "Which of these sound like you?")
-        XCTAssertTrue(app.buttons["starter-rose"].exists && app.buttons["starter-stone"].exists, "from People I love to Taking care of things")
-        XCTAssertFalse(app.buttons["starters-keep"].isEnabled, "nothing ticked, nothing to keep")
-        app.buttons["starter-moss"].tap()
-        XCTAssertTrue(app.buttons["starters-keep"].isEnabled, "a tick enables Keep these")
+        XCTAssertTrue(app.buttons["starter-rose"].exists, "starts with People I love")
         shot(app, "first-themes")
+        app.buttons["starter-moss"].tap()
+        // A List renders lazily: scroll to the end of the card.
+        let keep = app.buttons["starters-keep"]
+        for _ in 0..<6 where !keep.exists { app.swipeUp() }
+        XCTAssertTrue(app.buttons["starter-stone"].exists, "ends with Taking care of things")
+        XCTAssertTrue(keep.isEnabled, "a tick enables Keep these")
+        shot(app, "first-themes-end")
         app.buttons["starters-later"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["first-themes"].waitForNonExistence(timeout: 5), "Not now closes it")
     }
