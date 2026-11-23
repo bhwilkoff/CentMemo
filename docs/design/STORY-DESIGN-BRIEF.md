@@ -93,7 +93,7 @@ the Setting page) join where they fit.
   or mixes (propose, don't decide).
 - D6 🟡 (event page leads with the Setting tile and the memo; money and bank facts in a footnote; a pencil stroke draws in on save ✅ iPhone 12 + Duo; Narrative/Story rows next) Memo as achievement: a written memo reads as a moment in a life, not a
   debit.
-- D7 🟡 (Unexamined: up to three suggestions with reasons, no count, iOS + web ✅; the reason and prompt words await Ben's approval) Writing tools: friendly regular check-in, recommendations of what to
+- D7 🟡 (Unexamined: one invitation card at a time, with its reason, a question that fits the purchase (meal, trip, car...), Another, no count; bills never suggested (Ben, 2026-11-23: State Farm asked "What was the day about?"); iOS + web ✅; the words await Ben's approval) Writing tools: friendly regular check-in, recommendations of what to
   write about.
 - D8 🟡 (name cleaning + store tiles on iPhone and web ✅; a Setting's page, every visit there, from the event page's "Every visit", web ✅ + iPhone ✅ seen on the Duo (the iPhone 12 tap test still blocked by Screen Time); renames, categories ⏳) Merchant tiles and categories.
 - D9 ✅ (Narrative: All / Written / Unwritten, a theme, deposits and interest on request; iOS toolbar menu + web controls) Filters (show only some kinds of items).

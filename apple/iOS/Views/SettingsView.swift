@@ -11,8 +11,65 @@ struct SettingsView: View {
     @State private var copied = false
     private let finance = FinanceSources.current
 
+    @Environment(\.horizontalSizeClass) private var width
+    @State private var pane: SettingsPane = .look
+
     var body: some View {
-        Form {
+        Group {
+            if width == .regular {
+                // The open Duo (Ben, 2026-11-23): "work like a regular sidebar with the
+                // actual settings showing on the right", one stack for the screen and
+                // the list as a plain column, as TwoPane (Ear Drama iOS-DESIGN 3.6e).
+                HStack(spacing: 0) {
+                    List {
+                        ForEach(SettingsPane.allCases) { p in
+                            Button { pane = p; UISelectionFeedbackGenerator().selectionChanged() } label: {
+                                Label(p.title, systemImage: p.symbol).frame(maxWidth: .infinity, alignment: .leading)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .listRowBackground(pane == p ? Color.brandSurfaceAlt : Color.clear)
+                            .accessibilityAddTraits(pane == p ? .isSelected : [])
+                            .accessibilityIdentifier("settings-pane-\(p.rawValue)")
+                            .onGround().columnRowInsets()
+                        }
+                    }
+                    .listStyle(.plain)
+                    .frame(width: 380)
+                    Divider()
+                    Form {
+                        section(pane)
+                        if let error { Section { Text(error).foregroundStyle(Color.semanticError) } }
+                    }
+                    .modifier(PaneMargins(on: true))
+                    .frame(maxWidth: .infinity)
+                }
+            } else {
+                Form {
+                    ForEach(SettingsPane.allCases) { p in
+                        section(p)
+                        if p == .account, let error { Section { Text(error).foregroundStyle(Color.semanticError) } }
+                    }
+                }
+            }
+        }
+        .grounded()
+        .navigationTitle("Settings")
+        // An alert, not a confirmation dialog: iOS 26 shows that dialog as a sheet with
+        // only the destructive button (cancel-role buttons hidden), and a permanent
+        // action needs a visible way back (seen on the iPhone 12, 2026-11-22).
+        .alert("Delete your account?", isPresented: $confirmDelete) {
+            Button("Keep my account", role: .cancel) { }
+            Button("Delete everything, permanently", role: .destructive) { Task { await deleteAccount() } }
+        } message: {
+            Text("This removes every event, memo, and theme, and can't be undone.")
+        }
+        .task(id: session.dataVersion) { await load() }
+    }
+
+    @ViewBuilder private func section(_ p: SettingsPane) -> some View {
+        switch p {
+        case .look:
             Section("Ground") {
                 HStack(spacing: Spacing.s3) {
                     ForEach(Ground.allCases) { g in
@@ -33,6 +90,7 @@ struct SettingsView: View {
                 }
                 .frame(maxWidth: .infinity)
             }
+        case .themes:
             Section("Themes") {
                 if values.isEmpty {
                     Text("Add a theme from any memo.").foregroundStyle(Color.brandTextMuted)
@@ -43,6 +101,7 @@ struct SettingsView: View {
                 }
                 .onDelete { idx in Task { await remove(idx) } }
             }
+        case .moneyIn:
             Section {
                 ImportButton()
                 // Ben: "share the documented path for each of the csv pathways to
@@ -70,6 +129,7 @@ struct SettingsView: View {
                     Text("CentMemo reads your Apple Card, Apple Cash, and Savings accounts and transactions and keeps them in your CentMemo account, so you can write memos on any device. \(ConnectorPolicy.walletDisclosure) [Privacy](https://centmemo.com/privacy/)")
                 }
             }
+        case .claude:
             Section {
                 Text(APIClient.mcpURL).font(.system(.caption, design: .monospaced)).textSelection(.enabled)
                 Button(copied ? "Copied" : "Copy connector address") {
@@ -81,29 +141,18 @@ struct SettingsView: View {
             } footer: {
                 Text("Claude can read your Narrative and memos but can never change them. In Claude, open Settings, then Connectors, then Add custom connector.")
             }
+        case .account:
             Section("Account") {
                 if let email = session.email { LabeledContent("Signed in as", value: email) }
                 Button("Sign out") { Task { await session.signOut() } }
                 Button("Delete account", role: .destructive) { confirmDelete = true }
             }
-            if let error { Section { Text(error).foregroundStyle(Color.semanticError) } }
+        case .about:
             Section {
                 Link("Privacy", destination: URL(string: "https://centmemo.com/privacy/")!)
                 Link("Terms", destination: URL(string: "https://centmemo.com/terms/")!)
             }
         }
-        .grounded()
-        .navigationTitle("Settings")
-        // An alert, not a confirmation dialog: iOS 26 shows that dialog as a sheet with
-        // only the destructive button (cancel-role buttons hidden), and a permanent
-        // action needs a visible way back (seen on the iPhone 12, 2026-11-22).
-        .alert("Delete your account?", isPresented: $confirmDelete) {
-            Button("Keep my account", role: .cancel) { }
-            Button("Delete everything, permanently", role: .destructive) { Task { await deleteAccount() } }
-        } message: {
-            Text("This removes every event, memo, and theme, and can't be undone.")
-        }
-        .task(id: session.dataVersion) { await load() }
     }
 
     private func load() async {
@@ -120,6 +169,32 @@ struct SettingsView: View {
     }
     private func deleteAccount() async {
         do { try await session.deleteAccount() } catch { self.error = session.handle(error) }
+    }
+}
+
+/// The Settings sidebar's sections at regular width; compact width shows them all in one list.
+enum SettingsPane: String, CaseIterable, Identifiable {
+    case look, themes, moneyIn, claude, account, about
+    var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .look: "Ground"
+        case .themes: "Themes"
+        case .moneyIn: "Money in"
+        case .claude: "Connect Claude"
+        case .account: "Account"
+        case .about: "Privacy and terms"
+        }
+    }
+    var symbol: String {
+        switch self {
+        case .look: "paintpalette"
+        case .themes: "tag"
+        case .moneyIn: "tray.and.arrow.down"
+        case .claude: "link"
+        case .account: "person.crop.circle"
+        case .about: "hand.raised"
+        }
     }
 }
 

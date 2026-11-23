@@ -127,21 +127,39 @@
 
   /* ---- Unexamined (home) ---- */
   // The words for each rule; human-written, Ben approves them (as SuggestionWords).
+  // The question fits the purchase's moment first (Ben, 2026-11-23: State Farm
+  // Insurance asked "What was the day about?"), then the rule's own question.
   const REASONS = { first_visit: 'First time here', biggest_month: 'Biggest this month', busy_day: 'Your busiest day this month', year_ago: 'A year ago you wrote' };
   const PROMPTS = { first_visit: 'What brought you here?', biggest_month: 'What was it for?', busy_day: 'What was the day about?' };
+  const MOMENTS = { meal: 'What was the occasion?', groceries: 'What were you making?', trip: 'Where were you headed?',
+    ride: 'Where were you going?', fuel: 'Where was the drive taking you?', car: 'What did the car need?', outing: 'What did you see?',
+    find: 'What did you find?', care: 'Who was it for?', gift: 'Who was it for?', giving: 'What moved you to give?', shop: 'What did you bring home?' };
+  const promptFor = (s) => MOMENTS[s.moment] || PROMPTS[s.kind] || null;
+  // One invitation at a time (as the iPhone's SuggestionCard): the question leads
+  // over a pencil line, the place is the small print, and it ends on the act.
+  function suggestionCard(s, t) {
+    const prompt = s.memo_body ? null : promptFor(s);
+    return h('a', { class: 'suggestion', href: '#/t/' + t.id, 'data-kind': s.kind },
+      h('span', { class: 'suggestion-reason' }, REASONS[s.kind] || ''),
+      s.memo_body ? h('span', { class: 'suggestion-quote' }, '\u201C' + s.memo_body + '\u201D')
+        : prompt ? h('span', { class: 'suggestion-prompt' }, prompt) : null,
+      h('span', { class: 'suggestion-place' }, tile(t), h('span', { class: 'caption' }, merchantOf(t) + ' · ' + niceDate(t.txn_date)),
+        h('span', { class: 'caption suggestion-amount' }, money(t.amount_minor, t.currency))),
+      h('span', { class: 'suggestion-act' }, s.memo_body ? 'Read it again' : 'Write a memo'));
+  }
   async function suggestionCards(rows) {
     const out = [];
     for (const s of (await API.suggestions()).slice(0, 3)) {
       const t = rows.find((r) => r.id === s.transaction_id) || await API.transaction(s.transaction_id).catch(() => null);
-      if (!t) continue;
-      out.push(h('a', { class: 'suggestion', href: '#/t/' + t.id, 'data-kind': s.kind },
-        h('span', { class: 'suggestion-reason' }, REASONS[s.kind] || ''),
-        s.memo_body
-          ? [h('span', { class: 'suggestion-quote' }, '\u201C' + s.memo_body + '\u201D'), h('span', { class: 'caption' }, niceDate(t.txn_date) + ' · ' + merchantOf(t))]
-          : [h('span', { class: 'suggestion-place' }, tile(t), h('span', {}, h('b', {}, merchantOf(t)), h('br'), h('span', { class: 'caption' }, niceDate(t.txn_date)))),
-             PROMPTS[s.kind] ? h('span', { class: 'suggestion-prompt' }, PROMPTS[s.kind]) : null]));
+      if (t) out.push(suggestionCard(s, t));
     }
-    return out;
+    if (out.length < 2) return out;
+    let shown = 0;
+    const box = h('div', { class: 'suggestions' }, out[0]);
+    const another = h('button', { class: 'btn-link suggestion-another', type: 'button', 'data-another': '' }, 'Another');
+    another.addEventListener('click', () => { shown = (shown + 1) % out.length; box.replaceChildren(out[shown], another); });
+    box.append(another);
+    return [box];
   }
 
   async function unexaminedView() {
@@ -157,10 +175,10 @@
           ? empty(body, 'Every purchase has a memo.')
           : empty(body, 'Nothing in your Narrative yet.', h('a', { class: 'btn btn-primary', href: '#/import' }, 'Import from Apple Card'));
       }
-      // D7: up to three moments worth a memo, each with its reason; no count of
-      // what is left (as the iPhone's SuggestionCard).
+      // D7: one invitation at a time, "Another" for the next of up to three; no
+      // count of what is left (as the iPhone's SuggestionCard).
       const picks = await suggestionCards(rows).catch(() => []);
-      body.replaceChildren(picks.length ? h('div', { class: 'suggestions' }, picks) : '',
+      body.replaceChildren(picks.length === 1 ? h('div', { class: 'suggestions' }, picks) : picks.length ? picks[0] : '',
         h('div', { class: 'list' }, rows.map((t) => txnRow(t))),
         count > rows.length ? h('p', { class: 'caption' }, 'Showing the newest ' + rows.length + '.') : null);
     } catch (err) { failed(body, err, unexaminedView); }

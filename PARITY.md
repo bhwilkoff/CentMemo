@@ -96,7 +96,7 @@ When shipping any user-facing feature:
 | Ledger by month | ✅ | ✅ | |
 | Story (month or value) | ✅ | ✅ | |
 | Purchase detail | ✅ | ✅ | |
-| Settings (color, values, connect Claude, account) | ✅ | ✅ | iOS color choice persists across devices (GroundUITests) |
+| Settings (color, values, connect Claude, account) | ✅ | ✅ | iOS color choice persists across devices (GroundUITests). At regular width (the open Duo) a sidebar of sections with the chosen one on the right (Ben, 2026-11-23), seen on the Duo; the web keeps one page |
 | iPad layout | n/a | 🚧 | Native top tab bar seen; rows span full landscape width, a readable-width rule waits on Ben |
 
 ## 2. Money in
@@ -110,7 +110,7 @@ When shipping any user-facing feature:
 | Themes as collections (D12) | ✅ | ✅ | Story shelf with counts; tap a theme to read only its memos; ThemesUITests, test_web_states |
 | Share a memo as a card (D12) | ✅ | ✅ | Private by default (place and amount off); iOS renders an image via ShareLink, web uses navigator.share or copies text |
 | A Setting's page, every visit (D8) | ✅ | ✅ | Web #/setting/<name> (test_web_states). iOS SettingPageView from the event header's "Every visit"; one ilike pattern (settingPattern, golden in JS + Swift) plus an exact cleaned-name match. seen on the open Duo with build 16 (Apple Store, 107 visits; the long-name header whole). The iPhone 12 tap test is still blocked by a Screen Time limit |
-| Suggestions on Unexamined (D7) | ✅ | ✅ | memo_suggestions() in the database; same cards and words on both; no count |
+| Suggestions on Unexamined (D7) | ✅ | ✅ | memo_suggestions() in the database: bills never suggested (bill MCCs, or the same charge in two earlier months), three different places, a moment per pick so the question fits (SuggestionWords / MOMENTS). One invitation card at a time with Another; no count. Seen on the open Duo and web; the iPhone 12 tap tier is blocked by Screen Time |
 | Connect Apple Wallet (FinanceKit sync, history tokens) | n/a | 🚧 | Entitlement granted 2026-11-22 and signed into build 10; the iPhone 12 offers Connect (WalletAvailabilityUITests). Sync path verified with the sample source; the real sync is Ben's to run on his own phone |
 | FinanceKit background delivery | n/a | ⏳ | iOS 26 extension, after the entitlement |
 

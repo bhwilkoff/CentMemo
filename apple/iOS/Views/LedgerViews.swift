@@ -6,6 +6,7 @@ struct UnexaminedView: View {
     @Environment(SessionStore.self) private var session
     @State private var entries: [LedgerEntry] = []
     @State private var picked: [(APIClient.Suggestion, LedgerEntry)] = []
+    @State private var shown = 0
     @State private var hasAny = true
     @State private var loading = true
     @State private var error: String?
@@ -26,16 +27,30 @@ struct UnexaminedView: View {
                 }
             } else {
                 List {
-                    // D7: up to three moments worth a memo, each with its reason; no
-                    // count of what is left (story-design-research: no to-do lists).
+                    // D7: one invitation at a time, with its reason; "Another" shows the
+                    // next of up to three. No count of what is left (no to-do lists).
                     if !picked.isEmpty {
+                        let (s, e) = picked[shown % picked.count]
                         Section {
-                            ForEach(picked, id: \.0.transactionID) { s, e in
-                                EntryLink(id: e.id) { SuggestionCard(suggestion: s, entry: e) }
-                                    .skipAction(e) { await skip(e) }
-                                    .listRowSeparator(.hidden)
-                                    .listRowBackground(Color.clear)
-                                    .listRowInsets(EdgeInsets(top: Spacing.s1, leading: PaneEdges.box, bottom: Spacing.s1, trailing: PaneEdges.box))
+                            EntryLink(id: e.id) { SuggestionCard(suggestion: s, entry: e) }
+                                .skipAction(e) { await skip(e) }
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(Color.clear)
+                                .listRowInsets(EdgeInsets(top: Spacing.s1, leading: PaneEdges.box, bottom: Spacing.s2, trailing: PaneEdges.box))
+                            if picked.count > 1 {
+                                // A row of its own on the ground: a section footer drew a black
+                                // band and clipped the button at the divider (open Duo, 2026-11-23).
+                                HStack {
+                                    Spacer()
+                                    Button("Another", systemImage: "arrow.clockwise") {
+                                        shown += 1
+                                        UISelectionFeedbackGenerator().selectionChanged()
+                                    }
+                                    .buttonStyle(.borderless)
+                                    .font(TypeRamp.caption).foregroundStyle(Color.brandPrimary)
+                                    .accessibilityIdentifier("suggestion-another")
+                                }
+                                .onGround().listRowSeparator(.hidden).columnRowInsets(vertical: 0)
                             }
                         }
                     }

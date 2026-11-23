@@ -170,7 +170,9 @@ final class APIClient {
         let kind: String
         let transactionID: String
         let memoBody: String?
-        enum CodingKeys: String, CodingKey { case kind, transactionID = "transaction_id", memoBody = "memo_body" }
+        /// What kind of purchase it was (a meal, a trip...), so the question fits it.
+        var moment: String? = nil
+        enum CodingKeys: String, CodingKey { case kind, transactionID = "transaction_id", memoBody = "memo_body", moment }
     }
 
     func suggestions() async throws -> [Suggestion] {

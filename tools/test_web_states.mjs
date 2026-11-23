@@ -98,6 +98,13 @@ ok(await waitFor('document.querySelectorAll(".row").length > 0'), 'owner sees ro
 ok(!(await evaluate('!!document.querySelector(".state-empty")')), 'and no empty state');
 ok(await waitFor('document.querySelectorAll("#view-unexamined .suggestion").length > 0'), 'Unexamined suggests moments worth a memo (D7)');
 ok(await evaluate('[...document.querySelectorAll("#view-unexamined .suggestion-reason")].every(r => /First time here|Biggest this month|Your busiest day|A year ago you wrote/.test(r.textContent))'), 'each suggestion says why it was picked');
+ok(await evaluate('document.querySelectorAll("#view-unexamined .suggestion").length === 1'), 'one invitation at a time, not a list of cards (Ben, 2026-11-23)');
+ok(await evaluate('[...document.querySelectorAll("#view-unexamined .suggestion-act")].every(a => /Write a memo|Read it again/.test(a.textContent))'), 'the card ends on the act of writing');
+if (await evaluate('!!document.querySelector("#view-unexamined [data-another]")')) {
+  const first = await evaluate('document.querySelector("#view-unexamined .suggestion").getAttribute("href")');
+  await evaluate('document.querySelector("#view-unexamined [data-another]").click()');
+  ok(await evaluate('document.querySelector("#view-unexamined .suggestion").getAttribute("href") !== ' + JSON.stringify(first)), 'Another shows a different moment');
+}
 ok(!(await evaluate('!!document.querySelector("#h-unexamined .pencil-circle")')), 'no count of what is left');
 await shot('happy-unexamined');
 

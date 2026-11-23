@@ -1425,3 +1425,40 @@ Apple.
   Each row puts the date at the left and the amount about 1,500pt away at the
   right, with nothing between them when there is no memo.
 - **Still blocked:** the iPhone 12 tap test (Screen Time).
+
+### Design tick 21 — 2026-11-23 — an invitation card, relevant questions, a Settings sidebar
+- **Ben:** "the recommendations on the unexamined page look almost identical
+  to the regular rows and the questions are often incredibly irrelivent
+  (State Farm Insurance - 'What was the day about?'). We need to create a
+  proper card that is actually encouraging you to to write a memo that is
+  relevant." Also: Settings on the open Duo should "work like a regular
+  sidebar with the actual settings showing on the right".
+- **The database** (migration 20261123010000, applied):
+  - Bills are never suggested: insurance and finance, utilities, phone and
+    cable, and subscriptions by MCC, plus the same charge at the same place in
+    two earlier months.
+  - The three picks are at three different places.
+  - Each pick names its moment (meal, groceries, trip, ride, fuel, car,
+    outing, find, care, giving, gift, shop), from the MCC or the Apple Card
+    category.
+  - Checked against Ben's own data:
+    - before: State Farm and two Apple Store picks
+    - after: AutoNation "car", Apple Store "shop", Uber Eats "meal"
+- **The card (iOS and web):**
+  - one invitation at a time, with "Another"
+  - the question leads, in the serif, over a pencil line
+  - the place, date and amount are the small print
+  - it ends on "Write a memo"
+  - the questions fit the moment ("What did the car need?", "What was the
+    occasion?"); these are my drafts and await Ben's approval
+- **Settings at regular width:** a 380pt sidebar of sections (Ground, Themes,
+  Money in, Connect Claude, Account, Privacy and terms), with the chosen
+  section's form on the right. Compact width keeps the one list.
+- **Verified:**
+  - On the open Duo with Ben's own data, frames read: the card, then a fix
+    (a footer drew a black band and clipped "Another"; it is now a row of its
+    own, and the question is a size smaller), and the Settings sidebar.
+  - On the web, test_web_states: one card; it ends on the act; Another shows
+    a different moment. happy-unexamined.png read.
+  - `tools/test_all.sh` passes (rc=0).
+- **Not verified:** the iPhone 12 (Screen Time still covers CentMemo).
