@@ -17,11 +17,15 @@ struct LedgerEntry: Decodable, Identifiable, Hashable, Sendable {
     let skippedAt: String?
     var memo: Memo?
     var accountName: String?
+    /// D8 renames: the person's name for this Setting, filled in by APIClient.
+    var placeName: String?
 
-    var displayMerchant: String {
+    /// The Setting's key: the bank's text cleaned (one algorithm with the web).
+    var settingKey: String {
         let name = Money.cleanMerchant(merchant.isEmpty ? description : merchant)
         return name.isEmpty ? "Unknown" : name
     }
+    var displayMerchant: String { placeName ?? settingKey }
     var isCredit: Bool { amountMinor > 0 }
     var isSkipped: Bool { skippedAt != nil }
     /// Cash back and interest landing in Apple Cash or Savings (FinanceKit types

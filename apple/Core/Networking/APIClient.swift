@@ -73,6 +73,7 @@ final class APIClient {
     func signOut() async {
         _ = try? await raw("auth/v1/logout", method: "POST", body: [String: String](), authed: true)
         session = nil
+        settingNames = nil
     }
 
     /// In-app account deletion (Decision 035): every row cascades.
@@ -159,10 +160,42 @@ final class APIClient {
 
     private static let txnColumns = "id,account_id,txn_date,posted_date,amount_minor,currency,description,merchant,category,plain_category,txn_type,status,skipped_at"
 
+    // MARK: - Setting names (D8 renames): the person's name for a place, keyed by its cleaned name
+
+    private(set) var settingNames: [String: String]?
+
+    func loadSettingNames() async throws -> [String: String] {
+        if let settingNames { return settingNames }
+        struct Row: Decodable { let setting: String; let name: String }
+        let rows: [Row] = try await rest("setting_names", [.init(name: "select", value: "setting,name")])
+        let names = Dictionary(rows.map { ($0.setting, $0.name) }, uniquingKeysWith: { a, _ in a })
+        settingNames = names
+        return names
+    }
+
+    /// An empty name, or the bank's own, clears the rename.
+    func renameSetting(_ setting: String, to name: String) async throws {
+        let n = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        if n.isEmpty || n == setting {
+            try await raw("rest/v1/setting_names", query: [.init(name: "setting", value: "eq.\(setting)")], method: "DELETE")
+            settingNames?[setting] = nil
+        } else {
+            try await raw("rest/v1/setting_names", query: [.init(name: "on_conflict", value: "user_id,setting")], method: "POST",
+                          body: ["setting": setting, "name": n, "updated_at": ISO8601DateFormatter().string(from: Date())],
+                          prefer: "resolution=merge-duplicates")
+            settingNames?[setting] = n
+        }
+    }
+
+    private func named(_ rows: [LedgerEntry]) async -> [LedgerEntry] {
+        guard let names = try? await loadSettingNames(), !names.isEmpty else { return rows }
+        return rows.map { var e = $0; e.placeName = names[e.settingKey]; return e }
+    }
+
     func unexamined(limit: Int = 200) async throws -> [LedgerEntry] {
-        try await rest("unexamined_transactions", [.init(name: "select", value: Self.txnColumns),
+        await named(try await rest("unexamined_transactions", [.init(name: "select", value: Self.txnColumns),
                                                    .init(name: "order", value: "txn_date.desc"),
-                                                   .init(name: "limit", value: String(limit))])
+                                                   .init(name: "limit", value: String(limit))]))
     }
 
     /// D7: what to write about, chosen in the database by readable rules (memo_suggestions).
@@ -201,11 +234,11 @@ final class APIClient {
     }
 
     func month(_ ym: String) async throws -> [LedgerEntry] {
-        try await rest("transactions", [.init(name: "select", value: Self.txnColumns + ",memos(body,memo_values(value_id,life_values(name)))"),
+        await named(try await rest("transactions", [.init(name: "select", value: Self.txnColumns + ",memos(body,memo_values(value_id,life_values(name)))"),
                                         .init(name: "txn_date", value: "gte.\(ym)-01"),
                                         .init(name: "txn_date", value: "lte.\(LedgerDate.lastDay(ym))"),
                                         .init(name: "order", value: "txn_date.desc"),
-                                        .init(name: "limit", value: "2000")])
+                                        .init(name: "limit", value: "2000")]))
     }
 
     /// D8: every event at one Setting (as the web's atSetting): the pattern finds each
@@ -217,14 +250,14 @@ final class APIClient {
             .init(name: "select", value: Self.txnColumns + ",memos(body,memo_values(value_id,life_values(name)))"),
             .init(name: "or", value: "(merchant.ilike.\(p),description.ilike.\(p))"),
             .init(name: "order", value: "txn_date.desc"), .init(name: "limit", value: "1000")])
-        return rows.filter { $0.displayMerchant == name }
+        return await named(rows.filter { $0.settingKey == name })
     }
 
     func transaction(_ id: String) async throws -> LedgerEntry? {
         let rows: [LedgerEntry] = try await rest("transactions", [
             .init(name: "select", value: Self.txnColumns + ",accounts(display_name),memos(body,memo_values(value_id,life_values(name)))"),
             .init(name: "id", value: "eq.\(id)"), .init(name: "limit", value: "1")])
-        return rows.first
+        return await named(rows).first
     }
 
     enum StoryScope: Hashable { case month(String), value(String) }
@@ -242,7 +275,7 @@ final class APIClient {
             if links.isEmpty { return [] }
             q.append(.init(name: "id", value: "in.(\(links.map(\.transaction_id).joined(separator: ",")))"))
         }
-        return try await rest("transactions", q)
+        return await named(try await rest("transactions", q))
     }
 
     // MARK: - The person's ground (Decision 059)

@@ -33,7 +33,7 @@ struct EntryDetailView: View {
                     // (Decision 065: memo, Setting; the Chronicle direction).
                     Section {
                         // D8: the Setting heads the page and opens every visit there.
-                        NavigationLink(value: SettingRoute(name: e.displayMerchant)) {
+                        NavigationLink(value: SettingRoute(name: e.settingKey)) {
                             HStack(alignment: .center, spacing: Spacing.s3) {
                                 StoreTile(name: e.displayMerchant, category: e.category, size: 56)
                                 VStack(alignment: .leading, spacing: 2) {

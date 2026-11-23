@@ -99,7 +99,7 @@ const API = (() => {
     must(await client().auth.signInWithIdToken({ provider: 'apple', token: h.get('id_token'), nonce: saved.raw }));
     return saved.back || '';
   }
-  async function signOut() { await client().auth.signOut(); }
+  async function signOut() { names = null; await client().auth.signOut(); }
   async function deleteAccount() {
     must(await client().rpc('delete_my_account'));
     await client().auth.signOut({ scope: 'local' });
@@ -200,6 +200,21 @@ const API = (() => {
   async function deleteValue(id) {
     must(await client().from('life_values').delete().eq('id', id));
   }
+  // D8 renames: the person's name for a Setting, keyed by its cleaned name.
+  let names = null;
+  async function settingNames() {
+    if (!names) {
+      const rows = must(await client().from('setting_names').select('setting, name'));
+      names = Object.fromEntries(rows.map((r) => [r.setting, r.name]));
+    }
+    return names;
+  }
+  async function renameSetting(setting, name) {
+    const n = (name || '').trim();
+    if (n && n !== setting) must(await client().from('setting_names').upsert({ setting, name: n, updated_at: new Date().toISOString() }));
+    else must(await client().from('setting_names').delete().eq('setting', setting));
+    if (names) { if (n && n !== setting) names[setting] = n; else delete names[setting]; }
+  }
 
   /* ---- Writing the memo (only the person; agents are refused in SQL) ---- */
   async function saveMemo(transactionId, body, valueIds) {
@@ -245,6 +260,6 @@ const API = (() => {
   return {
     MCP_URL, client, session, onAuthChange, signInWithApple, finishAppleRedirect, signOut, deleteAccount,
     unexamined, suggestions, themeCounts, transactionCount, month, latestMonth, atSetting, transaction, stories,
-    values, addValue, setSkipped, renameValue, deleteValue, saveMemo, importAppleCard, importExport, GROUNDS, ground, setGround,
+    values, addValue, setSkipped, renameValue, deleteValue, settingNames, renameSetting, saveMemo, importAppleCard, importExport, GROUNDS, ground, setGround,
   };
 })();

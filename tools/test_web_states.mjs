@@ -183,6 +183,16 @@ console.log('event page (D6): the Setting and the memo lead; the money is a foot
   ok(await evaluate('/penguins/.test(document.querySelector("#view-setting .thread").innerText) && !/Denver Zoo/.test(document.querySelector("#view-setting .thread").innerText)'), 'with its memos, the place said once at the top');
   ok(!(await evaluate('/\\bnull\\b/.test(document.querySelector("#view-setting").innerText)')), 'no stray "null" on the Setting page');
   await shot('setting');
+  // D8 renames: the person names the place; clearing the name brings the bank's back.
+  const renameTo = async (v) => {
+    await evaluate('document.querySelector("#view-setting [data-rename]").click(); true');
+    await evaluate(`(() => { const i = document.querySelector("[data-rename-input]"); i.value = ${JSON.stringify(v)}; i.form.requestSubmit(); return true; })()`);
+  };
+  await renameTo('The Zoo');
+  ok(await waitFor('document.querySelector("#h-setting")?.textContent === "The Zoo" && /On the statement: Denver Zoo/.test(document.querySelector("#view-setting").innerText)'), 'Rename names the Setting, the statement name kept beside it');
+  await shot('setting-renamed');
+  await renameTo('');
+  ok(await waitFor('document.querySelector("#h-setting")?.textContent === "Denver Zoo" && !/On the statement/.test(document.querySelector("#view-setting").innerText)'), 'a cleared name brings the bank\'s name back');
   await evaluate('document.querySelector("#view-setting [data-back]").click(); true');
   ok(await waitFor('location.hash === "#/t/a3b8c10c-68b8-4bfe-9380-c87b7015a49d" && !document.getElementById("view-txn").hidden'), 'Back returns to the event');
 }

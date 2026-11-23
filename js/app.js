@@ -48,7 +48,10 @@
     return d.toISOString().slice(0, 7);
   }
   const thisMonth = () => new Date().toISOString().slice(0, 7);
-  const merchantOf = (t) => CentMoney.cleanMerchant(t.merchant || t.description) || 'Unknown';
+  // D8: a Setting's key is its cleaned name; the person's rename, when there is one, is what shows.
+  let NAMES = {};
+  const placeKey = (t) => CentMoney.cleanMerchant(t.merchant || t.description) || 'Unknown';
+  const merchantOf = (t) => NAMES[placeKey(t)] || placeKey(t);
   const TILE_HUES = ['clay', 'ochre', 'sage', 'slate', 'rose', 'stone'];
   // D8: the store tile, the same initials and hue as the iPhone (Money.merchantHue).
   function tile(t, big) {
@@ -100,6 +103,7 @@
     const parts = (location.hash.replace(/^#\/?/, '') || 'unexamined').split('/');
     const [name, arg] = parts;
     try {
+      try { NAMES = await API.settingNames(); } catch (_) { NAMES = {}; }
       if (name === 'ledger') { lastList = location.hash; return await ledgerView(arg); }
       if (name === 't' && arg) return await txnView(arg);
       if (name === 'setting' && arg) return await settingView(decodeURIComponent(arg));
@@ -378,7 +382,7 @@
           h('div', { class: 'txn-title' },
             h('h1', { id: 'h-txn', class: 'view-heading' }, merchantOf(t)),
             h('p', { class: 'caption' }, niceDate(t.txn_date) + ' · ',
-              h('a', { href: '#/setting/' + encodeURIComponent(merchantOf(t)), 'data-setting': '' }, 'Every visit')))),
+              h('a', { href: '#/setting/' + encodeURIComponent(placeKey(t)), 'data-setting': '' }, 'Every visit')))),
         h('label', { class: 'field-label', for: 'memo-body' }, 'Memo'),
         area,
         h('p', { class: 'field-label' }, 'Themes'),
@@ -411,13 +415,28 @@
       if (!rows.length) return empty(body, 'Nothing at ' + name + ' in your CentMemo.');
       const written = rows.filter((t) => { const m = t.memos && (Array.isArray(t.memos) ? t.memos[0] : t.memos); return m && m.body; }).length;
       const first = rows[rows.length - 1].txn_date;
+      const shown = NAMES[name] || name;
+      const heading = h('h1', { id: 'h-setting', class: 'view-heading' }, shown);
+      // D8 renames: the person's name for this place; cleared, the bank's name returns.
+      const rename = h('button', { class: 'btn btn-small', type: 'button', 'data-rename': '' }, 'Rename');
+      rename.addEventListener('click', () => {
+        const input = h('input', { type: 'text', value: shown, maxlength: '80', 'aria-label': 'Name for ' + name, 'data-rename-input': '' });
+        const form = h('form', { class: 'rename-form' }, input, h('button', { class: 'btn btn-small', type: 'submit' }, 'Save'));
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          try { await API.renameSetting(name, input.value); NAMES = await API.settingNames(); settingView(name); } catch (err) { failed(body, err, () => settingView(name)); }
+        });
+        heading.replaceWith(form); rename.remove(); input.focus(); input.select();
+      });
       body.replaceChildren(
         h('div', { class: 'txn-head' }, tile(rows[0], true),
           h('div', { class: 'txn-title' },
-            h('h1', { id: 'h-setting', class: 'view-heading' }, name),
+            heading,
             h('p', { class: 'caption', 'data-setting-summary': '' },
               [rows.length === 1 ? '1 visit' : rows.length + ' visits', rows.length > 1 ? 'since ' + niceDate(first) : null,
-                written ? (written === 1 ? '1 memo' : written + ' memos') : null].filter(Boolean).join(' · ')))),
+                written ? (written === 1 ? '1 memo' : written + ' memos') : null].filter(Boolean).join(' · ')),
+            shown !== name ? h('p', { class: 'caption' }, 'On the statement: ' + name) : null,
+            rename)),
         h('div', { class: 'thread' }, rows.map((t) => threadRow(t, { place: false }))));
     } catch (err) { failed(body, err, () => settingView(name)); }
   }

@@ -182,6 +182,9 @@ a.row:hover .row-title { text-decoration: underline; }
 .tile-big { width: 56px; height: 56px; border-radius: 14px; font-size: 20px; }
 .txn-head { display: flex; align-items: center; gap: var(--space-3); }
 .txn-title { min-width: 0; }
+.txn-title [data-rename] { margin-top: var(--space-2); }
+.rename-form { display: flex; gap: var(--space-2); align-items: center; }
+.rename-form input { flex: 1; min-width: 0; font: inherit; font-size: var(--type-body-size); min-height: 44px; }
 .share-panel { margin-top: var(--space-4); }
 .share-panel summary { cursor: pointer; color: var(--color-primary); padding: var(--space-2) 0; }
 .share-panel .filter-check { margin-top: var(--space-2); }

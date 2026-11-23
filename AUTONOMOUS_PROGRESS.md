@@ -1511,3 +1511,28 @@ Apple.
 - A database-only tick: the Mac was loaded (load 9: Android Studio, media
   analysis), so no local builds ran. The full suite runs at the next quiet
   moment.
+
+### Design tick 24 — 2026-11-23 — D8 renames
+- **Built:** the person names a Setting, and every visit there takes the name.
+  - `public.setting_names` (migration 20261123040000, applied). One row per
+    place, keyed by the cleaned name both clients already compute. Owner-only
+    RLS; agents are refused like every other table; added to test_rls.
+  - Web: Rename on the Setting page. Rows, tiles, cards, the event page and
+    the share card show the name. "On the statement: ..." sits under a
+    renamed place. Clearing the name brings the bank's name back.
+    `placeKey` stays the route key.
+  - iOS: `LedgerEntry.settingKey` (the key) and `placeName`. APIClient
+    loads the names once and fills them on every ledger read. A pencil in
+    the Setting page toolbar opens a native alert with the name, plus
+    "Use the statement name".
+- **Verified:**
+  - Web: test_web_states renames Denver Zoo to "The Zoo" and clears it again
+    (frame setting-renamed.png read).
+  - The Duo (build 16 debug, Ben's data): the Apple Store page renders with
+    the pencil under Back (frame read). The save itself was not pressed,
+    because it would write into Ben's real account.
+  - The iPhone 12 is still under Screen Time.
+  - `tools/test_all.sh`: rc=0, ALL PASS (niced; load about 9, from
+    contactsd and Chrome; no other builds running).
+- **Not done:** the connector still shows Claude the bank's names. The next
+  step is mcp reading setting_names.
