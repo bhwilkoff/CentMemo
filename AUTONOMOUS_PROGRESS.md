@@ -1311,3 +1311,18 @@ Apple.
   menu; the tap tier stays off Ben's phone).
 - **Next:** D14 themes, once Ben answers; sharing a whole theme; public links
   later (they need server pages).
+
+### 2026-11-23 — TestFlight 1.0 (15): the design pass so far
+- Full iPhone 12 tier before the upload: 21 PASS, 3 SKIP by design; RLS
+  plus the fake-data guard pass.
+- 1.0 (15) uploaded (not submitted for review; L2 stays held). In it, since
+  14:
+  - the Duo layout by Ear Drama's rules (DESIGN L)
+  - deposits quiet by default
+  - suggestions with reasons and no count
+  - filters
+  - the month strip
+  - Themes as collections
+  - sharing a memo
+  - Venmo, PayPal and Cash App import with the paths
+  - the test-account guards
