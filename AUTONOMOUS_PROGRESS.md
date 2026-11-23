@@ -125,6 +125,7 @@ Apple.
 ### Ben (2026-11-23): "Yes, let's start working on all of these items, in order within the autonomous loop."
 The loop takes these in order, after the D8 Rename save on the iPhone 12.
 Heavier work is allowed now: no competing sessions.
+Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wait (20-30 min heartbeat, plus a push notification) only when blocked on Ben, a locked device, or an external build or upload.
 1. F1 real FinanceKit sync on Ben's phone, then F2 background delivery (iOS 26).
 2. D14 default themes (Ben approves the set and words); this fixes D11's collisions.
 3. D15 Place. Ben: "I think you can have it predict a specific location for
