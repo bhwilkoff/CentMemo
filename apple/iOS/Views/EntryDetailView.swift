@@ -41,7 +41,7 @@ struct EntryDetailView: View {
                         .listRowBackground(Color.clear)
                         // In a pane the Form's cards stand 16pt off the divider; the header
                         // stands with them (Ear Drama iOS-DESIGN §3.6e).
-                        .listRowInsets(EdgeInsets(top: 0, leading: inPane ? Spacing.s4 : 0, bottom: 0, trailing: 0))
+                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                     }
                     Section {
                         TextEditor(text: $memo)
@@ -133,6 +133,9 @@ struct EntryDetailView: View {
                 ContentUnavailableView("This purchase isn't in your CentMemo.", systemImage: "questionmark")
             }
         }
+        // In a pane the Form's cards stood 1pt off the divider and 2pt off the strip
+        // (measured on the open Duo, 2026-11-22): give them the pane's 20pt.
+        .modifier(PaneMargins(on: inPane))
         .grounded()
         .navigationTitle(inPane ? "" : (entry?.displayMerchant ?? ""))
         .modifier(InlineTitle(on: !inPane))

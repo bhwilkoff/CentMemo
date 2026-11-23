@@ -11,6 +11,57 @@ extension EnvironmentValues {
     @Entry var inPane = false
 }
 
+/// The two edges at regular width (Ear Drama iOS-DESIGN §3.6b, §3.6e, adopted
+/// 2026-11-22 after Ben: "the padding being inconsistent across multiple
+/// surfaces"): words (titles, rows, totals, the month bar) stand 20pt in from
+/// both edges of a column, as the screen title does; boxes (cards) stand 16pt
+/// in. The right pane keeps 20pt from the divider and from the tab strip.
+/// Compact width keeps the 16pt it always had.
+enum PaneEdges {
+    static let words: CGFloat = 20
+    static let box: CGFloat = 16
+    static let pane: CGFloat = 20
+}
+
+/// Ear Drama's PageMargins (iOS-DESIGN §3.6a): a List counts its content margins from
+/// its own edges, not the safe area, so the margin adds the List's measured safe-area
+/// insets (the tab strip's, at the trailing edge). Without that the pane's cards ran
+/// under the strip (seen on the open Duo, 2026-11-22).
+struct PaneMargins: ViewModifier {
+    let on: Bool
+    @State private var safe = EdgeInsets()
+    func body(content: Content) -> some View {
+        if on {
+            content
+                .contentMargins(.leading, PaneEdges.pane + safe.leading, for: .scrollContent)
+                .contentMargins(.trailing, PaneEdges.pane + safe.trailing, for: .scrollContent)
+                .onGeometryChange(for: EdgeInsets.self) { $0.safeAreaInsets } action: { safe = $0 }
+        } else {
+            content
+        }
+    }
+}
+
+extension View {
+    /// A text row's horizontal insets: the words edge at regular width, 16pt compact.
+    func columnRowInsets(vertical: CGFloat? = nil) -> some View { modifier(ColumnRowInsets(vertical: vertical)) }
+}
+
+private struct ColumnRowInsets: ViewModifier {
+    var vertical: CGFloat?
+    @Environment(\.horizontalSizeClass) private var width
+    func body(content: Content) -> some View {
+        let h = width == .regular ? PaneEdges.words : Spacing.s4
+        if let vertical {
+            content.listRowInsets(EdgeInsets(top: vertical, leading: h, bottom: vertical, trailing: h))
+        } else if #available(iOS 26.0, *) {
+            content.listRowInsets(.horizontal, h)
+        } else {
+            content.listRowInsets(EdgeInsets(top: 11, leading: h, bottom: 11, trailing: h))
+        }
+    }
+}
+
 @Observable final class PaneSelection {
     var route: EntryRoute?
 }

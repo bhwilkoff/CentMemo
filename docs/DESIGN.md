@@ -72,3 +72,30 @@ Unexamined count; a faint wavy rule between rows (web) or the system divider
 writes at length (the memo field, story entries).
 
 **D2. Test at 375px first,** light and dark, before desktop.
+
+## L. Regular width: the open iPhone Duo (and any wide window)
+
+Ben, 2026-11-22: *"The duo column design still looks terrible. With the
+padding being inconsistent across multiple surfaces."* These rules follow Ear
+Drama's iOS-DESIGN §3.6, which already solved this. They are measured, not
+guessed: `tools/design_shots.py --device duo`, with guide lines drawn on the
+inner-display frame.
+
+- **L1. One stack per screen.** At regular width a list and the purchase it
+  opens are a plain column beside a pane, inside ONE NavigationStack
+  (`TwoPane`). A stack per pane picks up the tab strip's 84pt inset, and the
+  list ended short of the divider.
+- **L2. Two edges in the column.** Words (the screen title, rows, totals,
+  the month bar, the thread) stand **20pt** in from both edges of the column
+  (`PaneEdges.words`, `columnRowInsets()`). Boxes (suggestion cards) stand
+  **16pt** in (`PaneEdges.box`). Amounts end on the words edge, never at the
+  divider.
+- **L3. The pane keeps 20pt from the divider and from the strip**
+  (`PaneMargins`). A List counts content margins from its own edges, so the
+  margin adds the List's measured safe-area insets; the header stands on the
+  cards' edge.
+- **L4. Compact is unchanged.** Every closed phone and the iPhone 12 keep
+  16pt. The branch is on width only, never on the device.
+- **L5. Seeing it.** Any regular-width change is captured on the Duo's inner
+  display and checked against the guides at 16, 20, column−20, column−16,
+  divider+20 and strip−20 before it is called done.

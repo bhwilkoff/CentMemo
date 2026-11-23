@@ -35,12 +35,12 @@ struct UnexaminedView: View {
                                     .skipAction(e) { await skip(e) }
                                     .listRowSeparator(.hidden)
                                     .listRowBackground(Color.clear)
-                                    .listRowInsets(EdgeInsets(top: Spacing.s1, leading: Spacing.s4, bottom: Spacing.s1, trailing: Spacing.s4))
+                                    .listRowInsets(EdgeInsets(top: Spacing.s1, leading: PaneEdges.box, bottom: Spacing.s1, trailing: PaneEdges.box))
                             }
                         }
                     }
                     ForEach(entries) { e in
-                        EntryLink(id: e.id) { EntryRow(entry: e) }.onGround()
+                        EntryLink(id: e.id) { EntryRow(entry: e) }.onGround().columnRowInsets()
                             .skipAction(e) { await skip(e) }
                     }
                 }
@@ -101,21 +101,20 @@ struct LedgerView: View {
         LoadState(isLoading: loading && entries.isEmpty, error: error, retry: load) {
             List {
                 if let month {
-                    Section {
-                        totals.onGround()
-                    } header: {
-                        HStack {
-                            Button { step(-1) } label: { Image(systemName: "chevron.left") }
-                                .accessibilityLabel("Previous month")
-                            Spacer()
-                            Text(LedgerDate.monthName(month)).font(TypeRamp.bodyStrong).foregroundStyle(Color.brandText)
-                            Spacer()
-                            Button { step(1) } label: { Image(systemName: "chevron.right") }
-                                .accessibilityLabel("Next month")
-                        }
-                        .padding(.horizontal, Spacing.s1)
-                        .textCase(nil)
+                    // The month bar is a row, so it stands on the same edges as every
+                    // other row (as a section header it ran past the column's edge).
+                    HStack {
+                        Button { step(-1) } label: { Image(systemName: "chevron.left") }
+                            .accessibilityLabel("Previous month")
+                        Spacer()
+                        Text(LedgerDate.monthName(month)).font(TypeRamp.bodyStrong).foregroundStyle(Color.brandText)
+                        Spacer()
+                        Button { step(1) } label: { Image(systemName: "chevron.right") }
+                            .accessibilityLabel("Next month")
                     }
+                    .buttonStyle(.borderless)
+                    .onGround().listRowSeparator(.hidden).columnRowInsets()
+                    totals.onGround().columnRowInsets()
                 }
                 if entries.isEmpty {
                     Text("Nothing recorded this month.").foregroundStyle(Color.brandTextMuted).onGround()
@@ -123,7 +122,7 @@ struct LedgerView: View {
                     ForEach(filter.apply(entries)) { e in
                         EntryLink(id: e.id) { ThreadRow(entry: e) }.onGround()
                             .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets(top: 0, leading: Spacing.s4, bottom: 0, trailing: Spacing.s4))
+                            .columnRowInsets(vertical: 0)
                             .skipAction(e) { await skip(e, !e.isSkipped) }
                     }
                     let quiet = entries.filter { !$0.isSkipped && $0.isQuietDetail }.count
@@ -132,7 +131,7 @@ struct LedgerView: View {
                             Text(filter.details ? "Hide deposits and interest" : "\(quiet) deposits and interest hidden · Show")
                                 .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
                         }
-                        .buttonStyle(.plain).onGround().listRowSeparator(.hidden)
+                        .buttonStyle(.plain).onGround().listRowSeparator(.hidden).columnRowInsets()
                         .accessibilityIdentifier("quiet-details")
                     }
                     let skipped = entries.filter(\.isSkipped)
@@ -142,7 +141,7 @@ struct LedgerView: View {
                         Section {
                             if showSkipped {
                                 ForEach(skipped) { e in
-                                    EntryLink(id: e.id) { EntryRow(entry: e).opacity(0.6) }.onGround()
+                                    EntryLink(id: e.id) { EntryRow(entry: e).opacity(0.6) }.onGround().columnRowInsets()
                                         .skipAction(e) { await skip(e, false) }
                                 }
                             }

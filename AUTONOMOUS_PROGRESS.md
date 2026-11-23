@@ -1233,3 +1233,22 @@ Apple.
     page keeps globals). Each step is now its own function.
 - **Next:** D11 the color-coded month strip, or D12 Themes as collections;
   D14 default themes for Ben's review.
+
+### Design tick 13 — 2026-11-23 — Duo padding made consistent, measured against guides (Ben's request)
+- **Measured first:** guide lines on the Duo frames showed every surface on a
+  different edge:
+  - title 20, cards 16, Unexamined rows ~21 with amounts at the divider
+  - month bar 29 and 9 past the guide
+  - thread 24/44
+  - pane cards 1pt off the divider and 2pt off the strip
+- **Applied Ear Drama iOS-DESIGN §3.6b/e:**
+  - Words stand 20pt in from both column edges (`PaneEdges`,
+    `columnRowInsets()`); the month bar became a row so it stands on them.
+  - Boxes stand 16pt in.
+  - The pane keeps 20pt plus the measured safe area (`PaneMargins`, Ear
+    Drama's PageMargins). A first try with plain contentMargins ran the
+    cards under the strip.
+- **Verified:** guides on the Duo frames (Unexamined and Narrative, Ben's
+  account), every edge on its line; the iPhone 12 unchanged (guides); the
+  iPhone tap tier subset passes.
+- **Bound:** docs/DESIGN.md section L (L1–L5).
