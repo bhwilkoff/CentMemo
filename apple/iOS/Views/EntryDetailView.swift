@@ -37,7 +37,7 @@ struct EntryDetailView: View {
                             HStack(alignment: .center, spacing: Spacing.s3) {
                                 StoreTile(name: e.displayMerchant, category: e.category, size: 56)
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(e.displayMerchant).font(DisplayType.title).lineLimit(2)
+                                    SettingTitle(name: e.displayMerchant)
                                     HStack(spacing: 0) {
                                         Text(LedgerDate.display(e.txnDate) + " · ").foregroundStyle(Color.brandTextMuted)
                                         Text("Every visit").foregroundStyle(Color.brandPrimary)

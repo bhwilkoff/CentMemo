@@ -23,7 +23,7 @@ struct SettingPageView: View {
                 HStack(alignment: .center, spacing: Spacing.s3) {
                     StoreTile(name: name, category: entries.first?.category ?? "", size: 56)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(name).font(DisplayType.title).lineLimit(2)
+                        SettingTitle(name: name)
                         if !entries.isEmpty {
                             Text(summary).font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
                                 .accessibilityIdentifier("setting-summary")

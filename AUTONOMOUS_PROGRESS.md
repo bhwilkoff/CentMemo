@@ -1346,7 +1346,9 @@ Apple.
   - `tools/test_all.sh` passes (rc=0).
   - test_web_states: Every visit → Setting with its count and memos; Back
     returns. setting.png read.
-  - iPhone 12: `SettingUITests.testSettingDoor` passed.
+  - ~~iPhone 12: `SettingUITests.testSettingDoor` passed.~~ Corrected in
+    tick 18: it ran under the Time Limit overlay, and the harness flags that
+    pass as proving nothing.
 - **Not verified:**
   - **The iPhone 12 tap test:** a Screen Time "Time Limit: You've reached
     your limit on CentMemo" overlay covered the app during the run. Ben
@@ -1359,3 +1361,25 @@ Apple.
   - the header fit
   - re-run SettingUITests once the limit is lifted
   - D14 when Ben answers
+
+### Design tick 18 — 2026-11-23 — a Setting's name never breaks a word
+- **Found:** the Duo frame from tick 17 showed "AutoNa-tion Toyo…" in the
+  event header.
+- **Measured from that frame:** the Duo held in portrait gives a 669pt window,
+  so the pane's title has about 180pt at the default 34pt largeTitle.
+- **Fix:** `SettingTitle` (Core) steps down to title, then title2, when the
+  name's longest word won't fit whole on one line. It uses ViewThatFits; each
+  candidate's ideal width is its longest word. Used on the event page and on
+  the Setting page.
+- **Verified offline:** `SettingTitleRenderTests` renders the header at 180pt
+  before and after, to build/qa/setting-title/, and I read the frames:
+  - before: "AutoNatio / n Toyota…" (the bug reproduced)
+  - after: "AutoNation / Toyota / Arapahoe" at 28pt
+  - "Denver Zoo" stays at 34pt
+- `tools/test_all.sh` passes (rc=0).
+- **Not seen on a phone:** the iPhone 12 still shows the Screen Time Time
+  Limit on CentMemo. Tick 17's door "pass" ran under that overlay, so the
+  claim is corrected above. The Duo runs TestFlight 15.
+- **Waiting on Ben:**
+  - lift the iPhone 12's limit
+  - or say whether to install a debug build on the Duo, or ship TestFlight 16

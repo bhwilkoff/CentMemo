@@ -109,7 +109,7 @@ When shipping any user-facing feature:
 | Month strip by theme (D11) | ✅ | ✅ | ThemeStrip (Core) / themeStrip (web); named legend; colors collide until D14 |
 | Themes as collections (D12) | ✅ | ✅ | Story shelf with counts; tap a theme to read only its memos; ThemesUITests, test_web_states |
 | Share a memo as a card (D12) | ✅ | ✅ | Private by default (place and amount off); iOS renders an image via ShareLink, web uses navigator.share or copies text |
-| A Setting's page, every visit (D8) | ✅ | 🚧 | Web #/setting/<name> (test_web_states). iOS SettingPageView from the event header's "Every visit"; one ilike pattern (settingPattern, golden in JS + Swift) plus an exact cleaned-name match. iOS door test passed on the iPhone 12; the tap test was blocked by a Screen Time limit |
+| A Setting's page, every visit (D8) | ✅ | 🚧 | Web #/setting/<name> (test_web_states). iOS SettingPageView from the event header's "Every visit"; one ilike pattern (settingPattern, golden in JS + Swift) plus an exact cleaned-name match. not yet seen on a phone: a Screen Time limit covers CentMemo on the iPhone 12 (its door "pass" ran under the overlay and proves nothing), and the Duo runs TestFlight 15 |
 | Suggestions on Unexamined (D7) | ✅ | ✅ | memo_suggestions() in the database; same cards and words on both; no count |
 | Connect Apple Wallet (FinanceKit sync, history tokens) | n/a | 🚧 | Entitlement granted 2026-11-22 and signed into build 10; the iPhone 12 offers Connect (WalletAvailabilityUITests). Sync path verified with the sample source; the real sync is Ben's to run on his own phone |
 | FinanceKit background delivery | n/a | ⏳ | iOS 26 extension, after the entitlement |
