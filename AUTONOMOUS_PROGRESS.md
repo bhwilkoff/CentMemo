@@ -1613,3 +1613,16 @@ Apple.
   is the CentMemo domain purchase..."). "Nov 21, 2026 · Wp" and -$13.00
   follow in the muted footnote. The event opens in the second pane.
   D6 is ✅. The iPhone 12 frame waits on Screen Time.
+- **iPhone 12 (Ben, 2026-11-23: "screentime does not impact the iphone 12 at
+  this time of day"):** build installed on the bench device `iphone`
+  (synthetic owner), and both frames were read:
+  - `iphone-story-0.png`: "5 memos". Each card leads with its memo
+    ("Anniversary. Worth every cent..."), then the theme chip, then
+    "Nov 7, 2026 · Water Grill" and -$186.40 in the muted footnote.
+  - `iphone-setting-0.png`: Denver Zoo's Setting page shows the DZ tile,
+    "1 visit · 1 memo", the memo on the thread, and the pencil (Rename)
+    at the top right.
+  - D6 is now verified on web, Duo and iPhone 12. The D8 Setting page is
+    seen on both phones.
+- **Next:** press Rename → Save on the iPhone 12. It runs as the synthetic
+  owner, so no real data is touched, and closes D8's iOS save. Then D12.
