@@ -338,6 +338,7 @@ a.trow:hover .trow-memo, a.trow:hover .trow-meta { text-decoration: underline; }
 .story { list-style: none; margin-top: var(--space-4); }
 .story-entry { padding: var(--space-4) 0; border-top: 1px solid var(--color-border); }
 .story-meta { display: flex; justify-content: space-between; gap: var(--space-3); font-size: var(--type-caption-size); color: var(--color-text-muted); text-decoration: none; }
+.story-entry .story-meta { margin-top: var(--space-3); }
 .story-text { margin: var(--space-2) 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--type-body-size); line-height: 1.6; }
 
 /* ---- Static pages (privacy, terms, consent) ---- */

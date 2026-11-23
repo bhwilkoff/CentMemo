@@ -158,6 +158,7 @@ console.log('Themes as collections (D12)');
   await evaluate('document.querySelector("#view-story .theme-row[data-theme=\\"Great meals\\"]").click(); true');
   ok(await waitFor('/Anniversary/.test(document.querySelector("#view-story .story")?.innerText || "") && !/penguins/.test(document.querySelector("#view-story .story")?.innerText || "")'), 'a theme shows only its memos');
   await shot('story-theme');
+  ok(await evaluate('document.querySelector("#view-story .story-entry")?.firstElementChild?.classList.contains("story-text")'), 'a Story entry leads with its memo (D6)');
   ok(await evaluate('!!document.querySelector("#view-story .theme-row.every")'), 'Every memo leads back');
 }
 

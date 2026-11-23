@@ -1590,3 +1590,21 @@ Apple.
 - **Verified:** greps of every user-facing string in js/app.js, index.html
   and apple/iOS; `tools/test_all.sh` rc=0, ALL PASS (niced). No iOS change, so no
   new device frames this tick.
+
+### Design tick 27 — 2026-11-23 — D6 Story rows: the memo is the headline
+- **Change (web + iOS):** each Story entry now opens with the memo, then its
+  themes. Date, Setting and amount follow in a quiet footnote line, as on
+  the event page. The Story header reads "N memos" and no longer adds
+  "· $X spent": the Story is the memos, and money stays in the Narrative's
+  month facts. Web assets are at `?v=20261123h`.
+- **New web check:** "a Story entry leads with its memo (D6)".
+- **Verified:**
+  - Web: frame `story-theme.png` read. The memo leads, the chips sit
+    below it, and the footnote is spaced from the chips.
+  - `tools/test_all.sh`: rc=0, ALL PASS (niced), with the iOS build.
+  - Duo: build installed (debug), but the capture was refused because the
+    phone was locked ("device was not, or could not be, unlocked").
+  - iPhone 12: still under Screen Time.
+- **Not verified:** the iOS Story on a device. The next tick retakes the
+  Duo frame (`design_shots.py --device duo --screen story`, run with
+  /usr/bin/python3, which has Pillow) before D6 is marked done.

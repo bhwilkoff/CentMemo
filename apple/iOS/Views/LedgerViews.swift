@@ -301,8 +301,7 @@ struct StoryView: View {
                             .columnRowInsets()
                     }
                     if !entries.isEmpty {
-                        let spent = entries.filter { $0.amountMinor < 0 }.reduce(0) { $0 - $1.amountMinor }
-                        Text("\(entries.count) \(entries.count == 1 ? "memo" : "memos") · \(Money.format(spent)) spent")
+                        Text("\(entries.count) \(entries.count == 1 ? "memo" : "memos")")
                             .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
                             .columnRowInsets()
                     }
@@ -313,18 +312,19 @@ struct StoryView: View {
                 }
                 ForEach(entries) { e in
                     EntryLink(id: e.id) {
+                        // D6: the memo is the headline; when, where and how much are its footnote.
                         VStack(alignment: .leading, spacing: Spacing.s2) {
-                            HStack {
-                                Text("\(LedgerDate.display(e.txnDate)) · \(e.displayMerchant)")
-                                    .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
-                                Spacer()
-                                MoneyText(minor: e.amountMinor, currency: e.currency, font: TypeRamp.caption)
-                            }
                             Text(e.memo?.body ?? "").font(DisplayType.memo)
                             if let names = e.memo?.valueNames, !names.isEmpty {
                                 FlowLayout(spacing: 6) {
                                     ForEach(names, id: \.self) { ValueChip(name: $0, isOn: false, isStatic: true) }
                                 }
+                            }
+                            HStack {
+                                Text("\(LedgerDate.display(e.txnDate)) · \(e.displayMerchant)")
+                                    .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
+                                Spacer()
+                                MoneyText(minor: e.amountMinor, currency: e.currency, font: TypeRamp.caption)
                             }
                         }
                         .padding(.vertical, Spacing.s1)

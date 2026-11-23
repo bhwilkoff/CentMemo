@@ -509,7 +509,6 @@
         return empty(body, valueId ? 'No memos carry this theme yet.' : 'No memos written for ' + title + '.',
           h('a', { class: 'btn', href: '#/unexamined' }, 'Write one'));
       }
-      const spent = rows.filter((t) => t.amount_minor < 0).reduce((a, t) => a - t.amount_minor, 0);
       // D12 (Decision 065): Themes are the Story's collections, as on the iPhone.
       const shelfVals = vals.filter((v) => counts[v.id]);
       const shelf = shelfVals.length ? h('nav', { class: 'theme-shelf', 'aria-label': 'Themes' },
@@ -522,16 +521,17 @@
         shelf,
         h('header', { class: 'story-head' },
           h('h2', { class: 'section-heading' }, title),
-          h('p', { class: 'caption' }, rows.length + (rows.length === 1 ? ' memo · ' : ' memos · ') + money(spent) + ' spent')),
+          h('p', { class: 'caption' }, rows.length + (rows.length === 1 ? ' memo' : ' memos'))),
         h('ol', { class: 'story' }, rows.map((t) => {
           const memo = Array.isArray(t.memos) ? t.memos[0] : t.memos;
           const names = (memo.memo_values || []).map((mv) => mv.life_values && mv.life_values.name).filter(Boolean);
+          // D6: the memo is the headline; when, where and how much are its footnote.
           return h('li', { class: 'story-entry' },
+            h('p', { class: 'story-text' }, memo.body),
+            names.length ? h('p', { class: 'chips chips-static' }, names.map((n) => h('span', { class: 'chip' }, n))) : null,
             h('a', { class: 'story-meta', href: '#/t/' + t.id },
               h('span', {}, niceDate(t.txn_date) + ' · ' + merchantOf(t)),
-              h('span', { class: 'row-amount' }, money(t.amount_minor, t.currency))),
-            h('p', { class: 'story-text' }, memo.body),
-            names.length ? h('p', { class: 'chips chips-static' }, names.map((n) => h('span', { class: 'chip' }, n))) : null);
+              h('span', { class: 'row-amount' }, money(t.amount_minor, t.currency))));
         })));
     } catch (err) { failed(body, err, () => storyView(scope)); }
   }
