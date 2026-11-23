@@ -1462,3 +1462,16 @@ Apple.
     a different moment. happy-unexamined.png read.
   - `tools/test_all.sh` passes (rc=0).
 - **Not verified:** the iPhone 12 (Screen Time still covers CentMemo).
+- **Follow-ups the same morning (Ben):**
+  - "why does the refresh button also need a text label": it is now the
+    icon alone, still named "Another suggestion" for VoiceOver.
+  - "The refresh button should be within the card as well": it sits in the
+    card's top corner, beside the reason. On iOS it is an overlay on the row;
+    on the web it is a sibling laid over the card's link, so it never opens
+    the event.
+  - Both seen and read: the open Duo frame and web happy-unexamined.png.
+  - The web test clicks it and gets a different card. On iOS, tapping it is
+    not verified yet: the Duo takes no taps from the harness, and the
+    iPhone 12 is under Screen Time.
+- **Wallet in the connector:** Kavya's reply (2026-11-23) declines to
+  interpret the Addendum. Ben chose to keep it off until L2.

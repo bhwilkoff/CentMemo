@@ -34,27 +34,25 @@ struct UnexaminedView: View {
                         Section {
                             EntryLink(id: e.id) { SuggestionCard(suggestion: s, entry: e) }
                                 .skipAction(e) { await skip(e) }
+                                // In the card's corner, beside the reason (Ben, 2026-11-23: "within
+                                // the card as well"). An overlay, not a child, so it never opens the event.
+                                .overlay(alignment: .topTrailing) {
+                                    if picked.count > 1 {
+                                        Button("Another suggestion", systemImage: "arrow.clockwise") {
+                                            shown += 1
+                                            UISelectionFeedbackGenerator().selectionChanged()
+                                        }
+                                        .labelStyle(.iconOnly)
+                                        .buttonStyle(.borderless)
+                                        .font(TypeRamp.bodyStrong).foregroundStyle(Color.brandPrimary)
+                                        .frame(width: 44, height: 44)
+                                        .padding(.top, Spacing.s1).padding(.trailing, Spacing.s1)
+                                        .accessibilityIdentifier("suggestion-another")
+                                    }
+                                }
                                 .listRowSeparator(.hidden)
                                 .listRowBackground(Color.clear)
-                                .listRowInsets(EdgeInsets(top: Spacing.s1, leading: PaneEdges.box, bottom: Spacing.s2, trailing: PaneEdges.box))
-                            if picked.count > 1 {
-                                // A row of its own on the ground: a section footer drew a black
-                                // band and clipped the button at the divider (open Duo, 2026-11-23).
-                                HStack {
-                                    Spacer()
-                                    // The icon alone (Ben, 2026-11-23: why does it "also need a text label").
-                                    Button("Another suggestion", systemImage: "arrow.clockwise") {
-                                        shown += 1
-                                        UISelectionFeedbackGenerator().selectionChanged()
-                                    }
-                                    .labelStyle(.iconOnly)
-                                    .buttonStyle(.borderless)
-                                    .font(TypeRamp.bodyStrong).foregroundStyle(Color.brandPrimary)
-                                    .frame(minWidth: 44, minHeight: 44)
-                                    .accessibilityIdentifier("suggestion-another")
-                                }
-                                .onGround().listRowSeparator(.hidden).columnRowInsets(vertical: 0)
-                            }
+                                .listRowInsets(EdgeInsets(top: Spacing.s1, leading: PaneEdges.box, bottom: Spacing.s3, trailing: PaneEdges.box))
                         }
                     }
                     ForEach(entries) { e in
