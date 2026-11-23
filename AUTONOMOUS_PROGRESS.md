@@ -1406,3 +1406,22 @@ Apple.
   Screen Time limit still covers CentMemo.
 - **Next:** once 16 is on the Duo, capture the Setting page and the header
   there and read the frames.
+
+### Design tick 20 — 2026-11-23 — the Setting page seen on the Duo
+- **Ben:** "You should be able to add builds to the duo." I installed a debug
+  build 16 over TestFlight on the Duo (devicectl; no test sign-in, so his own
+  session).
+- **Seen on the open Duo, frames read** (build/design/2026-11-23):
+  - the Setting door, Apple Store: the tile, the name, "107 visits · since
+    Nov 5, 2019", and the thread of visits
+  - the AutoNation event page, from his own data: "AutoNation / Toyota
+    Arapahoe" at the stepped-down size, with no word broken, then
+    "Nov 20, 2026 · Every visit"
+- **Harness gap found:** the `memo` screen's fixture item isn't in Ben's
+  account, so on the Duo it shows "This purchase isn't in your CentMemo."
+  Worked around this with `--env APP_START_ITEM=<his event>`. The real item id
+  stays out of git.
+- **Seen, Ben's to judge:** the Setting page covers the whole Duo window.
+  Each row puts the date at the left and the amount about 1,500pt away at the
+  right, with nothing between them when there is no memo.
+- **Still blocked:** the iPhone 12 tap test (Screen Time).
