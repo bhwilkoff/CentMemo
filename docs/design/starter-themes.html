@@ -1,0 +1,85 @@
+<title>CentMemo Starter Themes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&family=Inter:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column on paper; each theme a row with its pencil mark, like the Story's theme shelf. */
+:root {
+  --paper: #FBFAF7; --ink: #1F1B19; --muted: #6B625C; --rule: #E6E1DA; --pencil: #4A1520; --card: #FFFFFF;
+  --display: "Newsreader", Georgia, serif; --text: "Inter", system-ui, -apple-system, sans-serif;
+  --clay: #A33E25; --persimmon: #964D09; --ochre: #815C0A; --olive: #686800; --moss: #2F751D; --sage: #1B735B;
+  --teal: #157171; --sky: #006D91; --slate: #2F60B2; --iris: #6451AC; --plum: #8A428E; --rose: #9D3A67; --stone: #6F6964;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #171615; --ink: #F2EEE9; --muted: #A69D96; --rule: #34302D; --pencil: #F0B9BE; --card: #201E1D;
+  --clay: #FCA48D; --persimmon: #FEA668; --ochre: #E9B452; --olive: #C3C55A; --moss: #90D281; --sage: #54D8B1;
+  --teal: #2AD7D7; --sky: #60CCFC; --slate: #98BFFE; --iris: #BCB3FA; --plum: #E8A0EC; --rose: #FF99C2; --stone: #B3ACA6;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #171615; --ink: #F2EEE9; --muted: #A69D96; --rule: #34302D; --pencil: #F0B9BE; --card: #201E1D;
+  --clay: #FCA48D; --persimmon: #FEA668; --ochre: #E9B452; --olive: #C3C55A; --moss: #90D281; --sage: #54D8B1;
+  --teal: #2AD7D7; --sky: #60CCFC; --slate: #98BFFE; --iris: #BCB3FA; --plum: #E8A0EC; --rose: #FF99C2; --stone: #B3ACA6;
+  color-scheme: dark }
+body { background: var(--paper); color: var(--ink); font: 16px/1.55 var(--text); }
+main { max-width: 42rem; margin: 0 auto; padding-block: 2.5rem 4rem;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1 { font: 600 2.4rem/1.1 var(--display); color: var(--pencil); margin: 0 0 .5rem; text-wrap: balance; }
+h2 { font: 600 1.35rem/1.2 var(--display); margin: 2.5rem 0 .75rem; text-wrap: balance; }
+p { margin: 0 0 .9rem; max-width: 65ch; }
+.lede { color: var(--muted); }
+.themes { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--rule); }
+.theme { display: grid; grid-template-columns: 6px 1fr auto; gap: .9rem; align-items: start; padding: .85rem 0; border-bottom: 1px solid var(--rule); }
+.mark { width: 5px; height: 2.4rem; border-radius: 3px; background: var(--c); margin-top: .2rem; }
+.name { font: 600 1.1rem/1.3 var(--text); color: var(--c); }
+.meaning { color: var(--ink); margin: .1rem 0 0; }
+.hue { font-size: .8rem; color: var(--muted); letter-spacing: .02em; white-space: nowrap; padding-top: .25rem; }
+.memo { font-family: var(--display); font-size: 1.05rem; color: var(--muted); margin: .25rem 0 0; }
+.ask { background: var(--card); border-radius: 12px; padding: 1.1rem 1.2rem; margin: 1rem 0; }
+.ask h3 { font: 600 1rem/1.3 var(--text); margin: 0 0 .4rem; }
+.ask p:last-child { margin-bottom: 0; }
+.palette { display: flex; flex-wrap: wrap; gap: .5rem; margin: .5rem 0 1rem; padding: 0; list-style: none; }
+.palette li { display: flex; align-items: center; gap: .4rem; font-size: .85rem; color: var(--muted); }
+.palette i { width: 22px; height: 6px; border-radius: 3px; background: var(--c); display: block; }
+small, .note { font-size: .85rem; color: var(--muted); }
+</style>
+
+<main>
+  <h1>Starter Themes</h1>
+  <p class="lede">D14 draft for Ben. A person picks the themes that sound like them on first run and can change them later in Settings. Every theme can be renamed or removed, and nobody has to keep any of them.</p>
+
+  <h2>The set (13)</h2>
+  <ul class="themes">
+    <li class="theme" style="--c: var(--rose)"><span class="mark"></span><div><div class="name">People I love</div><p class="meaning">Time and care for family and friends.</p></div><span class="hue">Rose</span></li>
+    <li class="theme" style="--c: var(--persimmon)"><span class="mark"></span><div><div class="name">Great meals</div><p class="meaning">Food worth remembering, alone or shared.</p></div><span class="hue">Persimmon</span></li>
+    <li class="theme" style="--c: var(--clay)"><span class="mark"></span><div><div class="name">Home</div><p class="meaning">The place I live and the comfort in it.</p></div><span class="hue">Clay</span></li>
+    <li class="theme" style="--c: var(--moss)"><span class="mark"></span><div><div class="name">Health</div><p class="meaning">My body, rest, movement, and care.</p></div><span class="hue">Moss</span></li>
+    <li class="theme" style="--c: var(--slate)"><span class="mark"></span><div><div class="name">Learning</div><p class="meaning">Books, classes, tools that grow a skill.</p></div><span class="hue">Slate</span></li>
+    <li class="theme" style="--c: var(--ochre)"><span class="mark"></span><div><div class="name">Making</div><p class="meaning">Materials and tools for things I create.</p></div><span class="hue">Ochre</span></li>
+    <li class="theme" style="--c: var(--sky)"><span class="mark"></span><div><div class="name">Adventure</div><p class="meaning">Trips, firsts, and getting out of routine.</p></div><span class="hue">Sky</span></li>
+    <li class="theme" style="--c: var(--plum)"><span class="mark"></span><div><div class="name">Joy</div><p class="meaning">Small treats and beautiful things that make a day better.</p></div><span class="hue">Plum</span></li>
+    <li class="theme" style="--c: var(--iris)"><span class="mark"></span><div><div class="name">Generosity</div><p class="meaning">Gifts, tips, and giving to causes.</p></div><span class="hue">Iris</span></li>
+    <li class="theme" style="--c: var(--teal)"><span class="mark"></span><div><div class="name">Time back</div><p class="meaning">Paying so I can spend time on what matters.</p></div><span class="hue">Teal</span></li>
+    <li class="theme" style="--c: var(--olive)"><span class="mark"></span><div><div class="name">Work I care about</div><p class="meaning">Tools and costs of my work or craft.</p></div><span class="hue">Olive</span></li>
+    <li class="theme" style="--c: var(--sage)"><span class="mark"></span><div><div class="name">Community</div><p class="meaning">Local places, events, and belonging.</p></div><span class="hue">Sage</span></li>
+    <li class="theme" style="--c: var(--stone)"><span class="mark"></span><div><div class="name">Taking care of things</div><p class="meaning">The steady costs that keep life running.</p></div><span class="hue">Stone</span></li>
+  </ul>
+  <p class="note">The research draft had 14. "Beauty" is folded into Joy so that every theme has its own color. Taking care of things is deliberately stone grey: bills and upkeep get an honest home without competing with the themes a person chose.</p>
+
+  <h2>How color works</h2>
+  <p>Each theme now stores its own color. Until now the color came from a hash of the name, so two themes could land on the same color. A new theme, or one a person types themselves, gets the first palette color that none of their themes uses yet, so up to 12 themes never share a color. A person can also pick a theme's color.</p>
+  <ul class="palette">
+    <li style="--c: var(--clay)"><i></i>Clay</li><li style="--c: var(--persimmon)"><i></i>Persimmon</li><li style="--c: var(--ochre)"><i></i>Ochre</li>
+    <li style="--c: var(--olive)"><i></i>Olive</li><li style="--c: var(--moss)"><i></i>Moss</li><li style="--c: var(--sage)"><i></i>Sage</li>
+    <li style="--c: var(--teal)"><i></i>Teal</li><li style="--c: var(--sky)"><i></i>Sky</li><li style="--c: var(--slate)"><i></i>Slate</li>
+    <li style="--c: var(--iris)"><i></i>Iris</li><li style="--c: var(--plum)"><i></i>Plum</li><li style="--c: var(--rose)"><i></i>Rose</li>
+    <li style="--c: var(--stone)"><i></i>Stone</li>
+  </ul>
+  <p class="note">Every color is at least 5.4:1 against the paper page and 9:1 against the dark page, above the 4.5:1 that body text needs. Colors stay as marks and words (Decision 060), never page grounds.</p>
+
+  <h2>Your themes today</h2>
+  <p>Nothing you already named changes. "Time with my kids", "Great meals" and "Being outside" keep their names and memos, and each gets its own color from the palette. Where your name matches a starter theme, as Great meals does, it takes that theme's color.</p>
+
+  <h2>Yours to choose</h2>
+  <div class="ask"><h3>1. The set</h3><p>Keep these 13, change any name or meaning, or add or drop themes. Do you want "Beauty" back as a 14th theme?</p></div>
+  <div class="ask"><h3>2. The first-run question</h3><p>The proposed prompt reads "Which of these sound like you?", above the list with every theme unticked. Or should all of them start ticked, so a person only removes what doesn't fit?</p></div>
+  <div class="ask"><h3>3. Taking care of things</h3><p>Should it be offered at first run like the others, or start hidden and appear only when a person reaches for it?</p></div>
+</main>

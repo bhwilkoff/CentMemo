@@ -1712,3 +1712,21 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
     timing. No notifications; the connector carve-out is unchanged.
   - **Ben's step:** read the addendum, press Agree, then Submit.
 - **Next:** D14 default themes, while Apple reviews.
+
+### Tick 30 — 2026-11-23 — D14 starter themes drafted for Ben
+- Proposal page: https://claude.ai/artifact/BmXyQZdab1uCcF9gLcRM5R (source:
+  docs/design/starter-themes.html).
+  - 13 themes from the research's 14, with "Beauty" folded into Joy so
+    every theme has its own color. "Taking care of things" is stone grey.
+  - The 12-hue palette is made in OKLCH (L 0.50 light / 0.80 dark). Each
+    color is at least 5.4:1 on paper and 9:1 on the dark page.
+  - Color rule: each theme stores its color. A new theme gets the first
+    color none of the person's themes uses, so up to 12 themes never
+    share one. This fixes D11's hash collisions.
+  - Ben's existing themes keep their names; a name that matches a starter
+    theme takes its color.
+- **Ben's choices:** the set and its words (Beauty back as a 14th?), the
+  first-run prompt with themes ticked or unticked, and whether Taking care
+  of things is offered at first run.
+- **Next:** D15 place prediction (Ben's direction, 2026-11-23) while D14
+  waits.
