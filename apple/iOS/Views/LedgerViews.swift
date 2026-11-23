@@ -238,33 +238,62 @@ struct StoryView: View {
     @State private var scope: APIClient.StoryScope?
     @State private var months: [String] = []
     @State private var values: [LifeValue] = []
+    @State private var counts: [String: Int] = [:]
     @State private var entries: [LedgerEntry] = []
     @State private var loading = true
     @State private var error: String?
 
+    private var themeID: String? { if case .value(let id) = scope { id } else { nil } }
+
     var body: some View {
         LoadState(isLoading: loading && entries.isEmpty, error: error, retry: load) {
             List {
+                // D12 (Decision 065): Themes are the Story's collections. Each one
+                // shows its mark and how many memos it holds; tap to read only those.
+                let shelf = values.filter { (counts[$0.id] ?? 0) > 0 }
+                if !shelf.isEmpty {
+                    Section {
+                        ForEach(shelf) { v in
+                            Button { scope = themeID == v.id ? .month(months.first ?? LedgerDate.thisMonth) : .value(v.id) } label: {
+                                HStack(spacing: Spacing.s3) {
+                                    Capsule().fill(ThemeHue.color(v.name)).frame(width: 4, height: 22)
+                                    Text(v.name).font(TypeRamp.bodyStrong).foregroundStyle(Color.brandText)
+                                    Spacer()
+                                    Text("\(counts[v.id] ?? 0)").font(TypeRamp.caption).monospacedDigit().foregroundStyle(Color.brandTextMuted)
+                                    if themeID == v.id { Image(systemName: "checkmark").foregroundStyle(Color.brandPrimary) }
+                                }
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityAddTraits(themeID == v.id ? .isSelected : [])
+                            .accessibilityIdentifier("theme-\(v.name)")
+                            .onGround().columnRowInsets()
+                        }
+                    } header: {
+                        Text("Themes").font(TypeRamp.caption).textCase(nil)
+                    }
+                }
                 Section {
-                    Picker("Show", selection: Binding(get: { scope ?? .month(LedgerDate.thisMonth) }, set: { scope = $0 })) {
-                        Section("Month") {
+                    if themeID == nil {
+                        Picker("Month", selection: Binding(get: { scope ?? .month(LedgerDate.thisMonth) }, set: { scope = $0 })) {
                             ForEach(months, id: \.self) { Text(LedgerDate.monthName($0)).tag(APIClient.StoryScope.month($0)) }
                         }
-                        if !values.isEmpty {
-                            Section("Theme") {
-                                ForEach(values) { Text($0.name).tag(APIClient.StoryScope.value($0.id)) }
-                            }
-                        }
+                        .columnRowInsets()
+                    } else {
+                        Button("Every memo") { scope = .month(months.first ?? LedgerDate.thisMonth) }
+                            .accessibilityIdentifier("every-memo")
+                            .columnRowInsets()
                     }
                     if !entries.isEmpty {
                         let spent = entries.filter { $0.amountMinor < 0 }.reduce(0) { $0 - $1.amountMinor }
                         Text("\(entries.count) \(entries.count == 1 ? "memo" : "memos") · \(Money.format(spent)) spent")
                             .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
+                            .columnRowInsets()
                     }
                 }
                 .onGround()
                 if entries.isEmpty {
-                    Text("No memos here yet.").foregroundStyle(Color.brandTextMuted).onGround()
+                    Text("No memos here yet.").foregroundStyle(Color.brandTextMuted).onGround().columnRowInsets()
                 }
                 ForEach(entries) { e in
                     EntryLink(id: e.id) {
@@ -284,7 +313,9 @@ struct StoryView: View {
                         }
                         .padding(.vertical, Spacing.s1)
                     }
-                    .listRowBackground(RoundedRectangle(cornerRadius: Radius.card).fill(Color.brandSurface).padding(.vertical, 4).padding(.horizontal, Spacing.s3))
+                    // A card on the box edge (16pt), its words 16pt inside it (DESIGN L2).
+                    .listRowBackground(RoundedRectangle(cornerRadius: Radius.card).fill(Color.brandSurface).padding(.vertical, 4).padding(.horizontal, PaneEdges.box))
+                    .listRowInsets(EdgeInsets(top: Spacing.s3, leading: PaneEdges.box * 2, bottom: Spacing.s3, trailing: PaneEdges.box * 2))
                 }
             }
             .listStyle(.plain)
@@ -301,6 +332,7 @@ struct StoryView: View {
             let latest = try await APIClient.shared.latestMonth() ?? LedgerDate.thisMonth
             months = (0..<24).map { LedgerDate.step(latest, by: -$0) }
             values = try await APIClient.shared.values()
+            counts = (try? await APIClient.shared.themeCounts()) ?? [:]
             if scope == nil { scope = .month(latest) }
             entries = try await APIClient.shared.stories(scope!)
             error = nil

@@ -1268,3 +1268,22 @@ Apple.
   share a color. With 6 hues, a name hash collides, so D14 must give each
   theme its own color (stored with the theme). D14 is next, with Ben
   approving the set.
+
+### Design tick 15 — 2026-11-23 — D12 Themes as the Story's collections
+- **Story tab (iOS):** a Themes shelf, each theme with its mark and how many
+  memos it holds (`APIClient.themeCounts`). Tapping one reads only that
+  theme; "Every memo" goes back. The picker is months only now.
+- **Web:** the same `.theme-shelf`; the "Show" picker became "Month" and
+  hides while a theme is open, so themes aren't offered twice.
+- **Duo, measured against the guides:** the Story column broke L2 (the Month
+  row, the count and the card ran to the divider, "$13.00" touched it). Now
+  rows sit on the words edge and cards on the box edge, with their words
+  16pt inside.
+- **Verified:**
+  - ThemesUITests on the iPhone 12 (Great meals shows only its memos,
+    Every memo returns).
+  - test_web_states (the shelf, a theme filter, Every memo).
+  - Frames read on the iPhone 12, the web and the Duo (with guides).
+- **Seen:** theme tags on memos are still aqua pills (the ground color),
+  while collections use per-theme marks. That's two color systems for one
+  idea; D14's theme colors settle it.

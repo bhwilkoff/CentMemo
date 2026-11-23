@@ -131,6 +131,11 @@ const API = (() => {
     const seen = new Set();
     return rows.filter((r) => !seen.has(r.transaction_id) && seen.add(r.transaction_id));
   }
+  // D12: how many memos each theme collects.
+  async function themeCounts() {
+    const rows = must(await client().from('memo_values').select('value_id').limit(10000));
+    return rows.reduce((m, r) => (m[r.value_id] = (m[r.value_id] || 0) + 1, m), {});
+  }
   async function latestMonth() {
     const rows = must(await client().from('transactions').select('txn_date').order('txn_date', { ascending: false }).limit(1));
     return rows.length ? rows[0].txn_date.slice(0, 7) : null;
@@ -230,7 +235,7 @@ const API = (() => {
 
   return {
     MCP_URL, client, session, onAuthChange, signInWithApple, finishAppleRedirect, signOut, deleteAccount,
-    unexamined, suggestions, transactionCount, month, latestMonth, transaction, stories,
+    unexamined, suggestions, themeCounts, transactionCount, month, latestMonth, transaction, stories,
     values, addValue, setSkipped, renameValue, deleteValue, saveMemo, importAppleCard, importExport, GROUNDS, ground, setGround,
   };
 })();

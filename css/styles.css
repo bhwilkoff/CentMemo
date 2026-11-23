@@ -182,6 +182,12 @@ a.row:hover .row-title { text-decoration: underline; }
 .tile-big { width: 56px; height: 56px; border-radius: 14px; font-size: 20px; }
 .txn-head { display: flex; align-items: center; gap: var(--space-3); }
 .txn-title { min-width: 0; }
+.theme-shelf { display: grid; margin-bottom: var(--space-4); }
+.theme-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; border-bottom: 1px solid var(--color-border); color: var(--color-text); text-decoration: none; font-weight: var(--type-body-strong-weight); }
+.theme-row i { width: 4px; height: 22px; border-radius: 2px; }
+.theme-row span:first-of-type { flex: 1; }
+.theme-row[aria-current="true"] { color: var(--color-primary); }
+.theme-row.every { font-weight: normal; color: var(--color-primary); }
 .month-strip { margin-bottom: var(--space-4); display: grid; gap: var(--space-2); }
 .strip-bar { display: flex; gap: 2px; height: 10px; border-radius: 3px; overflow: hidden; }
 .strip-bar span { min-width: 4px; }

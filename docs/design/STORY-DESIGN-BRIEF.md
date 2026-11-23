@@ -121,7 +121,7 @@ the Setting page) join where they fit.
   Cash into Apple Cash and Savings) are hidden from the Narrative by default
   (Ben, 2026-11-22); the filters will show them.
 - D13 🟡 (iOS swipe + detail menu, web detail button, Narrative 'N skipped' group, Unexamined excludes ✅; connector tool ⏳) Skip: swipe an event away as a detail; only plot points reach the Story.
-- D12 Themes (Ben's word for sets): collect stories into sets by value; share a story or a set.
+- D12 🟡 (Themes as the Story's collections with counts, iOS + web ✅; sharing a theme or a memo ⏳) Themes (Ben's word for sets): collect stories into sets by value; share a story or a set.
 
 ## Sources (Ben, 2026-11-22)
 

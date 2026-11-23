@@ -388,17 +388,19 @@
     loading(body);
     try {
       const vals = await API.values();
+      const counts = await API.themeCounts().catch(() => ({}));
       const latest = (await API.latestMonth()) || thisMonth();
       if (!scope) scope = latest;
       const months = [];
       for (let ym = latest, i = 0; i < 24; i++, ym = stepMonth(ym, -1)) months.push(ym);
       if (/^\d{4}-\d{2}$/.test(scope) && !months.includes(scope)) months.unshift(scope);
       select.replaceChildren(
-        h('optgroup', { label: 'Month' }, months.map((ym) => h('option', { value: ym, selected: scope === ym }, monthName(ym)))),
-        vals.length ? h('optgroup', { label: 'Theme' }, vals.map((v) => h('option', { value: 'value:' + v.id, selected: scope === 'value:' + v.id }, v.name))) : null);
+        months.map((ym) => h('option', { value: ym, selected: scope === ym }, monthName(ym))));
       select.onchange = () => { location.hash = '#/story/' + encodeURIComponent(select.value); };
 
       const valueId = scope.startsWith('value:') ? scope.slice(6) : null;
+      // Themes have their own shelf below; the picker is for months (as on the iPhone).
+      select.closest('.story-controls').hidden = !!valueId;
       const rows = await API.stories(valueId ? { valueId } : { ym: scope });
       const title = valueId ? (vals.find((v) => v.id === valueId) || {}).name || 'Theme' : monthName(scope);
       $('h-story').textContent = 'Story';
@@ -407,7 +409,16 @@
           h('a', { class: 'btn', href: '#/unexamined' }, 'Write one'));
       }
       const spent = rows.filter((t) => t.amount_minor < 0).reduce((a, t) => a - t.amount_minor, 0);
+      // D12 (Decision 065): Themes are the Story's collections, as on the iPhone.
+      const shelfVals = vals.filter((v) => counts[v.id]);
+      const shelf = shelfVals.length ? h('nav', { class: 'theme-shelf', 'aria-label': 'Themes' },
+        h('p', { class: 'field-label' }, 'Themes'),
+        shelfVals.map((v) => h('a', { class: 'theme-row', href: valueId === v.id ? '#/story/' + latest : '#/story/value:' + v.id,
+          'aria-current': valueId === v.id ? 'true' : null, 'data-theme': v.name },
+          h('i', { style: 'background: ' + themeHue(v.name) }), h('span', {}, v.name), h('span', { class: 'caption' }, String(counts[v.id])))),
+        valueId ? h('a', { class: 'theme-row every', href: '#/story/' + latest }, 'Every memo') : null) : '';
       body.replaceChildren(
+        shelf,
         h('header', { class: 'story-head' },
           h('h2', { class: 'section-heading' }, title),
           h('p', { class: 'caption' }, rows.length + (rows.length === 1 ? ' memo · ' : ' memos · ') + money(spent) + ' spent')),

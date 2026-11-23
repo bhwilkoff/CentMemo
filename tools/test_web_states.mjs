@@ -144,6 +144,16 @@ console.log('Narrative thread (D10): written memos are marks with the memo as he
   ok(await waitFor('document.querySelectorAll("#view-ledger .trow.is-waiting").length > 0'), 'back to All');
 }
 
+console.log('Themes as collections (D12)');
+{
+  await evaluate('location.hash = "#/story"; true');
+  ok(await waitFor('document.querySelectorAll("#view-story .theme-row[data-theme]").length >= 2'), 'the Story lists themes as collections');
+  await evaluate('document.querySelector("#view-story .theme-row[data-theme=\\"Great meals\\"]").click(); true');
+  ok(await waitFor('/Anniversary/.test(document.querySelector("#view-story .story")?.innerText || "") && !/penguins/.test(document.querySelector("#view-story .story")?.innerText || "")'), 'a theme shows only its memos');
+  await shot('story-theme');
+  ok(await evaluate('!!document.querySelector("#view-story .theme-row.every")'), 'Every memo leads back');
+}
+
 console.log('event page (D6): the Setting and the memo lead; the money is a footnote');
 {
   await evaluate('location.hash = "#/t/a3b8c10c-68b8-4bfe-9380-c87b7015a49d"; true');

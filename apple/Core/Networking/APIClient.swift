@@ -179,6 +179,13 @@ final class APIClient {
         return try JSONDecoder().decode([Suggestion].self, from: data).filter { seen.insert($0.transactionID).inserted }
     }
 
+    /// D12: how many memos each theme collects (value id -> count).
+    func themeCounts() async throws -> [String: Int] {
+        struct Row: Decodable { let value_id: String }
+        let rows: [Row] = try await rest("memo_values", [.init(name: "select", value: "value_id"), .init(name: "limit", value: "10000")])
+        return rows.reduce(into: [:]) { $0[$1.value_id, default: 0] += 1 }
+    }
+
     func hasAnyTransactions() async throws -> Bool {
         let rows: [[String: String]] = try await rest("transactions", [.init(name: "select", value: "id"), .init(name: "limit", value: "1")])
         return !rows.isEmpty
