@@ -1394,3 +1394,15 @@ Apple.
   a phone.
 - **Next:** rerun once Ben lifts the limit, or ships TestFlight 16, or says
   to install a debug build on the Duo.
+
+### 2026-11-23 — TestFlight 1.0 (16): the Setting page
+- **Ben:** "Ship the latest TestFlight".
+- `tools/test_all.sh` passes (rc=0). 1.0 (16) uploaded with
+  `tools/submit-appstore.sh ios` (not submitted for review; L2 stays held).
+- **New since 15:** a Setting's page, every visit there, from "Every visit"
+  on the event page (D8). A long Setting name steps down a size instead of
+  breaking a word.
+- **Not run before this upload:** the iPhone 12 tap tier, because the
+  Screen Time limit still covers CentMemo.
+- **Next:** once 16 is on the Duo, capture the Setting page and the header
+  there and read the frames.
