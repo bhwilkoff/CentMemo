@@ -1608,3 +1608,8 @@ Apple.
 - **Not verified:** the iOS Story on a device. The next tick retakes the
   Duo frame (`design_shots.py --device duo --screen story`, run with
   /usr/bin/python3, which has Pillow) before D6 is marked done.
+- **Duo, after Ben unlocked it (2026-11-23):** frame `duo-story-1.png` read.
+  The Story pane shows "1 memo", and the entry leads with Ben's memo ("This
+  is the CentMemo domain purchase..."). "Nov 21, 2026 · Wp" and -$13.00
+  follow in the muted footnote. The event opens in the second pane.
+  D6 is ✅. The iPhone 12 frame waits on Screen Time.

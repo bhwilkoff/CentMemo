@@ -91,7 +91,7 @@ the Setting page) join where they fit.
   "Ledger" and every other screen word. Ben chooses.
 - D5 ✅ (Ben chose C, with parts of A and B; https://claude.ai/artifact/TtRywFmQhiiq9Mdg1Q2jPu) Directions: three design directions drawn from the research; Ben chooses
   or mixes (propose, don't decide).
-- D6 🟡 (event page leads with the Setting tile and the memo; money and bank facts in a footnote; a pencil stroke draws in on save ✅ iPhone 12 + Duo; Narrative/Story rows next) Memo as achievement: a written memo reads as a moment in a life, not a
+- D6 ✅ (event page leads with the Setting tile and the memo; money and bank facts in a footnote; a pencil stroke draws in on save ✅ iPhone 12 + Duo; Narrative thread memo-first (D10); Story rows memo-first with a footnote, web + Duo ✅ 2026-11-23) Memo as achievement: a written memo reads as a moment in a life, not a
   debit.
 - D7 🟡 (Unexamined: one invitation card at a time, with its reason, a question that fits the purchase (meal, trip, car...), Another, no count; bills never suggested (Ben, 2026-11-23: State Farm asked "What was the day about?"); iOS + web ✅; the words await Ben's approval) Writing tools: friendly regular check-in, recommendations of what to
   write about.
