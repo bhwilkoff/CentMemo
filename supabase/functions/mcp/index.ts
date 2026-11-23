@@ -48,12 +48,15 @@ function memoValues(m: any): string[] {
   return (m?.memo_values || []).map((mv: any) => clean(mv.life_values?.name, 60)).filter(Boolean);
 }
 // deno-lint-ignore no-explicit-any
-function txnLine(t: any, withMemo = true): string {
+function txnLine(t: any, withMemo = true, names: Record<string, string> = {}): string {
   const memo = Array.isArray(t.memos) ? t.memos[0] : t.memos;
+  const raw = t.merchant || t.description;
+  // D8 renames: the person's own name for the place leads; the statement's text stays beside it.
+  const own = names[CentMoney.cleanMerchant(raw) || 'Unknown'];
   const parts = [
     `${t.txn_date}`,
     `${money(t.amount_minor, t.currency)}`,
-    `merchant: ${clean(t.merchant || t.description, 80) || '(none)'}`,
+    own ? `place: ${clean(own, 80)} (statement: ${clean(raw, 80)})` : `merchant: ${clean(raw, 80) || '(none)'}`,
     t.category ? `category: ${clean(t.category, 40)}` : '',
     t.txn_type ? `type: ${clean(t.txn_type, 30)}` : '',
     t.status !== 'booked' ? `status: ${t.status}` : '',
@@ -104,9 +107,14 @@ Deno.serve(
         // deno-lint-ignore no-explicit-any
         return r.data.map((x: any) => x.transaction_id);
       }
+      // D8 renames, read once per request, as the person (RLS scopes it to them).
+      let namesP: Promise<Record<string, string>> | null = null;
+      const settingNames = () => namesP ??= supabase.from('setting_names').select('setting, name')
+        // deno-lint-ignore no-explicit-any
+        .then((r: any) => Object.fromEntries((r.data || []).map((x: any) => [x.setting, x.name])));
 
       const handler = createMcpHandler(() => {
-        const server = new McpServer({ name: 'centmemo', version: '0.1.0' });
+        const server = new McpServer({ name: 'centmemo', version: '0.1.1' });
 
         server.registerTool('list_accounts', {
           title: 'List accounts',
@@ -161,7 +169,10 @@ Deno.serve(
           let q = txns(TXN_COLUMNS).gte('txn_date', from).lte('txn_date', to);
           if (a.merchant) {
             const m = a.merchant.replace(/[%_,()]/g, ' ');
-            q = q.or(`merchant.ilike.%${m}%,description.ilike.%${m}%`);
+            // A place the person renamed is found by their name too.
+            const term = m.trim().toLowerCase();
+            const keys = term ? Object.entries(await settingNames()).filter(([, n]) => n.toLowerCase().includes(term)).map(([k]) => CentMoney.settingPattern(k)).filter(Boolean) : [];
+            q = q.or([`merchant.ilike.%${m}%`, `description.ilike.%${m}%`, ...keys.flatMap((p: string) => [`merchant.ilike.${p}`, `description.ilike.${p}`])].join(','));
           }
           if (a.category) q = q.ilike('category', a.category);
           if (a.min_spent != null) q = q.lte('amount_minor', -Math.round(a.min_spent * 100));
@@ -179,7 +190,8 @@ Deno.serve(
             rows = rows.filter((t) => { const m = Array.isArray(t.memos) ? t.memos[0] : t.memos; return a.has_memo ? !!m : !m; }).slice(0, limit);
           }
           if (!rows.length) return text(`No transactions from ${from} to ${to} match.`);
-          return text(`${rows.length} transaction(s), ${from} to ${to}. ${DATA_NOTE}\n` + rows.map((t) => txnLine(t)).join('\n'));
+          const names = await settingNames();
+          return text(`${rows.length} transaction(s), ${from} to ${to}. ${DATA_NOTE}\n` + rows.map((t) => txnLine(t, true, names)).join('\n'));
         });
 
         server.registerTool('spending_summary', {
@@ -216,8 +228,9 @@ Deno.serve(
           // deno-lint-ignore no-explicit-any
           const rows = (r.data as any[]).filter((t) => !(Array.isArray(t.memos) ? t.memos.length : t.memos));
           if (!rows.length) return text(`Every purchase since ${since} has a memo.`);
+          const names = await settingNames();
           return text(`${rows.length} purchase(s) since ${since} without a memo; showing ${Math.min(rows.length, limit ?? 20)}. ${DATA_NOTE}\n` +
-            rows.slice(0, limit ?? 20).map((t) => txnLine(t, false)).join('\n') +
+            rows.slice(0, limit ?? 20).map((t) => txnLine(t, false, names)).join('\n') +
             '\nThe person writes memos at centmemo.com or in the CentMemo app.');
         });
 
@@ -242,8 +255,9 @@ Deno.serve(
           const r = await q.order('txn_date', { ascending: true }).limit(a.limit ?? 50);
           if (r.error) throw new Error(r.error.message);
           if (!r.data.length) return text(`No memos written from ${from} to ${to}.`);
+          const names = await settingNames();
           // deno-lint-ignore no-explicit-any
-          return text(`${r.data.length} memo(s), ${from} to ${to}. ${DATA_NOTE}\n` + r.data.map((t: any) => txnLine(t)).join('\n'));
+          return text(`${r.data.length} memo(s), ${from} to ${to}. ${DATA_NOTE}\n` + r.data.map((t: any) => txnLine(t, true, names)).join('\n'));
         });
 
         return server;

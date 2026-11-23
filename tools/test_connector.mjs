@@ -126,6 +126,20 @@ for (const [name, args] of Object.entries(calls)) {
   }
 }
 
+// 6c. D8 renames: the person's name for a place leads, the statement beside it,
+// and Claude finds the place by that name. The owner renames, then clears it.
+{
+  const put = await fetch(`${PROJECT}/rest/v1/setting_names?on_conflict=user_id,setting`, { method: 'POST', headers: { ...asOwner, Prefer: 'resolution=merge-duplicates' }, body: JSON.stringify({ setting: 'Denver Zoo', name: 'The Zoo' }) });
+  ok(put.ok, `the owner names a Setting (${put.status})`);
+  try {
+    const r = await rpc('tools/call', { name: 'search_transactions', arguments: { from: '2026-10-01', to: '2026-11-30', merchant: 'The Zoo' } });
+    const text = (r.json.result?.content || []).map((c) => c.text).join('\n');
+    ok(/place: The Zoo \(statement: [^)]*Zoo/.test(text), 'search by the person\'s name finds the place, shown with the statement text');
+  } finally {
+    await fetch(`${PROJECT}/rest/v1/setting_names?setting=eq.Denver%20Zoo`, { method: 'DELETE', headers: asOwner });
+  }
+}
+
 // 7. The agent's real token reads but never writes (Decision 056)
 console.log('agent token');
 const asAgent = { apikey: KEY, authorization: 'Bearer ' + tok.access_token, 'content-type': 'application/json', prefer: 'return=representation' };

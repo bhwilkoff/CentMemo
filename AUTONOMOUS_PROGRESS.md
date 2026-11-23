@@ -1536,3 +1536,28 @@ Apple.
     contactsd and Chrome; no other builds running).
 - **Not done:** the connector still shows Claude the bank's names. The next
   step is mcp reading setting_names.
+
+### Design tick 25 — 2026-11-23 — D8 renames reach Claude (mcp v9); the deploy token moves to the Keychain
+- **Connector v9:** a renamed place reads `place: The Zoo (statement: Denver
+  Zoo)`, and `search_transactions` finds it by the person's name. Names are
+  read once per request, as the person, under RLS, and passed to txnLine;
+  there is no module state, so nothing crosses between users.
+  - New test_connector check (6c): the owner renames a place, Claude
+    searches by that name, then the name is cleared. It failed on v8 and
+    passes on v9.
+  - Deployed through the Supabase connector with a trimmed money.js
+    (formatMinor, cleanMerchant, settingPattern).
+- **Ben (2026-11-23):** "The supabase connector should work via the keychain,
+  which is what we fixed so that we wouldn't have keys on the mac."
+  - Found: the Supabase personal access token was never moved into the
+    Keychain. There's no `centmemo:` item and no Supabase CLI login, and
+    deploy-mcp.sh still read the old token files, which are gone.
+  - Fixed: deploy-mcp.sh reads `centmemo:SUPABASE_ACCESS_TOKEN` from the
+    Keychain (or the environment) and never from a file. The new recipe
+    `tools/secrets.sh keychain-paste SUPABASE_ACCESS_TOKEN` stores a token
+    from the clipboard and then clears the clipboard. The value never sits
+    on a command line or in a file.
+  - Ben's step: make a token in the Supabase dashboard, copy it, and run
+    that recipe once.
+- **Verified:** test_connector passes, and `tools/test_all.sh` passes
+  (rc=0, niced, load about 8).
