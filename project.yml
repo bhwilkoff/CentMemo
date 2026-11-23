@@ -57,8 +57,12 @@ targets:
           - "tvOS/**"
           - "macOS/**"
           - "UITests/**"
+          - "Extensions/**"
           # The folder READMEs are notes for people, not app resources.
           - "**/*.md"
+    # F2: the CentMemoWalletDelivery extension (apple/Extensions/WalletDelivery,
+    # branch f2-wallet-delivery) joins here once Apple extends the FinanceKit
+    # grant to com.learningischange.centmemo.walletdelivery.
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.learningischange.centmemo

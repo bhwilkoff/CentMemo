@@ -1688,3 +1688,19 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   2. Register `group.com.learningischange.centmemo` and assign it to both
      App IDs.
 - main is untouched and still builds for the devices.
+- **Portal (Ben said yes):** registered the App Group
+  `group.com.learningischange.centmemo` ("CentMemo shared") and assigned it
+  to both App IDs. The ASC API confirms APP_GROUPS on both, and FINANCE_KIT
+  is still on the app.
+- **FinanceKit on the extension:** the walletdelivery App ID's Capability
+  Requests tab shows "FinanceKit: No Requests". Apple's grant covers only
+  `com.learningischange.centmemo`, so the extension needs its own request,
+  which Ben submits as Account Holder.
+- **On main now (without the extension):** the shared Keychain session,
+  the App Group tokens, the refresh-token handoff, and the enable/disable
+  calls. The extension target joins project.yml from branch
+  `f2-wallet-delivery` once the grant arrives.
+  - Duo, debug build with the App Group: Ben's real session survived, and
+    the Narrative loaded his November (113 events, his memo). Frame
+    `duo-ledger-1.png` read.
+  - `tools/test_all.sh` rc=0.

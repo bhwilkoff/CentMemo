@@ -286,9 +286,10 @@ struct WalletSyncButton: View {
                 result = "Apple Wallet access wasn't allowed. You can change this in Settings, Privacy & Security, Financial Data."
                 return
             }
-            let changes = try await finance.changes(since: UserDefaults.standard.data(forKey: tokenKey))
+            let changes = try await finance.changes(since: Shared.financeToken(tokenKey))
             let r = try await APIClient.shared.syncFinance(changes)
-            if let token = changes.newToken { UserDefaults.standard.set(token, forKey: tokenKey) }
+            if let token = changes.newToken { Shared.setFinanceToken(token, tokenKey) }
+            if finance is FinanceKitSource { FinanceBackgroundSync.enable() }
             result = "Synced \(r.inserted) event\(r.inserted == 1 ? "" : "s") from \(changes.accounts.count) account\(changes.accounts.count == 1 ? "" : "s")."
             session.didChangeData()
             UINotificationFeedbackGenerator().notificationOccurred(.success)
