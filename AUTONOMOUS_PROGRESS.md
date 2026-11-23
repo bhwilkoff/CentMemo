@@ -1502,3 +1502,12 @@ Apple.
     (two swift-frontend processes, load 35) to finish.
   - test_all now compiles for `generic/platform=iOS`, never the simulator,
     and the CentMemo simulator is deleted.
+
+### Design tick 23 — 2026-11-23 — bakeries are Restaurants
+- Migration 20261123030000 (applied) moves MCC 5462 from Grocery to
+  Restaurants in plain_category (Postgres 17 SET EXPRESSION; nothing
+  rewritten), and from "groceries" to "meal" in memo_suggestions. Ben's
+  Crumbl now reads "Restaurants".
+- A database-only tick: the Mac was loaded (load 9: Android Studio, media
+  analysis), so no local builds ran. The full suite runs at the next quiet
+  moment.
