@@ -46,6 +46,17 @@ final class PhotoAttachUITests: DeviceTestCase {
         _ = grid
         shot(app, "photo-attached")
 
+        // Item 10: the menu offers a copy in CentMemo. With Photos access declined
+        // (as here) CentMemo can't read the photo, and says so instead of failing quietly.
+        tile.press(forDuration: 1.2)
+        let keep = app.buttons["Keep a copy in CentMemo"]
+        XCTAssertTrue(keep.waitForExistence(timeout: 5), "context menu offers a copy in CentMemo")
+        keep.tap()
+        let honest = app.staticTexts["To keep a copy, allow CentMemo to see your photos in Settings, then try again."]
+        let kept = app.descendants(matching: .any)["A copy is kept in CentMemo"]
+        XCTAssertTrue(honest.waitForExistence(timeout: 15) || kept.waitForExistence(timeout: 1), "the copy is kept, or CentMemo says why not")
+        shot(app, "photo-copy")
+
         tile.press(forDuration: 1.2)
         let remove = app.buttons["Remove from this memo"]
         XCTAssertTrue(remove.waitForExistence(timeout: 5), "context menu offers removal")

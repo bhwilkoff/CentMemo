@@ -79,6 +79,7 @@ final class APIClient {
 
     /// In-app account deletion (Decision 035): every row cascades.
     func deleteAccount() async throws {
+        try await removeAllCopies()
         _ = try await raw("rest/v1/rpc/delete_my_account", method: "POST", body: [String: String]())
         session = nil
     }
@@ -445,26 +446,75 @@ final class APIClient {
         let id: String
         let kind: String
         let deviceRef: String?
-        enum CodingKeys: String, CodingKey { case id, kind, deviceRef = "device_ref" }
+        /// Item 10: set only when the person chose to keep a copy in CentMemo.
+        var storagePath: String? = nil
+        enum CodingKeys: String, CodingKey { case id, kind, deviceRef = "device_ref", storagePath = "storage_path" }
     }
 
     func attachments(for transactionID: String) async throws -> [Attachment] {
         try await rest("attachments", [.init(name: "transaction_id", value: "eq." + transactionID),
-                                      .init(name: "select", value: "id,kind,device_ref"),
+                                      .init(name: "select", value: "id,kind,device_ref,storage_path"),
                                       .init(name: "order", value: "created_at")])
     }
 
     /// Records a photo by its PhotoKit identifier only; no copy of the image leaves the device.
     func attachPhoto(transactionID: String, deviceRef: String) async throws -> Attachment {
         struct Row: Encodable { let transaction_id: String; let kind = "photo"; let device_ref: String }
-        let data = try await raw("rest/v1/attachments", query: [.init(name: "select", value: "id,kind,device_ref")], method: "POST",
+        let data = try await raw("rest/v1/attachments", query: [.init(name: "select", value: "id,kind,device_ref,storage_path")], method: "POST",
                                  body: Row(transaction_id: transactionID, device_ref: deviceRef), prefer: "return=representation")
         guard let made = try JSONDecoder().decode([Attachment].self, from: data).first else { throw APIError.decoding("no attachment returned") }
         return made
     }
 
-    func removeAttachment(_ id: String) async throws {
+    func removeAttachment(_ id: String, copy: String? = nil) async throws {
+        if let copy { try await removeCopy(attachmentID: id, path: copy) }
         try await raw("rest/v1/attachments", query: [.init(name: "id", value: "eq." + id)], method: "DELETE")
+    }
+
+    // MARK: - Photo copies (item 10): only when the person chooses one
+
+    /// Uploads a JPEG the phone made (resized, no location metadata) to the
+    /// person's own folder, and records where it is.
+    func keepCopy(attachmentID: String, jpeg: Data) async throws -> String {
+        guard let uid = session?.userID else { throw APIError.signedOut }
+        let path = "\(uid)/\(attachmentID).jpg"
+        _ = try await storage("POST", "object/attachments/" + path, body: jpeg, contentType: "image/jpeg", upsert: true)
+        try await raw("rest/v1/attachments", query: [.init(name: "id", value: "eq." + attachmentID)], method: "PATCH",
+                      body: ["storage_path": path])
+        return path
+    }
+
+    func removeCopy(attachmentID: String, path: String) async throws {
+        _ = try await storage("DELETE", "object/attachments/" + path)
+        try await raw("rest/v1/attachments", query: [.init(name: "id", value: "eq." + attachmentID)], method: "PATCH",
+                      body: ["storage_path": Optional<String>.none])
+    }
+
+    /// Every copy in the person's folder goes before the account does: storage
+    /// files are not removed by the database's cascade.
+    private func removeAllCopies() async throws {
+        guard let uid = session?.userID else { return }
+        struct Item: Decodable { let name: String }
+        struct ListBody: Encodable { let prefix: String; let limit = 1000 }
+        let listed = try await storage("POST", "object/list/attachments", body: try JSONEncoder().encode(ListBody(prefix: uid)), contentType: "application/json")
+        let names = (try? JSONDecoder().decode([Item].self, from: listed))?.map { "\(uid)/\($0.name)" } ?? []
+        guard !names.isEmpty else { return }
+        _ = try await storage("DELETE", "object/attachments", body: try JSONEncoder().encode(["prefixes": names]), contentType: "application/json")
+    }
+
+    private func storage(_ method: String, _ path: String, body: Data? = nil, contentType: String? = nil, upsert: Bool = false) async throws -> Data {
+        try await refreshIfNeeded()
+        var req = URLRequest(url: Self.projectURL.appending(path: "storage/v1/" + path))
+        req.httpMethod = method
+        req.setValue(Self.publishableKey, forHTTPHeaderField: "apikey")
+        if let token = session?.accessToken { req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
+        if let contentType { req.setValue(contentType, forHTTPHeaderField: "Content-Type") }
+        if upsert { req.setValue("true", forHTTPHeaderField: "x-upsert") }
+        req.httpBody = body
+        let (data, response) = try await URLSession.shared.data(for: req)
+        let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+        guard (200..<300).contains(code) else { throw APIError.server(Self.message(from: data, code: code)) }
+        return data
     }
 
     // MARK: - FinanceKit sync (Decision 057: idempotent on source_id)

@@ -100,7 +100,20 @@ const API = (() => {
     return saved.back || '';
   }
   async function signOut() { names = null; vals = null; places = null; await client().auth.signOut(); }
+  // Item 10: photo copies the person chose to keep; links last an hour.
+  async function copyUrls(paths) {
+    if (!paths.length) return {};
+    const { data, error } = await client().storage.from('attachments').createSignedUrls(paths, 3600);
+    if (error) throw error;
+    return Object.fromEntries((data || []).filter((d) => d.signedUrl).map((d) => [d.path, d.signedUrl]));
+  }
   async function deleteAccount() {
+    // Storage files outlive the database cascade: remove the person's copies first.
+    const { data: { user } } = await client().auth.getUser();
+    if (user) {
+      const { data: files } = await client().storage.from('attachments').list(user.id, { limit: 1000 });
+      if (files && files.length) must(await client().storage.from('attachments').remove(files.map((f) => user.id + '/' + f.name)));
+    }
     must(await client().rpc('delete_my_account'));
     await client().auth.signOut({ scope: 'local' });
   }
@@ -151,7 +164,7 @@ const API = (() => {
   }
   async function transaction(id) {
     const rows = must(await client().from('transactions')
-      .select(TXN + ', accounts(display_name), memos(body, updated_at, memo_values(value_id, life_values(name))), attachments(kind)').eq('id', id).limit(1));
+      .select(TXN + ', accounts(display_name), memos(body, updated_at, memo_values(value_id, life_values(name))), attachments(id, kind, storage_path)').eq('id', id).limit(1));
     return rows[0] || null;
   }
   async function stories({ ym, valueId }) {
@@ -278,6 +291,6 @@ const API = (() => {
   return {
     MCP_URL, client, session, onAuthChange, signInWithApple, finishAppleRedirect, signOut, deleteAccount,
     unexamined, suggestions, themeCounts, transactionCount, month, latestMonth, atSetting, transaction, stories,
-    values, addValue, settingPlaces, setSkipped, renameValue, deleteValue, settingNames, renameSetting, saveMemo, importAppleCard, importExport, GROUNDS, ground, setGround,
+    values, addValue, settingPlaces, copyUrls, setSkipped, renameValue, deleteValue, settingNames, renameSetting, saveMemo, importAppleCard, importExport, GROUNDS, ground, setGround,
   };
 })();

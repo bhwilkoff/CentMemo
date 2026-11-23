@@ -1858,3 +1858,33 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   unlisted links to the person's own words only). FinanceKit Addendum 3.2
   rules out CentMemo hosting Wallet amounts or places.
 - **Next:** item 10, files and opt-in uploaded copies.
+
+### Tick 35 — 2026-11-23 — Item 10: keep a copy of a photo in CentMemo
+- **Storage:** private bucket `attachments`, JPEG only, 5 MB. Files live
+  under `<user id>/`; the owner can read, add and remove them, and agents
+  can't write. test_rls now checks against the live project: the owner
+  uploads and reads; a stranger can't read or plant a file; there are no
+  public reads.
+- **iOS:** a photo's menu offers "Keep a copy in CentMemo" and "Remove the
+  copy". The copy is redrawn at up to 1600 px and encoded fresh, so no
+  location or camera metadata goes along, and a check mark marks it.
+  Removing the photo removes its copy, and deleting the account removes
+  every copy first, since storage files outlive the database cascade.
+- **Web:** kept copies show on the event page through hour-long signed
+  links. Deleting the account on the web removes the copies too.
+- **Privacy page:** describes copies, their stripped metadata, and their
+  deletion.
+- **Verified:**
+  - test_web_states: a planted copy draws from a signed link, then is
+    cleaned up.
+  - iPhone 12: PhotoAttachUITests passes with the new menu item. The bench
+    declines Photos access by design, so the run shows the new message
+    "To keep a copy, allow CentMemo to see your photos in Settings, then
+    try again." Frame photo-copy was read; the wording was changed after
+    reading the first version.
+  - `tools/test_all.sh` rc=0.
+- **Not verified:** the iOS upload itself (needs a phone with Photos
+  access; the Duo when it's back, with Ben's OK, since it writes to his
+  account).
+- **Next:** L2 prep while Ben reviews (public links, FinanceKit
+  extension), or file attachments.

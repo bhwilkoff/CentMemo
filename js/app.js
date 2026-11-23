@@ -574,10 +574,20 @@
   // Photos are attached on the iPhone by PhotoKit reference (money-story-design);
   // the web cannot draw them, so it says they exist and where they live.
   function photosNote(list) {
-    const n = (list || []).filter((a) => a.kind === 'photo').length;
-    if (!n) return null;
-    return h('p', { class: 'caption photos-note' }, n === 1 ? '1 photo attached in the CentMemo iPhone app.' : n + ' photos attached in the CentMemo iPhone app.');
+    const photos = (list || []).filter((a) => a.kind === 'photo');
+    if (!photos.length) return null;
+    // Item 10: copies the person chose to keep show here; the rest live on the iPhone.
+    const kept = photos.filter((a) => a.storage_path);
+    const onPhone = photos.length - kept.length;
+    const grid = h('div', { class: 'photo-copies', 'data-photo-copies': '' });
+    if (kept.length) {
+      API.copyUrls(kept.map((a) => a.storage_path)).then((urls) => grid.replaceChildren(...kept.filter((a) => urls[a.storage_path])
+        .map((a) => h('img', { src: urls[a.storage_path], alt: 'A photo attached to this memo', loading: 'lazy' })))).catch(() => {});
+    }
+    return h('div', {}, kept.length ? grid : null,
+      onPhone ? h('p', { class: 'caption photos-note' }, onPhone === 1 ? '1 photo attached in the CentMemo iPhone app.' : onPhone + ' photos attached in the CentMemo iPhone app.') : null);
   }
+
 
   /* ---- Story: the memos, read in order ---- */
   async function storyView(scope) {

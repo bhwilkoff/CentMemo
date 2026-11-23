@@ -104,9 +104,22 @@ struct EntryDetailView: View {
                             LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: 8)], spacing: 8) {
                                 ForEach(photos) { a in
                                     AttachedPhoto(ref: a.deviceRef ?? "")
+                                        .overlay(alignment: .bottomTrailing) {
+                                            if a.storagePath != nil {
+                                                Image(systemName: "checkmark.circle.fill").symbolRenderingMode(.palette)
+                                                    .foregroundStyle(Color.white, Color.brandPrimary).padding(4)
+                                                    .accessibilityLabel("A copy is kept in CentMemo")
+                                            }
+                                        }
                                         .contextMenu {
+                                            if let path = a.storagePath {
+                                                Button("Remove the copy in CentMemo", systemImage: "minus.circle") { Task { await dropCopy(a, path) } }
+                                            } else {
+                                                Button("Keep a copy in CentMemo", systemImage: "square.and.arrow.up") { Task { await keepCopy(a) } }
+                                            }
                                             Button("Remove from this memo", role: .destructive) { Task { await remove(a) } }
                                         }
+                                        .accessibilityIdentifier("attached-photo")
                                 }
                             }
                             .accessibilityIdentifier("attached-photos")
@@ -259,8 +272,32 @@ struct EntryDetailView: View {
     }
 
     private func remove(_ a: APIClient.Attachment) async {
-        do { try await APIClient.shared.removeAttachment(a.id); photos.removeAll { $0.id == a.id } }
+        do { try await APIClient.shared.removeAttachment(a.id, copy: a.storagePath); photos.removeAll { $0.id == a.id } }
         catch { self.error = session.handle(error) }
+    }
+
+    /// Item 10: the person chose to keep a copy, so the web can show it too.
+    private func keepCopy(_ a: APIClient.Attachment) async {
+        guard let ref = a.deviceRef, let jpeg = await AttachedPhoto.copyForUpload(ref: ref) else {
+            let allowed = [.authorized, .limited].contains(PHPhotoLibrary.authorizationStatus(for: .readWrite))
+            self.error = allowed ? "CentMemo couldn't read that photo from your library."
+                : "To keep a copy, allow CentMemo to see your photos in Settings, then try again."
+            UINotificationFeedbackGenerator().notificationOccurred(.error)
+            return
+        }
+        do {
+            let path = try await APIClient.shared.keepCopy(attachmentID: a.id, jpeg: jpeg)
+            if let i = photos.firstIndex(where: { $0.id == a.id }) { photos[i].storagePath = path }
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        } catch { self.error = session.handle(error); UINotificationFeedbackGenerator().notificationOccurred(.error) }
+    }
+
+    private func dropCopy(_ a: APIClient.Attachment, _ path: String) async {
+        do {
+            try await APIClient.shared.removeCopy(attachmentID: a.id, path: path)
+            if let i = photos.firstIndex(where: { $0.id == a.id }) { photos[i].storagePath = nil }
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        } catch { self.error = session.handle(error) }
     }
 
     private func addValue() async {

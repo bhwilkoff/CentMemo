@@ -92,5 +92,27 @@ for (const [who, token] of [['owner', owner], ['stranger', stranger]]) {
 }
 ok(realRows([{ source_id: 'sample-1' }, { source_id: '7F3A-real' }]).length === 1, 'negative control: a real id is caught');
 
+console.log('photo copies (storage bucket "attachments")');
+if (!control) {
+  const sub = (t) => JSON.parse(Buffer.from(t.split('.')[1], 'base64url').toString()).sub;
+  const store = (token, path, init = {}) => fetch(URL_ + '/storage/v1/object/' + path, { ...init, headers: { apikey: KEY, authorization: 'Bearer ' + token, ...(init.headers || {}) } });
+  const jpeg = Buffer.from('/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AKp//2Q==', 'base64');
+  const mine = 'attachments/' + sub(owner) + '/rls-check.jpg';
+  try {
+    const up = await store(owner, mine, { method: 'POST', body: jpeg, headers: { 'content-type': 'image/jpeg', 'x-upsert': 'true' } });
+    ok(up.ok, 'owner uploads a copy into their own folder (' + up.status + ')');
+    const peek = await store(stranger, 'authenticated/' + mine);
+    ok(!peek.ok, 'a stranger cannot read the owner\'s copy (' + peek.status + ')');
+    const plant = await store(stranger, 'attachments/' + sub(owner) + '/planted.jpg', { method: 'POST', body: jpeg, headers: { 'content-type': 'image/jpeg' } });
+    ok(!plant.ok, 'a stranger cannot write into the owner\'s folder (' + plant.status + ')');
+    const anon = await fetch(URL_ + '/storage/v1/object/public/' + mine);
+    ok(!anon.ok, 'the bucket is not public (' + anon.status + ')');
+    const own = await store(owner, 'authenticated/' + mine);
+    ok(own.ok, 'the owner reads their own copy (' + own.status + ')');
+  } finally {
+    await store(owner, 'attachments', { method: 'DELETE', body: JSON.stringify({ prefixes: [mine.slice('attachments/'.length)] }), headers: { 'content-type': 'application/json' } });
+  }
+}
+
 console.log(failures ? `FAIL: ${failures} check(s)` : 'PASS: row-level security holds on the deployed project');
 process.exit(failures ? 1 : 0);

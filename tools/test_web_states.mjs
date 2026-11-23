@@ -221,6 +221,25 @@ console.log('event page (D6): the Setting and the memo lead; the money is a foot
   } finally {
     await fetch(P + '/rest/v1/setting_places?setting=eq.Denver%20Zoo', { method: 'DELETE', headers: oh });
   }
+  // Item 10: a photo copy the person kept shows on the web, from a private bucket.
+  const uid = JSON.parse(Buffer.from(os.access_token.split('.')[1], 'base64url').toString()).sub;
+  const jpeg = Buffer.from('/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AKp//2Q==', 'base64');
+  let att;
+  try {
+    att = (await (await fetch(P + '/rest/v1/attachments?select=id', { method: 'POST', headers: { ...oh, prefer: 'return=representation' },
+      body: JSON.stringify({ transaction_id: 'a3b8c10c-68b8-4bfe-9380-c87b7015a49d', kind: 'photo', device_ref: 'web-test' }) })).json())[0];
+    const path = uid + '/' + att.id + '.jpg';
+    await fetch(P + '/storage/v1/object/attachments/' + path, { method: 'POST', headers: { apikey: K, Authorization: 'Bearer ' + os.access_token, 'content-type': 'image/jpeg' }, body: jpeg });
+    await fetch(P + '/rest/v1/attachments?id=eq.' + att.id, { method: 'PATCH', headers: oh, body: JSON.stringify({ storage_path: path }) });
+    await openAs('owner', '#/ledger');
+    await evaluate('location.hash = "#/t/a3b8c10c-68b8-4bfe-9380-c87b7015a49d"; true');
+    ok(await waitFor('[...document.querySelectorAll("#view-txn [data-photo-copies] img")].some(i => i.complete && i.naturalWidth > 0 && /token=/.test(i.src))'), 'a kept photo copy shows on the web, through a signed link');
+  } finally {
+    if (att) {
+      await fetch(P + '/storage/v1/object/attachments', { method: 'DELETE', headers: { apikey: K, Authorization: 'Bearer ' + os.access_token, 'content-type': 'application/json' }, body: JSON.stringify({ prefixes: [uid + '/' + att.id + '.jpg'] }) });
+      await fetch(P + '/rest/v1/attachments?id=eq.' + att.id, { method: 'DELETE', headers: oh });
+    }
+  }
 }
 
 console.log('error (REST blocked)');

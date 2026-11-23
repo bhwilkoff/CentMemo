@@ -478,3 +478,7 @@ html[data-ground="pistachio"] { --color-yours: #B4C875; }
 .share-theme-list { list-style: none; padding: 0; margin: var(--space-3) 0; display: flex; flex-direction: column; gap: var(--space-3); }
 .share-theme-list blockquote { margin: 0; }
 .share-picks { display: flex; flex-direction: column; gap: var(--space-1); margin-bottom: var(--space-3); }
+
+/* Item 10: photo copies the person kept in CentMemo */
+.photo-copies { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: var(--space-2); margin: var(--space-2) 0; }
+.photo-copies img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-control, 8px); }

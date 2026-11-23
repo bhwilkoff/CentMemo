@@ -111,5 +111,28 @@ struct AttachedPhoto: View {
         }
         if image == nil { note = "Couldn't load it" }
     }
+
+    /// Item 10: the copy CentMemo keeps when the person asks. Re-drawn at up to
+    /// 1600 px and encoded fresh, so no location or camera metadata goes along.
+    static func copyForUpload(ref: String) async -> Data? {
+        guard let asset = PHAsset.fetchAssets(withLocalIdentifiers: [ref], options: nil).firstObject else { return nil }
+        let opts = PHImageRequestOptions()
+        opts.deliveryMode = .highQualityFormat
+        opts.isNetworkAccessAllowed = true
+        opts.resizeMode = .exact
+        let img: UIImage? = await withCheckedContinuation { done in
+            PHImageManager.default().requestImage(for: asset, targetSize: CGSize(width: 1600, height: 1600),
+                                                  contentMode: .aspectFit, options: opts) { img, info in
+                if (info?[PHImageResultIsDegradedKey] as? Bool) == true { return }
+                done.resume(returning: img)
+            }
+        }
+        guard let img else { return nil }
+        let size = img.size
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = 1
+        let redrawn = UIGraphicsImageRenderer(size: size, format: format).image { _ in img.draw(in: CGRect(origin: .zero, size: size)) }
+        return redrawn.jpegData(compressionQuality: 0.8)
+    }
 }
 #endif
