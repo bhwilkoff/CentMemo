@@ -345,11 +345,14 @@ final class APIClient {
     // MARK: - Values the person names
 
     func values() async throws -> [LifeValue] {
-        try await rest("life_values", [.init(name: "select", value: "id,name"), .init(name: "order", value: "name")])
+        let vals: [LifeValue] = try await rest("life_values", [.init(name: "select", value: "id,name,color,created_at"), .init(name: "order", value: "name")])
+        let colors = Themes.assignColors(vals.map { .init(name: $0.name, color: $0.color, createdAt: $0.createdAt ?? "") })
+        await MainActor.run { Themes.current = colors }
+        return vals
     }
 
     func addValue(_ name: String) async throws -> LifeValue {
-        let data = try await raw("rest/v1/life_values", query: [.init(name: "select", value: "id,name")], method: "POST",
+        let data = try await raw("rest/v1/life_values", query: [.init(name: "select", value: "id,name,color,created_at")], method: "POST",
                                  body: ["name": name.trimmingCharacters(in: .whitespaces)], prefer: "return=representation")
         guard let v = try JSONDecoder().decode([LifeValue].self, from: data).first else { throw APIError.decoding("new value") }
         return v

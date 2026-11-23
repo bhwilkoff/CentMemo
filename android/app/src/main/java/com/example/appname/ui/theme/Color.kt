@@ -36,6 +36,19 @@ data class SemanticColors(
     val storeSlate: Color,
     val storeRose: Color,
     val storeStone: Color,
+    val themeClay: Color,
+    val themePersimmon: Color,
+    val themeOchre: Color,
+    val themeOlive: Color,
+    val themeMoss: Color,
+    val themeSage: Color,
+    val themeTeal: Color,
+    val themeSky: Color,
+    val themeSlate: Color,
+    val themeIris: Color,
+    val themePlum: Color,
+    val themeRose: Color,
+    val themeStone: Color,
 )
 
 val LightSemanticColors = SemanticColors(
@@ -49,6 +62,19 @@ val LightSemanticColors = SemanticColors(
     storeSlate = Color(0xFF3D5A9E),
     storeRose = Color(0xFFA8437A),
     storeStone = Color(0xFF6F6964),
+    themeClay = Color(0xFFA33E25),
+    themePersimmon = Color(0xFF964D09),
+    themeOchre = Color(0xFF815C0A),
+    themeOlive = Color(0xFF686800),
+    themeMoss = Color(0xFF2F751D),
+    themeSage = Color(0xFF1B735B),
+    themeTeal = Color(0xFF157171),
+    themeSky = Color(0xFF006D91),
+    themeSlate = Color(0xFF2F60B2),
+    themeIris = Color(0xFF6451AC),
+    themePlum = Color(0xFF8A428E),
+    themeRose = Color(0xFF9D3A67),
+    themeStone = Color(0xFF6F6964),
 )
 
 val DarkSemanticColors = SemanticColors(
@@ -62,6 +88,19 @@ val DarkSemanticColors = SemanticColors(
     storeSlate = Color(0xFF8EA8E6),
     storeRose = Color(0xFFE48BBB),
     storeStone = Color(0xFFB3ACA6),
+    themeClay = Color(0xFFFCA48D),
+    themePersimmon = Color(0xFFFEA668),
+    themeOchre = Color(0xFFE9B452),
+    themeOlive = Color(0xFFC3C55A),
+    themeMoss = Color(0xFF90D281),
+    themeSage = Color(0xFF54D8B1),
+    themeTeal = Color(0xFF2AD7D7),
+    themeSky = Color(0xFF60CCFC),
+    themeSlate = Color(0xFF98BFFE),
+    themeIris = Color(0xFFBCB3FA),
+    themePlum = Color(0xFFE8A0EC),
+    themeRose = Color(0xFFFF99C2),
+    themeStone = Color(0xFFB3ACA6),
 )
 
 object Spacing {

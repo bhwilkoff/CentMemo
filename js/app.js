@@ -104,6 +104,7 @@
     const [name, arg] = parts;
     try {
       try { NAMES = await API.settingNames(); } catch (_) { NAMES = {}; }
+      try { THEME_COLORS = CentThemes.assignColors(await API.values()); } catch (_) { THEME_COLORS = {}; }
       if (name === 'ledger') { lastList = location.hash; return await ledgerView(arg); }
       if (name === 't' && arg) return await txnView(arg);
       if (name === 'setting' && arg) return await settingView(decodeURIComponent(arg));
@@ -172,6 +173,50 @@
     return [box];
   }
 
+  /* ---- D14: starter themes (Ben's approved list), at first run and in Settings ---- */
+  const STARTERS_SEEN = 'cm-starters-seen';
+  function starterRows(held, onAdd) {
+    const have = new Set(held.map((v) => v.name.trim().toLowerCase()));
+    return CentThemes.STARTERS.filter((t) => !have.has(t.name.toLowerCase())).map((t) => {
+      // The color it would take if added now, by the same rule.
+      const color = CentThemes.assignColors([...held, { name: t.name, created_at: '9999' }])[t.name.toLowerCase()];
+      const add = h('button', { type: 'button', class: 'btn btn-small' }, 'Add');
+      add.addEventListener('click', () => onAdd(t, add));
+      return h('li', { class: 'row row-static starter', 'data-starter': t.name },
+        h('i', { class: 'theme-mark', style: 'background: var(--color-theme-' + color + ')' }),
+        h('span', { class: 'starter-text' }, h('strong', {}, t.name), h('span', { class: 'caption' }, t.meaning)), add);
+    });
+  }
+  // First run: no themes yet. Unticked, so the person chooses (Ben's list, D14).
+  function firstRunThemes(onDone) {
+    const boxes = CentThemes.STARTERS.map((t) => {
+      const box = h('input', { type: 'checkbox', id: 'starter-' + t.color, value: t.name });
+      return h('label', { class: 'starter-pick', for: 'starter-' + t.color }, box,
+        h('i', { class: 'theme-mark', style: 'background: var(--color-theme-' + t.color + ')' }),
+        h('span', { class: 'starter-text' }, h('strong', {}, t.name), h('span', { class: 'caption' }, t.meaning)));
+    });
+    const keep = h('button', { type: 'button', class: 'btn btn-primary' }, 'Keep these');
+    const later = h('button', { type: 'button', class: 'btn btn-quiet' }, 'Not now');
+    const note = h('p', { class: 'caption', role: 'status' });
+    const seen = () => { try { localStorage.setItem(STARTERS_SEEN, '1'); } catch (_) {} };
+    keep.addEventListener('click', async () => {
+      const names = boxes.map((b) => b.querySelector('input')).filter((b) => b.checked).map((b) => b.value);
+      if (!names.length) { note.textContent = 'Tick the themes that sound like you, or choose Not now.'; return; }
+      keep.disabled = true;
+      try { for (const n of names) await API.addValue(n); seen(); onDone(); }
+      catch (err) { keep.disabled = false; note.textContent = err.message; }
+    });
+    later.addEventListener('click', () => { seen(); onDone(); });
+    return h('section', { class: 'first-themes', 'aria-labelledby': 'first-themes-h' },
+      h('h2', { class: 'section-heading', id: 'first-themes-h' }, 'Which of these sound like you?'),
+      h('p', { class: 'caption' }, 'Themes collect your memos. Rename or remove them any time in Settings.'),
+      h('div', { class: 'starter-list' }, boxes), h('div', { class: 'actions' }, keep, later), note);
+  }
+  async function needsFirstRun() {
+    try { if (localStorage.getItem(STARTERS_SEEN)) return false; } catch (_) {}
+    return !(await API.values()).length;
+  }
+
   async function unexaminedView() {
     const body = showView('unexamined', 'unexamined');
     const heading = $('h-unexamined');
@@ -188,7 +233,8 @@
       // D7: one invitation at a time, "Another" for the next of up to three; no
       // count of what is left (as the iPhone's SuggestionCard).
       const picks = await suggestionCards(rows).catch(() => []);
-      body.replaceChildren(picks.length === 1 ? h('div', { class: 'suggestions' }, picks) : picks.length ? picks[0] : '',
+      const first = (await needsFirstRun().catch(() => false)) ? firstRunThemes(unexaminedView) : '';
+      body.replaceChildren(first, picks.length === 1 ? h('div', { class: 'suggestions' }, picks) : picks.length ? picks[0] : '',
         h('div', { class: 'list' }, rows.map((t) => txnRow(t))),
         count > rows.length ? h('p', { class: 'caption' }, 'Showing the newest ' + rows.length + '.') : null);
     } catch (err) { failed(body, err, unexaminedView); }
@@ -220,7 +266,14 @@
   }
   // D11: the month by theme (as the iPhone's ThemeStrip / MonthStrip): money spent
   // under each written memo's first theme; a legend names every part.
-  const themeHue = (name) => 'var(--color-store-' + TILE_HUES[CentMoney.merchantHue(name, 6)] + ')';
+  // D14: each theme's own color, by the shared rule (js/money/themes.js).
+  let THEME_COLORS = {};
+  const themeHue = (name) => {
+    const k = String(name || '').trim().toLowerCase();
+    const c = THEME_COLORS[k] || (CentThemes.STARTERS.find((s) => s.name.toLowerCase() === k) || {}).color
+      || CentThemes.PALETTE[CentMoney.merchantHue(k, CentThemes.PALETTE.length)];
+    return 'var(--color-theme-' + c + ')';
+  };
   function themeStrip(rows) {
     const sums = new Map();
     for (const t of rows) {
@@ -358,6 +411,7 @@
         try {
           const v = await API.addValue(name);
           vals.push(v); vals.sort((a, b) => a.name.localeCompare(b.name));
+          THEME_COLORS = CentThemes.assignColors(await API.values());
           chosen.add(v.id); newValue.value = ''; drawChips(vals);
         } catch (err) { error.textContent = /duplicate|unique/i.test(err.message) ? 'You already have that theme.' : err.message; error.hidden = false; }
       });
@@ -607,7 +661,7 @@
           if (del.dataset.confirm !== '1') { del.dataset.confirm = '1'; del.textContent = 'Remove from all memos'; return; }
           try { await API.deleteValue(v.id); settingsView(); } catch (err) { failed(body, err, settingsView); }
         });
-        return h('li', { class: 'row row-static' }, input, rename, del);
+        return h('li', { class: 'row row-static' }, h('i', { class: 'theme-mark', style: 'background: ' + themeHue(v.name) }), input, rename, del);
       }));
 
       const copy = h('button', { class: 'btn btn-small' }, 'Copy');
@@ -631,6 +685,13 @@
         picker,
         h('h2', { class: 'section-heading' }, 'Themes'),
         vals.length ? valueList : h('p', { class: 'caption' }, 'Add a theme from any memo.'),
+        (() => {
+          const rows = starterRows(vals, async (t, btn) => {
+            btn.disabled = true;
+            try { await API.addValue(t.name); settingsView(); } catch (err) { btn.disabled = false; failed(body, err, settingsView); }
+          });
+          return rows.length ? h('div', {}, h('p', { class: 'field-label' }, 'Starter themes'), h('ul', { class: 'list starters' }, rows)) : '';
+        })(),
         h('h2', { class: 'section-heading' }, 'Connect Claude'),
         h('p', {}, 'Claude can read your Narrative and memos, but can never change them. In Claude, open Settings, then Connectors, then Add custom connector, and paste:'),
         h('div', { class: 'inline-form' }, h('code', { class: 'code-line' }, API.MCP_URL), copy),

@@ -89,6 +89,11 @@ struct LedgerEntry: Decodable, Identifiable, Hashable, Sendable {
 struct LifeValue: Codable, Identifiable, Hashable, Sendable {
     let id: String
     var name: String
+    /// D14: the color the person chose; nil lets Themes.assignColors pick.
+    var color: String? = nil
+    var createdAt: String? = nil
+
+    enum CodingKeys: String, CodingKey { case id, name, color, createdAt = "created_at" }
 }
 
 /// "2026-11-18" helpers shared by every view.

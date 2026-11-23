@@ -54,6 +54,32 @@
                     <SolidColorBrush x:Key="SemanticStoreRoseBrush" Color="#A8437A"/>
                     <Color x:Key="SemanticStoreStone">#6F6964</Color>
                     <SolidColorBrush x:Key="SemanticStoreStoneBrush" Color="#6F6964"/>
+                    <Color x:Key="SemanticThemeClay">#A33E25</Color>
+                    <SolidColorBrush x:Key="SemanticThemeClayBrush" Color="#A33E25"/>
+                    <Color x:Key="SemanticThemePersimmon">#964D09</Color>
+                    <SolidColorBrush x:Key="SemanticThemePersimmonBrush" Color="#964D09"/>
+                    <Color x:Key="SemanticThemeOchre">#815C0A</Color>
+                    <SolidColorBrush x:Key="SemanticThemeOchreBrush" Color="#815C0A"/>
+                    <Color x:Key="SemanticThemeOlive">#686800</Color>
+                    <SolidColorBrush x:Key="SemanticThemeOliveBrush" Color="#686800"/>
+                    <Color x:Key="SemanticThemeMoss">#2F751D</Color>
+                    <SolidColorBrush x:Key="SemanticThemeMossBrush" Color="#2F751D"/>
+                    <Color x:Key="SemanticThemeSage">#1B735B</Color>
+                    <SolidColorBrush x:Key="SemanticThemeSageBrush" Color="#1B735B"/>
+                    <Color x:Key="SemanticThemeTeal">#157171</Color>
+                    <SolidColorBrush x:Key="SemanticThemeTealBrush" Color="#157171"/>
+                    <Color x:Key="SemanticThemeSky">#006D91</Color>
+                    <SolidColorBrush x:Key="SemanticThemeSkyBrush" Color="#006D91"/>
+                    <Color x:Key="SemanticThemeSlate">#2F60B2</Color>
+                    <SolidColorBrush x:Key="SemanticThemeSlateBrush" Color="#2F60B2"/>
+                    <Color x:Key="SemanticThemeIris">#6451AC</Color>
+                    <SolidColorBrush x:Key="SemanticThemeIrisBrush" Color="#6451AC"/>
+                    <Color x:Key="SemanticThemePlum">#8A428E</Color>
+                    <SolidColorBrush x:Key="SemanticThemePlumBrush" Color="#8A428E"/>
+                    <Color x:Key="SemanticThemeRose">#9D3A67</Color>
+                    <SolidColorBrush x:Key="SemanticThemeRoseBrush" Color="#9D3A67"/>
+                    <Color x:Key="SemanticThemeStone">#6F6964</Color>
+                    <SolidColorBrush x:Key="SemanticThemeStoneBrush" Color="#6F6964"/>
                     <SolidColorBrush x:Key="BrandPrimaryHoverBrush" Color="#43131D"/>
                     <SolidColorBrush x:Key="BrandPrimaryPressedBrush" Color="#3B111A"/>
                     <SolidColorBrush x:Key="BrandPrimaryDisabledBrush" Color="#664A1520"/>
@@ -95,6 +121,32 @@
                     <SolidColorBrush x:Key="SemanticStoreRoseBrush" Color="#E48BBB"/>
                     <Color x:Key="SemanticStoreStone">#B3ACA6</Color>
                     <SolidColorBrush x:Key="SemanticStoreStoneBrush" Color="#B3ACA6"/>
+                    <Color x:Key="SemanticThemeClay">#FCA48D</Color>
+                    <SolidColorBrush x:Key="SemanticThemeClayBrush" Color="#FCA48D"/>
+                    <Color x:Key="SemanticThemePersimmon">#FEA668</Color>
+                    <SolidColorBrush x:Key="SemanticThemePersimmonBrush" Color="#FEA668"/>
+                    <Color x:Key="SemanticThemeOchre">#E9B452</Color>
+                    <SolidColorBrush x:Key="SemanticThemeOchreBrush" Color="#E9B452"/>
+                    <Color x:Key="SemanticThemeOlive">#C3C55A</Color>
+                    <SolidColorBrush x:Key="SemanticThemeOliveBrush" Color="#C3C55A"/>
+                    <Color x:Key="SemanticThemeMoss">#90D281</Color>
+                    <SolidColorBrush x:Key="SemanticThemeMossBrush" Color="#90D281"/>
+                    <Color x:Key="SemanticThemeSage">#54D8B1</Color>
+                    <SolidColorBrush x:Key="SemanticThemeSageBrush" Color="#54D8B1"/>
+                    <Color x:Key="SemanticThemeTeal">#2AD7D7</Color>
+                    <SolidColorBrush x:Key="SemanticThemeTealBrush" Color="#2AD7D7"/>
+                    <Color x:Key="SemanticThemeSky">#60CCFC</Color>
+                    <SolidColorBrush x:Key="SemanticThemeSkyBrush" Color="#60CCFC"/>
+                    <Color x:Key="SemanticThemeSlate">#98BFFE</Color>
+                    <SolidColorBrush x:Key="SemanticThemeSlateBrush" Color="#98BFFE"/>
+                    <Color x:Key="SemanticThemeIris">#BCB3FA</Color>
+                    <SolidColorBrush x:Key="SemanticThemeIrisBrush" Color="#BCB3FA"/>
+                    <Color x:Key="SemanticThemePlum">#E8A0EC</Color>
+                    <SolidColorBrush x:Key="SemanticThemePlumBrush" Color="#E8A0EC"/>
+                    <Color x:Key="SemanticThemeRose">#FF99C2</Color>
+                    <SolidColorBrush x:Key="SemanticThemeRoseBrush" Color="#FF99C2"/>
+                    <Color x:Key="SemanticThemeStone">#B3ACA6</Color>
+                    <SolidColorBrush x:Key="SemanticThemeStoneBrush" Color="#B3ACA6"/>
                     <SolidColorBrush x:Key="BrandPrimaryHoverBrush" Color="#D8A7AB"/>
                     <SolidColorBrush x:Key="BrandPrimaryPressedBrush" Color="#C09498"/>
                     <SolidColorBrush x:Key="BrandPrimaryDisabledBrush" Color="#66F0B9BE"/>

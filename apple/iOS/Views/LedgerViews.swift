@@ -8,6 +8,8 @@ struct UnexaminedView: View {
     @State private var picked: [(APIClient.Suggestion, LedgerEntry)] = []
     @State private var shown = 0
     @State private var hasAny = true
+    /// D14: no themes yet and the starter question not yet answered.
+    @State private var firstRun = false
     @State private var loading = true
     @State private var error: String?
 
@@ -27,6 +29,10 @@ struct UnexaminedView: View {
                 }
             } else {
                 List {
+                    if firstRun {
+                        FirstRunThemesSection { firstRun = false }
+                            .listRowBackground(Color.clear)
+                    }
                     // D7: one invitation at a time, with its reason; "Another" shows the
                     // next of up to three. No count of what is left (no to-do lists).
                     if !picked.isEmpty {
@@ -97,6 +103,11 @@ struct UnexaminedView: View {
             picked = await suggestionsFor(list)
             entries = list
             if entries.isEmpty { hasAny = try await APIClient.shared.hasAnyTransactions() }
+            if LaunchDoors.current.firstThemes { firstRun = true }
+            else if !entries.isEmpty, !FirstRunThemesSection.wasSeen {
+                let themes = try? await APIClient.shared.values()
+                firstRun = themes?.isEmpty ?? false
+            } else { firstRun = false }
             error = nil
         } catch { self.error = session.handle(error) }
         loading = false

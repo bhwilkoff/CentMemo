@@ -1,0 +1,85 @@
+{
+  "note": "D14 starter themes, approved by Ben 2026-11-23 (\"I like the list. Let's keep it and implement it everywhere?\"). Human-edited data, never generated. Copies: js/money/themes.js and apple/Core/Models/Themes.swift (tests/themes.test.mjs and ThemesTests hold them to this file).",
+  "palette": [
+    "clay",
+    "persimmon",
+    "ochre",
+    "olive",
+    "moss",
+    "sage",
+    "teal",
+    "sky",
+    "slate",
+    "iris",
+    "plum",
+    "rose",
+    "stone"
+  ],
+  "starters": [
+    {
+      "name": "People I love",
+      "meaning": "Time and care for family and friends.",
+      "color": "rose"
+    },
+    {
+      "name": "Great meals",
+      "meaning": "Food worth remembering, alone or shared.",
+      "color": "persimmon"
+    },
+    {
+      "name": "Home",
+      "meaning": "The place I live and the comfort in it.",
+      "color": "clay"
+    },
+    {
+      "name": "Health",
+      "meaning": "My body, rest, movement, and care.",
+      "color": "moss"
+    },
+    {
+      "name": "Learning",
+      "meaning": "Books, classes, tools that grow a skill.",
+      "color": "slate"
+    },
+    {
+      "name": "Making",
+      "meaning": "Materials and tools for things I create.",
+      "color": "ochre"
+    },
+    {
+      "name": "Adventure",
+      "meaning": "Trips, firsts, and getting out of routine.",
+      "color": "sky"
+    },
+    {
+      "name": "Joy",
+      "meaning": "Small treats and beautiful things that make a day better.",
+      "color": "plum"
+    },
+    {
+      "name": "Generosity",
+      "meaning": "Gifts, tips, and giving to causes.",
+      "color": "iris"
+    },
+    {
+      "name": "Time back",
+      "meaning": "Paying so I can spend time on what matters.",
+      "color": "teal"
+    },
+    {
+      "name": "Work I care about",
+      "meaning": "Tools and costs of my work or craft.",
+      "color": "olive"
+    },
+    {
+      "name": "Community",
+      "meaning": "Local places, events, and belonging.",
+      "color": "sage"
+    },
+    {
+      "name": "Taking care of things",
+      "meaning": "The steady costs that keep life running.",
+      "color": "stone"
+    }
+  ]
+}

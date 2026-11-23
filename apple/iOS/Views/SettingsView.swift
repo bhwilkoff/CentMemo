@@ -96,10 +96,30 @@ struct SettingsView: View {
                     Text("Add a theme from any memo.").foregroundStyle(Color.brandTextMuted)
                 }
                 ForEach($values) { $v in
-                    TextField("Theme", text: $v.name)
-                        .onSubmit { Task { await rename(v) } }
+                    HStack(spacing: Spacing.s3) {
+                        Capsule().fill(ThemeHue.color(v.name)).frame(width: 4, height: 22)
+                        TextField("Theme", text: $v.name)
+                            .onSubmit { Task { await rename(v) } }
+                    }
                 }
                 .onDelete { idx in Task { await remove(idx) } }
+            }
+            // D14: Ben's starter themes the person doesn't have yet, each in the
+            // color it would take.
+            let held = Set(values.map { Themes.key($0.name) })
+            let offered = Themes.starters.filter { !held.contains(Themes.key($0.name)) }
+            if !offered.isEmpty {
+                Section("Starter themes") {
+                    ForEach(offered, id: \.name) { s in
+                        HStack {
+                            StarterThemeLabel(starter: s, color: Themes.preview(s, joining: values))
+                            Spacer()
+                            Button("Add") { Task { await addStarter(s) } }
+                                .buttonStyle(.bordered)
+                                .accessibilityIdentifier("add-starter-\(s.color)")
+                        }
+                    }
+                }
             }
         case .moneyIn:
             Section {
@@ -157,6 +177,14 @@ struct SettingsView: View {
 
     private func load() async {
         do { values = try await APIClient.shared.values(); error = nil } catch { self.error = session.handle(error) }
+    }
+    private func addStarter(_ s: Themes.Starter) async {
+        do {
+            _ = try await APIClient.shared.addValue(s.name)
+            values = try await APIClient.shared.values()
+            session.didChangeData()
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        } catch { self.error = session.handle(error) }
     }
     private func rename(_ v: LifeValue) async {
         do { try await APIClient.shared.renameValue(v.id, to: v.name); session.didChangeData() } catch { self.error = session.handle(error) }

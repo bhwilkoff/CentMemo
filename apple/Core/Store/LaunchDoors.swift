@@ -15,6 +15,8 @@ struct LaunchDoors: Sendable, Equatable {
     var startSetting: String?
     var mute = false
     var doorSeconds: Int?
+    /// D14: show the first-run starter themes even when themes exist (APP_FIRST_THEMES=1).
+    var firstThemes = false
 
     var isEmpty: Bool { self == LaunchDoors() }
 
@@ -26,7 +28,8 @@ struct LaunchDoors: Sendable, Equatable {
             startItem: environment["APP_START_ITEM"],
             startSetting: environment["APP_START_SETTING"],
             mute: environment["APP_MUTE"] == "1",
-            doorSeconds: environment["APP_DOOR_SECONDS"].flatMap { Int($0) }
+            doorSeconds: environment["APP_DOOR_SECONDS"].flatMap { Int($0) },
+            firstThemes: environment["APP_FIRST_THEMES"] == "1"
         )
         #else
         return LaunchDoors()

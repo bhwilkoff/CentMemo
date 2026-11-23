@@ -27,6 +27,19 @@
   --color-store-slate: #3D5A9E;
   --color-store-rose: #A8437A;
   --color-store-stone: #6F6964;
+  --color-theme-clay: #A33E25;
+  --color-theme-persimmon: #964D09;
+  --color-theme-ochre: #815C0A;
+  --color-theme-olive: #686800;
+  --color-theme-moss: #2F751D;
+  --color-theme-sage: #1B735B;
+  --color-theme-teal: #157171;
+  --color-theme-sky: #006D91;
+  --color-theme-slate: #2F60B2;
+  --color-theme-iris: #6451AC;
+  --color-theme-plum: #8A428E;
+  --color-theme-rose: #9D3A67;
+  --color-theme-stone: #6F6964;
   --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --type-page-title-size: 1.75rem;
@@ -70,6 +83,19 @@ html[data-theme="dark"] {
   --color-store-slate: #8EA8E6;
   --color-store-rose: #E48BBB;
   --color-store-stone: #B3ACA6;
+  --color-theme-clay: #FCA48D;
+  --color-theme-persimmon: #FEA668;
+  --color-theme-ochre: #E9B452;
+  --color-theme-olive: #C3C55A;
+  --color-theme-moss: #90D281;
+  --color-theme-sage: #54D8B1;
+  --color-theme-teal: #2AD7D7;
+  --color-theme-sky: #60CCFC;
+  --color-theme-slate: #98BFFE;
+  --color-theme-iris: #BCB3FA;
+  --color-theme-plum: #E8A0EC;
+  --color-theme-rose: #FF99C2;
+  --color-theme-stone: #B3ACA6;
 }
 @media (prefers-color-scheme: dark) {
   html:not([data-theme="light"]) {
@@ -92,6 +118,19 @@ html[data-theme="dark"] {
     --color-store-slate: #8EA8E6;
     --color-store-rose: #E48BBB;
     --color-store-stone: #B3ACA6;
+    --color-theme-clay: #FCA48D;
+    --color-theme-persimmon: #FEA668;
+    --color-theme-ochre: #E9B452;
+    --color-theme-olive: #C3C55A;
+    --color-theme-moss: #90D281;
+    --color-theme-sage: #54D8B1;
+    --color-theme-teal: #2AD7D7;
+    --color-theme-sky: #60CCFC;
+    --color-theme-slate: #98BFFE;
+    --color-theme-iris: #BCB3FA;
+    --color-theme-plum: #E8A0EC;
+    --color-theme-rose: #FF99C2;
+    --color-theme-stone: #B3ACA6;
   }
 }
 /* END design-tokens */
@@ -420,3 +459,13 @@ html[data-ground="pistachio"] { --color-yours: #B4C875; }
 .reviewer { margin-top: var(--space-6); }
 .reviewer summary { color: var(--color-text-muted); cursor: pointer; }
 .reviewer form { display: grid; gap: var(--space-2); margin-top: var(--space-3); max-width: 360px; }
+
+/* D14: starter themes and theme marks */
+.theme-mark { display: inline-block; width: 4px; height: 1.4rem; border-radius: 2px; flex: none; }
+.starter-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.starter-text .caption { margin: 0; }
+.first-themes { margin-bottom: var(--space-6); }
+.starter-list { display: flex; flex-direction: column; margin: var(--space-3) 0; }
+.starter-pick { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; border-bottom: 1px solid var(--color-border); cursor: pointer; }
+.starter-pick input { width: 1.1rem; height: 1.1rem; accent-color: var(--color-primary); flex: none; }
+.row-static .theme-mark { margin-right: var(--space-2); }

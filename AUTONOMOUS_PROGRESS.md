@@ -1767,3 +1767,29 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Next slices:** the confirmed place on the event page and on the web
   Setting page; the Duo check on Ben's data (it writes only if he
   confirms). Then D14 themes, now approved.
+
+### Tick 32 — 2026-11-23 — D14 starter themes on web and iOS (Ben approved the list)
+- **Data:** `tests/fixtures/starter-themes.json` holds Ben's 13 themes and
+  the palette. The JS copy (js/money/themes.js) and the Swift copy
+  (Themes.swift) are each tested against it word for word.
+- **Rule:** a chosen color stays; a starter name takes its own color;
+  everything else, oldest first, takes the first free palette color.
+  One golden is shared by `tests/themes.test.mjs` and ThemesTests; the JS
+  golden was seen failing on a planted change.
+- **DB:** `life_values.color`, nullable and limited to the palette names,
+  for colors a person chooses later.
+- **Tokens:** 13 `semanticTheme*` pairs. test_design_tokens passes,
+  including contrast.
+- **Web:**
+  - Theme marks use the rule.
+  - The first-run card on Unexamined (purchases, no themes) shows 13
+    unticked themes, with Keep these / Not now.
+  - Settings shows each theme's mark and offers the starter themes not
+    yet held, each in the color it would take.
+  - test_web_states adds checks: the stranger sees the card, ticks Health,
+    and keeps exactly Health; Settings offers People I love with its
+    mark. Frames first-themes and settings-starters were read.
+- **iOS:** the same three pieces, plus a DEBUG door `APP_FIRST_THEMES=1`.
+  ThemesStarterUITests is written; the iPhone 12 was leased by an Ear
+  Drama session, so the device run is queued.
+- `tools/test_all.sh` rc=0.

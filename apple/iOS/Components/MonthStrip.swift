@@ -5,7 +5,26 @@ import SwiftUI
 /// the same everywhere it shows (the thread's marks, the month strip), until D14's
 /// default themes carry their own colors.
 enum ThemeHue {
-    static func color(_ theme: String) -> Color { StoreTile.hues[Money.merchantHue(theme, count: StoreTile.hues.count)] }
+    /// D14: each theme's own color (Themes.assignColors, the web's twin).
+    static func color(_ theme: String) -> Color { swatch(Themes.colorKey(theme)) }
+
+    static func swatch(_ key: String) -> Color {
+        switch key {
+        case "clay": .semanticThemeClay
+        case "persimmon": .semanticThemePersimmon
+        case "ochre": .semanticThemeOchre
+        case "olive": .semanticThemeOlive
+        case "moss": .semanticThemeMoss
+        case "sage": .semanticThemeSage
+        case "teal": .semanticThemeTeal
+        case "sky": .semanticThemeSky
+        case "slate": .semanticThemeSlate
+        case "iris": .semanticThemeIris
+        case "plum": .semanticThemePlum
+        case "rose": .semanticThemeRose
+        default: .semanticThemeStone
+        }
+    }
 }
 
 /// D11: the month by theme. One bar split by money spent under each theme, and a

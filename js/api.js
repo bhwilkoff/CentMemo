@@ -99,7 +99,7 @@ const API = (() => {
     must(await client().auth.signInWithIdToken({ provider: 'apple', token: h.get('id_token'), nonce: saved.raw }));
     return saved.back || '';
   }
-  async function signOut() { names = null; await client().auth.signOut(); }
+  async function signOut() { names = null; vals = null; await client().auth.signOut(); }
   async function deleteAccount() {
     must(await client().rpc('delete_my_account'));
     await client().auth.signOut({ scope: 'local' });
@@ -184,20 +184,26 @@ const API = (() => {
   }
 
   /* ---- Values the person names ---- */
+  // D14: cached with each theme's color (CentThemes.assignColors); any change clears it.
+  let vals = null;
   async function values() {
-    return must(await client().from('life_values').select('id, name').order('name'));
+    if (!vals) vals = must(await client().from('life_values').select('id, name, color, created_at').order('name'));
+    return vals;
   }
   async function addValue(name) {
-    return must(await client().from('life_values').insert({ name: name.trim() }).select('id, name').single());
+    vals = null;
+    return must(await client().from('life_values').insert({ name: name.trim() }).select('id, name, color, created_at').single());
   }
   // Skip (Decision 065): a detail left out of the Story; false brings it back.
   async function setSkipped(id, skipped) {
     must(await client().from('transactions').update({ skipped_at: skipped ? new Date().toISOString() : null }).eq('id', id));
   }
   async function renameValue(id, name) {
+    vals = null;
     must(await client().from('life_values').update({ name: name.trim() }).eq('id', id));
   }
   async function deleteValue(id) {
+    vals = null;
     must(await client().from('life_values').delete().eq('id', id));
   }
   // D8 renames: the person's name for a Setting, keyed by its cleaned name.

@@ -254,6 +254,15 @@ console.log('import (stranger, through the real file input)');
     ok(await waitFor(`(${lines}).some(l => l.trim() === "0 new, ${n} already in CentMemo.")`, 20000), `second import: 0 new, ${n} already in CentMemo (Decision 057)`);
     await cdp('Page.navigate', { url: SITE + '#/ledger' });
     ok(await waitFor('document.querySelectorAll("#view-ledger .trow").length > 0'), 'the imported purchases appear in the Narrative');
+    // D14: with purchases and no themes, Unexamined asks which starter themes fit (all unticked).
+    await evaluate('location.hash = "#/unexamined"; true');
+    ok(await waitFor('!!document.querySelector("#view-unexamined .first-themes")'), 'first run asks "Which of these sound like you?"');
+    ok(await evaluate('document.querySelectorAll("#view-unexamined .starter-pick input").length === 13 && ![...document.querySelectorAll("#view-unexamined .starter-pick input")].some(b => b.checked)'), 'all 13 starter themes, none ticked');
+    await shot('first-themes');
+    await evaluate('document.getElementById("starter-moss").click(); [...document.querySelectorAll(".first-themes button")].find(b => b.textContent === "Keep these").click(); true');
+    ok(await waitFor('!document.querySelector("#view-unexamined .first-themes")'), 'Keep these closes the card');
+    const kept = await (await fetch(P + '/rest/v1/life_values?select=name', { headers: hdr })).json();
+    ok(Array.isArray(kept) && kept.length === 1 && kept[0].name === 'Health', 'and keeps exactly the ticked theme (Health)');
     // S1: a Venmo statement through the same file input lands in its own account, with its notes.
     await evaluate('location.hash = "#/import"; true');
     await waitFor('!document.getElementById("view-import").hidden');
@@ -273,6 +282,7 @@ console.log('import (stranger, through the real file input)');
     ok(venmo.length === 3 && venmo.every((t) => t.accounts?.display_name === 'Venmo') && venmo.some((t) => /Pizza night/.test(t.description)), 'in the Venmo account, with the person\'s notes');
   } finally {
     await fetch(P + '/rest/v1/accounts?source=eq.csv', { method: 'DELETE', headers: hdr });
+    await fetch(P + '/rest/v1/life_values?id=not.is.null', { method: 'DELETE', headers: hdr });
     await fetch(P + '/rest/v1/import_batches?source=eq.csv', { method: 'DELETE', headers: hdr });
     const left = await (await fetch(P + '/rest/v1/transactions?select=id', { headers: hdr })).json();
     ok(Array.isArray(left) && left.length === 0, `stranger left empty (${Array.isArray(left) ? left.length : JSON.stringify(left).slice(0, 80)} transactions)`);
@@ -376,6 +386,9 @@ await openAs('owner', '#/settings');
 await evaluate('location.hash = "#/settings"; true');
 ok(await waitFor('/mcp\\.centmemo\\.com/.test(document.body.innerText)'), 'web Settings shows https://mcp.centmemo.com');
 ok(!(await evaluate('/supabase\\.co\\/functions/.test(document.body.innerText)')), 'and never the Supabase address');
+ok(await waitFor('document.querySelectorAll(".starters [data-starter]").length > 0 && !!document.querySelector(\'.starters [data-starter="People I love"]\')'), 'Settings offers the starter themes the person does not have yet');
+ok(await evaluate('getComputedStyle(document.querySelector(\'.starters [data-starter="People I love"] .theme-mark\')).backgroundColor !== "rgba(0, 0, 0, 0)"'), 'each with its own color mark');
+await shot('settings-starters');
 
 console.log('static pages');
 for (const page of ['connect/', 'support/', 'privacy/', 'terms/']) {

@@ -93,6 +93,71 @@
         "light": "#6F6964",
         "dark": "#B3ACA6",
         "use": "store tile mark: which store, by Money.merchantHue order (D8); a 2pt pencil mark, never a fill or text"
+      },
+      "themeClay": {
+        "light": "#A33E25",
+        "dark": "#FCA48D",
+        "use": "a theme's mark (D14): chosen per theme, never a page ground (Decision 060)"
+      },
+      "themePersimmon": {
+        "light": "#964D09",
+        "dark": "#FEA668",
+        "use": "a theme's mark (D14): chosen per theme, never a page ground (Decision 060)"
+      },
+      "themeOchre": {
+        "light": "#815C0A",
+        "dark": "#E9B452",
+        "use": "a theme's mark (D14): chosen per theme, never a page ground (Decision 060)"
+      },
+      "themeOlive": {
+        "light": "#686800",
+        "dark": "#C3C55A",
+        "use": "a theme's mark (D14): chosen per theme, never a page ground (Decision 060)"
+      },
+      "themeMoss": {
+        "light": "#2F751D",
+        "dark": "#90D281",
+        "use": "a theme's mark (D14): chosen per theme, never a page ground (Decision 060)"
+      },
+      "themeSage": {
+        "light": "#1B735B",
+        "dark": "#54D8B1",
+        "use": "a theme's mark (D14): chosen per theme, never a page ground (Decision 060)"
+      },
+      "themeTeal": {
+        "light": "#157171",
+        "dark": "#2AD7D7",
+        "use": "a theme's mark (D14): chosen per theme, never a page ground (Decision 060)"
+      },
+      "themeSky": {
+        "light": "#006D91",
+        "dark": "#60CCFC",
+        "use": "a theme's mark (D14): chosen per theme, never a page ground (Decision 060)"
+      },
+      "themeSlate": {
+        "light": "#2F60B2",
+        "dark": "#98BFFE",
+        "use": "a theme's mark (D14): chosen per theme, never a page ground (Decision 060)"
+      },
+      "themeIris": {
+        "light": "#6451AC",
+        "dark": "#BCB3FA",
+        "use": "a theme's mark (D14): chosen per theme, never a page ground (Decision 060)"
+      },
+      "themePlum": {
+        "light": "#8A428E",
+        "dark": "#E8A0EC",
+        "use": "a theme's mark (D14): chosen per theme, never a page ground (Decision 060)"
+      },
+      "themeRose": {
+        "light": "#9D3A67",
+        "dark": "#FF99C2",
+        "use": "a theme's mark (D14): chosen per theme, never a page ground (Decision 060)"
+      },
+      "themeStone": {
+        "light": "#6F6964",
+        "dark": "#B3ACA6",
+        "use": "a theme's mark (D14): Taking care of things; never a page ground (Decision 060)"
       }
     }
   },
