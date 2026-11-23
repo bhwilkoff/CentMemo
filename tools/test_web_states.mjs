@@ -159,6 +159,13 @@ console.log('Themes as collections (D12)');
   ok(await waitFor('/Anniversary/.test(document.querySelector("#view-story .story")?.innerText || "") && !/penguins/.test(document.querySelector("#view-story .story")?.innerText || "")'), 'a theme shows only its memos');
   await shot('story-theme');
   ok(await evaluate('document.querySelector("#view-story .story-entry")?.firstElementChild?.classList.contains("story-text")'), 'a Story entry leads with its memo (D6)');
+  // D12: share the whole theme as one card; amounts off, any memo can be left out.
+  await evaluate('document.querySelector("#view-story [data-share-theme] summary").click(); true');
+  ok(await waitFor('/Anniversary/.test(document.querySelector("#view-story [data-share-theme] .share-card")?.innerText || "")'), 'Share this theme makes one card of the theme\'s memos');
+  ok(!(await evaluate('/\\$/.test(document.querySelector("#view-story [data-share-theme] .share-card").innerText)')), 'with no amounts unless turned on');
+  await shot('share-theme');
+  await evaluate('(() => { const b = document.getElementById("share-theme-0"); b.click(); return true; })()');
+  ok(await evaluate('document.querySelectorAll("#view-story [data-share-theme] .share-theme-list li").length === document.querySelectorAll("#view-story .story-entry").length - 1'), 'a memo the person unticks leaves the card');
   ok(await evaluate('!!document.querySelector("#view-story .theme-row.every")'), 'Every memo leads back');
 }
 
@@ -273,6 +280,8 @@ console.log('import (stranger, through the real file input)');
     await cdp('Page.navigate', { url: SITE + '#/ledger' });
     ok(await waitFor('document.querySelectorAll("#view-ledger .trow").length > 0'), 'the imported purchases appear in the Narrative');
     // D14: with purchases and no themes, Unexamined asks which starter themes fit (all unticked).
+    // The harness profile lasts the day; forget an earlier run's answer first.
+    await evaluate('localStorage.removeItem("cm-starters-seen"); location.hash = "#/settings"; true');
     await evaluate('location.hash = "#/unexamined"; true');
     ok(await waitFor('!!document.querySelector("#view-unexamined .first-themes")'), 'first run asks "Which of these sound like you?"');
     ok(await evaluate('document.querySelectorAll("#view-unexamined .starter-pick input").length === 13 && ![...document.querySelectorAll("#view-unexamined .starter-pick input")].some(b => b.checked)'), 'all 13 starter themes, none ticked');

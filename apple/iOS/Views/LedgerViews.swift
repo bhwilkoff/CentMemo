@@ -260,8 +260,11 @@ struct LedgerView: View {
 }
 
 /// The memos for a month or a value, in order, as a page to read.
+struct ThemeShareItem: Identifiable { let name: String; var id: String { name } }
+
 struct StoryView: View {
     @Environment(SessionStore.self) private var session
+    @State private var sharingTheme: String?
     @State private var scope: APIClient.StoryScope?
     @State private var months: [String] = []
     @State private var values: [LifeValue] = []
@@ -350,6 +353,16 @@ struct StoryView: View {
         }
         .grounded()
         .navigationTitle("Story")
+        .toolbar {
+            // D12: a whole theme as one card, when the Story shows one theme.
+            if let id = themeID, let name = values.first(where: { $0.id == id })?.name, !entries.isEmpty {
+                Button("Share this theme", systemImage: "square.and.arrow.up") { sharingTheme = name }
+                    .accessibilityIdentifier("share-theme")
+            }
+        }
+        .sheet(item: Binding(get: { sharingTheme.map(ThemeShareItem.init) }, set: { sharingTheme = $0?.name })) { item in
+            ShareThemeSheet(theme: item.name, entries: entries)
+        }
         .task(id: "\(session.dataVersion)-\(String(describing: scope))") { await load() }
     }
 

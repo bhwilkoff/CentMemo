@@ -133,7 +133,21 @@ the Setting page) join where they fit.
   Cash into Apple Cash and Savings) are hidden from the Narrative by default
   (Ben, 2026-11-22); the filters will show them.
 - D13 🟡 (iOS swipe + detail menu, web detail button, Narrative 'N skipped' group, Unexamined excludes ✅; the connector leaves skipped events out of unexamined, mcp v8 ✅) Skip: swipe an event away as a detail; only plot points reach the Story.
-- D12 🟡 (Themes as collections ✅; sharing a memo as a card, private by default, iOS + web ✅; sharing a whole theme and public links ⏳) Themes (Ben's word for sets): collect stories into sets by value; share a story or a set.
+- D12 🟡 (Themes as collections ✅; sharing a memo as a card, private by default, iOS + web ✅; a whole theme as one card, web + iPhone 12 ✅ 2026-11-23; public links wait on Ben's choice, below) Themes (Ben's word for sets): collect stories into sets by value; share a story or a set.
+
+## Open choice for Ben: public links (D12), 2026-11-23
+
+Sharing now makes a card or text on the device; CentMemo publishes nothing.
+A public link would put the person's words at a centmemo.com address anyone
+with the link can open. Options:
+1. **No public links** (cards only). Nothing to host, nothing to revoke.
+2. **Unlisted links to the person's own words only**: memo text, date,
+   theme; never amounts or places. Revocable any time, never indexed.
+3. **Unlisted links with the same toggles as the card** (place, amount).
+   Wallet (FinanceKit) rows would have to stay words-only: Apple's
+   FinanceKit terms (Addendum 3.2) bar CentMemo from disclosing Account
+   Data to third parties, and a link CentMemo hosts is CentMemo disclosing it.
+Recommendation: 2.
 
 ## Sources (Ben, 2026-11-22)
 

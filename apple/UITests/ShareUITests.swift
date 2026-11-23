@@ -26,4 +26,22 @@ final class ShareUITests: DeviceTestCase {
         XCTAssertTrue(app.staticTexts["Nov 16, 2026 · Denver Zoo"].waitForExistence(timeout: 5), "Show where adds the place")
         shot(app, "share-with-place")
     }
+
+    /// D12: a whole theme as one card, places and amounts off; any memo can be left out.
+    func testShareTheme() {
+        let app = launch()
+        openTab(app, "Story")
+        let theme = app.buttons["theme-Great meals"]
+        XCTAssertTrue(theme.waitForExistence(timeout: 25), "the Story's theme shelf")
+        theme.tap()
+        let share = app.buttons["share-theme"]
+        XCTAssertTrue(share.waitForExistence(timeout: 15), "Share this theme, when one theme is shown")
+        share.tap()
+        XCTAssertTrue(app.navigationBars["Share this theme"].waitForExistence(timeout: 10))
+        XCTAssertTrue(text(app, matching: "Anniversary").exists, "the card holds the theme's memos")
+        XCTAssertEqual(app.switches["share-theme-amount"].value as? String, "0", "amounts off by default")
+        shot(app, "share-theme")
+        app.buttons["Done"].tap()
+    }
 }
+

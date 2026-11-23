@@ -1838,3 +1838,23 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - D15 is done on web and iPhone 12; the Duo (Ben's places) waits until
   it's back.
 - **Next:** D12, sharing a whole theme and public links.
+
+### Tick 34 — 2026-11-23 — D12: share a whole theme as one card (web + iPhone 12)
+- **Story, with one theme shown:** "Share this theme" makes one card: the
+  theme's mark and name, then its memos and dates (up to 6 on the iPhone
+  card, "and N more"). Any memo can be left out, and places and amounts
+  stay off unless turned on. The card is made on the device (an image on
+  iOS, text on the web); CentMemo publishes nothing.
+- **Verified:**
+  - test_web_states: the card holds Anniversary, shows no "$", and drops
+    a memo when it's unticked. Frame share-theme read.
+  - iPhone 12: ShareUITests.testShareTheme passes. Frame share-theme read
+    (both memos on the card, toggles off).
+  - `tools/test_all.sh` rc=0.
+- **Harness fix:** the web harness profile kept the "starters seen" flag
+  between runs, which hid the first-run card. The test now clears it
+  first.
+- **For Ben:** public links (three options in the brief; recommendation:
+  unlisted links to the person's own words only). FinanceKit Addendum 3.2
+  rules out CentMemo hosting Wallet amounts or places.
+- **Next:** item 10, files and opt-in uploaded copies.

@@ -473,3 +473,8 @@ html[data-ground="pistachio"] { --color-yours: #B4C875; }
 /* D15: a confirmed place */
 .place-line { margin: var(--space-1) 0 0; font-size: var(--type-caption-size); }
 .place-line a { color: var(--color-primary); }
+
+/* D12: a theme's share card */
+.share-theme-list { list-style: none; padding: 0; margin: var(--space-3) 0; display: flex; flex-direction: column; gap: var(--space-3); }
+.share-theme-list blockquote { margin: 0; }
+.share-picks { display: flex; flex-direction: column; gap: var(--space-1); margin-bottom: var(--space-3); }

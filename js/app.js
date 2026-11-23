@@ -530,6 +530,40 @@
       h('p', { class: 'caption' }, 'Only the memo, its date, and its theme are shared unless you turn these on.'),
       h('div', { class: 'actions' }, send, status));
   }
+  // D12: a whole theme as one card (as the iPhone's ShareThemeSheet): its memos,
+  // any left out by the person; places and amounts off unless turned on.
+  function shareThemePanel(themeName, rows) {
+    const where = h('input', { type: 'checkbox', id: 'share-theme-where' });
+    const amount = h('input', { type: 'checkbox', id: 'share-theme-amount' });
+    const status = h('span', { class: 'caption', role: 'status' });
+    const memoOf = (t) => (Array.isArray(t.memos) ? t.memos[0] : t.memos) || {};
+    const picks = rows.map((t, i) => h('input', { type: 'checkbox', id: 'share-theme-' + i, checked: true }));
+    const list = h('ol', { class: 'share-theme-list' });
+    const lineOf = (t) => [niceDate(t.txn_date), where.checked ? merchantOf(t) : null, amount.checked ? money(-t.amount_minor) : null].filter(Boolean).join(' · ');
+    const chosen = () => rows.filter((_, i) => picks[i].checked);
+    const draw = () => list.replaceChildren(...chosen().map((t) => h('li', {}, h('blockquote', {}, memoOf(t).body), h('span', { class: 'share-line' }, lineOf(t)))));
+    [where, amount, ...picks].forEach((b) => b.addEventListener('change', draw)); draw();
+    const send = h('button', { type: 'button', class: 'btn' }, 'Share');
+    send.addEventListener('click', async () => {
+      const items = chosen();
+      if (!items.length) { status.textContent = 'Choose at least one memo.'; return; }
+      const body = themeName + '\n\n' + items.map((t) => memoOf(t).body + '\n' + lineOf(t)).join('\n\n') + '\n\nCentMemo';
+      try {
+        if (navigator.share) { await navigator.share({ text: body }); status.textContent = ''; }
+        else { await navigator.clipboard.writeText(body); status.textContent = 'Copied.'; }
+      } catch (_) { /* the person closed the share sheet */ }
+    });
+    return h('details', { class: 'share-panel', 'data-share-theme': '' }, h('summary', {}, 'Share this theme'),
+      h('figure', { class: 'share-card' },
+        h('span', { class: 'share-theme' }, h('i', { style: 'background: ' + themeHue(themeName) }), themeName),
+        list, h('span', { class: 'share-brand' }, 'CentMemo')),
+      h('p', { class: 'field-label' }, 'Memos on the card'),
+      h('div', { class: 'share-picks' }, rows.map((t, i) => h('label', { class: 'filter-check' }, picks[i], ' ' + memoOf(t).body.slice(0, 60)))),
+      h('label', { class: 'filter-check' }, where, ' Show where'),
+      h('label', { class: 'filter-check' }, amount, ' Show the amounts'),
+      h('p', { class: 'caption' }, 'Only the theme, its memos, and their dates are shared unless you turn these on.'),
+      h('div', { class: 'actions' }, send, status));
+  }
   function fact(k, v) { return h('div', {}, h('dt', {}, k), h('dd', {}, v)); }
   // Back walks the app's own history (a Setting opened from an event returns to
   // it); a page reached directly goes to the last list instead.
@@ -585,6 +619,7 @@
         h('header', { class: 'story-head' },
           h('h2', { class: 'section-heading' }, title),
           h('p', { class: 'caption' }, rows.length + (rows.length === 1 ? ' memo' : ' memos'))),
+        valueId ? shareThemePanel(title, rows) : '',
         h('ol', { class: 'story' }, rows.map((t) => {
           const memo = Array.isArray(t.memos) ? t.memos[0] : t.memos;
           const names = (memo.memo_values || []).map((mv) => mv.life_values && mv.life_values.name).filter(Boolean);
