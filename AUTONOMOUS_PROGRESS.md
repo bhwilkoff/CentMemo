@@ -1566,3 +1566,27 @@ Apple.
   manage them myself." The keychain-paste recipe and the "Ben's step" above
   are withdrawn. Edge Function deploys go through the signed-in Supabase
   connector, with no token, and deploy-mcp.sh says so.
+
+### Design tick 26 — 2026-11-23 — D4 vocabulary audit; the backend skill no longer asks for a token
+- **Skill fix:** `zero-cost-hosted-backend` told agents to keep a Supabase
+  personal access token in a mode-600 file. Changed it so migrations and
+  deploys go through the signed-in connector, and the owner is never asked
+  to create or paste a token (Ben, 2026-11-23).
+- **D4 audit** of the on-screen words against the vocabulary table
+  (Decision 065), on the web and iOS:
+  - Web: "That export has no transactions." became "That export has no
+    purchases in it." The theme field's screen-reader label "Value name"
+    became "Theme name". Assets are now at `?v=20261123g`.
+  - iOS: no screen word breaks the table.
+  - Kept on purpose:
+    - Apple's own button name "Export Transactions (CSV)" in the export
+      steps.
+    - The privacy disclosure's "accounts and transactions", because it
+      names exactly what is read.
+    - "Category", which is Apple's plain category on the event, not a
+      Theme.
+  - Internal route and table names (`#/ledger`, `transactions`) are not
+    on screen and stay as they are.
+- **Verified:** greps of every user-facing string in js/app.js, index.html
+  and apple/iOS; `tools/test_all.sh` rc=0, ALL PASS (niced). No iOS change, so no
+  new device frames this tick.

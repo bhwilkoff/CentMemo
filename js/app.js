@@ -550,7 +550,7 @@
     try {
       ({ kind, rows } = await M.parseAnyExport(await file.text()));
     } catch (err) { e.target.value = ''; return failed(body, err); }
-    if (!rows.length) { e.target.value = ''; return empty(body, 'That export has no transactions.'); }
+    if (!rows.length) { e.target.value = ''; return empty(body, 'That export has no purchases in it.'); }
     const dates = rows.map((r) => r.txn_date).sort();
     const spent = rows.filter((r) => r.amount_minor < 0).reduce((a, r) => a - r.amount_minor, 0);
     const NAMES = { applecard: 'Apple Card', venmo: 'Venmo', paypal: 'PayPal', cashapp: 'Cash App' };
@@ -599,7 +599,7 @@
         return b;
       }));
       const valueList = h('ul', { class: 'list' }, vals.map((v) => {
-        const input = h('input', { type: 'text', class: 'field-input field-inline', value: v.name, maxlength: '60', 'aria-label': 'Value name' });
+        const input = h('input', { type: 'text', class: 'field-input field-inline', value: v.name, maxlength: '60', 'aria-label': 'Theme name' });
         const rename = h('button', { class: 'btn btn-small' }, 'Rename');
         const del = h('button', { class: 'btn btn-small btn-quiet' }, 'Remove');
         rename.addEventListener('click', async () => { try { await API.renameValue(v.id, input.value); rename.textContent = 'Renamed'; } catch (err) { failed(body, err, settingsView); } });

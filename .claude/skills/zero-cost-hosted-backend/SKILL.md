@@ -244,10 +244,12 @@ it measured:
   migration: apply them all, then act as each role. Include negative checks
   (refused, or zero rows) and checks that a delete keeps what it must. A
   refused UPDATE returns zero rows, not an error, so assert on the rows.
-- **Migrations without the dashboard**: POST SQL to the Management API
-  (`/v1/projects/<ref>/database/query`) with a personal access token kept in
-  a mode-600 file, then record the version in
-  `supabase_migrations.schema_migrations`.
+- **Migrations and Edge Function deploys without the dashboard**: go through
+  the signed-in Supabase connector (`apply_migration`,
+  `deploy_edge_function`), which records the version for you. Never ask the
+  owner to create, copy or paste a personal access token, and never keep one
+  in a file; if a tool insists on a key the Keychain lacks, switch to a path
+  that is already signed in.
 - A **SECURITY DEFINER function that changes one field** (a guest setting
   their own link) is safer than an UPDATE grant on the whole row.
 

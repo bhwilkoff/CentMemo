@@ -87,7 +87,7 @@ the Setting page) join where they fit.
   categories, timeline and color-coded visualization, sets and sharing.
 - D3 ✅ (design_shots.py on both phones; two panes at regular width, DuoTwoPaneUITests) Device tools: the iPhone Duo design and test harness, ported from Ben's
   other repos; every screen checked on the Duo AND the iPhone 12.
-- D4 🟡 (vocabulary chosen by Ben, table above; applying it everywhere ⏳) Language: keep "Unexamined" (the unexamined life); propose options for
+- D4 ✅ (vocabulary chosen by Ben, table above; applied on web and iOS, audited 2026-11-23: two web strings fixed, Apple's own names and the privacy disclosure kept) Language: keep "Unexamined" (the unexamined life); propose options for
   "Ledger" and every other screen word. Ben chooses.
 - D5 ✅ (Ben chose C, with parts of A and B; https://claude.ai/artifact/TtRywFmQhiiq9Mdg1Q2jPu) Directions: three design directions drawn from the research; Ben chooses
   or mixes (propose, don't decide).
