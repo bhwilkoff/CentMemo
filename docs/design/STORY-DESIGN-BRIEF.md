@@ -117,6 +117,18 @@ the Setting page) join where they fit.
   confirms once per Setting and every later purchase there inherits; a small
   map on the event page. No location permission is needed. Also: show the time
   of day, and map the category code to plain categories.
+  Ben, 2026-11-23: "I think you can have it predict a specific location for
+  each one of the purchases based upon an algorthmic search combined with
+  other data factors (should we ask for location within the app to make it
+  easier or can we make assumptions based upon the data we are already
+  getting from financekit?)". Proposal: predict from data, with no location
+  permission by default. Signals: the statement's name and city, the
+  category code, the person's confirmed Settings and home area, and other
+  purchases the same day. MKLocalSearch ranks candidates. The person
+  confirms the predicted place, once per Setting, or per visit for chains.
+  A one-time "Use where I am" button (CoreLocationUI LocationButton, no
+  standing permission) appears only when writing a memo soon after a
+  purchase.
 - D9 note: deposits and interest (FinanceKit types deposit, interest: Daily
   Cash into Apple Cash and Savings) are hidden from the Narrative by default
   (Ben, 2026-11-22); the filters will show them.

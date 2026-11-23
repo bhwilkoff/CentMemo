@@ -121,7 +121,21 @@ Apple.
 - The FinanceKit entitlement: waiting on Apple.
 
 ## Pending asks
-(none)
+
+### Ben (2026-11-23): "Yes, let's start working on all of these items, in order within the autonomous loop."
+The loop takes these in order, after the D8 Rename save on the iPhone 12.
+Heavier work is allowed now: no competing sessions.
+1. F1 real FinanceKit sync on Ben's phone, then F2 background delivery (iOS 26).
+2. D14 default themes (Ben approves the set and words); this fixes D11's collisions.
+3. D15 Place. Ben: "I think you can have it predict a specific location for
+   each one of the purchases based upon an algorthmic search combined with
+   other data factors (should we ask for location within the app to make it
+   easier or can we make assumptions based upon the data we are already
+   getting from financekit?)". Proposal in the brief, D15.
+4. D12 sharing a theme and public story links (plan item 7).
+5. Item 10: files and opt-in uploaded copies, plus the web side.
+6. L2 App Store submission (after Ben signs off on the design), L3 directory.
+7. Later: macOS, and iPad readable width (waits on Ben's answer).
 
 ## Ticks
 
