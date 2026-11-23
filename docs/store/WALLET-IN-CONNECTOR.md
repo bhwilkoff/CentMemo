@@ -1,7 +1,13 @@
 # Apple Wallet data in the Claude connector: the turn-on commit
 
-Status: **built, off.** Waiting on Apple's written answer (Case-ID 23676235;
-Ben sent the question on 2026-11-22). Decision 066.
+Status: **built, off.** Decision 066.
+
+Apple answered on 2026-11-23 (Kavya, Wallet Entitlements, Case-ID 23676235):
+they are "unable to provide guidance or confirmation" on whether the connector
+is permitted. The reply also appreciates the decision to exclude FinanceKit
+data "until you receive the appropriate clarification". So the entitlement
+team won't decide this; App Review is the likely venue. Ben, 2026-11-23,
+after reading that: keep it off for now and revisit it at the L2 submission.
 
 Ben, 2026-11-22: "let's build everything as if we can send the apple wallet
 data to claude, but let's draft the email and see what they say rather than
