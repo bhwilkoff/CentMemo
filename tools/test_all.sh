@@ -26,8 +26,8 @@ else
 fi
 xcodegen generate -q >/dev/null 2>&1
 run "Swift Core tests (macOS)" xcodebuild test -project CentMemo.xcodeproj -scheme CentMemoTests \
-  -destination platform=macOS CODE_SIGNING_ALLOWED=NO -quiet
+  -destination platform=macOS CODE_SIGNING_ALLOWED=NO -jobs 2 -quiet
 run "iOS app builds" xcodebuild build -project CentMemo.xcodeproj -scheme CentMemoUITests \
-  -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO -quiet
+  -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO -jobs 2 -quiet
 [ $fail -eq 0 ] && echo "ALL PASS" || echo "SOME CHECKS FAILED"
 exit $fail
