@@ -54,6 +54,9 @@ def owner_env():
 def shoot(name, extra_env, screens, settle):
     entry = bench.require(name, platforms=("ios", "ipados"))
     udid = entry["udid"]
+    if ad.locked(udid):
+        print(f"LOCKED {name}: unlock the phone, then run again (apps cannot launch while it wants its passcode)")
+        return []
     ids = displays(udid) or [None]
     kept = []
     with devlease.hold([bench.lease_name(entry)], task="design_shots", wait=300):

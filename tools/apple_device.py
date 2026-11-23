@@ -94,6 +94,21 @@ def terminate_verified(udid, executable=None, settle=3):
 
 # ── launch / capture ─────────────────────────────────────────────────────────
 
+def locked(udid):
+    """True when the device wants its passcode (apps cannot launch), False when
+    unlocked, None when devicectl cannot say. Ask before a run, not after."""
+    import tempfile
+    with tempfile.NamedTemporaryFile(suffix=".json") as f:
+        r = subprocess.run(["xcrun", "devicectl", "device", "info", "lockState", "--device", udid,
+                            "-j", f.name, "-q"], capture_output=True, text=True)
+        if r.returncode != 0:
+            return None
+        try:
+            return bool(json.loads(Path(f.name).read_text())["result"]["passcodeRequired"])
+        except (ValueError, KeyError, TypeError):
+            return None
+
+
 def launch(udid, bundle, env=None, url=None, terminate_existing=True, timeout=90):
     """Returns (ok, output). env is sent as JSON, the only form devicectl accepts."""
     args = ["device", "process", "launch", "--device", udid]

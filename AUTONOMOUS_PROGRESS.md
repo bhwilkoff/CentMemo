@@ -1653,3 +1653,13 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   - PARITY: Rename iOS ✅. Brief: D8 ✅.
 - `tools/test_all.sh` rc=0, ALL PASS (full speed now).
 - **Next:** F1, real FinanceKit (Ben's order).
+- **Harness fixes (Ben, 2026-11-23: "What are the failures that keep
+  happening? Is there any way to solve for them?"):**
+  - Pillow: frame_blind re-runs under /usr/bin/python3. Proven by running
+    design_shots with Homebrew python3, which captured a frame.
+  - Locked phone: devicectl lockState is checked before a run, and the
+    tools print `LOCKED`. It reads False on both unlocked phones; the
+    locked case is not yet seen.
+  - Readable frame names: `setting-door.png` was exported beside its UUID
+    copy (testSettingDoor passed on the iPhone 12).
+  - Recorded in docs/TESTING.md. `tools/test_all.sh` rc=0.

@@ -30,6 +30,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import threading
@@ -104,8 +105,13 @@ def export_shots(bundle, dest):
     if mf.is_file():
         for t in json.loads(mf.read_text()):
             for a in t.get("attachments", []):
-                names.setdefault(t.get("testIdentifier", "?"), []).append(
-                    (a.get("suggestedHumanReadableName", ""), a.get("exportedFileName", "")))
+                human, exported = a.get("suggestedHumanReadableName", ""), a.get("exportedFileName", "")
+                names.setdefault(t.get("testIdentifier", "?"), []).append((human, exported))
+                # xcresulttool names files by UUID; keep a readable copy beside it
+                # ("setting-renamed_0_<uuid>.png" -> "setting-renamed.png").
+                short = re.sub(r"_\d+_[0-9A-F-]{36}(?=\.\w+$)", "", human)
+                if short and exported and (dest / exported).is_file():
+                    shutil.copyfile(dest / exported, dest / short)
     return names
 
 
@@ -130,6 +136,9 @@ def main():
     udid = entry.get("udid")
     if not udid:
         raise SystemExit(f"{entry['name']} has no udid in the bench manifest")
+    import apple_device
+    if apple_device.locked(udid):
+        raise SystemExit(f"LOCKED {entry['name']}: unlock the phone, then run again")
     stamp = time.strftime("%Y-%m-%d")
     outdir = app_config.QA_ROOT / f"ios-uitest-{stamp}"
     outdir.mkdir(parents=True, exist_ok=True)

@@ -83,5 +83,15 @@ signed in as the synthetic owner, at 375px (`tools/phone-frame.html`) and
   form content. Tap above it.
 - **A Form renders lazily**: swipe the Form's collection view, not the app,
   until the element exists.
+- **Three repeat failures now handled by the tools (2026-11-23):**
+  - Homebrew's `python3` has no Pillow, so `frame_blind` re-runs the tool
+    under `/usr/bin/python3`.
+  - `design_shots` and `ios_uitest` ask devicectl whether the phone wants
+    its passcode, and stop with `LOCKED <device>` before building.
+  - `ios_uitest` copies each frame to its readable name
+    (`attachments/<run>/setting-door.png`) beside xcresulttool's UUID
+    file.
+  - Screen Time limits the iPhone 12 only at some hours, so try it before
+    calling it blocked.
 - **A test that fails mid-way leaves data.** Check the server after a failure
   (memos, attachments) and clean it before the next run.
