@@ -9,6 +9,7 @@ struct SettingsView: View {
     @State private var error: String?
     @State private var confirmDelete = false
     @State private var copied = false
+    @State private var removing: LifeValue?
     private let finance = FinanceSources.current
 
     @Environment(\.horizontalSizeClass) private var width
@@ -36,6 +37,7 @@ struct SettingsView: View {
             }
         }
         .modifier(DeleteAccountAlert(shown: $confirmDelete) { await deleteAccount() })
+        .modifier(RemoveThemeAlert(theme: $removing) { await remove($0) })
         .task(id: session.dataVersion) { await load() }
         #else
         phone
@@ -65,12 +67,14 @@ struct SettingsView: View {
                     .listStyle(.plain)
                     .frame(width: 380)
                     Divider()
+                    // W5: the choices keep a reading width beside the list, and start at the divider.
                     Form {
                         section(pane)
                         if let error { Section { Text(error).foregroundStyle(Color.semanticError) } }
                     }
                     .modifier(PaneMargins(on: true))
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: Room.measure + PaneEdges.pane * 2)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             } else {
                 Form {
@@ -84,6 +88,7 @@ struct SettingsView: View {
         .grounded()
         .navigationTitle("Settings")
         .modifier(DeleteAccountAlert(shown: $confirmDelete) { await deleteAccount() })
+        .modifier(RemoveThemeAlert(theme: $removing) { await remove($0) })
         .task(id: session.dataVersion) { await load() }
     }
 
@@ -122,7 +127,7 @@ struct SettingsView: View {
                             .onSubmit { Task { await rename(v) } }
                     }
                 }
-                .onDelete { idx in Task { await remove(idx) } }
+                .onDelete { idx in removing = idx.first.map { values[$0] } }
             }
             // D14: Ben's starter themes the person doesn't have yet, each in the
             // color it would take.
@@ -161,7 +166,7 @@ struct SettingsView: View {
                     WalletSyncButton(finance: finance)
                 }
             } header: {
-                Text("Money in")
+                Text("Bring in purchases")
             } footer: {
                 // FinanceKit Addendum 3.3: what is read, how it is used, and the policy,
                 // shown before the person is asked for access.
@@ -209,14 +214,25 @@ struct SettingsView: View {
     private func rename(_ v: LifeValue) async {
         do { try await APIClient.shared.renameValue(v.id, to: v.name); session.didChangeData() } catch { self.error = session.handle(error) }
     }
-    private func remove(_ idx: IndexSet) async {
-        for i in idx {
-            do { try await APIClient.shared.deleteValue(values[i].id) } catch { self.error = session.handle(error) }
-        }
-        session.didChangeData()
+    private func remove(_ v: LifeValue) async {
+        do { try await APIClient.shared.deleteValue(v.id); session.didChangeData() } catch { self.error = session.handle(error) }
     }
     private func deleteAccount() async {
         do { try await session.deleteAccount() } catch { self.error = session.handle(error) }
+    }
+}
+
+/// Removing a theme takes it off every memo that wears it, so it asks first.
+private struct RemoveThemeAlert: ViewModifier {
+    @Binding var theme: LifeValue?
+    let remove: (LifeValue) async -> Void
+    func body(content: Content) -> some View {
+        content.alert("Remove “\(theme?.name ?? "")”?", isPresented: Binding(get: { theme != nil }, set: { if !$0 { theme = nil } }), presenting: theme) { v in
+            Button("Keep it", role: .cancel) { }
+            Button("Remove from all memos", role: .destructive) { Task { await remove(v) } }
+        } message: { _ in
+            Text("It comes off every memo that has it. Your memos stay.")
+        }
     }
 }
 
@@ -244,7 +260,7 @@ enum SettingsPane: String, CaseIterable, Identifiable {
         switch self {
         case .look: "Color"
         case .themes: "Themes"
-        case .moneyIn: "Money in"
+        case .moneyIn: "Bring in purchases"
         case .claude: "Connect Claude"
         case .account: "Account"
         case .about: "Privacy and terms"
@@ -378,6 +394,11 @@ struct WalletSyncButton: View {
     @State private var result: String?
 
     private var tokenKey: String { FinanceSources.tokenKey(session.email) }
+    /// What a sync did: some of these events may be ones the bank changed.
+    static func said(_ n: Int, _ accounts: Int) -> String {
+        n == 0 ? "Nothing new in Apple Wallet."
+            : "\(n.formatted()) new or changed event\(n == 1 ? "" : "s") from \(accounts) account\(accounts == 1 ? "" : "s")."
+    }
     /// A saved history token means Wallet is connected and the tap brings what is new.
     private var connected: Bool { Shared.financeToken(tokenKey) != nil }
 
@@ -412,7 +433,7 @@ struct WalletSyncButton: View {
             let r = try await APIClient.shared.syncFinance(changes)
             if let token = changes.newToken { Shared.setFinanceToken(token, tokenKey) }
             if finance.isWallet { FinanceBackgroundSync.enable() }
-            result = "Synced \(r.inserted) event\(r.inserted == 1 ? "" : "s") from \(changes.accounts.count) account\(changes.accounts.count == 1 ? "" : "s")."
+            result = Self.said(r.inserted, changes.accounts.count)
             session.didChangeData()
             Haptic.success()
         } catch {

@@ -11,7 +11,8 @@ final class EmptyStateUITests: DeviceTestCase {
         }
         let app = launch(["APP_TEST_EMAIL": email, "APP_TEST_PASSWORD": password, "APP_START_TAB": "unexamined"])
         XCTAssertTrue(app.staticTexts["Nothing in your Narrative yet"].waitForExistence(timeout: 30), "empty Unexamined says so")
-        XCTAssertTrue(text(app, matching: "Import an Apple Card export").exists, "and says what to do")
+        XCTAssertTrue(text(app, matching: "Import an export|reads your Apple Card").exists, "and says what to do, or what Wallet would read")
+        XCTAssertTrue(app.buttons["wallet-sync"].exists || text(app, matching: "Import an export").exists, "Wallet first, where there is one")
         XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS[c] 'Import'")).firstMatch.exists, "with the import action")
         shot(app, "empty-unexamined")
         app.terminate()

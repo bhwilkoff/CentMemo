@@ -56,7 +56,7 @@ struct EntryDetailView: View {
                     .modifier(PaneMargins(on: inPane))
                 }
             } else {
-                ContentUnavailableView("This purchase isn't in your CentMemo.", systemImage: "questionmark")
+                ContentUnavailableView("This event isn't in your CentMemo.", systemImage: "questionmark")
             }
         }
         .readsRoom($room)

@@ -86,10 +86,10 @@ account, 6 the Connect button):**
   card, web + Apple). A check must hold it.
 - N2 ✅ Starter themes leave Unexamined; Settings keeps them (web + Apple).
 - N3 ✅ "Connect Apple Wallet" reads "Sync Apple Wallet" once connected.
-- N3b ⏳ Audit every action's words on every platform.
+- N3b ✅ (tick 52) Audit every action's words on every platform.
 - N4 🟡 (DESIGN S; web live; draft for Ben https://claude.ai/artifact/XTgCwKxwxF6ZyAEuhYYcpc; memo and theme built on web, iPhone, iPad, Mac; links designed, waiting on Ben before anything public is built) Design your share: Setting, memory, themes; the person chooses the look.
   Design with the skills first, on every size. Links after the design.
-- N5 🟡 (rules: docs/DESIGN.md W; web at 375/768/1024/1440, iPad landscape, open Duo, Mac at 900/1180/1600 built and seen; iPad portrait, closed Duo, Settings at wide on Apple ⏳) Every screen size designed on purpose: iPhone 12, Duo closed and open, iPad
+- N5 🟡 (rules: docs/DESIGN.md W; web at 375/768/1024/1440, iPad landscape, open Duo, Mac at 900/1180/1600 built and seen; Settings at wide seen on the iPad; iPad portrait, closed Duo ⏳) Every screen size designed on purpose: iPhone 12, Duo closed and open, iPad
   portrait and landscape, Mac window small to large, web phone to desktop.
 - N6 🟡 macOS (tick 44, branch `macos`).
 - Design direction is chosen (item 4): don't ask for a sign-off again. L2 follows
@@ -2288,3 +2288,18 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   indexing, turned off at once, and off with the memo, theme or account.
 - **For Ben:** is this the page; may the place be typed; does a link carry a name.
 - **Next:** N3b (words on every action), then Settings at wide on Apple.
+
+### Tick 52 — 2026-11-24 — N3b: the words on every action; Ben's history came back (1.0.25 (26))
+- **Ben:** "I signed in again and synced again." Server, 2:00pm: 6,982 events from
+  2018-11-05 to today, 3 accounts, exactly what was deleted. The token fix (tick 45)
+  holds: deleting and coming back is proven end to end.
+- **Words:** "Money in" read as income, now "Bring in purchases". A sync says what it
+  did ("3 new or changed events", "Nothing new in Apple Wallet."), since some are
+  changes the bank made. Share switches are Where and When ("Settings" read as the
+  app's). The web's "Import from Apple Card" takes four sources: "Import a CSV".
+- **Not only words:** an empty account led with a CSV import on a phone that has
+  Wallet; Connect Apple Wallet leads now, with Apple's required disclosure above it.
+  Swiping a theme away removed it from every memo unasked; it asks first.
+- **Settings at wide:** the choices keep a reading width beside the list (iPad seen).
+- **Verified:** 12 iPhone 12 tests (the empty-state one rerun after its words changed),
+  test_all.

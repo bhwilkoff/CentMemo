@@ -49,8 +49,8 @@ struct ShareMemoSheet: View {
         }
         SharePaperAndShape(paper: $design.paper, shape: $design.shape, hasTheme: !content.themes.isEmpty)
         Section("Show") {
-            Toggle("Setting", isOn: $design.showSetting).accessibilityIdentifier("share-setting")
-            Toggle("Date", isOn: $design.showDate).accessibilityIdentifier("share-date")
+            Toggle("Where", isOn: $design.showSetting).accessibilityIdentifier("share-setting")
+            Toggle("When", isOn: $design.showDate).accessibilityIdentifier("share-date")
             if !content.themes.isEmpty { Toggle("Themes", isOn: $design.showThemes).accessibilityIdentifier("share-themes") }
         }
     }

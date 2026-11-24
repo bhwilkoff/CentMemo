@@ -60,7 +60,7 @@ struct SignInView: View {
         switch result {
         case .failure(let error):
             if (error as? ASAuthorizationError)?.code == .canceled {
-                message = "Sign-in was canceled. Tap Sign in with Apple to try again."
+                message = "Sign-in was canceled. Try Sign in with Apple again."
             } else {
                 message = "Apple couldn't sign you in: \(error.localizedDescription)"
             }

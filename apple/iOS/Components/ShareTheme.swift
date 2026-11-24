@@ -48,8 +48,8 @@ struct ShareThemeSheet: View {
         }
         SharePaperAndShape(paper: $design.paper, shape: $design.shape, hasTheme: true)
         Section("Show") {
-            Toggle("Settings", isOn: $design.showSetting).accessibilityIdentifier("share-theme-place")
-            Toggle("Dates", isOn: $design.showDate)
+            Toggle("Where", isOn: $design.showSetting).accessibilityIdentifier("share-theme-place")
+            Toggle("When", isOn: $design.showDate)
         }
         Section {
             ForEach(entries) { e in

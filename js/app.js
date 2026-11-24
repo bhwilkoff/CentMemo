@@ -216,7 +216,7 @@
         const any = await API.transactionCount();
         return any
           ? empty(body, 'Every purchase has a memo.')
-          : empty(body, 'Nothing in your Narrative yet.', h('a', { class: 'btn btn-primary', href: '#/import' }, 'Import from Apple Card'));
+          : empty(body, 'Nothing in your Narrative yet.', h('a', { class: 'btn btn-primary', href: '#/import' }, 'Import a CSV'));
       }
       // D7: one invitation at a time, "Another" for the next of up to three; no
       // count of what is left (as the iPhone's SuggestionCard).
@@ -366,7 +366,7 @@
     loading(body);
     try {
       const [t, vals] = await Promise.all([API.transaction(id), API.values()]);
-      if (!t) return empty(body, 'This event is not in your CentMemo.');
+      if (!t) return empty(body, 'This event isn\'t in your CentMemo.');
       const memo = t.memos && (Array.isArray(t.memos) ? t.memos[0] : t.memos);
       const chosen = new Set(memo ? (memo.memo_values || []).map((v) => v.value_id) : []);
       const area = h('textarea', { id: 'memo-body', class: 'field-input memo-input', rows: '6', maxlength: '10000' });
@@ -560,7 +560,7 @@
         h('div', { class: 'share-choices' },
           h('fieldset', { class: 'share-set' }, h('legend', {}, 'Underline the words that matter'), shareWords(data.memo, () => c.mark, (m) => { c.mark = m; }, draw)),
           pick('Look', 'look', CentShare.LOOKS), pick('Paper', 'paper', CentShare.PAPERS.filter((p) => p !== 'theme' || data.themes.length)), pick('Shape', 'shape', Object.keys(CentShare.SHAPES)),
-          h('fieldset', { class: 'share-set' }, h('legend', {}, 'Show'), h('div', { class: 'share-opts' }, show('showSetting', 'Setting'), show('showDate', 'Date'), data.themes.length ? show('showThemes', 'Themes') : null)),
+          h('fieldset', { class: 'share-set' }, h('legend', {}, 'Show'), h('div', { class: 'share-opts' }, show('showSetting', 'Where'), show('showDate', 'When'), data.themes.length ? show('showThemes', 'Themes') : null)),
           h('div', { class: 'actions' }, shareSend(card, status), status))));
   }
   // N4 (DESIGN S6): a whole theme. Any memo can be left out; Lines is made of the
@@ -588,7 +588,7 @@
       h('div', { class: 'share-studio' }, h('div', { class: 'share-stage' }, card),
         h('div', { class: 'share-choices' },
           pick('Look', 'look', CentShare.THEME_LOOKS), pick('Paper', 'paper', CentShare.PAPERS), pick('Shape', 'shape', Object.keys(CentShare.SHAPES)),
-          h('fieldset', { class: 'share-set' }, h('legend', {}, 'Show'), h('div', { class: 'share-opts' }, show('showSetting', 'Settings'), show('showDate', 'Dates'))),
+          h('fieldset', { class: 'share-set' }, h('legend', {}, 'Show'), h('div', { class: 'share-opts' }, show('showSetting', 'Where'), show('showDate', 'When'))),
           h('fieldset', { class: 'share-set' }, h('legend', {}, 'Underline the words that matter'), picks),
           h('div', { class: 'actions' }, shareSend(card, status), status))));
   }
@@ -666,7 +666,7 @@
         valueId ? h('a', { class: 'theme-row every', href: '#/story/' + latest }, 'Every memo') : null) : '';
       const none = rows.length ? null : h('div', { class: 'state state-empty' },
         h('p', {}, valueId ? 'No memos carry this theme yet.' : 'No memos written for ' + title + '.'),
-        h('a', { class: 'btn', href: '#/unexamined' }, 'Write one'));
+        h('a', { class: 'btn', href: '#/unexamined' }, 'Write a memo'));
       // W4: the shelf on the left, the memos as one column to read.
       fill(body, split([controls, shelf], none || [
         h('header', { class: 'story-head' },
