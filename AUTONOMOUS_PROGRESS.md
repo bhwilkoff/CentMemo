@@ -2334,3 +2334,14 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   with no amount and no Wallet store or date, one public read by unguessable code, a
   static `/s/` page marked noindex, a list to turn links off, cascade on delete. RLS
   tested as a stranger first. The pencil choices also go to the share cards.
+
+### Tick 55 — 2026-11-24 — N4: story links, the private half (deployed, not yet in the app)
+- **Table and rules:** `shares`, `make_share`, `get_share` (migration 20261124010000,
+  Decision 067). Links are owner-only to list and turn off; the connector cannot make one.
+- **Caught before applying:** a hidden place would still have been in the page's data,
+  and a lines-only page would have carried whole memos. The server leaves them out.
+- **Verified on the deployed project:** `tools/test_shares.mjs`, 24 checks as the owner,
+  a stranger and signed out (in test_all). Security advisor: only the intended public
+  read. Not tried: a real connector token (make_share refuses agents in code).
+- **Next:** the reader's page at /s/ (noindex, a report link), the maker on the event
+  and Story pages, Your links in Settings, and the privacy policy's paragraph.

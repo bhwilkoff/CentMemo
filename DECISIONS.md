@@ -93,6 +93,7 @@ Roll again past ~50 KB. Never trim, edit, or summarize an entry in place.
 - 064: Reviewer credentials go in the official submission form (amends 063)
 - 065: The story vocabulary: Narrative, memo, Story, plot point, Skip, Theme, Setting
 - 066: Wallet data in the connector is built and off until Apple answers in writing
+- 067: A story link publishes only what the server reads from the person's own memos
 
 ---
 
@@ -442,3 +443,23 @@ core, while waiting costs only Wallet rows in Claude.
   ConnectorPolicy.sharesWallet and every page's promise agree.
 - Never flip one switch alone. Quote Apple's reply in the turn-on commit.
 - If Apple permits only memos, add a memo-only read and leave the switch off.
+
+---
+
+## 067: A story link publishes only what the server reads from the person's own memos
+*Date: 2026-11-24*
+
+`make_share` builds the published page in the database: memo bodies and theme names
+come from the person's rows, the place and the time are what they typed, and what the
+page hides is left out of the payload. Clients cannot insert or edit a `shares` row.
+`get_share` is the one public read, by a 128-bit code.
+
+**Why**: Ben: "No amount of money should ever be shared", and Apple's FinanceKit
+Addendum 3.2 bars CentMemo from disclosing Wallet data on a page it hosts, whatever
+the person consents to. A payload sent by a client could carry an amount, a store
+name, or words that are not a memo; hiding a place with CSS would still publish it.
+
+**How to apply**:
+- Add a field to a link only inside `make_share`, with a check in `tools/test_shares.mjs`.
+- A Wallet purchase's store and date are never prefilled in the link form.
+- A link is a snapshot and never changes; turning it off deletes the row.
