@@ -2249,3 +2249,5 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Changed on purpose:** the Setting shows by default now (Ben: highlight the
   setting); it was off by default before. Each can be hidden.
 - **Next:** the Apple twin, then the theme card, then links.
+
+- **Ben on the share (about 1pm):** "the design for sharing looks very good so far." And the three closing status lines were unclear: write them plainly.
