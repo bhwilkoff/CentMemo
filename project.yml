@@ -60,9 +60,10 @@ targets:
           - "Extensions/**"
           # The folder READMEs are notes for people, not app resources.
           - "**/*.md"
-    # F2: the CentMemoWalletDelivery extension (apple/Extensions/WalletDelivery,
-    # branch f2-wallet-delivery) joins here once Apple extends the FinanceKit
-    # grant to com.learningischange.centmemo.walletdelivery.
+    dependencies:
+      # F2: FinanceKit background delivery (iOS 26); embedded in Extensions/.
+      - target: CentMemoWalletDelivery
+        embed: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.learningischange.centmemo
@@ -100,6 +101,33 @@ targets:
         "ENABLE_APP_SANDBOX[sdk=macosx*]": YES
         "ENABLE_OUTGOING_NETWORK_CONNECTIONS[sdk=macosx*]": YES
         "ENABLE_HARDENED_RUNTIME[sdk=macosx*]": YES
+
+  # F2: FinanceKit wakes this when Wallet data changes; it runs the app's own
+  # sync (Core) against the session shared through the App Group.
+  CentMemoWalletDelivery:
+    type: extensionkit-extension
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: apple/Extensions/WalletDelivery
+      - path: apple/Core
+        excludes:
+          - "**/*.md"
+    info:
+      path: apple/Extensions/WalletDelivery/Info.plist
+      properties:
+        CFBundleDisplayName: CentMemo
+        # App Store validation wants the app's own numbers (AppVersion.xcconfig).
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        EXAppExtensionAttributes:
+          EXExtensionPointIdentifier: com.apple.financekit.background-delivery
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.learningischange.centmemo.walletdelivery
+        PRODUCT_NAME: CentMemoWalletDelivery
+        CODE_SIGN_ENTITLEMENTS: apple/Extensions/WalletDelivery/WalletDelivery.entitlements
+        GENERATE_INFOPLIST_FILE: YES
 
   # Core unit tests. NOT hosted in the app: hosting the universal app built the
   # app module twice ("Multiple commands produce AppName.swiftmodule") in

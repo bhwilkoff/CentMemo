@@ -69,16 +69,18 @@ final class SettingUITests: DeviceTestCase {
     /// D15b: a Setting whose statement names no place ("MONTHLY INSTALLMENTS"
     /// at Apple) offers a quiet "Find on the map", then Apple's one-time
     /// location button; tapping it searches near the phone, once.
-    func testFindOnTheMapNearHere() {
+    func testFindOnTheMapNearHere() throws {
         let app = launch(["APP_START_SETTING": "Apple"])
         let find = app.buttons["place-find"]
         XCTAssertTrue(find.waitForExistence(timeout: 30), "no place words: a quiet Find on the map")
         XCTAssertFalse(app.descendants(matching: .any)["place-guess"].exists, "and no guess pushed at the person")
         find.tap()
-        let here = app.buttons["place-here"]
+        // The system draws LocationButton out of process, so our identifier isn't on it.
+        let here = text(app, matching: "Current Location")
         XCTAssertTrue(here.waitForExistence(timeout: 10), "Apple's one-time location button")
         shot(app, "place-find")
         here.tap()
+        if declineSystemPrompt(wait: 8) { throw XCTSkip("iOS asked for location; a person grants it, so the search is unverified") }
         let guess = app.descendants(matching: .any)["place-guess"].firstMatch
         XCTAssertTrue(guess.waitForExistence(timeout: 30), "a guess near the phone (Apple <store>)")
         shot(app, "place-near-here")

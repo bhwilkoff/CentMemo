@@ -222,7 +222,7 @@ struct FinanceKitSource: FinanceSource {
 /// Wallet access off, the Wallet data synced to CentMemo is deleted (their own
 /// memos on those purchases go with it; imported exports are untouched).
 /// F2: FinanceKit wakes the Wallet extension when Wallet data changes, and the
-/// extension runs the same sync the app's Sync now runs, with no screen. It
+/// extension runs the same sync the app's Connect Apple Wallet runs, with no screen. It
 /// never syncs into a synthetic account, and stops when access is turned off.
 enum FinanceBackgroundSync {
     static func run() async {

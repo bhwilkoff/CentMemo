@@ -29,8 +29,12 @@
 - **The dev Mac's Xcode works for TestFlight.** App Store review builds go
   through the cloud pipeline (`cloud-appstore-submission`): a beta toolchain
   is rejected after upload.
-- **The FinanceKit entitlement is not in the build yet**, and FinanceKit
-  stays off until Apple grants it (`CMFinanceKitEnabled`).
+- **FinanceKit is granted per bundle id**: the app on 2026-11-22 (case
+  23676235), the extension `com.learningischange.centmemo.walletdelivery` on
+  2026-11-24 (case 23709013). A grant is not a capability: it must then be
+  turned on for that App ID in the developer portal (Account Holder sign-in;
+  neither the ASC API nor automatic signing can do it), or device builds fail
+  with "requires approval from Apple".
 
 ## Checking a build's processing state
 

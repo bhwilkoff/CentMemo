@@ -42,6 +42,10 @@ sign-off.
   Photos access; needs a phone with access, and Ben's OK (writes to his account).
 - iOS Delete account: needs a throwaway account (Ben's call).
 
+- D15b update, 2026-11-24: on the iPhone 12 Find on the map shows and Current
+  Location taps; iOS then asks for location (first use). The test answers Not
+  Now and skips, since a person grants access. The search after it is unseen.
+
 **Bench facts:**
 - The iPhone 12 Screen Time limit blocks CentMemo from about 9:20pm to past
   midnight (and likely overnight Downtime). Afternoons are clear. Never
@@ -49,9 +53,18 @@ sign-off.
 - Behind the limit the app looks signed out. `ios_uitest` now checks the
   failure recording's last frame (f5fcf4c), so it names the overlay.
 
-**Waiting on Apple:** FinanceKit for `com.learningischange.centmemo.walletdelivery`
-(Ben submitted it). When granted, merge the extension target from branch
-`f2-wallet-delivery`, build, and test background delivery on the Duo.
+**F2, granted by Apple 2026-11-24 (case 23709013):** the extension target is back
+in project.yml, and FinanceKit is turned on for the walletdelivery App ID (portal,
+Ben signed in). Signed build rc=0; app and appex both carry `financial-data` and
+the App Group, and both profiles allow it. test_all rc=0. The debug build is on the
+Duo and opens to Settings (frame read). **Not verified:** delivery itself. Ben taps
+Connect Apple Wallet once (that enables hourly delivery); then a new purchase should arrive
+without opening the app. The App Store profile (tools/asc_profiles.py) is also
+untried with the extension; the next TestFlight upload is its first run.
+
+**Connector question (case 23676235):** Wallet Entitlements referred Ben to Apple
+Developer Support on 2026-11-24. The switch stays off. Draft for Ben to send:
+`docs/store/DEVELOPER-SUPPORT-QUESTION.md`.
 
 **Ben's choices, open:**
 1. Public links (D12). Recommendation: private links to his own words only.
@@ -2072,3 +2085,22 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 
 ### Ticks 43–49 — 2026-11-24 12:32–6:26am — hold, then stopped
 - Hourly holds overnight: the iPhone 12 was under Screen Time and everything else waited on Ben. Ben stopped the loop around 7am. Resume state is under "Resume here" at the top of this file.
+
+### 2026-11-24 — FinanceKit for the extension; TestFlight 1.0 (17)
+- **Ben:** "There are a couple more emails about approval for FinanceKit. Can
+  you read and address the information found there?" and "Testflight is for
+  testing across all devices. It should always be a part of major updates."
+- **Done:** the extension target is in the app, signed with FinanceKit (details
+  under Resume here); the Addendum 3.2 question is drafted, not sent.
+- **Tap tier:** the first full run on the iPhone 12 had 6 failures, all stale
+  tests, not the app. Starter themes (D14) pushed Settings rows below the fold
+  of a lazy list; Story's count no longer has a "·"; the location button is
+  drawn by the system, so it carries no identifier of ours. Fixed and rerun
+  (8 pass, 1 skip, over those 9 tests); the other 26 passed in the first run.
+- **Lesson:** a permission prompt left open by one test covers every test after
+  it. setUp now declines it.
+- **Gate:** test_all failed once after the full tap tier: ImportUITests leaves
+  rows in the stranger's own account, so the RLS and web-state checks found it
+  not empty. Not a leak (memos and themes still read 0). Run
+  `node tools/cleanup_stranger.mjs` after a full tap tier. The reviewer check
+  failed once too ("wrong password is refused" read an empty page) and passed alone.

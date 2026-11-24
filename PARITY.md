@@ -116,7 +116,7 @@ When shipping any user-facing feature:
 | Share a whole theme as a card (D12) | ✅ | ✅ | Story, one theme shown: its memos on one card; any memo left out; places and amounts off unless turned on; made on the device, nothing published. Web test_web_states; iOS ShareUITests.testShareTheme (iPhone 12). Public links wait on Ben. |
 | Suggestions on Unexamined (D7) | ✅ | ✅ | memo_suggestions() in the database: bills never suggested (bill MCCs, or the same charge in two earlier months), three different places, a moment per pick so the question fits (SuggestionWords / MOMENTS). One invitation card at a time with Another; no count. Seen on the open Duo and web; the iPhone 12 tap tier is blocked by Screen Time |
 | Connect Apple Wallet (FinanceKit sync, history tokens) | n/a | 🚧 | Entitlement granted 2026-11-22 and signed into build 10; the iPhone 12 offers Connect (WalletAvailabilityUITests). Sync path verified with the sample source; the real sync is Ben's to run on his own phone |
-| FinanceKit background delivery | n/a | ⏳ | iOS 26 extension, after the entitlement |
+| FinanceKit background delivery | n/a | 🚧 | iOS 26 extension, granted 2026-11-24; signed and on the Duo; a delivery not yet seen |
 
 ## 3. Telling the story
 

@@ -8,8 +8,9 @@ final class WalletSyncUITests: DeviceTestCase {
     func testSampleSyncIsIdempotent() {
         let app = launch(["APP_START_TAB": "settings", "APP_SAMPLE_FINANCE": "1"])
         let button = app.buttons["wallet-sync"]
-        XCTAssertTrue(button.waitForExistence(timeout: 25), "Connect Apple Wallet")
-        XCTAssertTrue(text(app, matching: "Claude never sees them").exists, "disclosure shown before access is asked")
+        XCTAssertTrue(text(app, matching: "Ground").waitForExistence(timeout: 25))
+        XCTAssertTrue(reach(app, button), "Connect Apple Wallet")
+        XCTAssertTrue(reach(app, text(app, matching: "Claude never sees them"), swipes: 2), "disclosure shown before access is asked")
         button.tap()
         let result = app.staticTexts["wallet-result"]
         XCTAssertTrue(result.waitForExistence(timeout: 20))

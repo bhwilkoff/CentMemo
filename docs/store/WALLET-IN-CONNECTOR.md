@@ -9,6 +9,12 @@ data "until you receive the appropriate clarification". So the entitlement
 team won't decide this; App Review is the likely venue. Ben, 2026-11-23,
 after reading that: keep it off for now and revisit it at the L2 submission.
 
+Ben asked who can decide. Kavya, 2026-11-24, same case: "We recommend contacting
+Apple Developer Support and requesting guidance from the team responsible for
+the FinanceKit APIs Addendum and related contractual permissions." The
+entitlement is unchanged. This is a referral, not a yes: the switch stays off.
+The question to send is in `docs/store/DEVELOPER-SUPPORT-QUESTION.md`.
+
 Ben, 2026-11-22: "let's build everything as if we can send the apple wallet
 data to claude, but let's draft the email and see what they say rather than
 turning it on before any kind of response."

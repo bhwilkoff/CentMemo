@@ -13,8 +13,12 @@ final class TabSmokeUITests: DeviceTestCase {
 
     func testUnexamined() { check("unexamined", "Biggest this month|First time here|Your busiest day|A year ago you wrote|Every purchase has a memo|Nothing in your Narrative yet") }
     func testLedger() { check("ledger", "Spent|Paid or credited") }
-    func testStory() { check("story", "memos? ·|No memos here yet") }
-    func testSettings() { check("settings", "Connect Claude") }
+    func testStory() { check("story", "^\\d+ memos?$|No memos here yet") }
+    func testSettings() {
+        check("settings", "Starter themes")
+        let app = XCUIApplication()
+        XCTAssertTrue(reach(app, text(app, matching: "Connect Claude")), "Connect Claude")
+    }
 
     /// Settings shows the connector's public address, not the database host's.
     func testConnectorAddress() {
@@ -38,7 +42,7 @@ final class TabSmokeUITests: DeviceTestCase {
         XCTAssertTrue(group.exists, "Where to get a CSV")
         group.tap()
         XCTAssertTrue(text(app, matching: "Statements").waitForExistence(timeout: 5), "Venmo's path")
-        XCTAssertTrue(text(app, matching: "cash\\.app/account").exists, "Cash App's path")
+        XCTAssertTrue(reach(app, text(app, matching: "cash\\.app/account")), "Cash App's path")
         shot(app, "export-paths")
     }
 
@@ -46,7 +50,7 @@ final class TabSmokeUITests: DeviceTestCase {
     func testTapThroughTabs() {
         let app = launch()
         XCTAssertTrue(text(app, matching: "Biggest this month|First time here|Your busiest day|A year ago you wrote|Every purchase has a memo").waitForExistence(timeout: 25))
-        for (tab, rx) in [("Narrative", "Spent"), ("Story", "memos? ·|No memos here yet"), ("Settings", "Connect Claude"), ("Unexamined", "Biggest this month|First time here|Your busiest day|A year ago you wrote|Every purchase")] {
+        for (tab, rx) in [("Narrative", "Spent"), ("Story", "^\\d+ memos?$|No memos here yet"), ("Settings", "Ground"), ("Unexamined", "Biggest this month|First time here|Your busiest day|A year ago you wrote|Every purchase")] {
             openTab(app, tab)
             XCTAssertTrue(text(app, matching: rx).waitForExistence(timeout: 15), "after tapping \(tab): /\(rx)/")
             shot(app, "tapped-\(tab)")

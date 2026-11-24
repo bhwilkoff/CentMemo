@@ -5,7 +5,18 @@ import XCTest
 /// sign-in handed over by tools/ios_uitest.py as TEST_RUNNER_APP_TEST_*; tests
 /// that change data put it back before they end.
 @MainActor class DeviceTestCase: XCTestCase {
-    override func setUp() { continueAfterFailure = true }
+    override func setUp() {
+        continueAfterFailure = true
+        declineSystemPrompt(wait: 1)  // one left by an earlier test covers every test after it
+    }
+
+    /// Answers a system permission prompt "Not Now": a test never grants access on a phone.
+    @discardableResult func declineSystemPrompt(wait: TimeInterval) -> Bool {
+        let no = XCUIApplication(bundleIdentifier: "com.apple.springboard").buttons["Not Now"]
+        guard no.waitForExistence(timeout: wait) else { return false }
+        no.tap()
+        return true
+    }
 
     func launch(_ env: [String: String] = [:]) -> XCUIApplication {
         let app = XCUIApplication()
@@ -28,6 +39,13 @@ import XCTest
     func text(_ app: XCUIApplication, matching rx: String) -> XCUIElement {
         app.descendants(matching: .any)
             .matching(NSPredicate(format: "label MATCHES %@", "(?s).*(\(rx)).*")).firstMatch
+    }
+
+    /// Settings is a lazy list: a row below the fold does not exist until scrolled to.
+    @discardableResult func reach(_ app: XCUIApplication, _ element: XCUIElement, swipes: Int = 10) -> Bool {
+        _ = element.waitForExistence(timeout: 2)
+        for _ in 0..<swipes where !element.exists { app.swipeUp(velocity: .slow); sleep(1) }
+        return element.exists
     }
 
     /// A section by name: the tab bar on iPhone, a sidebar item on iPad.

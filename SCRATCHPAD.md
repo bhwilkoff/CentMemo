@@ -20,17 +20,17 @@
   `/terms/`, `/brand/`). Apple sign-in on the web verified by Ben.
 - **Connector**: verified end to end as Claude drives it (`tools/test_connector.mjs`);
   read-only enforced in SQL; Wallet rows never shared (Addendum 3.2).
-- **iOS**: TestFlight 1.0 (8) valid (2026-11-22), Ben's group gets every
-  build: pencil circle, Connect Apple Wallet (unavailable until the
-  entitlement), photos by reference, privacy manifest, sanguine actions.
+- **iOS**: every major update ships to TestFlight (Ben, 2026-11-24). 1.0 (17)
+  adds the Wallet background delivery extension; a delivery is not yet seen.
 - **Testing** (`docs/TESTING.md`): `tools/test_all.sh` off-device (RLS,
   connector, web states at 375px, Swift Core, builds); iPhone 12 tap and
   glass tiers; iPad Pro glass tier only.
 - **Look**: paper, ink, sanguine pencil; the person's color as marks only
   (`docs/DESIGN.md`, Decision 060).
 - **Blocked on Ben**: iPhone Apple sign-in (via TestFlight); the Duet live and
-  scheduled test; the FinanceKit grant (submitted, Apple's turn); iPad UI
-  Automation (Settings > Developer).
+  scheduled test; sending Apple Developer Support the Addendum 3.2 question
+  (docs/store/DEVELOPER-SUPPORT-QUESTION.md); iPad UI Automation (Settings >
+  Developer).
 - **Loop**: stopped by Ben 2026-11-24. Start at "Resume here" in
   `AUTONOMOUS_PROGRESS.md` (unverified device checks, Ben's open choices,
   the FinanceKit walletdelivery grant, Screen Time hours).
