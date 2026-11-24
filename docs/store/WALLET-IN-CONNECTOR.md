@@ -13,7 +13,8 @@ Ben asked who can decide. Kavya, 2026-11-24, same case: "We recommend contacting
 Apple Developer Support and requesting guidance from the team responsible for
 the FinanceKit APIs Addendum and related contractual permissions." The
 entitlement is unchanged. This is a referral, not a yes: the switch stays off.
-The question to send is in `docs/store/DEVELOPER-SUPPORT-QUESTION.md`.
+Ben sent the question on 2026-11-24, Case ID 103023652799
+(`docs/store/DEVELOPER-SUPPORT-QUESTION.md`).
 
 Ben, 2026-11-22: "let's build everything as if we can send the apple wallet
 data to claude, but let's draft the email and see what they say rather than

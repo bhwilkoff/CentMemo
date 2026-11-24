@@ -59,12 +59,11 @@ Ben signed in). Signed build rc=0; app and appex both carry `financial-data` and
 the App Group, and both profiles allow it. test_all rc=0. The debug build is on the
 Duo and opens to Settings (frame read). **Not verified:** delivery itself. Ben taps
 Connect Apple Wallet once (that enables hourly delivery); then a new purchase should arrive
-without opening the app. The App Store profile (tools/asc_profiles.py) is also
-untried with the extension; the next TestFlight upload is its first run.
+without opening the app. TestFlight 1.0 (17) carries it: uploaded and VALID.
 
 **Connector question (case 23676235):** Wallet Entitlements referred Ben to Apple
-Developer Support on 2026-11-24. The switch stays off. Draft for Ben to send:
-`docs/store/DEVELOPER-SUPPORT-QUESTION.md`.
+Developer Support on 2026-11-24. Ben sent the question that day, Case ID
+103023652799 (`docs/store/DEVELOPER-SUPPORT-QUESTION.md`). The switch stays off.
 
 **Ben's choices, open:**
 1. Public links (D12). Recommendation: private links to his own words only.
@@ -2091,7 +2090,7 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   you read and address the information found there?" and "Testflight is for
   testing across all devices. It should always be a part of major updates."
 - **Done:** the extension target is in the app, signed with FinanceKit (details
-  under Resume here); the Addendum 3.2 question is drafted, not sent.
+  under Resume here); the Addendum 3.2 question, sent by Ben (Case ID 103023652799).
 - **Tap tier:** the first full run on the iPhone 12 had 6 failures, all stale
   tests, not the app. Starter themes (D14) pushed Settings rows below the fold
   of a lazy list; Story's count no longer has a "·"; the location button is

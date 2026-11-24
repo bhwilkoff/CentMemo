@@ -1,7 +1,7 @@
 # Question for Apple Developer Support (FinanceKit APIs Addendum 3.2)
 
-Status: **drafted 2026-11-24, not sent.** Ben sends it, signed in as Account
-Holder, from Apple's developer Contact Us page: Membership and Account >
+Status: **sent by Ben 2026-11-24, Case ID 103023652799.** The reply goes to Ben's
+Apple Account email. Sent from Apple's developer Contact Us page: Membership and Account >
 Agreements and Contracts > Email (phone was unavailable that day). The form has no
 subject field, so the subject goes on the first line. Why: `WALLET-IN-CONNECTOR.md`.
 

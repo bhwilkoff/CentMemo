@@ -27,9 +27,9 @@
   glass tiers; iPad Pro glass tier only.
 - **Look**: paper, ink, sanguine pencil; the person's color as marks only
   (`docs/DESIGN.md`, Decision 060).
+- **Waiting on Apple**: Addendum 3.2, Developer Support case 103023652799.
 - **Blocked on Ben**: iPhone Apple sign-in (via TestFlight); the Duet live and
-  scheduled test; sending Apple Developer Support the Addendum 3.2 question
-  (docs/store/DEVELOPER-SUPPORT-QUESTION.md); iPad UI Automation (Settings >
+  scheduled test; iPad UI Automation (Settings >
   Developer).
 - **Loop**: stopped by Ben 2026-11-24. Start at "Resume here" in
   `AUTONOMOUS_PROGRESS.md` (unverified device checks, Ben's open choices,
