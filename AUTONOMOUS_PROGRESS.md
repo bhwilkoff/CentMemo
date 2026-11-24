@@ -2356,3 +2356,10 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   when Current Location is tapped, and records nothing.
 - **Verified:** test_shares (24), test_web_states (make, open as a reader, same color,
   fits a phone, listed, turned off, then says so), frames at 375, 768 and 1440; test_all.
+- **Renamed after Ben asked** *"Isn't "where" and "from" the same field? What is the
+  difference?"*: From is now Shared by, the words the page prints. The Apple maker uses
+  the same label.
+- **Found by the gate failing:** Settings waited on the list of links before drawing
+  anything. The list now loads by itself, with Loading, Try again and offline; a check
+  holds the answer back forever. A second, intermittent failure was the test reloading
+  a page that was already reloading itself. Four clean runs after both.

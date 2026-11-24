@@ -252,6 +252,8 @@ console.log('event page (D6): the Setting and the memo lead; the money is a foot
   await shot('link-maker');
   await evaluate('[...document.querySelectorAll("#view-txn .link-panel button")].find((b) => b.textContent === "Make the link").click(); true');
   ok(await waitFor('!!document.querySelector("#view-txn .link-url")', 20000), 'Make the link gives an address');
+  await evaluate('(() => { const i = document.getElementById("link-from"); i.value = "Sam"; i.dispatchEvent(new Event("input")); return true; })()');
+  ok(await evaluate('document.querySelector("label[for=link-from]").textContent === "Shared by" && document.querySelector("#view-txn .sp-end").textContent.includes("Shared by Sam.") && document.querySelector("#view-txn .sp-place").textContent === "The zoo"'), 'Shared by is the person, named as the page names them; Where is the place');
   const linkColor = await evaluate('getComputedStyle(document.querySelector("#view-txn .link-panel .sp")).backgroundColor');
   const linkHash = await evaluate('new URL(document.querySelector("#view-txn .link-url").href).hash');
   await cdp('Page.navigate', { url: SITE + 's/' + linkHash });
@@ -269,10 +271,9 @@ console.log('event page (D6): the Setting and the memo lead; the money is a foot
   await evaluate('document.querySelector("#view-settings .link-row button").click(); true');
   ok(await waitFor('/Off/.test(document.querySelector("#view-settings .link-row").innerText)'), 'and turns it off');
   await cdp('Page.navigate', { url: SITE + 's/' + linkHash });
-  await cdp('Page.reload', { ignoreCache: true });
   ok(await waitFor('/This link was turned off/.test(document.body.innerText)', 20000), 'after which the address says so');
+  // Only the part after the # changes, and the page reloads itself; a second reload here raced it.
   await cdp('Page.navigate', { url: SITE + 's/#nope' });
-  await cdp('Page.reload', { ignoreCache: true });
   ok(await waitFor('/no page at this address/.test(document.body.innerText)'), 'and a wrong address says that');
   await openAs('owner', '#/t/a3b8c10c-68b8-4bfe-9380-c87b7015a49d');
   await evaluate('location.hash = "#/t/a3b8c10c-68b8-4bfe-9380-c87b7015a49d"; true');
@@ -526,6 +527,9 @@ console.log('reviewer sign-in (Decision 063): a real authorization, approved by 
 }
 
 console.log('connector address');
+await openAs('owner', '#/');
+await evaluate('API.shares = () => new Promise(() => {}); location.hash = "#/settings"; true');
+ok(await waitFor('/Sign out/.test(document.querySelector("#view-settings").innerText) && /Loading/.test(document.getElementById("your-links")?.innerText || "")'), 'Settings draws even while the list of links never answers');
 await openAs('owner', '#/settings');
 await evaluate('location.hash = "#/settings"; true');
 ok(await waitFor('/mcp\\.centmemo\\.com/.test(document.body.innerText)'), 'web Settings shows https://mcp.centmemo.com');

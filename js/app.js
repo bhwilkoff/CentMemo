@@ -636,7 +636,7 @@
         kind === 'memo' ? pick('What leads', 'lead', [['memory', 'The memory'], ['setting', 'The place']].concat(theme ? [['theme', 'The theme']] : []))
           : h('fieldset', { class: 'share-set' }, h('legend', {}, 'Parts of the page'), h('div', { class: 'share-opts' }, check('cover', 'Cover'), check('lines', 'Lines'), check('mems', 'Each memory'))),
         h('fieldset', { class: 'share-set' }, h('legend', {}, 'Show'), h('div', { class: 'share-opts' }, check('place', 'Where'), check('when', 'When'), kind === 'memo' && theme ? check('theme', 'Theme') : null)),
-        field('link-from', 'From', say.from, (v) => { say.from = v; }, 'A name, or nothing', 60),
+        field('link-from', 'Shared by', say.from, (v) => { say.from = v; }, 'Your name, or nothing', 60),
         h('p', { class: 'caption' }, 'Anyone with the link can read this page. It isn’t listed anywhere, and you can turn it off in Settings.'),
         h('div', { class: 'actions' }, go), status, made);
     }
@@ -869,7 +869,7 @@
           return rows.length ? h('div', {}, h('p', { class: 'field-label' }, 'Starter themes'), h('ul', { class: 'list starters' }, rows)) : '';
         })(),
         h('h2', { class: 'section-heading' }, 'Your links'),
-        linksList(await API.shares().catch(() => null)),
+        linksBox(),
         h('h2', { class: 'section-heading' }, 'Connect Claude'),
         h('p', {}, 'Claude can read your Narrative and memos, but can never change them. In Claude, open Settings, then Connectors, then Add custom connector, and paste:'),
         h('div', { class: 'inline-form' }, h('code', { class: 'code-line' }, API.MCP_URL), copy),
@@ -881,9 +881,23 @@
     } catch (err) { failed(body, err, settingsView); }
   }
 
+  // Loads by itself, so a slow answer never holds up the rest of Settings.
+  function linksBox() {
+    const box = h('div', { id: 'your-links' });
+    const load = async () => {
+      fill(box, h('p', { class: 'caption', role: 'status' }, 'Loading…'));
+      try { fill(box, linksList(await API.shares())); }
+      catch (_) {
+        const again = h('button', { type: 'button', class: 'btn btn-small' }, 'Try again');
+        again.addEventListener('click', load);
+        fill(box, h('p', { class: 'caption', role: 'alert' }, navigator.onLine ? 'CentMemo couldn’t load your links.' : 'You’re offline.'), again);
+      }
+    };
+    load();
+    return box;
+  }
   // Every link the person made, each turned off at once.
   function linksList(list) {
-    if (!list) return h('p', { class: 'caption' }, 'CentMemo couldn’t load your links.');
     if (!list.length) return h('p', { class: 'caption' }, 'None. Make one from a memo or a theme.');
     return h('ul', { class: 'list' }, list.map((l) => {
       const off = h('button', { type: 'button', class: 'btn btn-small' }, 'Turn off');
