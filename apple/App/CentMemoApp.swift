@@ -85,7 +85,10 @@ struct RootView: View {
             // to the foreground, which is when someone comes back from Settings.
             .onChange(of: phase, initial: true) { _, now in
                 guard now == .active, session.isSignedIn else { return }
-                Task { await FinanceRevocation.check(email: session.email) }
+                Task {
+                    await FinanceRevocation.check(email: session.email)
+                    await FinanceBackgroundSync.enableIfConnected(email: session.email)
+                }
             }
             // The ONE place the inbox is consumed: deep links and test doors
             // alike land in the store and are routed here.

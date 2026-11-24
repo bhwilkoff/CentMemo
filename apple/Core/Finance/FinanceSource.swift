@@ -227,6 +227,7 @@ struct FinanceKitSource: FinanceSource {
 enum FinanceBackgroundSync {
     static func run() async {
         #if canImport(FinanceKit) && os(iOS)
+        await APIClient.shared.reloadStoredSession()
         guard let email = await APIClient.shared.email, !SessionStore.isSynthetic(email),
               FinanceStore.isDataAvailable(.financialData),
               (try? await FinanceStore.shared.authorizationStatus()) == .authorized else { return }
@@ -247,6 +248,17 @@ enum FinanceBackgroundSync {
         if #available(iOS 26.0, *) {
             FinanceStore.shared.enableBackgroundDelivery(for: [.transactions, .accounts], frequency: .hourly)
         }
+        #endif
+    }
+
+    /// Someone who connected before delivery existed gets it without reconnecting;
+    /// for everyone else this only restates the frequency.
+    static func enableIfConnected(email: String?) async {
+        #if canImport(FinanceKit) && os(iOS)
+        guard let email, !SessionStore.isSynthetic(email), Shared.financeToken(FinanceSources.tokenKey(email)) != nil,
+              FinanceStore.isDataAvailable(.financialData),
+              (try? await FinanceStore.shared.authorizationStatus()) == .authorized else { return }
+        enable()
         #endif
     }
 

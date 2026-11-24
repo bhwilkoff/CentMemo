@@ -23,5 +23,7 @@
 		<key>EXExtensionPointIdentifier</key>
 		<string>com.apple.financekit.background-delivery</string>
 	</dict>
+	<key>NSFinancialDataUsageDescription</key>
+	<string>CentMemo shows your Apple Card, Apple Cash, and Savings transactions so you can write the story of each purchase.</string>
 </dict>
 </plist>

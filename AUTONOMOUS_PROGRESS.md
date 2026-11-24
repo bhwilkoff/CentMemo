@@ -26,7 +26,7 @@ The owner's requests jump the rotation.
 - DECISIONS entries are append-only (Decision 033): never edit one in place,
   even a superseded one. Supersession shows in the newer entry and the index.
 
-## Resume here (loop stopped by Ben, 2026-11-24 ~7am)
+## Resume here (loop resumed by Ben, 2026-11-24 ~11am: "Can we resume the work loop for what has been documented? We need to keep building this out.")
 
 Ben's order (2026-11-23): F1/F2 FinanceKit → D14 themes → D15 place → D12
 sharing → item 10 files → L2/L3 submission → macOS and iPad later. Done
@@ -2124,3 +2124,24 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Ben:** "Please stop asking me if you should push and commit. If you have done
   work that needs to be represented on devices and tested, then you should push
   a new version to testflight."
+
+### Tick 43 — 2026-11-24 — iOS: F2 made observable, and an offline open no longer signs you out (1.0.18 (19))
+- **Is delivery running?** The server's edge logs name the process: the app is
+  `CentMemo/<build>`, the extension `CentMemoWalletDelivery/<build>`. Every wake
+  posts accounts, so the logs are a detector with no code on the phone. As of
+  11:02am: no extension request. The Duo (Darwin 27.3) enabled delivery at
+  10:09:26am on build 17. It may only mean no new Wallet data yet.
+- **Bug found reading that path:** any failed token refresh (no signal, a 5xx)
+  signed the person out and deleted the session shared with the extension.
+  `ErrorStateUITests/testOfflineRefreshKeepsTheSignIn` failed on the iPhone 12
+  before the fix and passes after. Only a refusal (400, 401, 403) ends a session
+  (`SessionTests`). The earlier offline check never expired the session, so it
+  could not see this.
+- **Delivery gaps closed:** re-enabled on every return to the foreground for
+  someone already connected; each wake rereads the stored session (sign-out or
+  a switch of accounts); the usage string is in the extension's Info.plist
+  (Apple's setup article asks for one and does not say which target).
+- **Verified:** 12 iPhone 12 tests pass (Error, TabSmoke, WalletSync), no crash logs.
+  **Not verified:** a delivery; the re-enable on real Wallet data.
+- **Open, Ben's words:** the button reads "Connect Apple Wallet" even once connected.
+- **Next:** check the logs again after the Duo runs 19; then macOS (13).

@@ -117,6 +117,7 @@ targets:
       path: apple/Extensions/WalletDelivery/Info.plist
       properties:
         CFBundleDisplayName: CentMemo
+        NSFinancialDataUsageDescription: "CentMemo shows your Apple Card, Apple Cash, and Savings transactions so you can write the story of each purchase."
         # App Store validation wants the app's own numbers (AppVersion.xcconfig).
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"

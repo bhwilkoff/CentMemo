@@ -19,6 +19,19 @@ final class ErrorStateUITests: DeviceTestCase {
     func testUnreachable() { check("unreachable", "CentMemo couldn't reach its server.") }
     func testOffline() { check("offline", "You're offline.") }
 
+    /// An expired session with no signal is offline, not signed out: the refresh
+    /// never reached the server, so the server never refused it.
+    func testOfflineRefreshKeepsTheSignIn() {
+        let first = launch(["APP_START_TAB": "ledger"])
+        XCTAssertTrue(text(first, matching: "Spent|Paid or credited").waitForExistence(timeout: 30))
+        first.terminate()
+        let app = launch(["APP_START_TAB": "ledger", "APP_FAIL_NETWORK": "offline", "APP_EXPIRE_SESSION": "1"])
+        XCTAssertTrue(app.staticTexts["You're offline."].waitForExistence(timeout: 30), "says it is offline")
+        XCTAssertFalse(text(app, matching: "Sign in with Apple").exists, "and stays signed in")
+        shot(app, "offline-refresh")
+        app.terminate()
+    }
+
     /// Control: no door, the ledger loads.
     func testNoDoorLoads() {
         let app = launch(["APP_START_TAB": "ledger"])

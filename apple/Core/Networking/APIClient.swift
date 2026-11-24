@@ -25,10 +25,11 @@ final class APIClient {
     }
 
     enum APIError: Error, LocalizedError {
-        case server(String), signedOut, decoding(String)
+        case server(String), refused(String, code: Int), signedOut, decoding(String)
         var errorDescription: String? {
             switch self {
             case .server(let m): m
+            case .refused(let m, _): m
             case .signedOut: "You're signed out. Sign in again."
             case .decoding(let m): "CentMemo couldn't read the answer: \(m)"
             }
@@ -84,10 +85,18 @@ final class APIClient {
         session = nil
     }
 
+    private static var expireDoor: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.environment["APP_EXPIRE_SESSION"] == "1"
+        #else
+        false
+        #endif
+    }
+
     private func refreshIfNeeded(force: Bool = false) async throws {
         adoptNewerStoredSession()
         guard let s = session else { throw APIError.signedOut }
-        guard force || s.expiresAt < Date().timeIntervalSince1970 + 60 else { return }
+        guard force || Self.expireDoor || s.expiresAt < Date().timeIntervalSince1970 + 60 else { return }
         do {
             try await refresh(with: s.refreshToken)
         } catch {
@@ -95,9 +104,25 @@ final class APIClient {
             // this process held the old one; try the stored one before signing out.
             adoptNewerStoredSession()
             if let now = session, now.refreshToken != s.refreshToken, (try? await refresh(with: now.refreshToken)) != nil { return }
+            guard Self.endsSession(error) else { throw error }
             session = nil
             throw APIError.signedOut
         }
+    }
+
+    /// Only the server refusing the refresh token signs the person out. No signal, a
+    /// server error, or iOS stopping the Wallet extension mid-request does not: the
+    /// session is shared, so the extension would sign the app out.
+    nonisolated static func endsSession(_ error: Error) -> Bool {
+        guard case APIError.refused(_, let code) = error else { return false }
+        return code == 400 || code == 401 || code == 403
+    }
+
+    /// The Wallet extension's process can outlive a sign-out or a switch of accounts
+    /// in the app: each wake starts from the session the app holds now.
+    func reloadStoredSession() {
+        let stored = Keychain.load(account: "session").flatMap { try? JSONDecoder().decode(Session.self, from: $0) }
+        if stored?.refreshToken != session?.refreshToken || stored?.userID != session?.userID { session = stored }
     }
 
     private func refresh(with token: String) async throws {
@@ -146,7 +171,9 @@ final class APIClient {
         #if DEBUG
         // DEBUG door: APP_FAIL_NETWORK=offline|unreachable fails data requests
         // (sign-in still works), so the error state can be seen on a device.
-        if path.hasPrefix("rest/v1"), let fail = ProcessInfo.processInfo.environment["APP_FAIL_NETWORK"] {
+        // With APP_EXPIRE_SESSION=1 the token refresh fails the same way.
+        let refreshing = query.contains { $0.value == "refresh_token" } && Self.expireDoor
+        if path.hasPrefix("rest/v1") || refreshing, let fail = ProcessInfo.processInfo.environment["APP_FAIL_NETWORK"] {
             throw URLError(fail == "offline" ? .notConnectedToInternet : .cannotConnectToHost)
         }
         #endif
@@ -156,7 +183,10 @@ final class APIClient {
             try await refreshIfNeeded(force: true)
             return try await raw(path, query: query, method: method, body: body, prefer: prefer, authed: authed, retried: true)
         }
-        guard (200..<300).contains(code) else { throw APIError.server(Self.message(from: data, code: code)) }
+        guard (200..<300).contains(code) else {
+            throw path == "auth/v1/token" ? APIError.refused(Self.message(from: data, code: code), code: code)
+                : APIError.server(Self.message(from: data, code: code))
+        }
         return data
     }
 

@@ -43,6 +43,8 @@ launch it.
     - `TabSmokeUITests`: every tab, plus tapping through the bar.
     - `MemoUITests`: a memo with its values; write, save, read back after a
       relaunch, then remove.
+    - `ErrorStateUITests/testOfflineRefreshKeepsTheSignIn`: an expired session
+      with no signal (APP_EXPIRE_SESSION=1, APP_FAIL_NETWORK=offline) stays signed in.
     - `GroundUITests`: choosing a color saves and survives a relaunch.
 - **Glass tier**: `python3 tools/ios_run.py --device iphone --scenario <name>`
   - Launches through a test door and grades screenshots by OCR against text
@@ -99,3 +101,10 @@ signed in as the synthetic owner, at 375px (`tools/phone-frame.html`) and
     out, not blocked.
 - **A test that fails mid-way leaves data.** Check the server after a failure
   (memos, attachments) and clean it before the next run.
+
+## Is Wallet background delivery running?
+
+Supabase edge logs, read only (`query_logs`, source `edge_logs`): look for user
+agents starting `CentMemoWalletDelivery/`. The app is `CentMemo/`. Each wake
+with Wallet access posts to `/rest/v1/accounts`. No rows means either no wake or
+no new Wallet data: hourly is a minimum interval, and no change means no wake.
