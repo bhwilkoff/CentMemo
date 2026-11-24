@@ -87,7 +87,7 @@ account, 6 the Connect button):**
 - N2 ✅ Starter themes leave Unexamined; Settings keeps them (web + Apple).
 - N3 ✅ "Connect Apple Wallet" reads "Sync Apple Wallet" once connected.
 - N3b ⏳ Audit every action's words on every platform.
-- N4 🟡 (DESIGN S; web live; draft for Ben https://claude.ai/artifact/XTgCwKxwxF6ZyAEuhYYcpc; memo and theme built on web, iPhone, iPad, Mac; links ⏳) Design your share: Setting, memory, themes; the person chooses the look.
+- N4 🟡 (DESIGN S; web live; draft for Ben https://claude.ai/artifact/XTgCwKxwxF6ZyAEuhYYcpc; memo and theme built on web, iPhone, iPad, Mac; links designed, waiting on Ben before anything public is built) Design your share: Setting, memory, themes; the person chooses the look.
   Design with the skills first, on every size. Links after the design.
 - N5 🟡 (rules: docs/DESIGN.md W; web at 375/768/1024/1440, iPad landscape, open Duo, Mac at 900/1180/1600 built and seen; iPad portrait, closed Duo, Settings at wide on Apple ⏳) Every screen size designed on purpose: iPhone 12, Duo closed and open, iPad
   portrait and landscape, Mac window small to large, web phone to desktop.
@@ -2274,3 +2274,17 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   set of pieces on each platform.
 - **Verified:** test_web_states (each look redraws, no amount, an unticked memo leaves),
   ShareCardTests (all 27 theme combinations, 60 memos, none), frames read.
+
+### Tick 51 — 2026-11-24 — N4: story links, designed only
+- **Design:** docs/design/story-link.html. A reader's page for one memo, one for a theme
+  (cover in the theme's color, Lines, then each memory), and what the writer sees
+  before a link exists. Nothing public is built until Ben has seen it.
+- **Constraint (Addendum 3.2, docs/research):** a page CentMemo hosts is CentMemo
+  disclosing, and consent does not override it. So a Wallet purchase's store and date
+  never go on a link; the writer types the place and the time themselves or leaves
+  them out. Imported (CSV) purchases may prefill. A card the person sends is theirs
+  to send, so cards keep the Setting.
+- **How it would work:** a snapshot per link, an unguessable address, no listing or
+  indexing, turned off at once, and off with the memo, theme or account.
+- **For Ben:** is this the page; may the place be typed; does a link carry a name.
+- **Next:** N3b (words on every action), then Settings at wide on Apple.
