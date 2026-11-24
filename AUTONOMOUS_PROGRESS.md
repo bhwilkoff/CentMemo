@@ -90,7 +90,7 @@ account, 6 the Connect button):**
 - N3b ⏳ Audit every action's words on every platform.
 - N4 ⏳ Design your share: Setting, memory, themes; the person chooses the look.
   Design with the skills first, on every size. Links after the design.
-- N5 🟡 (rules: docs/DESIGN.md W; iPad landscape, open Duo, Mac Story built and seen; iPad portrait, Mac sizes, web medium and wide, Settings at wide ⏳) Every screen size designed on purpose: iPhone 12, Duo closed and open, iPad
+- N5 🟡 (rules: docs/DESIGN.md W; web at 375/768/1024/1440, iPad landscape, open Duo, Mac at 900/1180/1600 built and seen; iPad portrait, closed Duo, Settings at wide on Apple ⏳) Every screen size designed on purpose: iPhone 12, Duo closed and open, iPad
   portrait and landscape, Mac window small to large, web phone to desktop.
 - N6 🟡 macOS (tick 44, branch `macos`).
 - Design direction is chosen (item 4): don't ask for a sign-off again. L2 follows
@@ -2219,3 +2219,18 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   **Not seen:** iPad portrait, the closed Duo, Mac at 900 and 1600, light Mac.
 - **Verified:** full iPhone 12 tier 32 pass, 5 skip; test_all.
 - **Corrected by Ben:** I reported the Duo locked from a 25-minute-old check.
+
+### Tick 47 — 2026-11-24 — N5: the web at every width, the Mac at three sizes; sign out means this device (1.0.22 (23))
+- **Web:** two columns from 760px (the side before 320 at 1100): Unexamined's
+  invitation, the Narrative's month and filters, the Story's shelf, a Setting's
+  head stand beside what they belong to; the purchase desk from 900; Settings in
+  labeled rows. Every screen read at 375, 768, 1024 and 1440 (dark).
+- **Mac:** 900, 1180 and 1600, light and dark, read (APP_WINDOW and APP_APPEARANCE
+  doors). The memo field's white box in light mode is gone.
+- **Bug found because a Mac frame came up signed out:** signing out on one device
+  ended the sign-in on every device (the server's default scope), so signing out
+  of the web would also have stopped Wallet delivery on the phone. Measured with
+  two sessions; `tools/test_signout_scope.mjs` holds it, with the default as control.
+- **Sign-in page:** serif sanguine title and sanguine links (DESIGN T1, C2).
+- **Verified:** 16 iPhone 12 tests, test_all, web states. Deletion: no
+  delete_my_account call in the logs yet (12:31pm). Delivery: no wake yet.

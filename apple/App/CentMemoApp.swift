@@ -112,6 +112,15 @@ struct RootView: View {
             // Test doors (DEBUG builds only; LaunchDoors.current is empty in
             // Release). APP_DOOR_SECONDS bounds the door's activity.
             .task {
+                #if DEBUG && os(macOS)
+                // Harness doors: APP_WINDOW=900x700 and APP_APPEARANCE=light|dark (DESIGN W7).
+                if let size = ProcessInfo.processInfo.environment["APP_WINDOW"]?.split(separator: "x").compactMap({ Double($0) }), size.count == 2 {
+                    NSApp.windows.first { $0.isVisible }?.setContentSize(NSSize(width: size[0], height: size[1]))
+                }
+                if let look = ProcessInfo.processInfo.environment["APP_APPEARANCE"] {
+                    NSApp.appearance = NSAppearance(named: look == "light" ? .aqua : .darkAqua)
+                }
+                #endif
                 #if DEBUG
                 // Harness door: sign the synthetic test account in (never a real one).
                 let env = ProcessInfo.processInfo.environment

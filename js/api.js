@@ -99,7 +99,7 @@ const API = (() => {
     must(await client().auth.signInWithIdToken({ provider: 'apple', token: h.get('id_token'), nonce: saved.raw }));
     return saved.back || '';
   }
-  async function signOut() { names = null; vals = null; places = null; await client().auth.signOut(); }
+  async function signOut() { names = null; vals = null; places = null; await client().auth.signOut({ scope: 'local' }); }  // this browser only; the default ends every device's sign-in
   // Item 10: photo copies the person chose to keep; links last an hour.
   async function copyUrls(paths) {
     if (!paths.length) return {};

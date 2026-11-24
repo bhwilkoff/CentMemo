@@ -153,6 +153,7 @@ struct EntryDetailView: View {
         }
         Section {
             TextEditor(text: $memo)
+                .scrollContentBackground(.hidden)  // the card is the page; the Mac drew a white box on it
                 .frame(minHeight: room >= Room.desk ? 320 : 160)
                 .overlay(alignment: .topLeading) {
                     if memo.isEmpty {

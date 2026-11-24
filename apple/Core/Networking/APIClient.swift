@@ -72,7 +72,8 @@ final class APIClient {
     #endif
 
     func signOut() async {
-        _ = try? await raw("auth/v1/logout", method: "POST", body: [String: String](), authed: true)
+        // This device only: the server's default ends the person's sign-in everywhere.
+        _ = try? await raw("auth/v1/logout", query: [.init(name: "scope", value: "local")], method: "POST", body: [String: String](), authed: true)
         session = nil
         settingNames = nil
         settingPlaces = nil

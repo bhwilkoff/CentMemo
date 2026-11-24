@@ -28,6 +28,20 @@
   function fill(el, ...kids) {
     el.replaceChildren(...kids.flat().filter((k) => k != null && k !== false && k !== ''));
   }
+  // DESIGN W: two columns when there is room, one after the other when there is not.
+  // `side` stands left unless the page says otherwise (the purchase desk's is right).
+  function split(side, main) {
+    return h('div', { class: 'split' }, h('div', { class: 'split-side' }, side), h('div', { class: 'split-main' }, main));
+  }
+  // Settings: each heading and what follows it, side by side when there is room.
+  function sections(kids) {
+    const out = [];
+    for (const k of kids.filter((x) => x != null && x !== '')) {
+      if (k.tagName === 'H2') out.push(h('section', { class: 'set' }, k, h('div', { class: 'set-body' })));
+      else out[out.length - 1].lastChild.append(k);
+    }
+    return out;
+  }
   function icon(name) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('aria-hidden', 'true');
@@ -207,9 +221,10 @@
       // D7: one invitation at a time, "Another" for the next of up to three; no
       // count of what is left (as the iPhone's SuggestionCard).
       const picks = await suggestionCards(rows).catch(() => []);
-      fill(body, picks.length === 1 ? h('div', { class: 'suggestions' }, picks) : picks.length ? picks[0] : '',
-        h('div', { class: 'list' }, rows.map((t) => txnRow(t))),
-        count > rows.length ? h('p', { class: 'caption' }, 'Showing the newest ' + rows.length + '.') : null);
+      const invite = picks.length === 1 ? h('div', { class: 'suggestions' }, picks) : picks.length ? picks[0] : null;
+      const list = [h('div', { class: 'list' }, rows.map((t) => txnRow(t))),
+        count > rows.length ? h('p', { class: 'caption' }, 'Showing the newest ' + rows.length + '.') : null];
+      fill(body, invite ? split([invite], list) : list);
     } catch (err) { failed(body, err, unexaminedView); }
   }
 
@@ -282,10 +297,9 @@
     theme.addEventListener('change', () => { filter.theme = theme.value; draw(); });
     details.addEventListener('change', () => { filter.details = details.checked; draw(); });
     draw();
-    return h('div', {},
+    return { thread, controls:
       h('div', { class: 'filters', role: 'group', 'aria-label': 'Filter the Narrative' }, show, names.length ? theme : null,
-        quiet ? h('label', { class: 'filter-check' }, details, ' ' + quiet + ' deposits and interest') : null),
-      thread);
+        quiet ? h('label', { class: 'filter-check' }, details, ' ' + quiet + ' deposits and interest') : null) };
   }
 
   /* ---- The Narrative as a thread (D10), as on the iPhone's ThreadRow ---- */
@@ -326,17 +340,19 @@
       const spent = live.filter((t) => t.amount_minor < 0).reduce((a, t) => a - t.amount_minor, 0);
       const received = live.filter((t) => t.amount_minor > 0).reduce((a, t) => a + t.amount_minor, 0);
       const written = rows.filter((t) => t.memos && (Array.isArray(t.memos) ? t.memos.length : t.memos)).length;
-      fill(body, 
+      const story = narrativeFilters(rows);
+      fill(body, split([
         h('dl', { class: 'totals' },
           h('div', {}, h('dt', {}, 'Spent'), h('dd', {}, money(spent))),
           h('div', {}, h('dt', {}, 'Paid or credited'), h('dd', {}, money(received))),
           h('div', {}, h('dt', {}, 'Memos'), h('dd', {}, written + ' of ' + rows.length))),
         monthStrip(rows),
-        narrativeFilters(rows),
+        story.controls], [
+        story.thread,
         rows.some((t) => t.skipped_at)
           ? h('details', { class: 'skipped' }, h('summary', {}, rows.filter((t) => t.skipped_at).length + ' skipped'),
               h('div', { class: 'list' }, rows.filter((t) => t.skipped_at).map((t) => txnRow(t))))
-          : null);
+          : null]));
     } catch (err) { failed(body, err, () => ledgerView(ym)); }
   }
   document.querySelectorAll('[data-month-step]').forEach((b) => b.addEventListener('click', () => {
@@ -403,16 +419,18 @@
 
       // D6 (Decision 065): the Setting and the memo lead; the money and the
       // bank's facts are a footnote, as on the iPhone.
-      fill(body, 
-        h('div', { class: 'txn-head' },
+      const head = h('div', { class: 'txn-head' },
           tile(t, true),
           h('div', { class: 'txn-title' },
             h('h1', { id: 'h-txn', class: 'view-heading' }, merchantOf(t)),
             h('p', { class: 'caption' }, niceDate(t.txn_date) + ' · ',
               h('a', { href: '#/setting/' + encodeURIComponent(placeKey(t)), 'data-setting': '' }, 'Every visit')),
-            placeLine(await API.settingPlaces().then((p) => p[placeKey(t)]).catch(() => null)))),
+            placeLine(await API.settingPlaces().then((p) => p[placeKey(t)]).catch(() => null))));
+      // W3: the memo is the page; what belongs to it stands beside it when there is room.
+      fill(body, h('div', { class: 'split split-desk' }, h('div', { class: 'split-main' }, [
+        head,
         h('label', { class: 'field-label', for: 'memo-body' }, 'Memo'),
-        area,
+        area]), h('div', { class: 'split-side' }, [
         h('p', { class: 'field-label' }, 'Themes'),
         chips,
         h('div', { class: 'inline-form' }, newValue, addBtn),
@@ -432,7 +450,7 @@
             t.txn_type ? fact('Type', t.txn_type) : null,
             t.status !== 'booked' ? fact('Status', t.status) : null,
             t.accounts ? fact('Account', t.accounts.display_name) : null,
-            t.description && t.description !== t.merchant ? fact('Statement', t.description) : null)));
+            t.description && t.description !== t.merchant ? fact('Statement', t.description) : null))])));
     } catch (err) { failed(body, err, () => txnView(id)); }
   }
   // D8: a Setting's page, every visit there as a thread (as the iPhone's SettingView).
@@ -457,8 +475,7 @@
         });
         heading.replaceWith(form); rename.remove(); input.focus(); input.select();
       });
-      fill(body, 
-        h('div', { class: 'txn-head' }, tile(rows[0], true),
+      fill(body, split([h('div', { class: 'txn-head' }, tile(rows[0], true),
           h('div', { class: 'txn-title' },
             heading,
             h('p', { class: 'caption', 'data-setting-summary': '' },
@@ -466,8 +483,8 @@
                 written ? (written === 1 ? '1 memo' : written + ' memos') : null].filter(Boolean).join(' · ')),
             shown !== name ? h('p', { class: 'caption' }, 'On the statement: ' + name) : null,
             placeLine(await API.settingPlaces().then((p) => p[name]).catch(() => null)),
-            rename)),
-        h('div', { class: 'thread' }, rows.map((t) => threadRow(t, { place: false }))));
+            rename))],
+        [h('div', { class: 'thread' }, rows.map((t) => threadRow(t, { place: false })))]));
     } catch (err) { failed(body, err, () => settingView(name)); }
   }
   // D15: a confirmed place, as words and a link that opens Apple Maps there.
@@ -574,9 +591,11 @@
 
 
   /* ---- Story: the memos, read in order ---- */
+  // Kept by reference: it is drawn inside the Story's shelf each time.
+  const STORY_CONTROLS = document.querySelector('.story-controls');
   async function storyView(scope) {
     const body = showView('story', 'story');
-    const select = $('story-scope');
+    const controls = STORY_CONTROLS, select = controls.querySelector('select');
     loading(body);
     try {
       const vals = await API.values();
@@ -592,14 +611,10 @@
 
       const valueId = scope.startsWith('value:') ? scope.slice(6) : null;
       // Themes have their own shelf below; the picker is for months (as on the iPhone).
-      select.closest('.story-controls').hidden = !!valueId;
+      controls.hidden = !!valueId;
       const rows = await API.stories(valueId ? { valueId } : { ym: scope });
       const title = valueId ? (vals.find((v) => v.id === valueId) || {}).name || 'Theme' : monthName(scope);
       $('h-story').textContent = 'Story';
-      if (!rows.length) {
-        return empty(body, valueId ? 'No memos carry this theme yet.' : 'No memos written for ' + title + '.',
-          h('a', { class: 'btn', href: '#/unexamined' }, 'Write one'));
-      }
       // D12 (Decision 065): Themes are the Story's collections, as on the iPhone.
       const shelfVals = vals.filter((v) => counts[v.id]);
       const shelf = shelfVals.length ? h('nav', { class: 'theme-shelf', 'aria-label': 'Themes' },
@@ -608,8 +623,11 @@
           'aria-current': valueId === v.id ? 'true' : null, 'data-theme': v.name },
           h('i', { style: 'background: ' + themeHue(v.name) }), h('span', {}, v.name), h('span', { class: 'caption' }, String(counts[v.id])))),
         valueId ? h('a', { class: 'theme-row every', href: '#/story/' + latest }, 'Every memo') : null) : '';
-      fill(body, 
-        shelf,
+      const none = rows.length ? null : h('div', { class: 'state state-empty' },
+        h('p', {}, valueId ? 'No memos carry this theme yet.' : 'No memos written for ' + title + '.'),
+        h('a', { class: 'btn', href: '#/unexamined' }, 'Write one'));
+      // W4: the shelf on the left, the memos as one column to read.
+      fill(body, split([controls, shelf], none || [
         h('header', { class: 'story-head' },
           h('h2', { class: 'section-heading' }, title),
           h('p', { class: 'caption' }, rows.length + (rows.length === 1 ? ' memo' : ' memos'))),
@@ -624,14 +642,14 @@
             h('a', { class: 'story-meta', href: '#/t/' + t.id },
               h('span', {}, niceDate(t.txn_date) + ' · ' + merchantOf(t)),
               h('span', { class: 'row-amount' }, money(t.amount_minor, t.currency))));
-        })));
+        }))]));
     } catch (err) { failed(body, err, () => storyView(scope)); }
   }
 
   /* ---- Import ---- */
   function importView() {
     const body = showView('import', 'import');
-    if (!body.childElementCount) fill(body, );
+    if (!body.childElementCount) fill(body);
   }
   $('import-file').addEventListener('change', async (e) => {
     const file = e.target.files && e.target.files[0];
@@ -718,7 +736,7 @@
         catch (err) { del.disabled = false; delNote.textContent = err.message; }
       });
 
-      fill(body, 
+      fill(body, sections([
         h('h2', { class: 'section-heading' }, 'Color'),
         picker,
         h('h2', { class: 'section-heading' }, 'Themes'),
@@ -737,7 +755,7 @@
         h('p', {}, session && session.user ? session.user.email : ''),
         h('div', { class: 'actions' }, h('button', { class: 'btn', onclick: async () => { await API.signOut(); showAuth(); } }, 'Sign out'), del),
         delNote,
-        h('p', { class: 'caption' }, h('a', { href: 'privacy/' }, 'Privacy'), ' · ', h('a', { href: 'terms/' }, 'Terms')));
+        h('p', { class: 'caption' }, h('a', { href: 'privacy/' }, 'Privacy'), ' · ', h('a', { href: 'terms/' }, 'Terms'))]));
     } catch (err) { failed(body, err, settingsView); }
   }
 

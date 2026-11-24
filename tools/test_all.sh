@@ -19,6 +19,7 @@ run "agent files" python3 tools/test_agent_files.py
 run "app identity" python3 tools/test_app_identity.py
 if [ -r "$HOME/.centmemo/test-users.json" ]; then
   run "row-level security (deployed)" node tools/test_rls.mjs
+  run "signing out ends this device only" node tools/test_signout_scope.mjs
   run "Claude connector end to end (OAuth + six tools)" node tools/test_connector.mjs
   run "Directory reviewer path, live (consent page + reviewer credentials)" node tools/test_reviewer_live.mjs
   run "web: four states at 375px (headless Chrome)" node tools/test_web_states.mjs

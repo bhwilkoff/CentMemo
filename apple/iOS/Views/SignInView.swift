@@ -19,7 +19,7 @@ struct SignInView: View {
         VStack(alignment: .leading, spacing: Spacing.s6) {
             Spacer()
             VStack(alignment: .leading, spacing: Spacing.s2) {
-                Text("CentMemo").font(TypeRamp.pageTitle)
+                Text("CentMemo").font(DisplayType.title).foregroundStyle(Color.brandPrimary)
                 Text("Every cent tells a story.").font(TypeRamp.sectionHeader)
                 Text("Write the memo for each purchase on your Apple Card, and see what your money says you value.")
                     .font(TypeRamp.body).foregroundStyle(Color.brandTextMuted)
@@ -52,6 +52,7 @@ struct SignInView: View {
         .frame(maxWidth: 520)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.brandBackground)
+        .tint(Color.brandPrimary)
     }
 
     private func finish(_ result: Result<ASAuthorization, Error>) async {
