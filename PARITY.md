@@ -103,7 +103,7 @@ When shipping any user-facing feature:
 
 | Feature | Web | iOS | Notes |
 |---|---|---|---|
-| Import Apple Card CSV export | ✅ | 🚧 | Web: real file input, re-import adds 0 (test_web_states). Same source IDs on both (golden parity test). iOS import never run on a device |
+| Import Apple Card CSV export | ✅ | ✅ | Web: real file input, re-import adds 0 (test_web_states). Same source IDs on both (golden parity test). iOS: ImportUITests on the iPhone 12 as the empty stranger: "3 new", then "0 new, 3 already in CentMemo" (DEBUG door APP_IMPORT_SAMPLE feeds the same import code; tools/cleanup_stranger.mjs empties it after). The Files picker itself is the system's. |
 | Import Venmo, PayPal, Cash App CSV (S1/S2) | ✅ | 🚧 | Web: auto-detected by header, own account per source, documented export paths; end-to-end import test. iOS: same parsers (Swift goldens read the same fixtures), Settings shows the paths (testExportPaths); importing a real file through the Files picker not yet run on a device |
 | Narrative filters (D9) | ✅ | ✅ | All / Written / Unwritten, theme, deposits and interest on request. iOS toolbar menu (FilterUITests), web selects (test_web_states) |
 | Month strip by theme (D11) | ✅ | ✅ | ThemeStrip (Core) / themeStrip (web); named legend; colors collide until D14 |

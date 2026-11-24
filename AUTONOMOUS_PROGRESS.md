@@ -1913,3 +1913,22 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   design). Open for Ben: public links (D12), the FinanceKit extension
   request, D7 suggestion words. The loop moves to the remaining smaller
   items (D10/D13 polish, iPhone import and delete-account checks).
+
+### Tick 37 — 2026-11-23 — iPhone import verified on a device (and a result that vanished)
+- **ImportUITests** runs on the iPhone 12 as the empty stranger. The DEBUG
+  door APP_IMPORT_SAMPLE=1 feeds the same import code a three-row Apple
+  Card export: the first import says "Apple Card: 3 new.", the second
+  "Apple Card: 0 new, 3 already in CentMemo." (Decision 057).
+  `tools/cleanup_stranger.mjs` empties the account afterwards; test_rls
+  still finds it empty.
+- **Real bug found on the way:** the import's result line could vanish.
+  Settings rebuilds its rows while an import runs, so the finished import
+  reported into a view that no longer existed (one run even imported
+  twice from two view copies). The result now lives in a small observed
+  `ImportStatus`, and the DEBUG door runs once per launch. Separately,
+  Unexamined's empty state hides its import button as soon as the
+  purchases arrive, so the test runs from Settings.
+- PARITY: iOS import ✅. `tools/test_all.sh` rc=0.
+- **Next:** iOS delete account on a device. It needs a throwaway account,
+  so a test that creates one and deletes it, rather than the stranger or
+  Ben's account.

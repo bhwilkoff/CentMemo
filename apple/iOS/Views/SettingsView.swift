@@ -239,31 +239,73 @@ struct ExportPath {
 
 /// Picks an Apple Card CSV export with the system file importer and imports
 /// it through the same idempotent path as the web (Decision 057).
+@Observable
+final class ImportStatus {
+    static let shared = ImportStatus()
+    var text: String?
+}
+
 struct ImportButton: View {
     @Environment(SessionStore.self) private var session
     @State private var picking = false
-    @State private var result: String?
+    /// The latest import's result outlives this view: Settings rebuilds its rows
+    /// while an import runs, and the answer must still appear when it arrives.
+    private var status = ImportStatus.shared
+    private var result: String? {
+        get { status.text }
+        nonmutating set { status.text = newValue }
+    }
     @State private var working = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.s1) {
             Button(working ? "Importing…" : "Import a CSV") { picking = true }.disabled(working)
-            if let result { Text(result).font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted) }
+            if let result { Text(result).font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted).accessibilityIdentifier("import-result") }
         }
         .fileImporter(isPresented: $picking, allowedContentTypes: [.commaSeparatedText, .plainText]) { picked in
             Task { await importFile(picked) }
         }
+        #if DEBUG
+        // DEBUG door APP_IMPORT_SAMPLE=1: the same import, fed a three-row Apple Card
+        // export, so a device run needs no Files picker (ImportUITests).
+        .task {
+            // Once per launch: a view's task can start again before the first reports.
+            if ProcessInfo.processInfo.environment["APP_IMPORT_SAMPLE"] == "1", !Self.sampleImported {
+                Self.sampleImported = true
+                await importText(Self.sample, filename: "sample.csv")
+            }
+        }
+        #endif
     }
 
+    #if DEBUG
+    static var sampleImported = false
+    static let sample = """
+    Transaction Date,Clearing Date,Description,Merchant,Category,Type,Amount (USD),Purchased By
+    11/18/2026,11/19/2026,"BLUE PAN PIZZA 3930 W 38TH AVE DENVER 80212 CO USA",Blue Pan Pizza,Restaurants,Purchase,64.37,Sample Person
+    11/16/2026,11/17/2026,"DENVER ZOO 2300 STEELE ST DENVER 80205 CO USA",Denver Zoo,Entertainment,Purchase,82.00,Sample Person
+    11/14/2026,,"APPLE.COM/BILL ONE APPLE PARK WAY 866-712-7753 95014 CA USA",Apple Services,Other,Purchase,9.99,Sample Person
+    """
+    #endif
+
     private func importFile(_ picked: Result<URL, Error>) async {
-        working = true
-        defer { working = false }
         do {
             let url = try picked.get()
             let scoped = url.startAccessingSecurityScopedResource()
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-            let (kind, rows) = try Money.parseAnyExport(try String(contentsOf: url, encoding: .utf8))
-            let r = try await APIClient.shared.importExport(kind, rows, filename: url.lastPathComponent)
+            await importText(try String(contentsOf: url, encoding: .utf8), filename: url.lastPathComponent)
+        } catch {
+            result = session.handle(error)
+            UINotificationFeedbackGenerator().notificationOccurred(.error)
+        }
+    }
+
+    private func importText(_ text: String, filename: String) async {
+        working = true
+        defer { working = false }
+        do {
+            let (kind, rows) = try Money.parseAnyExport(text)
+            let r = try await APIClient.shared.importExport(kind, rows, filename: filename)
             result = "\(kind.displayName): \(r.inserted) new" + (r.skipped > 0 ? ", \(r.skipped) already in CentMemo." : ".")
             session.didChangeData()
             UINotificationFeedbackGenerator().notificationOccurred(.success)
