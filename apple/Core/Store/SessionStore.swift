@@ -42,7 +42,10 @@ final class SessionStore {
     }
 
     func deleteAccount() async throws {
+        let key = FinanceSources.tokenKey(email)
         try await APIClient.shared.deleteAccount()
+        FinanceBackgroundSync.disable()
+        Shared.setFinanceToken(nil, key)
         isSignedIn = false
         email = nil
     }

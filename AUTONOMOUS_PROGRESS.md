@@ -95,9 +95,13 @@ account, 6 the Connect button):**
 - N6 🟡 macOS (tick 44, branch `macos`).
 - Design direction is chosen (item 4): don't ask for a sign-off again. L2 follows
   N1 to N5, because those change what the app looks like.
-- Delete account on the iPhone: Ben allows adding and deleting in his account.
-  His memos, themes, names and places can't be re-imported, so deleting the whole
-  account is not done without him confirming that loss.
+- Delete account on the iPhone: Ben was told his memos, themes, names and places
+  can't be re-imported, and answered, 2026-11-24: "You can use mine. I'm not saving
+  anything I need forever in my account yet." ONE deletion, on his Duo, with
+  `CENTMEMO_DELETE_REAL=1 CENTMEMO_UITEST_DUO=1 tools/ios_uitest.py --device duo --only
+  DeleteAccountUITests`. Waits for an unlocked Duo. Before, 11:50am: 3 accounts, 6,982
+  events, 1 memo; the three synthetic users 22/22/0 events. After it, Ben signs in
+  and taps Connect Apple Wallet. Do not repeat it without asking.
 
 ## Backlog
 
@@ -2187,3 +2191,14 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Verified:** full iPhone 12 tier on the shared-view change (32 pass, 4 skip), then
   the 13 tests nearest N1 to N3; `tools/test_all.sh` (now builds the Mac too).
 - **Next:** N5 with the Mac included, then N4.
+
+### Tick 45 — 2026-11-24 — deleting an account no longer starves the next sync (1.0.20 (21))
+- **Found before pressing Delete:** the phone kept its Wallet history token after a
+  deletion, so signing in again and syncing would return only new purchases.
+  Deletion now clears the token and stops delivery, and every sync starts over
+  when the server holds no Wallet account (which also covers a deletion on the web).
+- **Verified:** iPhone 12 WalletSync and WalletAvailability pass; test_all. The
+  deletion itself is not yet run: the Duo is locked.
+- **Finding for L2 (App Review 5.1.1(v)):** an app with Sign in with Apple should
+  revoke the Apple token when an account is deleted. CentMemo keeps no Apple
+  authorization code or refresh token, so it cannot. Needs a design before submission.

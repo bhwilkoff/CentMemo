@@ -83,6 +83,8 @@ final class APIClient {
         try await removeAllCopies()
         _ = try await raw("rest/v1/rpc/delete_my_account", method: "POST", body: [String: String]())
         session = nil
+        settingNames = nil
+        settingPlaces = nil
     }
 
     private static var expireDoor: Bool {
@@ -578,6 +580,16 @@ final class APIClient {
     }
 
     // MARK: - FinanceKit sync (Decision 057: idempotent on source_id)
+
+    /// Whether the server holds any Wallet account for this person. A history token
+    /// means nothing without them: after a deleted account (here or on the web) the
+    /// next sync must start over, or only new purchases would return.
+    func hasFinanceAccounts() async throws -> Bool {
+        struct Row: Decodable { let id: String }
+        let rows: [Row] = try await rest("accounts", [.init(name: "source", value: "eq.financekit"),
+                                                      .init(name: "select", value: "id"), .init(name: "limit", value: "1")])
+        return !rows.isEmpty
+    }
 
     /// Deletes every account that came from FinanceKit; its transactions,
     /// balances, memos, and attachments cascade. Used when access is revoked.

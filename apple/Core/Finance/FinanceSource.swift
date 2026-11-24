@@ -70,6 +70,12 @@ enum FinanceSources {
 
     /// The saved history token, per signed-in person.
     static func tokenKey(_ email: String?) -> String { "financeToken-" + (email ?? "anon") }
+
+    /// Where the next sync starts: the saved token, unless the server holds nothing for it.
+    static func startToken(_ key: String) async throws -> Data? {
+        guard let token = Shared.financeToken(key) else { return nil }
+        return try await APIClient.shared.hasFinanceAccounts() ? token : nil
+    }
 }
 
 struct UnavailableFinanceSource: FinanceSource {
@@ -240,7 +246,7 @@ enum FinanceBackgroundSync {
               (try? await FinanceStore.shared.authorizationStatus()) == .authorized else { return }
         let key = FinanceSources.tokenKey(email)
         do {
-            let changes = try await FinanceKitSource().changes(since: Shared.financeToken(key))
+            let changes = try await FinanceKitSource().changes(since: FinanceSources.startToken(key))
             _ = try await APIClient.shared.syncFinance(changes)
             if let token = changes.newToken { Shared.setFinanceToken(token, key) }
         } catch {

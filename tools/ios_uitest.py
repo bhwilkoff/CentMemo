@@ -60,6 +60,8 @@ def env():
     # sign-in, read from ~/.centmemo at run time (never stored in the repo).
     for k, v in app_config.test_account_env().items():
         e["TEST_RUNNER_" + k] = v
+    if os.environ.get("CENTMEMO_DELETE_REAL"):  # DeleteAccountUITests only; never set by a suite
+        e["TEST_RUNNER_CENTMEMO_DELETE_REAL"] = os.environ["CENTMEMO_DELETE_REAL"]
     e.setdefault("DEVELOPER_DIR", "/Applications/Xcode.app/Contents/Developer")
     # xcodebuild collects the device's diagnostics on a failure by running `xcrun devicectl`
     # in an environment that drops DEVELOPER_DIR, so with xcode-select on the Command Line
