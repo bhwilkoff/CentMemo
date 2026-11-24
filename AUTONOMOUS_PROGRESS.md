@@ -2026,3 +2026,11 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Harness gap noted:** run 1 failed without the overlay flag because no frame caught the overlay; check the frames for "Time Limit" before debugging sign-in (memory updated).
 - **Not verified on a device:** Find on the map → Current Location → guess.
 - **Next:** retry on the iPhone 12 tomorrow afternoon, or Ben taps Current Location on the Duo's Apple Store page.
+
+### Tick 42 — 2026-11-23 11:28pm — harness: failure recordings checked for Screen Time
+- **Context:** D15b device retry. Still blocked at 11:29pm. The failure again looked like a signed-out app, because the test failed before taking any screenshot, so the overlay check saw nothing.
+- **Implementation:** `tools/ios_uitest.py` `export_shots` pulls the last frame of each failure recording (ffmpeg) into the overlay check. `docs/TESTING.md` updated.
+- **Verification:** positive: replaying the 11:28pm result now reports "shows a system overlay ('Time Limit')". Negative control: a recording built from a good frame (place-guess, Denver Zoo) reports nothing. Both frames read. `tools/test_all.sh` rc=0.
+- **Correction to tick 40:** the replay shows the 9:21pm and 9:22pm D15b runs were also behind the Time Limit screen. So "the Find on the map link wasn't appearing because the page hid the whole place section" was never observed on a device. The `canSearchNearby` condition is still right on reading the code, but it is fixed, not verified. Only the 9:20pm Apple Aspen Grove false guess was a real device observation.
+- **Screen Time hours:** blocked about 9:20pm to past midnight (12:03am frame from the night before).
+- **Next:** iPhone 12 tomorrow afternoon for `testFindOnTheMapNearHere`, or Ben on the Duo.

@@ -112,6 +112,19 @@ def export_shots(bundle, dest):
                 short = re.sub(r"_\d+_[0-9A-F-]{36}(?=\.\w+$)", "", human)
                 if short and exported and (dest / exported).is_file():
                     shutil.copyfile(dest / exported, dest / short)
+    # A test that fails before its first shot leaves only the failure recording. Its
+    # last frame joins the overlay check, so a Screen Time limit is named, not
+    # mistaken for the app's own screen (2026-11-23: a "signed out" app was behind one).
+    ff = shutil.which("ffmpeg")
+    for tid, items in list(names.items()):
+        for human, exported in list(items):
+            if not (ff and exported.lower().endswith(".mp4") and (dest / exported).is_file()):
+                continue
+            still = dest / (Path(exported).stem + "-last.png")
+            r = subprocess.run([ff, "-loglevel", "error", "-y", "-sseof", "-2", "-i", str(dest / exported),
+                                "-frames:v", "1", str(still)], capture_output=True)
+            if r.returncode == 0 and still.is_file():
+                items.append((f"last frame of {human}", still.name))
     return names
 
 

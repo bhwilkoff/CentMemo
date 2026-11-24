@@ -92,6 +92,10 @@ signed in as the synthetic owner, at 375px (`tools/phone-frame.html`) and
     (`attachments/<run>/setting-door.png`) beside xcresulttool's UUID
     file.
   - Screen Time limits the iPhone 12 only at some hours, so try it before
-    calling it blocked.
+    calling it blocked. Observed blocked 9:20pm to past midnight.
+  - A test that fails before its first shot leaves only the failure
+    recording. `ios_uitest` checks that recording's last frame for system
+    overlays too, because behind a Time Limit screen the app looks signed
+    out, not blocked.
 - **A test that fails mid-way leaves data.** Check the server after a failure
   (memos, attachments) and clean it before the next run.
