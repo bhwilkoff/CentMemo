@@ -178,6 +178,10 @@ enum PlaceGuess {
     static func search(setting: String, entries: [LedgerEntry], near home: [CLLocationCoordinate2D], here: CLLocation? = nil) async -> [MKMapItem] {
         let hints = entries.compactMap { PlaceHint.from(description: $0.description, merchant: $0.merchant) }
         let hint = hints.first(where: \.isAddress) ?? hints.first
+        // A statement that isn't a place ("MONTHLY INSTALLMENTS") gets no guess,
+        // unless the person asked to search near where they are.
+        guard hint != nil || here != nil || entries.contains(where: { PlaceHint.namesStore(description: $0.description, merchant: $0.merchant) })
+        else { return [] }
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = hint?.query(for: setting) ?? setting
         request.resultTypes = .pointOfInterest

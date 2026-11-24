@@ -36,6 +36,16 @@ struct PlaceHint: Equatable, Sendable {
         return PlaceHint(rest: rest.joined(separator: " "), zip: zip, state: state, isAddress: house || zip != nil)
     }
 
+    /// The statement begins with the store's name ("Apple Store", "CRUMBL ..."),
+    /// so it describes a place, even with no address after it. "MONTHLY
+    /// INSTALLMENTS" at Apple does not: no search, only "Find on the map".
+    static func namesStore(description: String, merchant: String) -> Bool {
+        let words = description.uppercased().replacingOccurrences(of: "*", with: " ")
+            .split(whereSeparator: { $0 == " " || $0 == "," }).map(String.init)
+        let store = Money.cleanMerchant(merchant.isEmpty ? description : merchant).uppercased().split(separator: " ").map(String.init)
+        return !store.isEmpty && words.starts(with: store.prefix(1))
+    }
+
     /// The Apple Maps query for this Setting.
     func query(for setting: String) -> String { "\(setting) \(rest.capitalized)" }
 

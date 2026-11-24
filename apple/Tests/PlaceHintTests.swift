@@ -36,5 +36,12 @@ struct PlaceHintTests {
         #expect(!PlaceHint.nameMatches("Big Bear Lake", "Big Lots"), "a short lead word is not a brand")
         #expect(!PlaceHint.nameMatches("Golden Corral", "Golden Gate Park"), "a common lead word is not a brand")
     }
+
+    @Test func statementNamesAStore() {
+        #expect(PlaceHint.namesStore(description: "Apple Store", merchant: "Apple Store"), "FinanceKit's bare store name")
+        #expect(PlaceHint.namesStore(description: "crumbl greenwood villa", merchant: "Crumbl"))
+        #expect(!PlaceHint.namesStore(description: "MONTHLY INSTALLMENTS (3 OF 12)", merchant: "Apple"), "an installment is not a place")
+        #expect(PlaceHint.namesStore(description: "INTEREST CHARGE", merchant: "Interest"), "Interest names itself; the Maps name filter then finds nothing")
+    }
 }
 

@@ -2001,3 +2001,21 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   50 minute waits) covered nothing. Ear Drama's ios_uitest (pid 7063) has
   held the iPhone 12 since about 6:58pm, renewing its lease. Not taken
   from it; the next tick retries.
+- **About 9:20pm, the iPhone 12 freed (Ear Drama done):**
+  - Run 1 found a real flaw. "Apple" (MONTHLY INSTALLMENTS, not a place)
+    got a pushed guess, "Apple Aspen Grove, 7301 S Santa Fe Dr, Littleton".
+    With no region, Apple Maps answers near the phone's rough location on
+    its own. That's right for FinanceKit's bare "Apple Store", wrong for
+    installments.
+  - Fix: `PlaceHint.namesStore`. Search only when the statement begins
+    with the store's name or carries an address; otherwise "Find on the
+    map". Unit tests cover installments, the bare store name and a city.
+  - Run 2: no guess was pushed, but the place section was hidden because
+    the page only showed it for a place or a guess. The condition now
+    includes `canSearchNearby`.
+  - Run 3: Screen Time's "Time Limit" ("You've reached your limit on
+    CentMemo") covered the app at 9:23pm. The harness flagged the overlay,
+    so the run proves nothing.
+- `tools/test_all.sh` rc=0. **Not verified on a device:** Find on the map
+  → Current Location → guess. Next: iPhone 12 tomorrow, outside Screen
+  Time hours, or Ben on the Duo.

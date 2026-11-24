@@ -42,7 +42,7 @@ struct SettingPageView: View {
                     }
                 }
                 .onGround().listRowSeparator(.hidden).columnRowInsets()
-                if #available(iOS 26.0, *), let model = places as? SettingPlaceModel, model.place != nil || model.guess != nil {
+                if #available(iOS 26.0, *), let model = places as? SettingPlaceModel, model.place != nil || model.guess != nil || model.canSearchNearby {
                     SettingPlaceSection(model: model, setting: name, shownName: shown, entries: entries)
                         .onGround().listRowSeparator(.hidden).columnRowInsets()
                 }
