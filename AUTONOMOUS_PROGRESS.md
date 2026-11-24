@@ -1997,3 +1997,7 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   testFindOnTheMapNearHere). Ear Drama held the phone for 15+ minutes;
   queued with a 40-minute wait. On the Duo, Ben taps Current Location on
   Apple Store himself (it's his location).
+- **About 9:00pm:** two queued runs of testFindOnTheMapNearHere (40 and
+  50 minute waits) covered nothing. Ear Drama's ios_uitest (pid 7063) has
+  held the iPhone 12 since about 6:58pm, renewing its lease. Not taken
+  from it; the next tick retries.
