@@ -2019,3 +2019,10 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - `tools/test_all.sh` rc=0. **Not verified on a device:** Find on the map
   → Current Location → guess. Next: iPhone 12 tomorrow, outside Screen
   Time hours, or Ben on the Duo.
+
+### Tick 41 — 2026-11-23 10:25pm — iOS: D15b device run, still blocked by Screen Time
+- **Context:** retry `SettingUITests/testFindOnTheMapNearHere` on the iPhone 12 (no device lease held).
+- **Result:** run 1 failed at "place-find": the app showed its sign-in screen. The owner's sign-in works from the Mac (`tools/test_rls.mjs` PASS). Run 2 at 10:27pm caught the cause in a frame: Screen Time's "Time Limit" overlay (the harness flagged it). The signed-out screen was the app behind that limit, not a CentMemo bug.
+- **Harness gap noted:** run 1 failed without the overlay flag because no frame caught the overlay; check the frames for "Time Limit" before debugging sign-in (memory updated).
+- **Not verified on a device:** Find on the map → Current Location → guess.
+- **Next:** retry on the iPhone 12 tomorrow afternoon, or Ben taps Current Location on the Duo's Apple Store page.
