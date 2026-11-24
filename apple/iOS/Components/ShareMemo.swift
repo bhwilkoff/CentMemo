@@ -1,79 +1,150 @@
 #if os(iOS) || os(macOS)
 import SwiftUI
+import UniformTypeIdentifiers
 
-/// D12: share one memo as a card. Private by default (story-design-research):
-/// the place stays off unless the
-/// person turns it on, and an amount is never shared (Ben, 2026-11-24).
-struct MemoShareCard: View {
-    let entry: LedgerEntry
-    let memo: String
-    let theme: String?
-    var showPlace = false
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.s4) {
-            Text(memo).font(.system(size: 26, weight: .regular, design: .serif))
-                .foregroundStyle(Color(red: 0.137, green: 0.106, blue: 0.11))
-                .fixedSize(horizontal: false, vertical: true)
-            VStack(alignment: .leading, spacing: 4) {
-                if let theme {
-                    HStack(spacing: 6) {
-                        Capsule().fill(ThemeHue.color(theme)).frame(width: 18, height: 4)
-                        Text(theme).font(.system(size: 15, weight: .medium))
-                    }
-                }
-                Text(([LedgerDate.display(entry.txnDate)] + (showPlace ? [entry.displayMerchant] : [])).joined(separator: " · "))
-                    .font(.system(size: 15))
-            }
-            .foregroundStyle(Color(red: 0.37, green: 0.33, blue: 0.33))
-            Text("CentMemo").font(.system(size: 15, weight: .semibold, design: .serif))
-                .foregroundStyle(Color(red: 0.29, green: 0.08, blue: 0.125))
-        }
-        .padding(28)
-        .frame(width: 360, alignment: .leading)
-        // The card is paper and ink in either appearance: it is an image someone else sees.
-        .background(Color(red: 0.984, green: 0.98, blue: 0.969))
-        .environment(\.colorScheme, .light)
-    }
-}
-
+/// N4 (DESIGN S): the person designs their share. The card takes the memo, the
+/// Setting, the date and the themes; it is never given what was paid.
 struct ShareMemoSheet: View {
     let entry: LedgerEntry
     let memo: String
-    let theme: String?
-    @State private var showPlace = false
+    @State private var design = ShareDesign()
+    @State private var room: CGFloat = 0
     @Environment(\.dismiss) private var dismiss
 
-    private var card: MemoShareCard { MemoShareCard(entry: entry, memo: memo, theme: theme, showPlace: showPlace) }
-
-    private var image: Image {
-        let r = ImageRenderer(content: card)
-        r.scale = 3
-        return r.platformImage ?? Image(systemName: "photo")
+    private var content: ShareContent {
+        ShareContent(memo: memo, setting: entry.displayMerchant, initials: Money.merchantInitials(entry.displayMerchant),
+                     date: LedgerDate.display(entry.txnDate),
+                     themes: (entry.memo?.valueNames ?? []).map { n in
+                         let c = Themes.hex[Themes.colorKey(n)] ?? (0x6F6964, 0xB3ACA6)
+                         return .init(name: n, paper: c.0, night: c.1)
+                     })
     }
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section { card.frame(maxWidth: .infinity).listRowBackground(Color.clear) }
-                Section {
-                    Toggle("Show where", isOn: $showPlace).accessibilityIdentifier("share-place")
-                } footer: {
-                    Text("Only the memo, its date, and its theme are shared unless you turn this on. Never the amount.")
+            Group {
+                if room >= 760 {
+                    HStack(spacing: 0) {
+                        preview(maxWidth: room - 380 - PaneEdges.pane * 2, maxHeight: 560)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        Form { choices }.cardForm().frame(width: 380)
+                    }
+                } else {
+                    Form {
+                        Section {
+                            preview(maxWidth: max(0, room - PaneEdges.pane * 2), maxHeight: 340)
+                                .frame(maxWidth: .infinity)
+                        }
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets())
+                        choices
+                    }
+                    .cardForm()
                 }
-                Section {
-                    ShareLink(item: image, preview: SharePreview("A memo", image: image)) {
+            }
+            .readsRoom($room)
+            .grounded()
+            .navigationTitle("Share this memo")
+            .inlineTitle()
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Done") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    ShareLink(item: SharedCard(content: content, design: design), preview: SharePreview("A memo")) {
                         Label("Share", systemImage: "square.and.arrow.up")
                     }
                     .accessibilityIdentifier("share-send")
                 }
             }
-            .cardForm()
-            .navigationTitle("Share this memo")
-            .inlineTitle()
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Done") { dismiss() } } }
         }
-        .sheetSize()
+        .studioSize()
+    }
+
+    private func preview(maxWidth: CGFloat, maxHeight: CGFloat) -> some View {
+        let size = design.shape.size
+        let scale = max(0.01, min(maxWidth / size.width, maxHeight / size.height))
+        return ShareCard(content: content, design: design)
+            .scaleEffect(scale, anchor: .topLeading)
+            .frame(width: size.width * scale, height: size.height * scale, alignment: .topLeading)
+            .clipped()
+            .shadow(color: .black.opacity(0.18), radius: 10, y: 4)
+            .accessibilityIdentifier("share-card")
+            .padding(.vertical, Spacing.s3)
+    }
+
+    @ViewBuilder private var choices: some View {
+        Section {
+            FlowLayout(spacing: 6) {
+                ForEach(Array(content.words.enumerated()), id: \.offset) { i, w in
+                    let on = design.mark?.contains(i) ?? false
+                    Button { design.tap(i); Haptic.selection() } label: {
+                        Text(w).font(DisplayType.memo).foregroundStyle(Color.brandText)
+                            .padding(.vertical, 4)
+                            .overlay(alignment: .bottom) { if on { Capsule().fill(Color.brandPrimary).frame(height: 3) } }
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(on ? .isSelected : [])
+                    .accessibilityIdentifier("share-word-\(i)")
+                }
+            }
+            if design.mark != nil { Button("No underline") { design.mark = nil } }
+        } header: {
+            Text("Underline the words that matter")
+        }
+        Section("Look") {
+            Picker("Look", selection: $design.look) {
+                Text("Page").tag(ShareDesign.Look.page)
+                Text("Setting").tag(ShareDesign.Look.setting)
+                Text("Theme").tag(ShareDesign.Look.theme)
+                Text("Words").tag(ShareDesign.Look.words)
+            }
+            .pickerStyle(.segmented).labelsHidden()
+            .accessibilityIdentifier("share-look")
+        }
+        Section("Paper") {
+            Picker("Paper", selection: $design.paper) {
+                Text("Paper").tag(ShareDesign.Paper.paper)
+                Text("Night").tag(ShareDesign.Paper.night)
+                if !content.themes.isEmpty { Text("Theme color").tag(ShareDesign.Paper.theme) }
+            }
+            .pickerStyle(.segmented).labelsHidden()
+            .accessibilityIdentifier("share-paper")
+        }
+        Section("Shape") {
+            Picker("Shape", selection: $design.shape) {
+                Text("Square").tag(ShareDesign.Shape.square)
+                Text("Tall").tag(ShareDesign.Shape.tall)
+                Text("Wide").tag(ShareDesign.Shape.wide)
+            }
+            .pickerStyle(.segmented).labelsHidden()
+            .accessibilityIdentifier("share-shape")
+        }
+        Section("Show") {
+            Toggle("Setting", isOn: $design.showSetting).accessibilityIdentifier("share-setting")
+            Toggle("Date", isOn: $design.showDate).accessibilityIdentifier("share-date")
+            if !content.themes.isEmpty { Toggle("Themes", isOn: $design.showThemes).accessibilityIdentifier("share-themes") }
+        }
+    }
+}
+
+/// The card as a picture, drawn when the person sends it.
+struct SharedCard: Transferable {
+    let content: ShareContent
+    let design: ShareDesign
+
+    @MainActor func png() throws -> Data {
+        let r = ImageRenderer(content: ShareCard(content: content, design: design))
+        r.scale = 1
+        #if os(macOS)
+        guard let cg = r.cgImage, let data = NSBitmapImageRep(cgImage: cg).representation(using: .png, properties: [:]) else { throw CocoaError(.fileWriteUnknown) }
+        #else
+        guard let data = r.uiImage?.pngData() else { throw CocoaError(.fileWriteUnknown) }
+        #endif
+        return data
+    }
+
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(exportedContentType: .png) { card in try await card.png() }
+            .suggestedFileName("CentMemo.png")
     }
 }
 #endif

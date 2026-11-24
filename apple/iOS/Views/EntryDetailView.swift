@@ -103,7 +103,7 @@ struct EntryDetailView: View {
         }
         .sheet(isPresented: $sharing) {
             if let e = entry, let body = e.memo?.body {
-                ShareMemoSheet(entry: e, memo: body, theme: e.memo?.valueNames.first)
+                ShareMemoSheet(entry: e, memo: body)
             }
         }
         .task { await load() }
@@ -302,6 +302,10 @@ struct EntryDetailView: View {
             memo = entry?.memo?.body ?? ""
             chosen = Set(entry?.memo?.valueIDs ?? [])
             if let key = entry?.settingKey { place = (try? await APIClient.shared.loadSettingPlaces())?[key] }
+            #if DEBUG
+            // DEBUG door APP_START_SHARE=1: the share studio, for captures where nothing can tap (iPad, Duo).
+            if ProcessInfo.processInfo.environment["APP_START_SHARE"] == "1", entry?.memo != nil { sharing = true }
+            #endif
             #if DEBUG && os(iOS)
             if ProcessInfo.processInfo.environment["APP_ATTACH_SAMPLE_FILE"] == "1", !photos.contains(where: { $0.kind == "file" }) {
                 let pdf = UIGraphicsPDFRenderer(bounds: CGRect(x: 0, y: 0, width: 300, height: 200)).pdfData { ctx in

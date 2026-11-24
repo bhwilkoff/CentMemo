@@ -114,6 +114,14 @@ extension View {
         self
         #endif
     }
+    /// The share studio: a page-sized sheet where there is room for the card beside its choices.
+    @ViewBuilder func studioSize() -> some View {
+        #if os(macOS)
+        frame(width: 960, height: 660)
+        #else
+        presentationSizing(.page)
+        #endif
+    }
     /// Forms on the Mac are grouped cards, as on the phone (the default there is a bare column).
     func cardForm() -> some View {
         #if os(macOS)

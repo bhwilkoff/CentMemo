@@ -88,7 +88,7 @@ account, 6 the Connect button):**
 - N2 ✅ Starter themes leave Unexamined; Settings keeps them (web + Apple).
 - N3 ✅ "Connect Apple Wallet" reads "Sync Apple Wallet" once connected.
 - N3b ⏳ Audit every action's words on every platform.
-- N4 🟡 (DESIGN S; web live; draft for Ben https://claude.ai/artifact/XTgCwKxwxF6ZyAEuhYYcpc; Apple twin, theme card and links ⏳) Design your share: Setting, memory, themes; the person chooses the look.
+- N4 🟡 (DESIGN S; web live; draft for Ben https://claude.ai/artifact/XTgCwKxwxF6ZyAEuhYYcpc; iPhone, iPad and Mac built; theme card and links ⏳) Design your share: Setting, memory, themes; the person chooses the look.
   Design with the skills first, on every size. Links after the design.
 - N5 🟡 (rules: docs/DESIGN.md W; web at 375/768/1024/1440, iPad landscape, open Duo, Mac at 900/1180/1600 built and seen; iPad portrait, closed Duo, Settings at wide on Apple ⏳) Every screen size designed on purpose: iPhone 12, Duo closed and open, iPad
   portrait and landscape, Mac window small to large, web phone to desktop.
@@ -2251,3 +2251,13 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Next:** the Apple twin, then the theme card, then links.
 
 - **Ben on the share (about 1pm):** "the design for sharing looks very good so far." And the three closing status lines were unclear: write them plainly.
+
+### Tick 49 — 2026-11-24 — N4: design your share on iPhone, iPad and Mac (1.0.23 (24))
+- **Built:** `apple/Core/ShareCard.swift`, step for step the web's drawing, in New
+  York; `ShareMemoSheet` is the studio (card beside the choices from 760, above them
+  on a phone); the PNG is drawn when it is sent.
+- **Verified:** ShareCardTests render all 36 look, paper and shape combinations (PNGs
+  read beside the web's) plus long and themeless memos; ShareUITests designs one on
+  the iPhone 12; iPad and Mac studio frames read (APP_START_SHARE door). 12 iPhone 12
+  tests, test_all. **Not seen:** the open Duo; a picture actually sent.
+- **Next:** the theme card in the same design, then links.

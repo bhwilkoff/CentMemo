@@ -23,6 +23,24 @@ enum Themes {
         .init(name: "Taking care of things", meaning: "The steady costs that keep life running.", color: "stone"),
     ]
 
+    /// The theme tokens as plain values (light, dark) for what is drawn off the page: the
+    /// share card keeps its own colors whatever the device's appearance (DESIGN S).
+    nonisolated static let hex: [String: (paper: UInt32, night: UInt32)] = [
+        "clay": (0xA33E25, 0xFCA48D),
+        "persimmon": (0x964D09, 0xFEA668),
+        "ochre": (0x815C0A, 0xE9B452),
+        "olive": (0x686800, 0xC3C55A),
+        "moss": (0x2F751D, 0x90D281),
+        "sage": (0x1B735B, 0x54D8B1),
+        "teal": (0x157171, 0x2AD7D7),
+        "sky": (0x006D91, 0x60CCFC),
+        "slate": (0x2F60B2, 0x98BFFE),
+        "iris": (0x6451AC, 0xBCB3FA),
+        "plum": (0x8A428E, 0xE8A0EC),
+        "rose": (0x9D3A67, 0xFF99C2),
+        "stone": (0x6F6964, 0xB3ACA6),
+    ]
+
     /// The signed-in person's theme colors, refreshed whenever their themes load.
     static var current: [String: String] = [:]
 

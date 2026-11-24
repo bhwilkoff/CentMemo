@@ -141,8 +141,7 @@ Ben, 2026-11-24: *"It should be well designed to highlight the 'setting', the
 be able to design your 'share'."*
 
 - **S1. The card is never given an amount.** The drawing takes the memo, the
-  Setting, the date and the themes (`js/money/share-card.js`; the Apple twin
-  follows). `tests/share_no_money.test.mjs` holds it.
+  Setting, the date and the themes (`js/money/share-card.js`, `apple/Core/ShareCard.swift`). `tests/share_no_money.test.mjs` holds it.
 - **S2. The person designs it, and CentMemo suggests nothing.** They underline
   the words that matter in their own memo (first word, then last), and choose a
   look, a paper, a shape, and what shows.

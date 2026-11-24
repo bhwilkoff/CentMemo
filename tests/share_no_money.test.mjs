@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const MONEY = /amount_?minor|money\s*\(|(?<!Cent)Money\.|CentMoney\.(format|parse)|MoneyText|showAmount|share-(theme-)?amount/i;
+const MONEY = /amount_?minor|money\s*\(|(?<!Cent)Money\.(?!merchantInitials)|CentMoney\.(format|parse)|MoneyText|showAmount|share-(theme-)?amount/i;
 const strip = (s) => s.replace(/\/\/.*$/gm, '');
 function webPanel(name) {
   const src = readFileSync('js/app.js', 'utf8');
@@ -17,6 +17,7 @@ const surfaces = {
   'the card itself': readFileSync('js/money/share-card.js', 'utf8'),
   'web theme card': webPanel('shareThemePanel'),
   'Apple memo card': readFileSync('apple/iOS/Components/ShareMemo.swift', 'utf8'),
+  'the Apple card itself': readFileSync('apple/Core/ShareCard.swift', 'utf8'),
   'Apple theme card': readFileSync('apple/iOS/Components/ShareTheme.swift', 'utf8'),
 };
 for (const [name, src] of Object.entries(surfaces)) {

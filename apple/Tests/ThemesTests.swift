@@ -15,6 +15,17 @@ struct ThemesTests {
         #expect(Themes.starters == file.starters.map { .init(name: $0.name, meaning: $0.meaning, color: $0.color) })
     }
 
+    @Test func hexIsTheTokens() throws {
+        let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("../../design-tokens.json").standardized
+        let root = try #require(try JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any])
+        let sem = try #require((root["color"] as? [String: Any])?["semantic"] as? [String: [String: String]])
+        for key in Themes.palette {
+            let t = try #require(sem["theme" + key.prefix(1).uppercased() + key.dropFirst()])
+            #expect(Themes.hex[key]?.paper == UInt32(t["light"]!.dropFirst(), radix: 16))
+            #expect(Themes.hex[key]?.night == UInt32(t["dark"]!.dropFirst(), radix: 16))
+        }
+    }
+
     @Test func golden() {
         let input: [Themes.Input] = [
             .init(name: "Time with my kids", createdAt: "2026-11-21T10:00:00Z"),
