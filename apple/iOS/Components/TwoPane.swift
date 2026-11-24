@@ -17,6 +17,23 @@ extension EnvironmentValues {
 /// both edges of a column, as the screen title does; boxes (cards) stand 16pt
 /// in. The right pane keeps 20pt from the divider and from the tab strip.
 /// Compact width keeps the 16pt it always had.
+/// DESIGN W: the room a screen has decides its layout, never the device.
+enum Room {
+    static let wide: CGFloat = 1100
+    /// The purchase page becomes a desk (W3).
+    static let desk: CGFloat = 780
+    static let aside: CGFloat = 340
+    /// The longest line of reading (W5).
+    static let measure: CGFloat = 640
+}
+
+extension View {
+    /// Reports the width this view was given.
+    func readsRoom(_ room: Binding<CGFloat>) -> some View {
+        onGeometryChange(for: CGFloat.self) { $0.size.width } action: { room.wrappedValue = $0 }
+    }
+}
+
 enum PaneEdges {
     static let words: CGFloat = 20
     static let box: CGFloat = 16
@@ -118,6 +135,7 @@ struct TwoPane<List: View>: View {
     @Environment(\.horizontalSizeClass) private var width
     @Environment(AppStore.self) private var store
     @State private var pane = PaneSelection()
+    @State private var room: CGFloat = 0
 
     var body: some View {
         if width == .regular {
@@ -129,7 +147,7 @@ struct TwoPane<List: View>: View {
             screenStack {
                 HStack(spacing: 0) {
                     destinations(AnyView(list()))
-                        .frame(width: 380)
+                        .frame(width: room >= Room.wide ? 440 : 380)  // W2
                     Divider()
                     Group {
                         if let r = pane.route {
@@ -141,6 +159,7 @@ struct TwoPane<List: View>: View {
                     .environment(\.inPane, true)
                     .frame(maxWidth: .infinity)
                 }
+                .readsRoom($room)
             }
             .environment(pane)
             // A link that opened an item (the inbox) shows it on the right, not

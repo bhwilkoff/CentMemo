@@ -90,7 +90,7 @@ account, 6 the Connect button):**
 - N3b ⏳ Audit every action's words on every platform.
 - N4 ⏳ Design your share: Setting, memory, themes; the person chooses the look.
   Design with the skills first, on every size. Links after the design.
-- N5 ⏳ Every screen size designed on purpose: iPhone 12, Duo closed and open, iPad
+- N5 🟡 (rules: docs/DESIGN.md W; iPad landscape, open Duo, Mac Story built and seen; iPad portrait, Mac sizes, web medium and wide, Settings at wide ⏳) Every screen size designed on purpose: iPhone 12, Duo closed and open, iPad
   portrait and landscape, Mac window small to large, web phone to desktop.
 - N6 🟡 macOS (tick 44, branch `macos`).
 - Design direction is chosen (item 4): don't ask for a sign-off again. L2 follows
@@ -99,7 +99,8 @@ account, 6 the Connect button):**
   can't be re-imported, and answered, 2026-11-24: "You can use mine. I'm not saving
   anything I need forever in my account yet." ONE deletion, on his Duo, with
   `CENTMEMO_DELETE_REAL=1 CENTMEMO_UITEST_DUO=1 tools/ios_uitest.py --device duo --only
-  DeleteAccountUITests`. Waits for an unlocked Duo. Before, 11:50am: 3 accounts, 6,982
+  DeleteAccountUITests`. Tried 12:14pm: XCUITest cannot
+  enable automation mode on the Duo, so Ben taps it himself (asked 12:16pm). Before, 11:50am: 3 accounts, 6,982
   events, 1 memo; the three synthetic users 22/22/0 events. After it, Ben signs in
   and taps Connect Apple Wallet. Do not repeat it without asking.
 
@@ -2202,3 +2203,19 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Finding for L2 (App Review 5.1.1(v)):** an app with Sign in with Apple should
   revoke the Apple token when an account is deleted. CentMemo keeps no Apple
   authorization code or refresh token, so it cannot. Needs a design before submission.
+
+### Tick 46 — 2026-11-24 — N5: the purchase desk, the Story as a page (1.0.21 (22))
+- **Looked first** at iPad, Duo, Mac and the web at four widths. The iPad wore the
+  Duo's layout stretched; the web was one phone column at every width.
+- **Rules:** docs/DESIGN.md section W (room, not device; three classes).
+- **Built (Apple):** lists at 440 when wide; the purchase page as a writing desk
+  with its belongings beside it (pane 780 and up); the Story as a reading column
+  with a shelf (iOS regular width and the Mac's own columns); a Setting's map beside
+  its visits. No empty Themes row. A thread row keeps its date and place on one line.
+- **Web bugs found and fixed (live):** the Story's month menu was empty (a list
+  passed to replaceChildren becomes text), and stray "null" on three screens. `fill`
+  replaces replaceChildren; test_web_states checks every screen.
+- **Seen:** iPad landscape (6 screens), open Duo on Ben's data (3), Mac dark (2).
+  **Not seen:** iPad portrait, the closed Duo, Mac at 900 and 1600, light Mac.
+- **Verified:** full iPhone 12 tier 32 pass, 5 skip; test_all.
+- **Corrected by Ben:** I reported the Duo locked from a 25-minute-old check.

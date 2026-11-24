@@ -36,12 +36,16 @@ struct ThreadRow: View {
             if let memo = entry.memo {
                 VStack(alignment: .leading, spacing: Spacing.s1) {
                     Text(memo.body).font(DisplayType.memo).foregroundStyle(Color.brandText).lineLimit(4)
-                    HStack(spacing: Spacing.s2) {
-                        if showsPlace { StoreTile(name: entry.displayMerchant, category: entry.category, size: 24) }
-                        Text(meta)
-                            .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
+                    // The date and place stay on one line; the theme moves down when it must (W2).
+                    FlowLayout(spacing: Spacing.s2) {
+                        HStack(spacing: Spacing.s2) {
+                            if showsPlace { StoreTile(name: entry.displayMerchant, category: entry.category, size: 24) }
+                            Text(meta)
+                                .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
+                        }
                         if let theme = memo.valueNames.first {
                             Text(theme).font(TypeRamp.caption).foregroundStyle(hue)
+                                .frame(minHeight: showsPlace ? 24 : nil)  // on the tile's line
                         }
                     }
                 }

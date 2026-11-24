@@ -79,8 +79,12 @@ final class SettingUITests: DeviceTestCase {
         let here = text(app, matching: "Current Location")
         XCTAssertTrue(here.waitForExistence(timeout: 10), "Apple's one-time location button")
         shot(app, "place-find")
+        // A tap asks for location, and only a person grants that (the open prompt once
+        // covered every later test): the search itself is checked by hand.
+        guard ProcessInfo.processInfo.environment["CENTMEMO_LOCATION_OK"] == "1" else {
+            throw XCTSkip("the location button is there; a person grants location, so the search is unverified")
+        }
         here.tap()
-        if declineSystemPrompt(wait: 8) { throw XCTSkip("iOS asked for location; a person grants it, so the search is unverified") }
         let guess = app.descendants(matching: .any)["place-guess"].firstMatch
         XCTAssertTrue(guess.waitForExistence(timeout: 30), "a guess near the phone (Apple <store>)")
         shot(app, "place-near-here")

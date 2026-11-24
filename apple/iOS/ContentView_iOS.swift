@@ -16,7 +16,7 @@ struct ContentView_iOS: View {
                     TwoPane(list: { UnexaminedView() }, destinations: wrap, path: $store.navigationPath)
                 }
                 Tab("Narrative", systemImage: "list.bullet", value: "ledger") { TwoPane(list: { LedgerView() }, destinations: wrap) }
-                Tab("Story", systemImage: "book", value: "story") { TwoPane(list: { StoryView() }, destinations: wrap) }
+                Tab("Story", systemImage: "book", value: "story") { stack { StoryView() } }
                 Tab("Settings", systemImage: "gearshape", value: "settings") { stack { SettingsView() } }
             }
             .tint(Color.brandPrimary)

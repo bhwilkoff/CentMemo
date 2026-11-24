@@ -9,6 +9,7 @@ struct ContentView_macOS: View {
     @Environment(SessionStore.self) private var session
     @Environment(AppStore.self) private var store
     @State private var pane = PaneSelection()
+    @State private var story = StoryModel()
 
     private var section: Binding<MacSection?> {
         Binding(get: { store.selectedTab.flatMap(MacSection.init(rawValue:)) ?? .unexamined },
@@ -23,12 +24,15 @@ struct ContentView_macOS: View {
                     .navigationSplitViewColumnWidth(min: 160, ideal: 180, max: 240)
             } content: {
                 list
-                    .navigationSplitViewColumnWidth(min: 340, ideal: 400, max: 520)
+                    .navigationSplitViewColumnWidth(min: 340, ideal: 440, max: 520)
             } detail: {
                 NavigationStack(path: $store.navigationPath) {
                     Group {
                         if let r = pane.route {
                             EntryDetailView(entryID: r.id).id(r.id)
+                                .toolbar { if section.wrappedValue == .story { backToStory } }
+                        } else if section.wrappedValue == .story {
+                            StoryReading(model: story).grounded()
                         } else {
                             ContentUnavailableView("Choose a purchase", systemImage: "square.and.pencil")
                                 .frame(maxWidth: .infinity, maxHeight: .infinity).grounded()
@@ -60,7 +64,18 @@ struct ContentView_macOS: View {
         switch section.wrappedValue ?? .unexamined {
         case .unexamined: UnexaminedView()
         case .ledger: LedgerView()
-        case .story: StoryView()
+        case .story:
+            List { StoryShelf(model: story) }.listStyle(.plain).grounded()
+                .navigationTitle("Story")
+                .modifier(StoryChrome(model: story))
+        }
+    }
+
+    /// The Story fills the detail column; a memo opened from it comes back to it.
+    private var backToStory: some ToolbarContent {
+        ToolbarItem(placement: .navigation) {
+            Button("Back to the Story", systemImage: "chevron.left") { pane.route = nil }
+                .keyboardShortcut("[", modifiers: .command)
         }
     }
 }

@@ -26,171 +26,40 @@ struct EntryDetailView: View {
     @Environment(\.openURL) private var openURL
     @State private var drawn: CGFloat = 0
     @State private var sharing = false
+    @State private var room: CGFloat = 0
     /// D15: the Setting's confirmed place, if the person confirmed one.
     @State private var place: APIClient.SettingPlace?
 
     var body: some View {
         LoadState(isLoading: loading, error: entry == nil ? error : nil, retry: load) {
             if let e = entry {
-                Form {
-                    // D6: the Setting and the memo lead; the money is a footnote
-                    // (Decision 065: memo, Setting; the Chronicle direction).
-                    Section {
-                        // D8: the Setting heads the page and opens every visit there.
-                        NavigationLink(value: SettingRoute(name: e.settingKey)) {
-                            HStack(alignment: .center, spacing: Spacing.s3) {
-                                StoreTile(name: e.displayMerchant, category: e.category, size: 56)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    SettingTitle(name: e.displayMerchant)
-                                    HStack(spacing: 0) {
-                                        Text(LedgerDate.display(e.txnDate) + " · ").foregroundStyle(Color.brandTextMuted)
-                                        Text("Every visit").foregroundStyle(Color.brandPrimary)
-                                    }
-                                    .font(TypeRamp.caption)
-                                }
-                            }
-                        }
-                        .accessibilityIdentifier("every-visit")
-                        .listRowBackground(Color.clear)
-                        // In a pane the Form's cards stand 16pt off the divider; the header
-                        // stands with them (Ear Drama iOS-DESIGN §3.6e).
-                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                // W3: a desk when there is room, the phone's single page when not.
+                if room >= Room.desk {
+                    HStack(spacing: 0) {
+                        Form { writing(e) }
+                            .cardForm()
+                            .modifier(PaneMargins(on: true))
+                            .frame(maxWidth: Room.measure + PaneEdges.pane * 2)
+                        Form { belongings(e) }
+                            .cardForm()
+                            .modifier(PaneMargins(on: true))
+                            .frame(width: Room.aside)
                     }
-                    Section {
-                        TextEditor(text: $memo)
-                            .frame(minHeight: 160)
-                            .overlay(alignment: .topLeading) {
-                                if memo.isEmpty {
-                                    Text("What do you want to remember?").font(DisplayType.memo)
-                                        .foregroundStyle(Color.brandTextMuted.opacity(0.7))
-                                        .padding(.top, 8).padding(.leading, 5).allowsHitTesting(false)
-                                }
-                            }
-                            .font(DisplayType.memo)
-                            .accessibilityLabel("Memo")
-                            .accessibilityIdentifier("memo-editor")
-                            .focused($writing)
-                    } header: {
-                        Text("Memo")
-                    } footer: {
-                        // The confirmation sits under the memo, where the person is
-                        // looking (the iPhone 12 tap tier found it off-screen below).
-                        if let status {
-                            HStack(spacing: Spacing.s2) {
-                                // The moment a memo is kept: one pencil stroke draws in.
-                                if status == "Saved." {
-                                    PencilStroke().trim(from: 0, to: drawn)
-                                        .stroke(Color.brandPrimary, style: StrokeStyle(lineWidth: 2, lineCap: .round))
-                                        .frame(width: 72, height: 8)
-                                        .accessibilityHidden(true)
-                                }
-                                Text(status).accessibilityIdentifier("memo-status")
-                            }
-                        }
+                    .contentMargins(.top, Spacing.s4, for: .scrollContent)  // both columns start on one line
+                    .frame(maxWidth: .infinity)
+                } else {
+                    Form {
+                        writing(e)
+                        belongings(e)
                     }
-                    Section("Themes") {
-                        FlowLayout(spacing: 8) {
-                            ForEach(values) { v in
-                                Button { toggle(v.id) } label: { ValueChip(name: v.name, isOn: chosen.contains(v.id)) }
-                                    .buttonStyle(.plain)
-                                    .accessibilityAddTraits(chosen.contains(v.id) ? .isSelected : [])
-                            }
-                        }
-                        HStack {
-                            TextField("Add a theme", text: $newValue, prompt: Text("Add a theme")).labelsHidden().onSubmit { Task { await addValue() } }
-                            Button("Add") { Task { await addValue() } }.disabled(newValue.trimmingCharacters(in: .whitespaces).isEmpty)
-                        }
-                    }
-                    Section("Photos") {
-                        if photos.contains(where: { $0.kind == "photo" }) {
-                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: 8)], spacing: 8) {
-                                ForEach(photos.filter { $0.kind == "photo" }) { a in
-                                    AttachedPhoto(ref: a.deviceRef ?? "")
-                                        .overlay(alignment: .bottomTrailing) {
-                                            if a.storagePath != nil {
-                                                Image(systemName: "checkmark.circle.fill").symbolRenderingMode(.palette)
-                                                    .foregroundStyle(Color.white, Color.brandPrimary).padding(4)
-                                                    .accessibilityLabel("A copy is kept in CentMemo")
-                                            }
-                                        }
-                                        .contextMenu {
-                                            if let path = a.storagePath {
-                                                Button("Remove the copy in CentMemo", systemImage: "minus.circle") { Task { await dropCopy(a, path) } }
-                                            } else {
-                                                Button("Keep a copy in CentMemo", systemImage: "square.and.arrow.up") { Task { await keepCopy(a) } }
-                                            }
-                                            Button("Remove from this memo", role: .destructive) { Task { await remove(a) } }
-                                        }
-                                        .accessibilityIdentifier("attached-photo")
-                                }
-                            }
-                            .accessibilityIdentifier("attached-photos")
-                        }
-                        Button { Task { await openPicker() } } label: {
-                            Label("Add a photo", systemImage: "photo.badge.plus")
-                        }
-                        .accessibilityIdentifier("add-photo")
-                    }
-                    // Item 10: files (a receipt, a ticket), kept as private copies.
-                    Section {
-                        ForEach(photos.filter { $0.kind == "file" }) { a in
-                            Button { Task { await openFile(a) } } label: {
-                                Label(a.caption ?? a.deviceRef ?? "File", systemImage: (a.storagePath ?? "").hasSuffix(".pdf") ? "doc.richtext" : "photo")
-                            }
-                            .contextMenu {
-                                Button("Remove from this memo", role: .destructive) { Task { await remove(a) } }
-                            }
-                            .accessibilityIdentifier("attached-file")
-                        }
-                        Button { choosingFile = true } label: { Label("Add a file", systemImage: "doc.badge.plus") }
-                            .accessibilityIdentifier("add-file")
-                    } header: {
-                        Text("Files")
-                    } footer: {
-                        Text("Files you add are kept in CentMemo, privately.")
-                    }
-                    .fileImporter(isPresented: $choosingFile, allowedContentTypes: [.pdf, .image]) { result in
-                        if case .success(let url) = result { Task { await addFile(url) } }
-                    }
-                    if let error { Section { Text(error).foregroundStyle(Color.semanticError) } }
-                    // D15: where it happened, under the memo (D6: the memo leads).
-                    if #available(iOS 26.0, *), let place {
-                        Section {
-                            PlaceMap(name: place.name, address: place.address, lat: place.lat, lon: place.lon)
-                                .accessibilityIdentifier("entry-place")
-                        }
-                    }
-                    // The money and the bank's facts: a footnote, there when wanted.
-                    Section {
-                        DisclosureGroup {
-                            LabeledContent("Date", value: LedgerDate.display(e.txnDate))
-                            if let posted = e.postedDate, posted != e.txnDate { LabeledContent("Posted", value: LedgerDate.display(posted)) }
-                            if !e.category.isEmpty { LabeledContent("Category", value: e.category) }
-                            if !e.txnType.isEmpty { LabeledContent("Type", value: e.txnType) }
-                            if e.status != "booked" { LabeledContent("Status", value: e.status.capitalized) }
-                            if let account = e.accountName { LabeledContent("Account", value: account) }
-                            if !e.description.isEmpty, e.description != e.merchant {
-                                LabeledContent("Statement") { Text(e.description).font(TypeRamp.caption) }
-                            }
-                        } label: {
-                            HStack {
-                                MoneyText(minor: e.amountMinor, currency: e.currency, font: TypeRamp.caption)
-                                Text([e.accountName, e.category.isEmpty ? nil : e.category].compactMap { $0 }.joined(separator: " · "))
-                                    .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
-                            }
-                        }
-                        .accessibilityIdentifier("event-details")
-                    }
-
+                    .cardForm()
+                    .modifier(PaneMargins(on: inPane))
                 }
             } else {
                 ContentUnavailableView("This purchase isn't in your CentMemo.", systemImage: "questionmark")
             }
         }
-        // In a pane the Form's cards stood 1pt off the divider and 2pt off the strip
-        // (measured on the open Duo, 2026-11-22): give them the pane's 20pt.
-        .modifier(PaneMargins(on: inPane))
-        .cardForm()
+        .readsRoom($room)
         .grounded()
         .navigationTitle(inPane ? "" : (entry?.displayMerchant ?? ""))
         .modifier(InlineTitle(on: !inPane))
@@ -254,6 +123,164 @@ struct EntryDetailView: View {
             picked = nil
             picking = false
             Task { await attach(ref) }
+        }
+    }
+
+    /// What the person writes: the Setting and the memo (D6).
+    @ViewBuilder private func writing(_ e: LedgerEntry) -> some View {
+        // D6: the Setting and the memo lead; the money is a footnote
+        // (Decision 065: memo, Setting; the Chronicle direction).
+        Section {
+            // D8: the Setting heads the page and opens every visit there.
+            NavigationLink(value: SettingRoute(name: e.settingKey)) {
+                HStack(alignment: .center, spacing: Spacing.s3) {
+                    StoreTile(name: e.displayMerchant, category: e.category, size: 56)
+                    VStack(alignment: .leading, spacing: 2) {
+                        SettingTitle(name: e.displayMerchant)
+                        HStack(spacing: 0) {
+                            Text(LedgerDate.display(e.txnDate) + " · ").foregroundStyle(Color.brandTextMuted)
+                            Text("Every visit").foregroundStyle(Color.brandPrimary)
+                        }
+                        .font(TypeRamp.caption)
+                    }
+                }
+            }
+            .accessibilityIdentifier("every-visit")
+            .listRowBackground(Color.clear)
+            // In a pane the Form's cards stand 16pt off the divider; the header
+            // stands with them (Ear Drama iOS-DESIGN §3.6e).
+            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+        }
+        Section {
+            TextEditor(text: $memo)
+                .frame(minHeight: room >= Room.desk ? 320 : 160)
+                .overlay(alignment: .topLeading) {
+                    if memo.isEmpty {
+                        Text("What do you want to remember?").font(DisplayType.memo)
+                            .foregroundStyle(Color.brandTextMuted.opacity(0.7))
+                            .padding(.top, 8).padding(.leading, 5).allowsHitTesting(false)
+                    }
+                }
+                .font(DisplayType.memo)
+                .accessibilityLabel("Memo")
+                .accessibilityIdentifier("memo-editor")
+                .focused($writing)
+        } header: {
+            Text("Memo")
+        } footer: {
+            // The confirmation sits under the memo, where the person is
+            // looking (the iPhone 12 tap tier found it off-screen below).
+            if let status {
+                HStack(spacing: Spacing.s2) {
+                    // The moment a memo is kept: one pencil stroke draws in.
+                    if status == "Saved." {
+                        PencilStroke().trim(from: 0, to: drawn)
+                            .stroke(Color.brandPrimary, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                            .frame(width: 72, height: 8)
+                            .accessibilityHidden(true)
+                    }
+                    Text(status).accessibilityIdentifier("memo-status")
+                }
+            }
+        }
+    }
+
+    /// What belongs to the memo: themes, photos, files, the place, the bank's facts.
+    @ViewBuilder private func belongings(_ e: LedgerEntry) -> some View {
+        Section("Themes") {
+            if !values.isEmpty {
+                FlowLayout(spacing: 8) {
+                    ForEach(values) { v in
+                        Button { toggle(v.id) } label: { ValueChip(name: v.name, isOn: chosen.contains(v.id)) }
+                            .buttonStyle(.plain)
+                            .accessibilityAddTraits(chosen.contains(v.id) ? .isSelected : [])
+                    }
+                }
+            }
+            HStack {
+                TextField("Add a theme", text: $newValue, prompt: Text("Add a theme")).labelsHidden().onSubmit { Task { await addValue() } }
+                Button("Add") { Task { await addValue() } }.disabled(newValue.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+        }
+        Section("Photos") {
+            if photos.contains(where: { $0.kind == "photo" }) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: 8)], spacing: 8) {
+                    ForEach(photos.filter { $0.kind == "photo" }) { a in
+                        AttachedPhoto(ref: a.deviceRef ?? "")
+                            .overlay(alignment: .bottomTrailing) {
+                                if a.storagePath != nil {
+                                    Image(systemName: "checkmark.circle.fill").symbolRenderingMode(.palette)
+                                        .foregroundStyle(Color.white, Color.brandPrimary).padding(4)
+                                        .accessibilityLabel("A copy is kept in CentMemo")
+                                }
+                            }
+                            .contextMenu {
+                                if let path = a.storagePath {
+                                    Button("Remove the copy in CentMemo", systemImage: "minus.circle") { Task { await dropCopy(a, path) } }
+                                } else {
+                                    Button("Keep a copy in CentMemo", systemImage: "square.and.arrow.up") { Task { await keepCopy(a) } }
+                                }
+                                Button("Remove from this memo", role: .destructive) { Task { await remove(a) } }
+                            }
+                            .accessibilityIdentifier("attached-photo")
+                    }
+                }
+                .accessibilityIdentifier("attached-photos")
+            }
+            Button { Task { await openPicker() } } label: {
+                Label("Add a photo", systemImage: "photo.badge.plus")
+            }
+            .accessibilityIdentifier("add-photo")
+        }
+        // Item 10: files (a receipt, a ticket), kept as private copies.
+        Section {
+            ForEach(photos.filter { $0.kind == "file" }) { a in
+                Button { Task { await openFile(a) } } label: {
+                    Label(a.caption ?? a.deviceRef ?? "File", systemImage: (a.storagePath ?? "").hasSuffix(".pdf") ? "doc.richtext" : "photo")
+                }
+                .contextMenu {
+                    Button("Remove from this memo", role: .destructive) { Task { await remove(a) } }
+                }
+                .accessibilityIdentifier("attached-file")
+            }
+            Button { choosingFile = true } label: { Label("Add a file", systemImage: "doc.badge.plus") }
+                .accessibilityIdentifier("add-file")
+        } header: {
+            Text("Files")
+        } footer: {
+            Text("Files you add are kept in CentMemo, privately.")
+        }
+        .fileImporter(isPresented: $choosingFile, allowedContentTypes: [.pdf, .image]) { result in
+            if case .success(let url) = result { Task { await addFile(url) } }
+        }
+        if let error { Section { Text(error).foregroundStyle(Color.semanticError) } }
+        // D15: where it happened, under the memo (D6: the memo leads).
+        if #available(iOS 26.0, *), let place {
+            Section {
+                PlaceMap(name: place.name, address: place.address, lat: place.lat, lon: place.lon)
+                    .accessibilityIdentifier("entry-place")
+            }
+        }
+        // The money and the bank's facts: a footnote, there when wanted.
+        Section {
+            DisclosureGroup {
+                LabeledContent("Date", value: LedgerDate.display(e.txnDate))
+                if let posted = e.postedDate, posted != e.txnDate { LabeledContent("Posted", value: LedgerDate.display(posted)) }
+                if !e.category.isEmpty { LabeledContent("Category", value: e.category) }
+                if !e.txnType.isEmpty { LabeledContent("Type", value: e.txnType) }
+                if e.status != "booked" { LabeledContent("Status", value: e.status.capitalized) }
+                if let account = e.accountName { LabeledContent("Account", value: account) }
+                if !e.description.isEmpty, e.description != e.merchant {
+                    LabeledContent("Statement") { Text(e.description).font(TypeRamp.caption) }
+                }
+            } label: {
+                HStack {
+                    MoneyText(minor: e.amountMinor, currency: e.currency, font: TypeRamp.caption)
+                    Text([e.accountName, e.category.isEmpty ? nil : e.category].compactMap { $0 }.joined(separator: " · "))
+                        .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
+                }
+            }
+            .accessibilityIdentifier("event-details")
         }
     }
 

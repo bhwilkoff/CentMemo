@@ -15,7 +15,20 @@ struct SettingPageView: View {
     /// D15: a SettingPlaceModel on iOS 26 (typed loosely for the iOS 18 floor).
     @State private var places: AnyObject? = nil
 
+    @State private var room: CGFloat = 0
+
     private var shown: String { placeName ?? name }
+
+    private var hasPlace: Bool {
+        if #available(iOS 26.0, *), let model = places as? SettingPlaceModel { return model.place != nil || model.guess != nil || model.canSearchNearby }
+        return false
+    }
+
+    @ViewBuilder private var place: some View {
+        if #available(iOS 26.0, *), let model = places as? SettingPlaceModel, hasPlace {
+            SettingPlaceSection(model: model, setting: name, shownName: shown, entries: entries)
+        }
+    }
 
     private var summary: String {
         let written = entries.filter { $0.memo != nil }.count
@@ -27,6 +40,7 @@ struct SettingPageView: View {
 
     var body: some View {
         LoadState(isLoading: loading && entries.isEmpty, error: error, retry: load) {
+            HStack(alignment: .top, spacing: 0) {
             List {
                 HStack(alignment: .center, spacing: Spacing.s3) {
                     StoreTile(name: shown, category: entries.first?.category ?? "", size: 56)
@@ -42,10 +56,7 @@ struct SettingPageView: View {
                     }
                 }
                 .onGround().listRowSeparator(.hidden).columnRowInsets()
-                if #available(iOS 26.0, *), let model = places as? SettingPlaceModel, model.place != nil || model.guess != nil || model.canSearchNearby {
-                    SettingPlaceSection(model: model, setting: name, shownName: shown, entries: entries)
-                        .onGround().listRowSeparator(.hidden).columnRowInsets()
-                }
+                if room < Room.desk { place.onGround().listRowSeparator(.hidden).columnRowInsets() }
                 if entries.isEmpty {
                     Text("Nothing at \(name) in your CentMemo.").foregroundStyle(Color.brandTextMuted).onGround()
                 } else {
@@ -57,7 +68,15 @@ struct SettingPageView: View {
                 }
             }
             .listStyle(.plain)
+            .frame(maxWidth: room >= Room.desk ? Room.measure + PaneEdges.words * 2 : .infinity)
+            // W6: the place stands beside its visits when there is room.
+            if room >= Room.desk, hasPlace {
+                place.padding(.top, Spacing.s4).padding(.trailing, PaneEdges.pane).frame(width: Room.aside + PaneEdges.pane)
+            }
+            }
+            .frame(maxWidth: .infinity)
         }
+        .readsRoom($room)
         .grounded()
         .navigationTitle("")
         .inlineTitle()

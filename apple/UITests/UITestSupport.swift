@@ -10,9 +10,10 @@ import XCTest
         declineSystemPrompt(wait: 1)  // one left by an earlier test covers every test after it
     }
 
-    /// Answers a system permission prompt "Not Now": a test never grants access on a phone.
+    /// Declines a system permission prompt: a test never grants access on a phone.
     @discardableResult func declineSystemPrompt(wait: TimeInterval) -> Bool {
-        let no = XCUIApplication(bundleIdentifier: "com.apple.springboard").buttons["Not Now"]
+        let no = XCUIApplication(bundleIdentifier: "com.apple.springboard").buttons
+            .matching(NSPredicate(format: "label IN {'Not Now', 'Don’t Allow', \"Don't Allow\"}")).firstMatch
         guard no.waitForExistence(timeout: wait) else { return false }
         no.tap()
         return true

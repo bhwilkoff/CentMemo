@@ -102,3 +102,34 @@ inner-display frame.
 - **L5. Seeing it.** Any regular-width change is captured on the Duo's inner
   display and checked against the guides at 16, 20, column−20, column−16,
   divider+20 and strip−20 before it is called done.
+
+## W. Every width, designed on purpose
+
+Ben, 2026-11-24: *"The design of any app layout should be done with design
+skills for that specific device size. Design and implement for every screen
+size."* The branch is on the room a screen has, never on the device.
+
+| Class | Room | Where it happens |
+|---|---|---|
+| Compact | under 700 | iPhone 12, the closed Duo, a phone browser |
+| Medium | 700 to 1099 | the open Duo, iPad portrait, a small Mac window, a tablet browser |
+| Wide | 1100 and up | iPad landscape, a Mac window, a desktop browser |
+
+- **W1. Compact is one column that pushes** (D2 first). Nothing below changes it.
+- **W2. The list gets the room its words need.** 380 at medium, 440 at wide: a
+  row's date and place stay on one line.
+- **W3. The purchase page is a desk at wide.** The memo is the page you write
+  on (taller, never wider than 640); what belongs to it (themes, photos, files,
+  the place, the bank's facts) stands beside it in a 340 column. Below that room
+  they follow the memo, as on the phone. The pane needs 780 for the desk.
+- **W4. The Story is read, not managed.** At medium and wide its themes and
+  months are a shelf on the left; the memos are one reading column on the right,
+  in the memo's own serif, with the Setting and the date beneath each. Opening
+  one pushes its page.
+- **W5. A line of reading is never longer than 640.** The column is centered in
+  its room; the room is left empty on purpose.
+- **W6. A Setting's place stands beside its visits at wide**, a 340 card with
+  the map, not a strip across the page.
+- **W7. Seeing it.** Every class is captured and read before a change is called
+  done: iPhone 12 and the Duo both ways, iPad both ways, the Mac at 900, 1180 and
+  1600, the web at 375, 768, 1024 and 1440 (`tools/test_web_states.mjs --widths`).
