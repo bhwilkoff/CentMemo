@@ -23,6 +23,11 @@
     for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid.nodeType ? kid : String(kid));
     return el;
   }
+  // Like replaceChildren, but with h()'s rules: lists are spread, and null or false
+  // is nothing. replaceChildren itself prints "null" and turns a list into text.
+  function fill(el, ...kids) {
+    el.replaceChildren(...kids.flat().filter((k) => k != null && k !== false && k !== ''));
+  }
   function icon(name) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('aria-hidden', 'true');
@@ -60,10 +65,10 @@
   }
 
   /* ---- Four states (universal-feature-states) ---- */
-  function loading(body) { body.replaceChildren(h('p', { class: 'state state-loading', role: 'status' }, 'Loading…')); }
-  function empty(body, text, action) { body.replaceChildren(h('div', { class: 'state state-empty' }, h('p', {}, text), action || null)); }
+  function loading(body) { fill(body, h('p', { class: 'state state-loading', role: 'status' }, 'Loading…')); }
+  function empty(body, text, action) { fill(body, h('div', { class: 'state state-empty' }, h('p', {}, text), action || null)); }
   function failed(body, err, retry) {
-    body.replaceChildren(h('div', { class: 'banner banner-error', role: 'alert' },
+    fill(body, h('div', { class: 'banner banner-error', role: 'alert' },
       h('span', {}, !navigator.onLine ? 'You\'re offline.'
         : /Failed to fetch|NetworkError|Load failed/i.test((err && err.message) || '') ? 'CentMemo couldn\'t reach its server.'
         : (err && err.message) || 'Something went wrong.'),
@@ -83,7 +88,7 @@
   ];
   function buildTabs() {
     document.querySelectorAll('.tabs').forEach((nav) => {
-      nav.replaceChildren(...TABS.map((t) => h('a', { class: 'tab', href: t.href, 'data-tab': t.id }, icon(t.icon), h('span', {}, t.label))));
+      fill(nav, ...TABS.map((t) => h('a', { class: 'tab', href: t.href, 'data-tab': t.id }, icon(t.icon), h('span', {}, t.label))));
     });
   }
   function showView(id, tab) {
@@ -168,7 +173,7 @@
     // The icon alone (Ben, 2026-11-23), named for screen readers.
     const another = h('button', { class: 'suggestion-another', type: 'button', 'data-another': '', 'aria-label': 'Another suggestion', title: 'Another suggestion' });
     another.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v4h-4"/></svg>';
-    another.addEventListener('click', () => { shown = (shown + 1) % out.length; box.replaceChildren(out[shown], another); });
+    another.addEventListener('click', () => { shown = (shown + 1) % out.length; fill(box, out[shown], another); });
     box.append(another);
     return [box];
   }
@@ -202,7 +207,7 @@
       // D7: one invitation at a time, "Another" for the next of up to three; no
       // count of what is left (as the iPhone's SuggestionCard).
       const picks = await suggestionCards(rows).catch(() => []);
-      body.replaceChildren(picks.length === 1 ? h('div', { class: 'suggestions' }, picks) : picks.length ? picks[0] : '',
+      fill(body, picks.length === 1 ? h('div', { class: 'suggestions' }, picks) : picks.length ? picks[0] : '',
         h('div', { class: 'list' }, rows.map((t) => txnRow(t))),
         count > rows.length ? h('p', { class: 'caption' }, 'Showing the newest ' + rows.length + '.') : null);
     } catch (err) { failed(body, err, unexaminedView); }
@@ -265,7 +270,7 @@
 
   function narrativeFilters(rows) {
     const thread = h('div', { class: 'thread' });
-    const draw = () => thread.replaceChildren(...narrativeFilter(rows).map(threadRow));
+    const draw = () => fill(thread, ...narrativeFilter(rows).map(threadRow));
     const show = h('select', { id: 'filter-show', 'aria-label': 'Show' },
       ['all', 'written', 'unwritten'].map((v) => h('option', { value: v, selected: filter.show === v }, v[0].toUpperCase() + v.slice(1))));
     const names = [...new Set(rows.flatMap(themesOf))].sort();
@@ -321,7 +326,7 @@
       const spent = live.filter((t) => t.amount_minor < 0).reduce((a, t) => a - t.amount_minor, 0);
       const received = live.filter((t) => t.amount_minor > 0).reduce((a, t) => a + t.amount_minor, 0);
       const written = rows.filter((t) => t.memos && (Array.isArray(t.memos) ? t.memos.length : t.memos)).length;
-      body.replaceChildren(
+      fill(body, 
         h('dl', { class: 'totals' },
           h('div', {}, h('dt', {}, 'Spent'), h('dd', {}, money(spent))),
           h('div', {}, h('dt', {}, 'Paid or credited'), h('dd', {}, money(received))),
@@ -361,7 +366,7 @@
       });
       const chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Themes' });
       function drawChips(list) {
-        chips.replaceChildren(...list.map((v) => {
+        fill(chips, ...list.map((v) => {
           const b = h('button', { type: 'button', class: 'chip', 'aria-pressed': chosen.has(v.id) ? 'true' : 'false' }, v.name);
           b.addEventListener('click', () => {
             if (chosen.has(v.id)) chosen.delete(v.id); else chosen.add(v.id);
@@ -398,7 +403,7 @@
 
       // D6 (Decision 065): the Setting and the memo lead; the money and the
       // bank's facts are a footnote, as on the iPhone.
-      body.replaceChildren(
+      fill(body, 
         h('div', { class: 'txn-head' },
           tile(t, true),
           h('div', { class: 'txn-title' },
@@ -452,7 +457,7 @@
         });
         heading.replaceWith(form); rename.remove(); input.focus(); input.select();
       });
-      body.replaceChildren(
+      fill(body, 
         h('div', { class: 'txn-head' }, tile(rows[0], true),
           h('div', { class: 'txn-title' },
             heading,
@@ -507,7 +512,7 @@
     const list = h('ol', { class: 'share-theme-list' });
     const lineOf = (t) => [niceDate(t.txn_date), where.checked ? merchantOf(t) : null].filter(Boolean).join(' · ');
     const chosen = () => rows.filter((_, i) => picks[i].checked);
-    const draw = () => list.replaceChildren(...chosen().map((t) => h('li', {}, h('blockquote', {}, memoOf(t).body), h('span', { class: 'share-line' }, lineOf(t)))));
+    const draw = () => fill(list, ...chosen().map((t) => h('li', {}, h('blockquote', {}, memoOf(t).body), h('span', { class: 'share-line' }, lineOf(t)))));
     [where, ...picks].forEach((b) => b.addEventListener('change', draw)); draw();
     const send = h('button', { type: 'button', class: 'btn' }, 'Share');
     send.addEventListener('click', async () => {
@@ -547,7 +552,7 @@
     API.copyUrls(files.map((a) => a.storage_path)).then((urls) => {
       ul.querySelectorAll('[data-file]').forEach((li) => {
         const url = urls[li.dataset.file];
-        if (url) li.replaceChildren(h('a', { href: url, target: '_blank', rel: 'noopener' }, li.textContent));
+        if (url) fill(li, h('a', { href: url, target: '_blank', rel: 'noopener' }, li.textContent));
       });
     }).catch(() => {});
     return h('div', {}, h('p', { class: 'field-label' }, 'Files'), ul);
@@ -560,7 +565,7 @@
     const onPhone = photos.length - kept.length;
     const grid = h('div', { class: 'photo-copies', 'data-photo-copies': '' });
     if (kept.length) {
-      API.copyUrls(kept.map((a) => a.storage_path)).then((urls) => grid.replaceChildren(...kept.filter((a) => urls[a.storage_path])
+      API.copyUrls(kept.map((a) => a.storage_path)).then((urls) => fill(grid, ...kept.filter((a) => urls[a.storage_path])
         .map((a) => h('img', { src: urls[a.storage_path], alt: 'A photo attached to this memo', loading: 'lazy' })))).catch(() => {});
     }
     return h('div', {}, kept.length ? grid : null,
@@ -581,7 +586,7 @@
       const months = [];
       for (let ym = latest, i = 0; i < 24; i++, ym = stepMonth(ym, -1)) months.push(ym);
       if (/^\d{4}-\d{2}$/.test(scope) && !months.includes(scope)) months.unshift(scope);
-      select.replaceChildren(
+      fill(select, 
         months.map((ym) => h('option', { value: ym, selected: scope === ym }, monthName(ym))));
       select.onchange = () => { location.hash = '#/story/' + encodeURIComponent(select.value); };
 
@@ -603,7 +608,7 @@
           'aria-current': valueId === v.id ? 'true' : null, 'data-theme': v.name },
           h('i', { style: 'background: ' + themeHue(v.name) }), h('span', {}, v.name), h('span', { class: 'caption' }, String(counts[v.id])))),
         valueId ? h('a', { class: 'theme-row every', href: '#/story/' + latest }, 'Every memo') : null) : '';
-      body.replaceChildren(
+      fill(body, 
         shelf,
         h('header', { class: 'story-head' },
           h('h2', { class: 'section-heading' }, title),
@@ -626,7 +631,7 @@
   /* ---- Import ---- */
   function importView() {
     const body = showView('import', 'import');
-    if (!body.childElementCount) body.replaceChildren();
+    if (!body.childElementCount) fill(body, );
   }
   $('import-file').addEventListener('change', async (e) => {
     const file = e.target.files && e.target.files[0];
@@ -648,12 +653,12 @@
       try {
         const r = await API.importExport(kind, rows, file.name);
         e.target.value = '';
-        body.replaceChildren(h('div', { class: 'state' },
+        fill(body, h('div', { class: 'state' },
           h('p', {}, r.inserted + ' new' + (r.skipped ? ', ' + r.skipped + ' already in CentMemo.' : '.')),
           h('a', { class: 'btn btn-primary', href: '#/unexamined' }, 'Start writing')));
       } catch (err) { go.disabled = false; status.textContent = ''; failed(body, err); }
     });
-    body.replaceChildren(
+    fill(body, 
       h('dl', { class: 'totals' },
         h('div', {}, h('dt', {}, 'Events'), h('dd', {}, String(rows.length))),
         h('div', {}, h('dt', {}, 'From'), h('dd', {}, niceDate(dates[0]))),
@@ -713,7 +718,7 @@
         catch (err) { del.disabled = false; delNote.textContent = err.message; }
       });
 
-      body.replaceChildren(
+      fill(body, 
         h('h2', { class: 'section-heading' }, 'Color'),
         picker,
         h('h2', { class: 'section-heading' }, 'Themes'),

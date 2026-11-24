@@ -22,6 +22,7 @@ const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/M
 const PORT = 8794, DEVTOOLS = 9294, SITE = `http://127.0.0.1:${PORT}/`;
 const OUT = path.join(ROOT, 'build/qa', 'web-states-' + new Date().toISOString().slice(0, 10));
 mkdirSync(OUT, { recursive: true });
+let OUT_DIR = OUT;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let failures = 0;
 const ok = (c, m) => { console.log((c ? '  ok   ' : '  FAIL ') + m); if (!c) failures++; };
@@ -64,7 +65,7 @@ async function waitFor(expr, ms = 15000) {
 }
 async function shot(name) {
   const r = await cdp('Page.captureScreenshot', { format: 'png' });
-  writeFileSync(path.join(OUT, name + '.png'), Buffer.from(r.result.data, 'base64'));
+  writeFileSync(path.join(OUT_DIR, name + '.png'), Buffer.from(r.result.data, 'base64'));
 }
 async function openAs(who, route) {
   const s = await sessionFor(who);
@@ -82,6 +83,29 @@ async function openAs(who, route) {
 const visibleText = 'document.body.innerText';
 // Only the view on screen counts: hidden sections keep the banners of earlier visits.
 const VIS = 'section:not([hidden]) ';
+
+// node tools/test_web_states.mjs --widths [375,768,...]: every screen at every
+// width, frames to read (DESIGN W7), in build/qa/web-states-<date>/widths/.
+if (process.argv[2] === '--widths') {
+  OUT_DIR = path.join(OUT, 'widths');
+  mkdirSync(OUT_DIR, { recursive: true });
+  const WIDTHS = (process.argv[3] || '375,768,1024,1440').split(',').map(Number);
+  const item = 'a3b8c10c-68b8-4bfe-9380-c87b7015a49d';
+  const SCREENS = { unexamined: '#/unexamined', narrative: '#/ledger', story: '#/story', event: '#/t/' + item, setting: '#/setting/Denver%20Zoo', settings: '#/settings', import: '#/import' };
+  await openAs('owner', '#/unexamined');
+  for (const w of WIDTHS) {
+    await cdp('Emulation.setDeviceMetricsOverride', { width: w, height: w < 600 ? 812 : w < 900 ? 1024 : 900, deviceScaleFactor: 1, mobile: w < 600 });
+    for (const [name, hash] of Object.entries(SCREENS)) {
+      await evaluate(`location.hash = ${JSON.stringify(hash)}; true`);
+      await sleep(1800);
+      await shot(`${w}-${name}`);
+      const over = await evaluate('document.documentElement.scrollWidth - innerWidth');
+      if (over > 0) ok(false, `${name} scrolls sideways by ${over} at ${w}`);
+    }
+  }
+  console.log(failures ? 'FAIL: sideways scroll above' : 'frames in ' + OUT_DIR);
+  process.exit(failures ? 1 : 0);
+}
 
 console.log('empty (stranger)');
 await openAs('stranger', '#/unexamined');
@@ -107,6 +131,17 @@ if (await evaluate('!!document.querySelector("#view-unexamined [data-another]")'
 }
 ok(!(await evaluate('!!document.querySelector("#h-unexamined .pencil-circle")')), 'no count of what is left');
 await shot('happy-unexamined');
+
+console.log('no screen prints a stray value, and the Story can change months');
+for (const route of ['unexamined', 'ledger', 'story', 'settings', 'import', 't/a3b8c10c-68b8-4bfe-9380-c87b7015a49d', 'setting/Denver%20Zoo']) {
+  await evaluate(`location.hash = "#/${route}"; true`);
+  await sleep(1500);
+  ok(await evaluate('!document.body.innerText.split("\\n").some((l) => /^(null|undefined|false|\\[object .*)$/.test(l.trim()))'), `${route} prints no null`);
+}
+await evaluate('location.hash = "#/story"; true');
+ok(await waitFor('document.querySelectorAll("#story-scope option").length === 24 && !!document.getElementById("story-scope").value'), 'the Story offers 24 months and shows the current one');
+await evaluate('location.hash = "#/unexamined"; true');
+await waitFor('document.querySelectorAll("#view-unexamined a.row").length > 0');
 
 console.log('skip (Decision 065): an event leaves Unexamined and the Narrative, then comes back');
 {
