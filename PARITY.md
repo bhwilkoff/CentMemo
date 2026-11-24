@@ -104,7 +104,7 @@ When shipping any user-facing feature:
 | Feature | Web | iOS | Notes |
 |---|---|---|---|
 | Import Apple Card CSV export | ✅ | ✅ | Web: real file input, re-import adds 0 (test_web_states). Same source IDs on both (golden parity test). iOS: ImportUITests on the iPhone 12 as the empty stranger: "3 new", then "0 new, 3 already in CentMemo" (DEBUG door APP_IMPORT_SAMPLE feeds the same import code; tools/cleanup_stranger.mjs empties it after). The Files picker itself is the system's. |
-| Import Venmo, PayPal, Cash App CSV (S1/S2) | ✅ | 🚧 | Web: auto-detected by header, own account per source, documented export paths; end-to-end import test. iOS: same parsers (Swift goldens read the same fixtures), Settings shows the paths (testExportPaths); importing a real file through the Files picker not yet run on a device |
+| Import Venmo, PayPal, Cash App CSV (S1/S2) | ✅ | ✅ | Web: auto-detected by header, own account per source, documented export paths; end-to-end import test. iOS: same parsers (Swift goldens read the same fixtures), Settings shows the paths (testExportPaths); ImportUITests.testVenmoImport on the iPhone 12: "Venmo: 3 new." (DEBUG door feeds tests/fixtures/venmo-sample.csv). PayPal and Cash App ride the same detector, golden-tested. |
 | Narrative filters (D9) | ✅ | ✅ | All / Written / Unwritten, theme, deposits and interest on request. iOS toolbar menu (FilterUITests), web selects (test_web_states) |
 | Month strip by theme (D11) | ✅ | ✅ | ThemeStrip (Core) / themeStrip (web); named legend; colors collide until D14 |
 | Themes as collections (D12) | ✅ | ✅ | Story shelf with counts; tap a theme to read only its memos; ThemesUITests, test_web_states |
@@ -144,8 +144,8 @@ When shipping any user-facing feature:
 | Surface | Web | iOS | Notes |
 |---|---|---|---|
 | Empty state with a next action | ✅ | ✅ | Both seen with the empty stranger account: test_web_states, EmptyStateUITests (iPhone 12) |
-| Error with Try again | ✅ | 🚧 | iOS `LoadState` built, not seen failing |
-| Offline | ✅ | 🚧 | Web banner and message tested. iOS shows the error state; no dedicated offline indicator |
+| Error with Try again | ✅ | ✅ | iOS: ErrorStateUITests on the iPhone 12 (2026-11-23): unreachable and offline each say so in plain words with Try again, retry stays alive, never URLSession's words; the control loads. |
+| Offline | ✅ | ✅ | Web banner and message tested. iOS: "Couldn't load / You're offline." with Try again (ErrorStateUITests.testOffline, frame read); no separate always-on banner. |
 | Hints and walkthroughs | 🚫 | 🚫 | The Unexamined count is the only prompt CentMemo needs (DESIGN C4) |
 
 ## 6. Sign-in

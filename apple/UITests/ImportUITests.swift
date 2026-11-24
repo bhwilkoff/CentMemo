@@ -29,4 +29,18 @@ final class ImportUITests: DeviceTestCase {
         XCTAssertEqual(again.label, "Apple Card: 0 new, 3 already in CentMemo.", "the same export adds nothing")
         shot(app, "import-again")
     }
+
+    /// S1 on a device: a Venmo statement through the same import lands in its own account.
+    func testVenmoImport() {
+        let runner = ProcessInfo.processInfo.environment
+        guard let email = runner["APP_TEST_STRANGER_EMAIL"], let password = runner["APP_TEST_STRANGER_PASSWORD"] else {
+            XCTFail("stranger credentials not handed to the runner"); return
+        }
+        let app = launch(["APP_TEST_EMAIL": email, "APP_TEST_PASSWORD": password, "APP_IMPORT_SAMPLE": "venmo", "APP_START_TAB": "settings"])
+        let result = app.staticTexts["import-result"]
+        for _ in 0..<8 where !result.exists { app.swipeUp(); sleep(1) }
+        XCTAssertTrue(result.waitForExistence(timeout: 40), "the import reports back")
+        XCTAssertEqual(result.label, "Venmo: 3 new.", "a Venmo statement is recognized and imported")
+    }
 }
+

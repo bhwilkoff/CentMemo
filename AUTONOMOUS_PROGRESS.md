@@ -1932,3 +1932,18 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Next:** iOS delete account on a device. It needs a throwaway account,
   so a test that creates one and deletes it, rather than the stranger or
   Ben's account.
+
+### Tick 38 — 2026-11-23 — Parity audit: Venmo import, error and offline states seen on the iPhone 12
+- `ImportUITests.testVenmoImport`: "Venmo: 3 new." from
+  tests/fixtures/venmo-sample.csv through the same DEBUG door. Stranger
+  emptied after.
+- ErrorStateUITests rerun: unreachable, offline and the control all pass.
+  Frame error-offline read ("Couldn't load / You're offline." with Try
+  again).
+- PARITY: Venmo/PayPal/Cash App iOS ✅, Error iOS ✅, Offline iOS ✅. Those
+  rows had been stale since launch tick 8.
+- **Gate:** the first test_all run failed on a dropped connection
+  (ECONNRESET) in test_connector. It passed alone and on the full rerun
+  (rc=0), so it was network noise, not code.
+- **Delete account on iOS:** needs a throwaway account. Creating one is
+  Ben's call; asked.

@@ -270,9 +270,10 @@ struct ImportButton: View {
         // export, so a device run needs no Files picker (ImportUITests).
         .task {
             // Once per launch: a view's task can start again before the first reports.
-            if ProcessInfo.processInfo.environment["APP_IMPORT_SAMPLE"] == "1", !Self.sampleImported {
+            let door = ProcessInfo.processInfo.environment["APP_IMPORT_SAMPLE"]
+            if let door, !Self.sampleImported {
                 Self.sampleImported = true
-                await importText(Self.sample, filename: "sample.csv")
+                await importText(door == "venmo" ? Self.venmoSample : Self.sample, filename: "sample.csv")
             }
         }
         #endif
@@ -280,6 +281,19 @@ struct ImportButton: View {
 
     #if DEBUG
     static var sampleImported = false
+    /// tests/fixtures/venmo-sample.csv, word for word.
+    static let venmoSample = #"""
+    Account Statement - (@sample-person) ,,,,,,,,,,,,,,,,,,,,,
+    Account Activity,,,,,,,,,,,,,,,,,,,,,
+    ,ID,Datetime,Type,Status,Note,From,To,Amount (total),Amount (tip),Amount (tax),Amount (fee),Tax Rate,Tax Exempt,Funding Source,Destination,Beginning Balance,Ending Balance,Statement Period Venmo Fees,Terminal Location,Year to Date Venmo Fees,Disclaimer
+    ,,,,,,,,,,,,,,,,$12.50,,,,,
+    ,3912345678901234567,2026-11-03T18:33:12,Payment,Complete,"Pizza night 🍕, my half",Sample Person,Alex Rivera,- $18.50,,0,,0,,Apple Card,,,,,Venmo,,
+    ,3912345678901234568,2026-11-05T09:01:44,Payment,Complete,Concert tickets,Jordan Lee,Sample Person,+ $40.00,,0,,0,,,Venmo balance,,,,Venmo,,
+    ,3912345678901234569,2026-11-09T21:10:02,Standard Transfer,Issued,,,,"- $1,021.50",,0,,0,,,Bank,,,,Venmo,,
+    ,,,,,,,,,,,,,,,,,$12.50,$0.00,,$0.00,
+    ,,,,,,,,,,,,,,,,,,,,,"In case of errors or questions about your
+    electronic transfers, contact us."
+    """#
     static let sample = """
     Transaction Date,Clearing Date,Description,Merchant,Category,Type,Amount (USD),Purchased By
     11/18/2026,11/19/2026,"BLUE PAN PIZZA 3930 W 38TH AVE DENVER 80212 CO USA",Blue Pan Pizza,Restaurants,Purchase,64.37,Sample Person
