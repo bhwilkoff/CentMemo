@@ -87,7 +87,7 @@ account, 6 the Connect button):**
 - N2 ✅ Starter themes leave Unexamined; Settings keeps them (web + Apple).
 - N3 ✅ "Connect Apple Wallet" reads "Sync Apple Wallet" once connected.
 - N3b ✅ (tick 52) Audit every action's words on every platform.
-- N4 🟡 (DESIGN S; web live; draft for Ben https://claude.ai/artifact/XTgCwKxwxF6ZyAEuhYYcpc; memo and theme built on web, iPhone, iPad, Mac; links designed, waiting on Ben before anything public is built) Design your share: Setting, memory, themes; the person chooses the look.
+- N4 🟡 (DESIGN S; web live; draft for Ben https://claude.ai/artifact/XTgCwKxwxF6ZyAEuhYYcpc; memo and theme built on web, iPhone, iPad, Mac; links designed and liked by Ben; building them next) Design your share: Setting, memory, themes; the person chooses the look.
   Design with the skills first, on every size. Links after the design.
 - N5 🟡 (rules: docs/DESIGN.md W; web at 375/768/1024/1440, iPad landscape, open Duo, Mac at 900/1180/1600 built and seen; Settings at wide and iPad portrait seen; closed Duo ⏳) Every screen size designed on purpose: iPhone 12, Duo closed and open, iPad
   portrait and landscape, Mac window small to large, web phone to desktop.
@@ -2322,3 +2322,15 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   because each date repeated the year: a row now names the year only when it isn't this
   one, on web and Apple.
 - **Verified:** iPad tier, 15 iPhone 12 tests, test_all.
+
+- **Ben on story links (about 3:45pm):** "The story links design is nice. I'd like a
+  little more customization from the web, but I really like the bold colors and the
+  touch of the pencil marks. I'd like to be able to choose which words get the underline."
+- **Design v2:** every choice is the writer's, live beside the reader's page: the marked
+  words, the pencil (underline, two lines, circle, highlighter), bold / paper / night,
+  the theme's color, what leads, the parts of a theme's page, where / when / from in
+  their own words. Bold is the default, as Ben likes it.
+- **Build next (opt-in, per link):** a `shares` table (owner-only), a snapshot payload
+  with no amount and no Wallet store or date, one public read by unguessable code, a
+  static `/s/` page marked noindex, a list to turn links off, cascade on delete. RLS
+  tested as a stranger first. The pencil choices also go to the share cards.
