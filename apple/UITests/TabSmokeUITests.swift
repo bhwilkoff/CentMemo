@@ -23,7 +23,7 @@ final class TabSmokeUITests: DeviceTestCase {
     /// Settings shows the connector's public address, not the database host's.
     func testConnectorAddress() {
         let app = launch(["APP_START_TAB": "settings"])
-        XCTAssertTrue(text(app, matching: "Ground|Connect Claude").waitForExistence(timeout: 25))
+        XCTAssertTrue(text(app, matching: "^Color$|Connect Claude").waitForExistence(timeout: 25))
         let address = text(app, matching: "mcp\\.centmemo\\.com")
         let form = app.collectionViews.firstMatch
         for _ in 0..<8 where !address.exists { form.swipeUp(velocity: .slow); sleep(1) }
@@ -35,7 +35,7 @@ final class TabSmokeUITests: DeviceTestCase {
     /// Settings tells where each source's CSV comes from (S1/S2).
     func testExportPaths() {
         let app = launch(["APP_START_TAB": "settings"])
-        XCTAssertTrue(text(app, matching: "Ground|Connect Claude").waitForExistence(timeout: 25))
+        XCTAssertTrue(text(app, matching: "^Color$|Connect Claude").waitForExistence(timeout: 25))
         let group = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Where to get a CSV'")).firstMatch
         let form = app.collectionViews.firstMatch
         for _ in 0..<6 where !(group.exists && group.isHittable && group.frame.maxY < app.frame.height * 0.7) { form.swipeUp(velocity: .slow); sleep(1) }
@@ -50,7 +50,7 @@ final class TabSmokeUITests: DeviceTestCase {
     func testTapThroughTabs() {
         let app = launch()
         XCTAssertTrue(text(app, matching: "Biggest this month|First time here|Your busiest day|A year ago you wrote|Every purchase has a memo").waitForExistence(timeout: 25))
-        for (tab, rx) in [("Narrative", "Spent"), ("Story", "^\\d+ memos?$|No memos here yet"), ("Settings", "Ground"), ("Unexamined", "Biggest this month|First time here|Your busiest day|A year ago you wrote|Every purchase")] {
+        for (tab, rx) in [("Narrative", "Spent"), ("Story", "^\\d+ memos?$|No memos here yet"), ("Settings", "^Color$"), ("Unexamined", "Biggest this month|First time here|Your busiest day|A year ago you wrote|Every purchase")] {
             openTab(app, tab)
             XCTAssertTrue(text(app, matching: rx).waitForExistence(timeout: 15), "after tapping \(tab): /\(rx)/")
             shot(app, "tapped-\(tab)")

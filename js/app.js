@@ -711,7 +711,7 @@
     loading(body);
     try {
       const [vals, session, current] = await Promise.all([API.values(), API.session(), API.ground()]);
-      const picker = h('div', { class: 'grounds', role: 'group', 'aria-label': 'Ground color' }, API.GROUNDS.map((g) => {
+      const picker = h('div', { class: 'grounds', role: 'group', 'aria-label': 'Color' }, API.GROUNDS.map((g) => {
         const b = h('button', { type: 'button', class: 'ground-swatch', 'aria-pressed': g.id === current ? 'true' : 'false' },
           h('i', { style: 'background:' + g.hex }), h('span', {}, g.name));
         b.addEventListener('click', async () => {
@@ -750,7 +750,7 @@
       });
 
       body.replaceChildren(
-        h('h2', { class: 'section-heading' }, 'Ground'),
+        h('h2', { class: 'section-heading' }, 'Color'),
         picker,
         h('h2', { class: 'section-heading' }, 'Themes'),
         vals.length ? valueList : h('p', { class: 'caption' }, 'Add a theme from any memo.'),

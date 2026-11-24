@@ -2103,3 +2103,24 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   not empty. Not a leak (memos and themes still read 0). Run
   `node tools/cleanup_stranger.mjs` after a full tap tier. The reviewer check
   failed once too ("wrong password is refused" read an empty page) and passed alone.
+
+### 2026-11-24 — versions: 1.0.PATCH, both numbers on every build
+- **Ben:** "Why are we not increasing the versioning on each build? 1.0.0 is
+  the method we have used for all of our other apps."
+- **State found:** builds 1 to 17 all shipped as "1.0", against the cadence rule
+  at the top of this file. STORE.md step 1 had softened it to "user-visible
+  changes", and the version test was not in test_all.
+- **Done:** 1.0.17 (18), Ear Drama's pattern (PATCH = build - 1). The test now
+  refuses a two-part version, or a build bump without a version bump (both seen
+  to fail), and runs in test_all. Build 17 stays "1.0" on TestFlight.
+- **At L2:** the App Store Connect version record still reads "1.0"; it must
+  match the build submitted.
+- **Ben:** "why the color picker in settings is called 'Ground'? That doesn't
+  make any sense." A leftover of Decision 059 (color as the page's ground), which
+  060 replaced. Now "Color" on iPhone and web. Also Ben: "Connecting apple wallet
+  seems to be working on the duo for adding new items to the database." The
+  button said 3 new items, so that was the regular sync, and that tap is what
+  turns on hourly delivery. A delivery with the app closed is still unseen.
+- **Ben:** "Please stop asking me if you should push and commit. If you have done
+  work that needs to be represented on devices and tested, then you should push
+  a new version to testflight."

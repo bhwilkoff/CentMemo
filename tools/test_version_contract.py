@@ -17,6 +17,7 @@ Run: python3 tools/test_version_contract.py   (exit 0 = pass; a repo with no
 android/ module passes with a note)
 """
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -34,6 +35,32 @@ xc = (ROOT / "AppVersion.xcconfig").read_text()
 m = re.search(r"^MARKETING_VERSION\s*=\s*(\S+)", xc, re.M)
 check(m is not None, "AppVersion.xcconfig declares MARKETING_VERSION")
 marketing = m.group(1) if m else ""
+
+check(re.fullmatch(r"\d+\.\d+\.\d+", marketing) is not None,
+      "MARKETING_VERSION is MAJOR.MINOR.PATCH", marketing)
+
+
+def pair(text):
+    v = re.search(r"^MARKETING_VERSION\s*=\s*(\S+)", text, re.M)
+    b = re.search(r"^CURRENT_PROJECT_VERSION\s*=\s*(\S+)", text, re.M)
+    return (v and v.group(1), b and b.group(1))
+
+
+# CentMemo shipped TestFlight builds 1 to 17 all as "1.0" (Ben, 2026-11-24): the
+# two numbers move together. Compares this file with the last one that differed.
+def git(*a):
+    return subprocess.run(["git", "-C", str(ROOT), *a], capture_output=True, text=True).stdout
+
+
+now = pair(xc)
+before = next((p for p in (pair(git("show", f"{h}:AppVersion.xcconfig"))
+                           for h in git("log", "-5", "--format=%h", "--", "AppVersion.xcconfig").split())
+               if p != now and p[0]), None)
+if before:
+    check(now[0] != before[0] and now[1] != before[1],
+          "the version and the build number were bumped together", f"{before} -> {now}")
+else:
+    print("  SKIP  no earlier AppVersion.xcconfig in this checkout's history")
 
 gradle_file = ROOT / "android/app/build.gradle.kts"
 if not gradle_file.exists():

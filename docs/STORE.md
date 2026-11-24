@@ -9,8 +9,9 @@
 
 ## Ship a TestFlight build
 
-1. Bump `CURRENT_PROJECT_VERSION` in `AppVersion.xcconfig` (every upload).
-   Bump `MARKETING_VERSION` too for a user-visible change.
+1. Bump both numbers in `AppVersion.xcconfig` on every build, as in Ben's other
+   apps: PATCH +1 and build +1 (1.0.17 (18), then 1.0.18 (19)). *Check:
+   `tools/test_version_contract.py`.*
 2. Run `tools/test_all.sh` and the iPhone 12 tap tier (`docs/TESTING.md`).
 3. Run `tools/submit-appstore.sh ios`. It archives, signs manually through
    the API key, exports, and uploads.

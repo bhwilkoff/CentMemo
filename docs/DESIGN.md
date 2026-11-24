@@ -36,6 +36,9 @@ meaning, never chrome:**
 2. **What you value.** The values the person names (chips on a memo and in
    the story) are filled with their color, because they are theirs.
 
+On screen it is called **Color** (Ben, 2026-11-24). "Ground" survives only in
+code and the database, from 059.
+
 Nothing else is colored: no colored headers, bands, cards, tab bars, or
 backgrounds.
 

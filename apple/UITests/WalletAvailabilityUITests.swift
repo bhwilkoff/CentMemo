@@ -7,7 +7,7 @@ import XCTest
 final class WalletAvailabilityUITests: DeviceTestCase {
     func testWalletOfferIsHonest() {
         let app = launch(["APP_START_TAB": "settings"])
-        XCTAssertTrue(text(app, matching: "Ground|Connect Claude").waitForExistence(timeout: 25))
+        XCTAssertTrue(text(app, matching: "^Color$|Connect Claude").waitForExistence(timeout: 25))
         let button = app.buttons["wallet-sync"]
         let reason = text(app, matching: "isn't on this device|isn't available here")
         let form = app.collectionViews.firstMatch

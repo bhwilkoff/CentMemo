@@ -76,7 +76,7 @@ struct SettingsView: View {
     @ViewBuilder private func section(_ p: SettingsPane) -> some View {
         switch p {
         case .look:
-            Section("Ground") {
+            Section("Color") {
                 HStack(spacing: Spacing.s3) {
                     ForEach(Ground.allCases) { g in
                         Button { Task { do { try await session.choose(g) } catch { self.error = session.handle(error) } } } label: {
@@ -212,7 +212,7 @@ enum SettingsPane: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var title: String {
         switch self {
-        case .look: "Ground"
+        case .look: "Color"
         case .themes: "Themes"
         case .moneyIn: "Money in"
         case .claude: "Connect Claude"

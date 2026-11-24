@@ -14,6 +14,7 @@ run "money core + connector guard (node)" node --test tests/money.test.mjs tests
 run "design tokens: drift + contrast" node tools/test_design_tokens.mjs
 run "grounds: contrast + web/Apple parity" node tools/test_grounds.mjs
 run "US English" python3 tools/test_us_english.py
+run "version: MAJOR.MINOR.PATCH, both numbers bumped" python3 tools/test_version_contract.py
 run "agent files" python3 tools/test_agent_files.py
 run "app identity" python3 tools/test_app_identity.py
 if [ -r "$HOME/.centmemo/test-users.json" ]; then
