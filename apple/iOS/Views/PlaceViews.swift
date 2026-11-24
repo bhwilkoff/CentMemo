@@ -1,4 +1,6 @@
 #if os(iOS)
+import CoreLocation
+import CoreLocationUI
 import MapKit
 import SwiftUI
 
@@ -17,6 +19,10 @@ final class SettingPlaceModel {
     private var searchedFor: String?
 
     var guess: MKMapItem? { place == nil && index < guesses.count ? guesses[index] : nil }
+    /// D15b: nothing in the statement or the person's places to search near
+    /// (FinanceKit often says only "Apple Store"): offer "Find on the map".
+    var canSearchNearby = false
+    var findingNearby = false
 
     func load(setting: String, shownName: String, entries: [LedgerEntry]) async {
         place = (try? await APIClient.shared.loadSettingPlaces())?[setting]
@@ -25,6 +31,15 @@ final class SettingPlaceModel {
         let home = APIClient.shared.settingPlaces?.values.map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) } ?? []
         guesses = await PlaceGuess.search(setting: shownName, entries: entries, near: home)
         index = 0
+        canSearchNearby = guesses.isEmpty
+    }
+
+    /// The person tapped Apple's one-time location button: search near there.
+    func searchNear(_ here: CLLocation, setting: String, shownName: String, entries: [LedgerEntry]) async {
+        guesses = await PlaceGuess.search(setting: shownName, entries: entries, near: [], here: here)
+        index = 0
+        findingNearby = false
+        canSearchNearby = guesses.isEmpty
     }
 
     func confirm(_ item: MKMapItem, setting: String, shownName: String) async throws {
@@ -84,7 +99,35 @@ struct SettingPlaceSection: View {
             }
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("place-guess")
+        } else if model.canSearchNearby {
+            if model.findingNearby {
+                VStack(alignment: .leading, spacing: Spacing.s2) {
+                    Text("Search near where you are now. CentMemo uses it once, for this search.")
+                        .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
+                    LocationButton(.currentLocation) { Task { await locate() } }
+                        .labelStyle(.titleAndIcon).symbolVariant(.fill)
+                        .foregroundStyle(Color.brandOnPrimary).tint(Color.brandPrimary)
+                        .clipShape(Capsule())
+                        .accessibilityIdentifier("place-here")
+                }
+            } else {
+                Button("Find on the map", systemImage: "mappin.and.ellipse") { model.findingNearby = true }
+                    .font(TypeRamp.caption)
+                    .accessibilityIdentifier("place-find")
+            }
         }
+    }
+
+    /// One reading from the location Apple's button just allowed; never stored.
+    private func locate() async {
+        do {
+            for try await update in CLLocationUpdate.liveUpdates() {
+                if let here = update.location {
+                    await model.searchNear(here, setting: setting, shownName: shownName, entries: entries)
+                    return
+                }
+            }
+        } catch { _ = session.handle(error) }
     }
 
     private func run(_ work: () async throws -> Void) async {
@@ -132,36 +175,24 @@ struct PlaceMap: View {
 /// words, and only results whose name matches the Setting's.
 @available(iOS 26.0, *)
 enum PlaceGuess {
-    static func search(setting: String, entries: [LedgerEntry], near home: [CLLocationCoordinate2D]) async -> [MKMapItem] {
+    static func search(setting: String, entries: [LedgerEntry], near home: [CLLocationCoordinate2D], here: CLLocation? = nil) async -> [MKMapItem] {
         let hints = entries.compactMap { PlaceHint.from(description: $0.description, merchant: $0.merchant) }
         let hint = hints.first(where: \.isAddress) ?? hints.first
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = hint?.query(for: setting) ?? setting
         request.resultTypes = .pointOfInterest
-        let center = centroid(home)
+        let center = here?.coordinate ?? centroid(home)
         if hint?.isAddress != true, let center {
             request.region = MKCoordinateRegion(center: center, latitudinalMeters: 80_000, longitudinalMeters: 80_000)
         }
         guard let items = try? await MKLocalSearch(request: request).start().mapItems else { return [] }
-        let matches = items.filter { matches(setting, $0.name ?? "") }
+        let matches = items.filter { PlaceHint.nameMatches(setting, $0.name ?? "") }
         #if DEBUG
         print("PlaceGuess: \(request.naturalLanguageQuery ?? "") -> \(items.count) results, \(matches.count) named like \(setting)")
         #endif
         guard let center, hint?.isAddress != true else { return Array(matches.prefix(3)) }
         let here = CLLocation(latitude: center.latitude, longitude: center.longitude)
         return Array(matches.sorted { $0.location.distance(from: here) < $1.location.distance(from: here) }.prefix(3))
-    }
-
-    /// Most of the Setting's words appear in the place's name ("Crumbl" in
-    /// "Crumbl Cookies", "Denver Zoo" in "Denver Zoo").
-    static func matches(_ setting: String, _ name: String) -> Bool {
-        let want = words(setting), have = words(name)
-        guard !want.isEmpty else { return false }
-        return Double(want.filter(have.contains).count) / Double(want.count) >= 0.6
-    }
-
-    private static func words(_ s: String) -> Set<String> {
-        Set(s.lowercased().split { !$0.isLetter && !$0.isNumber }.map(String.init).filter { $0.count > 1 && $0 != "the" })
     }
 
     private static func centroid(_ points: [CLLocationCoordinate2D]) -> CLLocationCoordinate2D? {

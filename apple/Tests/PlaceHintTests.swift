@@ -26,4 +26,15 @@ struct PlaceHintTests {
         #expect(PlaceHint.from(description: "SQ *JOES COFFEE 1234", merchant: "") == nil)
         #expect(PlaceHint.from(description: "Denver Zoo", merchant: "Denver Zoo") == nil)
     }
+
+    @Test func namesMatchIncludingChains() {
+        #expect(PlaceHint.nameMatches("Denver Zoo", "Denver Zoo"))
+        #expect(PlaceHint.nameMatches("Crumbl", "Crumbl Cookies"))
+        #expect(PlaceHint.nameMatches("Apple Store", "Apple Park Meadows"), "Apple names its stores Apple <mall>")
+        #expect(!PlaceHint.nameMatches("Apple Store", "Applebee's Grill + Bar"))
+        #expect(!PlaceHint.nameMatches("Apple Store", "Best Buy"))
+        #expect(!PlaceHint.nameMatches("Big Bear Lake", "Big Lots"), "a short lead word is not a brand")
+        #expect(!PlaceHint.nameMatches("Golden Corral", "Golden Gate Park"), "a common lead word is not a brand")
+    }
 }
+

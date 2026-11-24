@@ -42,4 +42,29 @@ struct PlaceHint: Equatable, Sendable {
     private static func isHouseNumber(_ w: String) -> Bool {
         (1...6).contains(w.count) && w.first?.isNumber == true && w.allSatisfy { $0.isNumber || $0 == "-" }
     }
+
+    /// Most of the Setting's words appear in the place's name ("Crumbl" in
+    /// "Crumbl Cookies", "Denver Zoo" in "Denver Zoo").
+    nonisolated static func nameMatches(_ setting: String, _ name: String) -> Bool {
+        let want = words(setting), have = words(name)
+        guard !want.isEmpty else { return false }
+        if Double(want.filter(have.contains).count) / Double(want.count) >= 0.6 { return true }
+        // A chain: Apple Maps names Apple's stores "Apple Park Meadows", so the
+        // brand (the Setting's first word) leading the place's name counts.
+        let brand = ordered(setting).first, lead = ordered(name).first
+        guard let brand, brand == lead, brand.count >= 4, !commonLeads.contains(brand) else { return false }
+        return true
+    }
+
+    /// Lead words too common to be a brand ("Big Bear" is not "Big Lots").
+    nonisolated static let commonLeads: Set<String> = ["best", "city", "park", "great", "little", "first", "golden", "royal", "grand", "north", "south", "east", "west", "united", "american", "national"]
+
+    nonisolated private static func ordered(_ s: String) -> [String] {
+        s.lowercased().split { !$0.isLetter && !$0.isNumber }.map(String.init).filter { $0.count > 1 && $0 != "the" }
+    }
+
+    nonisolated private static func words(_ s: String) -> Set<String> {
+        Set(s.lowercased().split { !$0.isLetter && !$0.isNumber }.map(String.init).filter { $0.count > 1 && $0 != "the" })
+    }
+
 }

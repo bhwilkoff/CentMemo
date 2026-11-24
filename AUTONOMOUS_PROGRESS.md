@@ -1979,3 +1979,21 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   word plus Apple Maps category), and the one-time "Use where I am" button
   from the proposal for when nothing else fits. Chains are confirmed per
   visit.
+
+### Tick 40 — 2026-11-23 — D15b: place guesses for statements with no place words (built; device run queued)
+- **Chain matching** moved into Core as `PlaceHint.nameMatches`: "Apple
+  Store" accepts "Apple Park Meadows" (the brand leads), with a brand word
+  of at least 4 letters and not a common lead word. PlaceHintTests:
+  Applebee's, Best Buy, Big Lots and Golden Gate Park are all refused.
+- **No place words, no confirmed places** (Ben's 107 FinanceKit "Apple
+  Store" rows): a quiet "Find on the map" row, never a pushed guess. It
+  reveals Apple's one-time Current Location button; one reading via
+  `CLLocationUpdate`, used for that search only and never stored.
+- `NSLocationWhenInUseUsageDescription` added (project.yml); the privacy
+  page names the one-time location use. L2 note: re-check the App Privacy
+  answer on location (sent to Apple Maps only, not collected by CentMemo).
+- **Verified:** unit tests; the iOS build; `tools/test_all.sh` rc=0.
+- **Not yet verified:** the iPhone 12 run (SettingUITests.
+  testFindOnTheMapNearHere). Ear Drama held the phone for 15+ minutes;
+  queued with a 40-minute wait. On the Duo, Ben taps Current Location on
+  Apple Store himself (it's his location).

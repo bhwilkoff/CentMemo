@@ -66,6 +66,24 @@ final class SettingUITests: DeviceTestCase {
         XCTAssertTrue(guess.waitForExistence(timeout: 30), "forgotten: the guess returns")
     }
 
+    /// D15b: a Setting whose statement names no place ("MONTHLY INSTALLMENTS"
+    /// at Apple) offers a quiet "Find on the map", then Apple's one-time
+    /// location button; tapping it searches near the phone, once.
+    func testFindOnTheMapNearHere() {
+        let app = launch(["APP_START_SETTING": "Apple"])
+        let find = app.buttons["place-find"]
+        XCTAssertTrue(find.waitForExistence(timeout: 30), "no place words: a quiet Find on the map")
+        XCTAssertFalse(app.descendants(matching: .any)["place-guess"].exists, "and no guess pushed at the person")
+        find.tap()
+        let here = app.buttons["place-here"]
+        XCTAssertTrue(here.waitForExistence(timeout: 10), "Apple's one-time location button")
+        shot(app, "place-find")
+        here.tap()
+        let guess = app.descendants(matching: .any)["place-guess"].firstMatch
+        XCTAssertTrue(guess.waitForExistence(timeout: 30), "a guess near the phone (Apple <store>)")
+        shot(app, "place-near-here")
+    }
+
     /// The door opens a Setting directly (for design_shots).
     func testSettingDoor() {
         let app = launch(["APP_START_SETTING": "Denver Zoo"])
