@@ -1947,3 +1947,11 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   (rc=0), so it was network noise, not code.
 - **Delete account on iOS:** needs a throwaway account. Creating one is
   Ben's call; asked.
+
+### Check-in — 2026-11-23, about 5:50pm
+- **FinanceKit for `com.learningischange.centmemo.walletdelivery`:** the
+  developer portal's Capability Requests tab reads "Submitted". Ben's
+  submit went through; F2 waits on Apple.
+- The Duo is still away ("unavailable" in devicectl).
+- Still open for Ben: the throwaway account for the iPhone delete check,
+  public links (D12), D7 words, iPad width, and the design sign-off for L2.
