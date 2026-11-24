@@ -82,6 +82,7 @@ struct StoryChrome: ViewModifier {
     let model: StoryModel
     @Environment(SessionStore.self) private var session
     @State private var sharingTheme: String?
+    @State private var linkingTheme: LifeValue?
     func body(content: Content) -> some View {
         content
             .toolbar {
@@ -89,11 +90,14 @@ struct StoryChrome: ViewModifier {
                 if let name = model.themeName, !model.entries.isEmpty {
                     Button("Share this theme", systemImage: "square.and.arrow.up") { sharingTheme = name }
                         .accessibilityIdentifier("share-theme")
+                    Button("Make a link to this theme", systemImage: "link") { linkingTheme = model.values.first { $0.id == model.themeID } }
+                        .accessibilityIdentifier("link-theme")
                 }
             }
             .sheet(item: Binding(get: { sharingTheme.map(ThemeShareItem.init) }, set: { sharingTheme = $0?.name })) { item in
                 ShareThemeSheet(theme: item.name, entries: model.entries)
             }
+            .sheet(item: $linkingTheme) { MakeLinkSheet(theme: $0, entries: model.entries) }
             .task(id: "\(session.dataVersion)-\(String(describing: model.scope))") { await model.load(session) }
     }
 }

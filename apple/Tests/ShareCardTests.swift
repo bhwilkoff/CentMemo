@@ -47,6 +47,15 @@ import Testing
         for look in ShareDesign.Look.allCases { _ = try png(Self.long, ShareDesign(look: look, shape: .wide, mark: 4...500), "long-\(look.rawValue)") }
     }
 
+    @Test func everyPencilDrawsItsOwnMark() throws {
+        for paper in ShareDesign.Paper.allCases {
+            var seen = Set<Data>()
+            for p in ShareDesign.Pencil.allCases {
+                #expect(seen.insert(try png(Self.zoo, ShareDesign(look: .page, paper: paper, pencil: p, mark: 13...16), "pencil-\(p.rawValue)-\(paper.rawValue)")).inserted)
+            }
+        }
+    }
+
     @Test func underliningTakesTwoTaps() {
         var d = ShareDesign()
         d.tap(5); #expect(d.mark == 5...5)

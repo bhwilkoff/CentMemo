@@ -174,6 +174,8 @@ struct SettingsView: View {
                     Text("CentMemo reads your Apple Card, Apple Cash, and Savings accounts and transactions and keeps them in your CentMemo account, so you can write memos on any device. \(ConnectorPolicy.walletDisclosure) [Privacy](https://centmemo.com/privacy/)")
                 }
             }
+        case .links:
+            YourLinksSection()
         case .claude:
             Section {
                 Text(APIClient.mcpURL).font(.system(.caption, design: .monospaced)).textSelection(.enabled)
@@ -254,13 +256,14 @@ private struct DeleteAccountAlert: ViewModifier {
 
 /// The Settings sidebar's sections at regular width; compact width shows them all in one list.
 enum SettingsPane: String, CaseIterable, Identifiable {
-    case look, themes, moneyIn, claude, account, about
+    case look, themes, moneyIn, links, claude, account, about
     var id: String { rawValue }
     var title: String {
         switch self {
         case .look: "Color"
         case .themes: "Themes"
         case .moneyIn: "Bring in purchases"
+        case .links: "Your links"
         case .claude: "Connect Claude"
         case .account: "Account"
         case .about: "Privacy and terms"
@@ -271,7 +274,8 @@ enum SettingsPane: String, CaseIterable, Identifiable {
         case .look: "paintpalette"
         case .themes: "tag"
         case .moneyIn: "tray.and.arrow.down"
-        case .claude: "link"
+        case .links: "link"
+        case .claude: "powerplug"
         case .account: "person.crop.circle"
         case .about: "hand.raised"
         }

@@ -26,6 +26,7 @@ struct EntryDetailView: View {
     @Environment(\.openURL) private var openURL
     @State private var drawn: CGFloat = 0
     @State private var sharing = false
+    @State private var linking = false
     @State private var room: CGFloat = 0
     /// D15: the Setting's confirmed place, if the person confirmed one.
     @State private var place: APIClient.SettingPlace?
@@ -81,6 +82,10 @@ struct EntryDetailView: View {
                         Button("Share", systemImage: "square.and.arrow.up") { sharing = true }
                             .accessibilityIdentifier("share-memo")
                     }
+                    ToolbarItem(placement: .secondaryAction) {
+                        Button("Make a link", systemImage: "link") { linking = true }
+                            .accessibilityIdentifier("link-memo")
+                    }
                 }
                 // Skip (Decision 065), also reachable without the list's swipe.
                 ToolbarItem(placement: .secondaryAction) {
@@ -104,6 +109,11 @@ struct EntryDetailView: View {
         .sheet(isPresented: $sharing) {
             if let e = entry, let body = e.memo?.body {
                 ShareMemoSheet(entry: e, memo: body)
+            }
+        }
+        .sheet(isPresented: $linking) {
+            if let e = entry, let body = e.memo?.body {
+                MakeLinkSheet(entry: e, memo: body)
             }
         }
         .task { await load() }
@@ -305,6 +315,7 @@ struct EntryDetailView: View {
             #if DEBUG
             // DEBUG door APP_START_SHARE=1: the share studio, for captures where nothing can tap (iPad, Duo).
             if ProcessInfo.processInfo.environment["APP_START_SHARE"] == "1", entry?.memo != nil { sharing = true }
+            if ProcessInfo.processInfo.environment["APP_START_SHARE"] == "link", entry?.memo != nil { linking = true }
             #endif
             #if DEBUG && os(iOS)
             if ProcessInfo.processInfo.environment["APP_ATTACH_SAMPLE_FILE"] == "1", !photos.contains(where: { $0.kind == "file" }) {

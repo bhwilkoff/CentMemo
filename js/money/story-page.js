@@ -41,8 +41,8 @@
         const add = (d, width, op) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.setAttribute('stroke-width', width); if (op) p.style.opacity = op; svg.append(p); };
         const line = (yy) => `M${x - 3} ${yy + t * .4}C${x + w * .3} ${yy - t * 1.1} ${x + w * .62} ${yy + t * 1.5} ${x + w + 5} ${yy - t * .2}`;
         if (kind === 'double') { add(line(u - t * .6), t * .7); add(line(u + t * 1.3), t * .7); }
-        else if (kind === 'highlight') add(`M${x} ${y + h * .56}C${x + w * .3} ${y + h * .52} ${x + w * .7} ${y + h * .6} ${x + w} ${y + h * .55}`, h * .62, .28);
-        else if (kind === 'circle') { const X = x - size * .16, Y = y - h * .02, W = w + size * .32, H = h * 1.06, p = (a, b) => `${X + a / 100 * W} ${Y + b / 60 * H}`; add(`M${p(58, 3)}C${p(26, 1)} ${p(2, 14)} ${p(2, 31)}C${p(3, 50)} ${p(34, 59)} ${p(58, 57)}C${p(86, 55)} ${p(99, 42)} ${p(98, 27)}C${p(96, 12)} ${p(72, 2)} ${p(42, 5)}`, Math.max(2, size * .05)); }
+        else if (kind === 'highlight') { svg.classList.add('sp-hi'); add(`M${x - 3} ${y + h * .56}C${x + w * .3} ${y + h * .52} ${x + w * .7} ${y + h * .6} ${x + w + 3} ${y + h * .55}`, h * .72, .26); }
+        else if (kind === 'circle') { const X = x - size * .24, Y = y - h * .02, W = w + size * .48, H = h * 1.06, p = (a, b) => `${X + a / 100 * W} ${Y + b / 60 * H}`; add(`M${p(58, 3)}C${p(20, 0)} ${p(1, 4)} ${p(1, 31)}C${p(1, 57)} ${p(22, 60)} ${p(58, 58)}C${p(90, 57)} ${p(100, 54)} ${p(99, 28)}C${p(98, 3)} ${p(80, 0)} ${p(42, 5)}`, Math.max(2, size * .05)); }
         else add(line(u), t);
       }
       q.prepend(svg);

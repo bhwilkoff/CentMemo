@@ -35,8 +35,9 @@ struct ShareMemoSheet: View {
         Section {
             ShareWords(words: content.words, mark: $design.mark, prefix: nil)
         } header: {
-            Text("Underline the words that matter")
+            Text("Mark the words that matter")
         }
+        if design.look != .words { PencilPicker(pencil: $design.pencil) }
         Section("Look") {
             Picker("Look", selection: $design.look) {
                 Text("Page").tag(ShareDesign.Look.page)
@@ -112,7 +113,7 @@ struct ShareStudio<Card: View, Choices: View, Send: View>: View {
     }
 }
 
-/// A memo's words as buttons: first word, then last, and what is between is underlined.
+/// A memo's words as buttons: first word, then last, and what is between is marked.
 struct ShareWords: View {
     let words: [String]
     @Binding var mark: ClosedRange<Int>?
@@ -134,7 +135,22 @@ struct ShareWords: View {
                 .accessibilityIdentifier(prefix.map { "share-word-\($0)-\(i)" } ?? "share-word-\(i)")
             }
         }
-        if mark != nil { Button("No underline") { mark = nil }.buttonStyle(.borderless) }
+        if mark != nil { Button("No mark") { mark = nil }.buttonStyle(.borderless) }
+    }
+}
+
+/// How the marked words are marked, on cards and on links.
+struct PencilPicker: View {
+    @Binding var pencil: ShareDesign.Pencil
+
+    var body: some View {
+        Section("Pencil") {
+            Picker("Pencil", selection: $pencil) {
+                ForEach(ShareDesign.Pencil.allCases, id: \.self) { Text($0.title).tag($0) }
+            }
+            .pickerStyle(.segmented).labelsHidden()
+            .accessibilityIdentifier("share-pencil")
+        }
     }
 }
 

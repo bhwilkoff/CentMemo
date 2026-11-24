@@ -6,6 +6,7 @@
   const LOOKS = ['page', 'setting', 'theme', 'words'];
   const SHAPES = { square: [1080, 1080], tall: [1080, 1920], wide: [1200, 630] };
   const PAPERS = ['paper', 'night', 'theme'];
+  const PENCILS = ['underline', 'double', 'circle', 'highlight'];
   const SERIF = 'Newsreader, "New York", Georgia, serif';
   const SANS = '-apple-system, "Helvetica Neue", Arial, sans-serif';
 
@@ -53,6 +54,31 @@
     ctx.bezierCurveTo(...p(84, 53), ...p(97, 42), ...p(95, 27)); ctx.bezierCurveTo(...p(93, 12), ...p(72, 3), ...p(44, 6));
     ctx.stroke(); ctx.restore();
   }
+  // The pencil the person chose, over one line's marked words. The highlighter goes
+  // under the words; on a color page it darkens, so the words keep their contrast.
+  function pencilUnder(ctx, x, base, w, size, m) {
+    if (m.kind !== 'highlight') return;
+    ctx.save(); ctx.fillStyle = m.onColor ? '#000000' : m.color; ctx.globalAlpha = m.onColor ? .24 : .28;
+    ctx.beginPath(); ctx.moveTo(x - size * .06, base - size * .62); ctx.bezierCurveTo(x + w * .3, base - size * .68, x + w * .7, base - size * .58, x + w + size * .08, base - size * .66);
+    ctx.lineTo(x + w + size * .04, base + size * .14); ctx.bezierCurveTo(x + w * .7, base + size * .2, x + w * .3, base + size * .1, x - size * .04, base + size * .17);
+    ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+  function pencilOver(ctx, x, base, w, size, m) {
+    const t = Math.max(3, size * .07);
+    if (m.kind === 'highlight') return;
+    if (m.kind === 'circle') ring(ctx, x - size * .24, base - size * .92, w + size * .48, size * 1.28, m.color, Math.max(3, size * .05));
+    else if (m.kind === 'double') { stroke(ctx, x, base + size * .13, w, m.color, t * .7); stroke(ctx, x, base + size * .25, w, m.color, t * .7); }
+    else stroke(ctx, x, base + size * .16, w, m.color, t);
+  }
+  // Around words: squarer than the date's loop, so it clears the first and last letters.
+  function ring(ctx, x, y, w, h, color, thick) {
+    ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = thick; ctx.lineCap = 'round'; ctx.globalAlpha = .85;
+    const p = (a, b) => [x + a / 100 * w, y + b / 60 * h];
+    ctx.beginPath(); ctx.moveTo(...p(58, 3));
+    ctx.bezierCurveTo(...p(20, 0), ...p(1, 4), ...p(1, 31)); ctx.bezierCurveTo(...p(1, 57), ...p(22, 60), ...p(58, 58));
+    ctx.bezierCurveTo(...p(90, 57), ...p(100, 54), ...p(99, 28)); ctx.bezierCurveTo(...p(98, 3), ...p(80, 0), ...p(42, 5));
+    ctx.stroke(); ctx.restore();
+  }
   function block(ctx, words, f, make, x, y, ink, mark) {
     ctx.font = make(f.size); ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
     const space = ctx.measureText(' ').width, lh = f.size * 1.28;
@@ -60,15 +86,18 @@
     f.lines.forEach((l, n) => {
       let cx = x; const base = y + f.size + n * lh; last = base;
       let from = null, to = null;
-      l.words.forEach((i, k) => {
+      const at = l.words.map((i, k) => {
         let t = words[i];
         if (f.cut && n === f.lines.length - 1 && k === l.words.length - 1) t += '…';
-        const w = ctx.measureText(t).width;
-        ctx.fillStyle = ink; ctx.fillText(t, cx, base);
+        const w = ctx.measureText(t).width, place = [t, cx];
         if (mark && i >= mark.from && i <= mark.to) { if (from == null) from = cx; to = cx + w; }
         cx += w + space;
+        return place;
       });
-      if (from != null) stroke(ctx, from, base + f.size * .16, to - from, mark.color, Math.max(3, f.size * .07));
+      if (from != null) pencilUnder(ctx, from, base, to - from, f.size, mark);
+      ctx.fillStyle = ink;
+      for (const [t, px] of at) ctx.fillText(t, px, base);
+      if (from != null) pencilOver(ctx, from, base, to - from, f.size, mark);
     });
     return last + f.size * .3;
   }
@@ -97,13 +126,13 @@
   const range = (a, b, step) => { const o = []; for (let v = a; v >= b; v -= step) o.push(v); return o; };
 
   /* d: { memo, setting, initials, date, themes: [{ name, color, dark }] }
-   * c: { look, shape, paper, showSetting, showDate, showThemes, mark: [from, to] | null } */
+   * c: { look, shape, paper, showSetting, showDate, showThemes, pencil, mark: [from, to] | null } */
   function draw(canvas, d, c) {
     const [W, H] = SHAPES[c.shape] || SHAPES.square;
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d'), theme = d.themes[0] || null, k = inks(c.paper, theme);
     const M = Math.round(Math.min(W, H) * .09), words = wordsOf(d.memo);
-    const mark = c.mark && words.length ? { from: Math.min(...c.mark), to: Math.max(...c.mark), color: c.paper === 'theme' ? k.pencil : k.mark } : null;
+    const mark = c.mark && words.length ? { from: Math.min(...c.mark), to: Math.max(...c.mark), color: c.paper === 'theme' ? k.pencil : k.mark, kind: c.pencil, onColor: c.paper === 'theme' } : null;
     ctx.fillStyle = k.bg; ctx.fillRect(0, 0, W, H);
     const memo = (s) => `400 ${s}px ${SERIF}`, strong = (s) => `600 ${s}px ${SERIF}`;
     const big = Math.round(Math.min(W, H) * (H > W * 1.5 ? .112 : .085));
@@ -186,7 +215,7 @@
     return { size: s, blocks: out };
   }
   /* d: { theme: { name, color, dark }, span, memos: [{ memo, setting, date, mark }] }
-   * c: { look, shape, paper, showSetting, showDate } */
+   * c: { look, shape, paper, pencil, showSetting, showDate } */
   function drawTheme(canvas, d, c) {
     const [W, H] = SHAPES[c.shape] || SHAPES.square;
     canvas.width = W; canvas.height = H;
@@ -227,7 +256,7 @@
     const f = stack(ctx, items, memo, W - M * 2, bottom - top, range(Math.round(short * .055), 22, 1), .8, cap);
     let y = top;
     f.blocks.forEach((L, i) => {
-      block(ctx, items[i], { size: f.size, lines: L }, memo, M, y, k.ink, d.memos[i].mark ? { from: Math.min(...d.memos[i].mark), to: Math.max(...d.memos[i].mark), color: c.paper === 'theme' ? k.pencil : k.mark } : null);
+      block(ctx, items[i], { size: f.size, lines: L }, memo, M, y, k.ink, d.memos[i].mark ? { from: Math.min(...d.memos[i].mark), to: Math.max(...d.memos[i].mark), color: c.paper === 'theme' ? k.pencil : k.mark, kind: c.pencil, onColor: c.paper === 'theme' } : null);
       y += L.length * f.size * 1.28;
       if (cap) { const t = Math.round(Math.max(20, f.size * .62)); ctx.font = sans(t); ctx.fillStyle = k.muted; ctx.fillText([c.showSetting ? d.memos[i].setting : null, c.showDate ? d.memos[i].date : null].filter(Boolean).join(' · '), M, y + f.size * .72); y += f.size * .95; }
       y += f.size * .8;
@@ -238,7 +267,7 @@
   }
   function round(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
 
-  const api = { LOOKS, THEME_LOOKS, SHAPES, PAPERS, draw, drawTheme, linesOf, wordsOf, inks };
+  const api = { LOOKS, THEME_LOOKS, SHAPES, PAPERS, PENCILS, draw, drawTheme, linesOf, wordsOf, inks };
   root.CentShare = api;
   if (typeof module !== 'undefined') module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

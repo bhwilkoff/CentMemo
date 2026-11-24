@@ -87,7 +87,7 @@ account, 6 the Connect button):**
 - N2 ✅ Starter themes leave Unexamined; Settings keeps them (web + Apple).
 - N3 ✅ "Connect Apple Wallet" reads "Sync Apple Wallet" once connected.
 - N3b ✅ (tick 52) Audit every action's words on every platform.
-- N4 🟡 (DESIGN S; web live; draft for Ben https://claude.ai/artifact/XTgCwKxwxF6ZyAEuhYYcpc; memo and theme built on web, iPhone, iPad, Mac; links live on the web (tick 56); links from iPhone and Mac, pencil choices on cards ⏳) Design your share: Setting, memory, themes; the person chooses the look.
+- N4 🟡 (DESIGN S; web live; draft for Ben https://claude.ai/artifact/XTgCwKxwxF6ZyAEuhYYcpc; memo and theme built on web, iPhone, iPad, Mac; links and pencil choices live on web, iPhone, iPad and Mac (tick 57)) Design your share: Setting, memory, themes; the person chooses the look.
   Design with the skills first, on every size. Links after the design.
 - N5 🟡 (rules: docs/DESIGN.md W; web at 375/768/1024/1440, iPad landscape, open Duo, Mac at 900/1180/1600 built and seen; Settings at wide and iPad portrait seen; closed Duo ⏳) Every screen size designed on purpose: iPhone 12, Duo closed and open, iPad
   portrait and landscape, Mac window small to large, web phone to desktop.
@@ -2363,3 +2363,16 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   anything. The list now loads by itself, with Loading, Try again and offline; a check
   holds the answer back forever. A second, intermittent failure was the test reloading
   a page that was already reloading itself. Four clean runs after both.
+
+### Tick 57 — 2026-11-24 — N4: links from iPhone, iPad and Mac; the pencil on cards — v1.0.28 (29)
+- **Built:** Make a link (event ⋯ menu, a theme's Story), Your links in Settings, the
+  four pencils on memo and theme cards (web and Apple). The preview is the site's page
+  code bundled in the app, so the two cannot drift.
+- **Caught by looking:** typing in Shared by scrolled the field away; a new link's
+  address was off screen; a filled Where or When had no label; the circle cut the first
+  and last letters; the highlighter on a color page fell to 2.97:1. All fixed. Pressing
+  Make twice no longer makes a twin (web too).
+- **Verified:** iPhone 12 taps (make, type, send offered, listed, turned off, theme
+  parts), Mac and iPad seen, unit tests, test_all.
+- **Not verified:** iPad taps (it wants its passcode for UI automation, Ben's to enter);
+  the Duo (not reachable from this Mac at 4:40pm); a link sent from a share sheet.

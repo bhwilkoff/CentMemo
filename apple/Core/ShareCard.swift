@@ -33,12 +33,17 @@ struct ShareDesign: Equatable, Sendable {
             }
         }
     }
+    enum Pencil: String, CaseIterable, Sendable {
+        case underline, double, circle, highlight
+        var title: String { switch self { case .underline: "Underline"; case .double: "Two lines"; case .circle: "Circle"; case .highlight: "Highlighter" } }
+    }
     var look = Look.page
     var paper = Paper.paper
     var shape = Shape.square
     var showSetting = true
     var showDate = true
     var showThemes = true
+    var pencil = Pencil.underline
     var mark: ClosedRange<Int>?
 
     /// First tap starts an underline, the second ends it, the third starts over.
@@ -89,6 +94,7 @@ struct ThemeShareDesign: Equatable, Sendable {
     var look = Look.cover
     var paper = ShareDesign.Paper.paper
     var shape = ShareDesign.Shape.square
+    var pencil = ShareDesign.Pencil.underline
     var showSetting = true
     var showDate = true
 }
@@ -101,7 +107,7 @@ struct ThemeShareCard: View {
         let size = design.shape.size
         Canvas { ctx, _ in
             let base = ShareContent(memo: "", setting: "", initials: "", date: "", themes: [content.theme])
-            Painter(ctx: ctx, c: base, d: ShareDesign(paper: design.paper, shape: design.shape)).paintTheme(content, design)
+            Painter(ctx: ctx, c: base, d: ShareDesign(paper: design.paper, shape: design.shape, pencil: design.pencil)).paintTheme(content, design)
         }
         .frame(width: size.width, height: size.height)
         .accessibilityElement()
@@ -194,26 +200,67 @@ private struct Painter {
         for (n, line) in f.lines.enumerated() {
             let base = y + f.size + CGFloat(n) * f.size * Self.lead
             last = base
-            var cx = x, from: CGFloat?, to: CGFloat = 0
+            var cx = x, from: CGFloat?, to: CGFloat = 0, at: [(String, CGFloat)] = []
             for (k, i) in line.words.enumerated() {
                 let end = f.cut && n == f.lines.count - 1 && k == line.words.count - 1
                 let t = end ? words[i] + "…" : words[i], w = Self.width(t, font)
-                text(t, f.size, face, color, x: cx, base: base)
+                at.append((t, cx))
                 if let mark, mark.contains(i) { if from == nil { from = cx }; to = cx + w }
                 cx += w + space
             }
-            if let from { stroke(from, base + f.size * 0.16, to - from, d.paper == .theme ? pencil : accent, max(3, f.size * 0.07)) }
+            if let from { pencilUnder(from, base, to - from, f.size) }
+            for (t, px) in at { text(t, f.size, face, color, x: px, base: base) }
+            if let from { pencilOver(from, base, to - from, f.size) }
         }
         return last + f.size * 0.3
     }
 
     // MARK: Marks
 
+    private var markColor: Color { d.paper == .theme ? pencil : accent }
+
+    /// The highlighter goes under the words; on a color page it darkens, so the words
+    /// keep their contrast.
+    private func pencilUnder(_ x: CGFloat, _ base: CGFloat, _ w: CGFloat, _ size: CGFloat) {
+        guard d.pencil == .highlight else { return }
+        var p = Path()
+        p.move(to: CGPoint(x: x - size * 0.06, y: base - size * 0.62))
+        p.addCurve(to: CGPoint(x: x + w + size * 0.08, y: base - size * 0.66), control1: CGPoint(x: x + w * 0.3, y: base - size * 0.68), control2: CGPoint(x: x + w * 0.7, y: base - size * 0.58))
+        p.addLine(to: CGPoint(x: x + w + size * 0.04, y: base + size * 0.14))
+        p.addCurve(to: CGPoint(x: x - size * 0.04, y: base + size * 0.17), control1: CGPoint(x: x + w * 0.7, y: base + size * 0.2), control2: CGPoint(x: x + w * 0.3, y: base + size * 0.1))
+        p.closeSubpath()
+        ctx.fill(p, with: .color(d.paper == .theme ? Color.black.opacity(0.24) : accent.opacity(0.28)))
+    }
+
+    private func pencilOver(_ x: CGFloat, _ base: CGFloat, _ w: CGFloat, _ size: CGFloat) {
+        let t = max(3, size * 0.07)
+        switch d.pencil {
+        case .highlight: break
+        case .circle: ring(CGRect(x: x - size * 0.24, y: base - size * 0.92, width: w + size * 0.48, height: size * 1.28), markColor, max(3, size * 0.05))
+        case .double:
+            stroke(x, base + size * 0.13, w, markColor, t * 0.7)
+            stroke(x, base + size * 0.25, w, markColor, t * 0.7)
+        case .underline: stroke(x, base + size * 0.16, w, markColor, t)
+        }
+    }
+
     private func stroke(_ x: CGFloat, _ y: CGFloat, _ w: CGFloat, _ color: Color, _ thick: CGFloat) {
         var p = Path()
         p.move(to: CGPoint(x: x - 4, y: y + thick * 0.4))
         p.addCurve(to: CGPoint(x: x + w + 6, y: y - thick * 0.2), control1: CGPoint(x: x + w * 0.3, y: y - thick * 1.1), control2: CGPoint(x: x + w * 0.62, y: y + thick * 1.5))
         ctx.stroke(p, with: .color(color.opacity(0.85)), style: StrokeStyle(lineWidth: thick, lineCap: .round))
+    }
+
+    /// Around words: squarer than the date's loop, so it clears the first and last letters.
+    private func ring(_ r: CGRect, _ color: Color, _ thick: CGFloat) {
+        func p(_ a: CGFloat, _ b: CGFloat) -> CGPoint { CGPoint(x: r.minX + a / 100 * r.width, y: r.minY + b / 60 * r.height) }
+        var path = Path()
+        path.move(to: p(58, 3))
+        path.addCurve(to: p(1, 31), control1: p(20, 0), control2: p(1, 4))
+        path.addCurve(to: p(58, 58), control1: p(1, 57), control2: p(22, 60))
+        path.addCurve(to: p(99, 28), control1: p(90, 57), control2: p(100, 54))
+        path.addCurve(to: p(42, 5), control1: p(98, 3), control2: p(80, 0))
+        ctx.stroke(path, with: .color(color.opacity(0.85)), style: StrokeStyle(lineWidth: thick, lineCap: .round))
     }
 
     private func loop(_ r: CGRect, _ color: Color) {

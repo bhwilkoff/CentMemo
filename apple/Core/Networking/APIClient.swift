@@ -413,6 +413,27 @@ final class APIClient {
         try await raw("rest/v1/life_values", query: [.init(name: "id", value: "eq.\(id)")], method: "DELETE")
     }
 
+    // MARK: - Story links (Decision 067)
+
+    func makeShare(_ draft: StoryLinkDraft) async throws -> String {
+        let data = try await raw("rest/v1/rpc/make_share", method: "POST", body: draft.request)
+        guard let code = try? JSONDecoder().decode(String.self, from: data), !code.isEmpty else { throw APIError.decoding("new link") }
+        return code
+    }
+    func shares() async throws -> [StoryLink] {
+        try await rest("shares", [.init(name: "select", value: "code,title,created_at"), .init(name: "order", value: "created_at.desc")])
+    }
+    func turnOffShare(_ code: String) async throws {
+        try await raw("rest/v1/shares", query: [.init(name: "code", value: "eq.\(code)")], method: "DELETE")
+    }
+    /// Which of these came from Apple Wallet: their store and date are never prefilled.
+    func walletIDs(among ids: [String]) async throws -> Set<String> {
+        struct Row: Decodable { let id: String }
+        let rows: [Row] = try await rest("transactions", [.init(name: "select", value: "id"), .init(name: "source", value: "eq.financekit"),
+                                                          .init(name: "id", value: "in.(\(ids.joined(separator: ",")))")])
+        return Set(rows.map(\.id))
+    }
+
     // MARK: - Writing the memo (only the person; agents are refused in SQL)
 
     func saveMemo(transactionID: String, body: String, valueIDs: [String]) async throws {

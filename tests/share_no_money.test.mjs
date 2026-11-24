@@ -18,6 +18,10 @@ const surfaces = {
   'web theme card': webPanel('shareThemePanel'),
   'Apple memo card': readFileSync('apple/iOS/Components/ShareMemo.swift', 'utf8'),
   'the Apple card itself': readFileSync('apple/Core/ShareCard.swift', 'utf8'),
+  'web link maker': webPanel('linkPanel'),
+  'the link page': readFileSync('js/money/story-page.js', 'utf8'),
+  'Apple link maker': readFileSync('apple/iOS/Components/MakeLink.swift', 'utf8'),
+  'the Apple link itself': readFileSync('apple/Core/Models/StoryLink.swift', 'utf8'),
   'Apple theme card': readFileSync('apple/iOS/Components/ShareTheme.swift', 'utf8'),
 };
 for (const [name, src] of Object.entries(surfaces)) {

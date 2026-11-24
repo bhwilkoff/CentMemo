@@ -502,7 +502,7 @@
   }
   // N4 (DESIGN S): the person designs their share. The card is drawn from the memo,
   // the Setting, the date and the themes; it is never given an amount.
-  const SHARE_NAMES = { page: 'Page', setting: 'Setting', theme: 'Theme', words: 'Words', paper: 'Paper', night: 'Night', themeColor: 'Theme color', square: 'Square', tall: 'Tall', wide: 'Wide', cover: 'Cover', pages: 'Pages', lines: 'Lines' };
+  const SHARE_NAMES = { page: 'Page', setting: 'Setting', theme: 'Theme', words: 'Words', paper: 'Paper', night: 'Night', themeColor: 'Theme color', square: 'Square', tall: 'Tall', wide: 'Wide', cover: 'Cover', pages: 'Pages', lines: 'Lines', underline: 'Underline', double: 'Two lines', circle: 'Circle', highlight: 'Highlighter' };
   const THEME_HEX = { clay: ['#A33E25', '#FCA48D'], persimmon: ['#964D09', '#FEA668'], ochre: ['#815C0A', '#E9B452'], olive: ['#686800', '#C3C55A'], moss: ['#2F751D', '#90D281'], sage: ['#1B735B', '#54D8B1'], teal: ['#157171', '#2AD7D7'], sky: ['#006D91', '#60CCFC'], slate: ['#2F60B2', '#98BFFE'], iris: ['#6451AC', '#BCB3FA'], plum: ['#8A428E', '#E8A0EC'], rose: ['#9D3A67', '#FF99C2'], stone: ['#6F6964', '#B3ACA6'] };
   const themeOf = (n) => { const [color, dark] = THEME_HEX[themeKey(n)] || THEME_HEX.stone; return { name: n, color, dark }; };
   // The pieces both studios share: a choice, a switch, the words, and sending.
@@ -531,7 +531,7 @@
       }));
       if (focus != null) box.querySelectorAll('button')[focus].focus();
     }
-    const clear = h('button', { type: 'button', class: 'btn btn-small btn-quiet' }, 'No underline');
+    const clear = h('button', { type: 'button', class: 'btn btn-small btn-quiet' }, 'No mark');
     clear.addEventListener('click', () => { set(null); paint(); draw(); });
     paint();
     return [box, clear];
@@ -556,16 +556,17 @@
     const names = (memo.memo_values || []).map((v) => v.life_values && v.life_values.name).filter(Boolean);
     const data = { memo: memo.body, setting: merchantOf(t), initials: CentMoney.merchantInitials(merchantOf(t)), date: niceDate(t.txn_date),
       themes: names.map(themeOf) };
-    const c = { look: 'page', shape: 'square', paper: 'paper', showSetting: true, showDate: true, showThemes: true, mark: null };
+    const c = { look: 'page', shape: 'square', paper: 'paper', showSetting: true, showDate: true, showThemes: true, pencil: 'underline', mark: null };
     const card = h('canvas', { class: 'share-canvas', role: 'img' }), status = h('span', { class: 'caption', role: 'status' });
-    const draw = () => { CentShare.draw(card, data, c); card.setAttribute('aria-label', SHARE_NAMES[c.look] + ' card: ' + data.memo); };
+    const draw = () => { CentShare.draw(card, data, c); card.setAttribute('aria-label', SHARE_NAMES[c.look] + ' card: ' + data.memo); pencil.hidden = c.look === 'words'; };
     const pick = (legend, key, values) => sharePick(c, 'share-', legend, key, values, draw), show = (key, label) => shareShow(c, 'share-', key, label, draw);
+    const pencil = pick('Pencil', 'pencil', CentShare.PENCILS);
     shareFonts().then(draw);
     return h('details', { class: 'share-panel' }, h('summary', {}, 'Share this memo'),
       h('div', { class: 'share-studio' }, h('div', { class: 'share-stage' }, card),
         h('div', { class: 'share-choices' },
-          h('fieldset', { class: 'share-set' }, h('legend', {}, 'Underline the words that matter'), shareWords(data.memo, () => c.mark, (m) => { c.mark = m; }, draw)),
-          pick('Look', 'look', CentShare.LOOKS), pick('Paper', 'paper', CentShare.PAPERS.filter((p) => p !== 'theme' || data.themes.length)), pick('Shape', 'shape', Object.keys(CentShare.SHAPES)),
+          h('fieldset', { class: 'share-set' }, h('legend', {}, 'Mark the words that matter'), shareWords(data.memo, () => c.mark, (m) => { c.mark = m; }, draw)),
+          pencil, pick('Look', 'look', CentShare.LOOKS), pick('Paper', 'paper', CentShare.PAPERS.filter((p) => p !== 'theme' || data.themes.length)), pick('Shape', 'shape', Object.keys(CentShare.SHAPES)),
           h('fieldset', { class: 'share-set' }, h('legend', {}, 'Show'), h('div', { class: 'share-opts' }, show('showSetting', 'Where'), show('showDate', 'When'), data.themes.length ? show('showThemes', 'Themes') : null)),
           h('div', { class: 'actions' }, shareSend(card, status), status))));
   }
@@ -574,15 +575,17 @@
   function shareThemePanel(themeName, rows) {
     const memoOf = (t) => (Array.isArray(t.memos) ? t.memos[0] : t.memos) || {};
     const all = rows.map((t) => ({ memo: memoOf(t).body, setting: merchantOf(t), day: t.txn_date, date: niceDate(t.txn_date), mark: null, on: true }));
-    const c = { look: 'cover', shape: 'square', paper: 'paper', showSetting: true, showDate: true };
+    const c = { look: 'cover', shape: 'square', paper: 'paper', showSetting: true, showDate: true, pencil: 'underline' };
     const card = h('canvas', { class: 'share-canvas', role: 'img' }), status = h('span', { class: 'caption', role: 'status' });
     const draw = () => {
       const memos = all.filter((m) => m.on), days = memos.map((m) => m.day).sort();
       const span = !days.length ? '' : days[0] === days[days.length - 1] ? niceDate(days[0]) : niceDate(days[0]) + ' to ' + niceDate(days[days.length - 1]);
       CentShare.drawTheme(card, { theme: themeOf(themeName), span, memos }, c);
       card.setAttribute('aria-label', themeName + ': ' + memos.map((m) => m.memo).join(' '));
+      pencil.hidden = c.look !== 'pages';
     };
     const pick = (legend, key, values) => sharePick(c, 'share-theme-', legend, key, values, draw), show = (key, label) => shareShow(c, 'share-theme-', key, label, draw);
+    const pencil = pick('Pencil', 'pencil', CentShare.PENCILS);
     const picks = all.map((m, i) => {
       const box = h('input', { type: 'checkbox', id: 'share-theme-' + i, checked: true });
       const words = h('div', { class: 'share-memo-words' }, shareWords(m.memo, () => m.mark, (v) => { m.mark = v; }, draw));
@@ -593,9 +596,9 @@
     return h('details', { class: 'share-panel', 'data-share-theme': '' }, h('summary', {}, 'Share this theme'),
       h('div', { class: 'share-studio' }, h('div', { class: 'share-stage' }, card),
         h('div', { class: 'share-choices' },
-          pick('Look', 'look', CentShare.THEME_LOOKS), pick('Paper', 'paper', CentShare.PAPERS), pick('Shape', 'shape', Object.keys(CentShare.SHAPES)),
+          pick('Look', 'look', CentShare.THEME_LOOKS), pencil, pick('Paper', 'paper', CentShare.PAPERS), pick('Shape', 'shape', Object.keys(CentShare.SHAPES)),
           h('fieldset', { class: 'share-set' }, h('legend', {}, 'Show'), h('div', { class: 'share-opts' }, show('showSetting', 'Where'), show('showDate', 'When'))),
-          h('fieldset', { class: 'share-set' }, h('legend', {}, 'Underline the words that matter'), picks),
+          h('fieldset', { class: 'share-set' }, h('legend', {}, 'Mark the words that matter'), picks),
           h('div', { class: 'actions' }, shareSend(card, status), status))));
   }
   /* ---- Make a link (DESIGN S7): every choice is the writer's, beside the reader's page ---- */
@@ -607,6 +610,7 @@
     const say = { from: '' };
     const on = () => all.filter((m) => m.on);
     function draw() {
+      go.disabled = false;
       const items = on().map((m) => ({ memo: m.memo, place: d.place && m.place.trim() || null, when: d.when && m.when.trim() || null, mark: m.mark && [Math.min(...m.mark), Math.max(...m.mark)] }));
       CentStory.render(page, { kind, theme: theme && (kind === 'theme' || d.theme) ? { name: theme.name } : null, from: say.from.trim() || null, items, design: { ...d, color: theme ? themeKey(theme.name) : 'clay' } });
     }
@@ -652,8 +656,7 @@
         copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(url); copy.textContent = 'Copied'; } catch (_) { copy.textContent = 'Select and copy'; } });
         status.textContent = 'Your link is ready.';
         fill(made, h('div', { class: 'inline-form' }, h('a', { class: 'link-url', href: url, target: '_blank', rel: 'noopener' }, url), copy));
-      } catch (err) { status.textContent = err.message; }
-      go.disabled = false;
+      } catch (err) { status.textContent = err.message; go.disabled = false; }
     });
     const panel = h('details', { class: 'share-panel link-panel' }, h('summary', {}, kind === 'theme' ? 'Make a link to this theme' : 'Make a link to this memo'),
       h('div', { class: 'share-studio' }, h('div', { class: 'link-stage' }, page), choices));

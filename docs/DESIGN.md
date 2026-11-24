@@ -166,3 +166,10 @@ be able to design your 'share'."*
   highlighter), the color, what leads, the parts of a theme's page, and the place, time
   and name in their own words, beside the reader's page, live. One module draws both
   (`js/money/story-page.js`). What may be published is Decision 067.
+- **S8. The pencil is the same four marks on cards and links** (underline, two lines,
+  circle, highlighter). The circle clears the first and last letters; the highlighter
+  sits under the words and, on a color page, darkens it (a white one measured 2.97:1;
+  dark is 7:1 or better). A look that draws no mark hides the choice.
+- **S9. On Apple devices the link's preview is the site's own page code**, bundled
+  (`StoryPagePreview`), with no network. Beside the choices from 760pt; above them on a
+  phone, shrinking while typing. Every filled field keeps its label.

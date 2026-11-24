@@ -59,6 +59,11 @@ targets:
           - "Extensions/**"
           # The folder READMEs are notes for people, not app resources.
           - "**/*.md"
+      # The story link page, drawn by the site's own code (DESIGN S7).
+      - path: js/money/story-page.js
+        buildPhase: resources
+      - path: css/story-page.css
+        buildPhase: resources
     dependencies:
       # F2: FinanceKit background delivery (iOS 26); embedded in Extensions/.
       - target: CentMemoWalletDelivery

@@ -46,6 +46,7 @@ struct ShareThemeSheet: View {
             }
             .pickerStyle(.segmented).labelsHidden()
         }
+        if design.look == .pages { PencilPicker(pencil: $design.pencil) }
         SharePaperAndShape(paper: $design.paper, shape: $design.shape, hasTheme: true)
         Section("Show") {
             Toggle("Where", isOn: $design.showSetting).accessibilityIdentifier("share-theme-place")
@@ -62,7 +63,7 @@ struct ShareThemeSheet: View {
                 }
             }
         } header: {
-            Text("Underline the words that matter")
+            Text("Mark the words that matter")
         }
     }
 }
