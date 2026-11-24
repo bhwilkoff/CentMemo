@@ -288,7 +288,26 @@ const API = (() => {
     return { inserted, skipped: rows.length - inserted };
   }
 
+  /* ---- Story links (N4, Decision 067) ---- */
+  async function makeShare(kind, items, design, valueId, from) {
+    return must(await client().rpc('make_share', { p_kind: kind, p_items: items, p_design: design, p_value: valueId || null, p_from: from || null }));
+  }
+  async function shares() { return must(await client().from('shares').select('code, kind, title, created_at').order('created_at', { ascending: false })); }
+  async function turnOffShare(code) { must(await client().from('shares').delete().eq('code', code).select('code')); }
+  // Which of these came from Apple Wallet: their store and date are never prefilled.
+  async function walletIds(ids) {
+    return new Set(must(await client().from('transactions').select('id').eq('source', 'financekit').in('id', ids)).map((r) => r.id));
+  }
+  // The reader's one call, signed in or not, with no supabase-js on that page.
+  async function getShare(code) {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/get_share', { method: 'POST', referrerPolicy: 'no-referrer', signal: AbortSignal.timeout(15000),
+      headers: { apikey: SUPABASE_KEY, 'content-type': 'application/json' }, body: JSON.stringify({ p_code: code }) });
+    if (!r.ok) throw new Error('The server answered ' + r.status + '.');
+    return r.json();
+  }
+
   return {
+    makeShare, shares, turnOffShare, walletIds, getShare,
     MCP_URL, client, session, onAuthChange, signInWithApple, finishAppleRedirect, signOut, deleteAccount,
     unexamined, suggestions, themeCounts, transactionCount, month, latestMonth, atSetting, transaction, stories,
     values, addValue, settingPlaces, copyUrls, setSkipped, renameValue, deleteValue, settingNames, renameSetting, saveMemo, importAppleCard, importExport, GROUNDS, ground, setGround,

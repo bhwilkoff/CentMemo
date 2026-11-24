@@ -91,13 +91,15 @@ if (process.argv[2] === '--widths') {
   mkdirSync(OUT_DIR, { recursive: true });
   const WIDTHS = (process.argv[3] || '375,768,1024,1440').split(',').map(Number);
   const item = 'a3b8c10c-68b8-4bfe-9380-c87b7015a49d';
-  const SCREENS = { unexamined: '#/unexamined', narrative: '#/ledger', story: '#/story', event: '#/t/' + item, setting: '#/setting/Denver%20Zoo', settings: '#/settings', import: '#/import', share: '#/t/' + item };
+  const SCREENS = { unexamined: '#/unexamined', narrative: '#/ledger', story: '#/story', event: '#/t/' + item, setting: '#/setting/Denver%20Zoo', settings: '#/settings', import: '#/import', share: '#/t/' + item, link: '#/t/' + item, themelink: '#/story/value:THEME' };
   await openAs('owner', '#/unexamined');
   for (const w of WIDTHS) {
     await cdp('Emulation.setDeviceMetricsOverride', { width: w, height: w < 600 ? 812 : w < 900 ? 1024 : 900, deviceScaleFactor: 1, mobile: w < 600 });
-    for (const [name, hash] of Object.entries(SCREENS)) {
+    SCREENS.themelink = '#/story/' + (await evaluate('(async () => "value:" + (await API.values()).find((v) => v.name === "Great meals").id)()'));
+  for (const [name, hash] of Object.entries(SCREENS)) {
       await evaluate(`location.hash = ${JSON.stringify(hash)}; true`);
       await sleep(1800);
+      if (name.endsWith('link')) { await evaluate(`(() => { const p = document.querySelector('section:not([hidden]) .link-panel'); p.open = true; p.scrollIntoView(); return true; })()`); await sleep(1800); }
       if (name === 'share') { await evaluate('document.querySelector(".share-panel").open = true; document.querySelector(".share-panel").scrollIntoView(); true'); await sleep(600); }
       await shot(`${w}-${name}`);
       const over = await evaluate('document.documentElement.scrollWidth - innerWidth');
@@ -238,6 +240,43 @@ console.log('event page (D6): the Setting and the memo lead; the money is a foot
   ok(await waitFor('document.querySelector("#view-txn .share-canvas").height === 1920'), 'and the tall shape');
   await evaluate('document.getElementById("share-shape-square").click(); true');
   await shot('share-card');
+  // N4: a link, made and opened and turned off.
+  await evaluate('document.querySelector("#view-txn .link-panel").open = true; true');
+  ok(await waitFor('/penguins/.test(document.querySelector("#view-txn .link-panel .sp blockquote")?.textContent || "")'), 'Make a link shows the reader\'s page, live');
+  ok(await waitFor('document.getElementById("link-place-0")?.value === "Denver Zoo"'), 'an imported purchase may start with its place');
+  await evaluate('(() => { const b = document.querySelectorAll("#view-txn .link-panel .share-words button"); b[13].click(); document.querySelectorAll("#view-txn .link-panel .share-words button")[16].click(); document.getElementById("link-pencil-circle").click(); const p = document.getElementById("link-place-0"); p.value = "The zoo"; p.dispatchEvent(new Event("input")); return true; })()');
+  ok(await waitFor('document.querySelector("#view-txn .link-panel .sp mark")?.textContent === "we stayed until closing." && document.querySelectorAll("#view-txn .link-panel svg.sp-ink path").length > 0'), 'the writer chooses the marked words, and the pencil draws them');
+  ok(await evaluate('document.querySelector("#view-txn .link-panel .sp-place").textContent === "The zoo" && document.querySelector("#view-txn .link-panel .sp").classList.contains("bold")'), 'the place is in their words, and bold is where it starts');
+  ok(!(await evaluate('/[$]/.test(document.querySelector("#view-txn .link-panel").innerText)')), 'and no amount anywhere in it');
+  await evaluate('document.querySelector("#view-txn .link-panel").scrollIntoView(); true');
+  await shot('link-maker');
+  await evaluate('[...document.querySelectorAll("#view-txn .link-panel button")].find((b) => b.textContent === "Make the link").click(); true');
+  ok(await waitFor('!!document.querySelector("#view-txn .link-url")', 20000), 'Make the link gives an address');
+  const linkColor = await evaluate('getComputedStyle(document.querySelector("#view-txn .link-panel .sp")).backgroundColor');
+  const linkHash = await evaluate('new URL(document.querySelector("#view-txn .link-url").href).hash');
+  await cdp('Page.navigate', { url: SITE + 's/' + linkHash });
+  ok(await waitFor('document.querySelector("#page blockquote")?.textContent.includes("penguins")', 20000), 'the address opens the page');
+  ok(await evaluate('document.querySelector("#page mark").textContent === "we stayed until closing." && document.querySelector(".sp-place").textContent === "The zoo"'), 'with the words, the mark and the place they chose');
+  ok(await evaluate('document.querySelector(\'meta[name=robots]\').content.includes("noindex") && !!document.querySelector(\'.sp-end a[href*="report"]\')'), 'unlisted, with a way to report it');
+  ok(await evaluate('getComputedStyle(document.getElementById("page")).backgroundColor') === linkColor, 'in the color the writer saw');
+  ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'and it fits a phone');
+  await waitFor('document.fonts.check("600 20px Newsreader")');
+  await shot('link-page');
+  await openAs('owner', '#/settings');
+  await evaluate('location.hash = "#/settings"; true');
+  ok(await waitFor('!!document.querySelector("#view-settings .link-row button")'), 'Settings lists the link');
+  await shot('link-settings');
+  await evaluate('document.querySelector("#view-settings .link-row button").click(); true');
+  ok(await waitFor('/Off/.test(document.querySelector("#view-settings .link-row").innerText)'), 'and turns it off');
+  await cdp('Page.navigate', { url: SITE + 's/' + linkHash });
+  await cdp('Page.reload', { ignoreCache: true });
+  ok(await waitFor('/This link was turned off/.test(document.body.innerText)', 20000), 'after which the address says so');
+  await cdp('Page.navigate', { url: SITE + 's/#nope' });
+  await cdp('Page.reload', { ignoreCache: true });
+  ok(await waitFor('/no page at this address/.test(document.body.innerText)'), 'and a wrong address says that');
+  await openAs('owner', '#/t/a3b8c10c-68b8-4bfe-9380-c87b7015a49d');
+  await evaluate('location.hash = "#/t/a3b8c10c-68b8-4bfe-9380-c87b7015a49d"; true');
+  await waitFor('!!document.getElementById("memo-body")');
   // D8: the Setting's page, every visit there; Back returns to the event.
   await evaluate('document.querySelector("[data-setting]").click(); true');
   ok(await waitFor('location.hash === "#/setting/Denver%20Zoo" && /\\bvisits?\\b/.test(document.querySelector("[data-setting-summary]")?.textContent || "")'), 'Every visit opens the Setting with its count');

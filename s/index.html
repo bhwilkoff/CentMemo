@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A memo on CentMemo</title>
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="referrer" content="no-referrer">
+  <link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <meta property="og:title" content="A memo on CentMemo">
+  <meta property="og:image" content="https://centmemo.com/assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&display=swap">
+  <link rel="stylesheet" href="../css/story-page.css?v=20261124h">
+  <style>html, body { margin: 0; min-height: 100%; } body { min-height: 100dvh; display: flex; flex-direction: column; } #page { flex: 1; }</style>
+</head>
+<body>
+  <main id="page" class="sp" aria-busy="true"></main>
+  <script src="../js/api.js?v=20261124h"></script>
+  <script src="../js/money/story-page.js?v=20261124h"></script>
+  <script>
+    // The code is after the #, so it never reaches a server log or another site.
+    (async () => {
+      const page = document.getElementById('page'), code = location.hash.slice(1);
+      const say = (text, again) => {
+        page.className = 'sp'; page.replaceChildren();
+        const box = document.createElement('div'); box.className = 'sp-gut';
+        const p = document.createElement('p'); p.className = 'sp-none'; p.textContent = text; box.append(p);
+        if (again) { const b = document.createElement('button'); b.textContent = 'Try again'; b.addEventListener('click', () => location.reload()); p.append(document.createElement('br'), document.createElement('br'), b); }
+        page.append(box);
+      };
+      page.removeAttribute('aria-busy');
+      if (!/^[A-Za-z0-9_-]{22}$/.test(code)) return say('There is no page at this address. The link may have been cut short.');
+      let data;
+      try { data = await API.getShare(code); }
+      catch (_) { return say(navigator.onLine ? 'CentMemo couldn’t reach its server.' : 'You’re offline.', true); }
+      if (!data) return say('This link was turned off, or the memo was deleted.');
+      document.title = data.kind === 'theme' && data.theme ? data.theme.name + ' on CentMemo' : 'A memo on CentMemo';
+      CentStory.render(page, data, { report: '../support/#report' });
+    })();
+    addEventListener('hashchange', () => location.reload());
+  </script>
+</body>
+</html>

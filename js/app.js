@@ -455,7 +455,8 @@
             t.status !== 'booked' ? fact('Status', t.status) : null,
             t.accounts ? fact('Account', t.accounts.display_name) : null,
             t.description && t.description !== t.merchant ? fact('Statement', t.description) : null))])),
-        memo && memo.body ? sharePanel(t, memo) : '');
+        memo && memo.body ? sharePanel(t, memo) : '',
+        memo && memo.body ? linkPanel('memo', [t], ((memo.memo_values || [])[0] || {}).life_values ? { name: memo.memo_values[0].life_values.name, id: memo.memo_values[0].value_id || memo.memo_values[0].life_values.id } : null) : '');
     } catch (err) { failed(body, err, () => txnView(id)); }
   }
   // D8: a Setting's page, every visit there as a thread (as the iPhone's SettingView).
@@ -597,6 +598,78 @@
           h('fieldset', { class: 'share-set' }, h('legend', {}, 'Underline the words that matter'), picks),
           h('div', { class: 'actions' }, shareSend(card, status), status))));
   }
+  /* ---- Make a link (DESIGN S7): every choice is the writer's, beside the reader's page ---- */
+  function linkPanel(kind, rows, theme) {
+    const memoOf = (t) => (Array.isArray(t.memos) ? t.memos[0] : t.memos) || {};
+    const all = rows.slice(0, 100).map((t) => ({ txn: t.id, memo: memoOf(t).body, shown: merchantOf(t), shownWhen: niceDate(t.txn_date), place: '', when: '', mark: null, on: true, wallet: true }));
+    const d = { paper: 'bold', pencil: 'underline', lead: 'memory', place: true, when: true, theme: true, cover: true, lines: true, mems: true };
+    const page = h('div', { class: 'sp' }), status = h('p', { class: 'caption', role: 'status' }), made = h('div', { class: 'link-made' });
+    const say = { from: '' };
+    const on = () => all.filter((m) => m.on);
+    function draw() {
+      const items = on().map((m) => ({ memo: m.memo, place: d.place && m.place.trim() || null, when: d.when && m.when.trim() || null, mark: m.mark && [Math.min(...m.mark), Math.max(...m.mark)] }));
+      CentStory.render(page, { kind, theme: theme && (kind === 'theme' || d.theme) ? { name: theme.name } : null, from: say.from.trim() || null, items, design: { ...d, color: theme ? themeKey(theme.name) : 'clay' } });
+    }
+    const pick = (legend, key, values) => h('fieldset', { class: 'share-set' }, h('legend', {}, legend), h('div', { class: 'share-opts' }, values.map(([v, label]) => {
+      const box = h('input', { type: 'radio', name: 'link-' + key, id: 'link-' + key + '-' + v, checked: d[key] === v });
+      box.addEventListener('change', () => { d[key] = v; draw(); });
+      return h('label', {}, box, label);
+    })));
+    const check = (key, label) => { const box = h('input', { type: 'checkbox', id: 'link-' + key, checked: d[key] }); box.addEventListener('change', () => { d[key] = box.checked; draw(); }); return h('label', {}, box, label); };
+    const field = (id, label, value, set, hint, max) => { const i = h('input', { type: 'text', id, class: 'field-input', value, maxlength: max, placeholder: hint, autocomplete: 'off' }); i.addEventListener('input', () => { set(i.value); draw(); }); return h('div', { class: 'link-field' }, h('label', { class: 'field-label', for: id }, label), i); };
+    const choices = h('div', { class: 'share-choices' });
+    function build() {
+      const anyWallet = all.some((m) => m.wallet);
+      fill(choices,
+        h('fieldset', { class: 'share-set' }, h('legend', {}, 'Mark the words that matter'), all.map((m, i) => {
+          const body = h('div', {}, shareWords(m.memo, () => m.mark, (v) => { m.mark = v; }, draw),
+            field('link-place-' + i, 'Where', m.place, (v) => { m.place = v; }, 'The place, in your words', 80),
+            field('link-when-' + i, 'When', m.when, (v) => { m.when = v; }, 'A date, a season, or nothing', 60));
+          if (kind === 'memo') return body;
+          const box = h('input', { type: 'checkbox', id: 'link-on-' + i, checked: true });
+          box.addEventListener('change', () => { m.on = box.checked; body.hidden = !m.on; draw(); });
+          return h('div', { class: 'share-memo' }, h('label', { class: 'filter-check' }, box, ' ' + m.shown + ', ' + m.shownWhen), body);
+        })),
+        anyWallet ? h('p', { class: 'caption' }, 'For Apple Card purchases, Where and When start empty. Apple’s rules don’t let CentMemo publish the store or the date, so you write them.') : null,
+        pick('Pencil', 'pencil', [['underline', 'Underline'], ['double', 'Two lines'], ['circle', 'Circle'], ['highlight', 'Highlighter']]),
+        pick('Color', 'paper', [['bold', 'Bold'], ['paper', 'Paper'], ['night', 'Night']]),
+        kind === 'memo' ? pick('What leads', 'lead', [['memory', 'The memory'], ['setting', 'The place']].concat(theme ? [['theme', 'The theme']] : []))
+          : h('fieldset', { class: 'share-set' }, h('legend', {}, 'Parts of the page'), h('div', { class: 'share-opts' }, check('cover', 'Cover'), check('lines', 'Lines'), check('mems', 'Each memory'))),
+        h('fieldset', { class: 'share-set' }, h('legend', {}, 'Show'), h('div', { class: 'share-opts' }, check('place', 'Where'), check('when', 'When'), kind === 'memo' && theme ? check('theme', 'Theme') : null)),
+        field('link-from', 'From', say.from, (v) => { say.from = v; }, 'A name, or nothing', 60),
+        h('p', { class: 'caption' }, 'Anyone with the link can read this page. It isn’t listed anywhere, and you can turn it off in Settings.'),
+        h('div', { class: 'actions' }, go), status, made);
+    }
+    const go = h('button', { type: 'button', class: 'btn btn-primary' }, 'Make the link');
+    go.addEventListener('click', async () => {
+      const items = on();
+      if (!items.length) { status.textContent = 'Choose at least one memo.'; return; }
+      if (kind === 'theme' && !d.cover && !d.lines && !d.mems) { status.textContent = 'Choose at least one part of the page.'; return; }
+      go.disabled = true; status.textContent = 'Making the link…';
+      try {
+        const code = await API.makeShare(kind, items.map((m) => ({ txn: m.txn, place: m.place, when: m.when, mark: m.mark })), { ...d, color: theme ? themeKey(theme.name) : 'clay' }, theme && theme.id, say.from);
+        const url = location.origin + '/s/#' + code, copy = h('button', { type: 'button', class: 'btn btn-small' }, 'Copy');
+        copy.addEventListener('click', async () => { try { await navigator.clipboard.writeText(url); copy.textContent = 'Copied'; } catch (_) { copy.textContent = 'Select and copy'; } });
+        status.textContent = 'Your link is ready.';
+        fill(made, h('div', { class: 'inline-form' }, h('a', { class: 'link-url', href: url, target: '_blank', rel: 'noopener' }, url), copy));
+      } catch (err) { status.textContent = err.message; }
+      go.disabled = false;
+    });
+    const panel = h('details', { class: 'share-panel link-panel' }, h('summary', {}, kind === 'theme' ? 'Make a link to this theme' : 'Make a link to this memo'),
+      h('div', { class: 'share-studio' }, h('div', { class: 'link-stage' }, page), choices));
+    let opened = false;
+    panel.addEventListener('toggle', async () => {
+      if (!panel.open || opened) return;
+      opened = true; build(); draw();
+      try {
+        // Only what is not Apple's to publish may be filled in for the writer.
+        const wallet = await API.walletIds(all.map((m) => m.txn));
+        for (const m of all) { m.wallet = wallet.has(m.txn); if (!m.wallet) { m.place = m.shown; m.when = m.shownWhen; } }
+        build(); draw();
+      } catch (_) { /* they stay empty, the safe way round */ }
+    });
+    return panel;
+  }
   function fact(k, v) { return h('div', {}, h('dt', {}, k), h('dd', {}, v)); }
   // Back walks the app's own history (a Setting opened from an event returns to
   // it); a page reached directly goes to the last list instead.
@@ -678,6 +751,7 @@
           h('h2', { class: 'section-heading' }, title),
           h('p', { class: 'caption' }, rows.length + (rows.length === 1 ? ' memo' : ' memos'))),
         valueId ? shareThemePanel(title, rows) : '',
+        valueId ? linkPanel('theme', rows, { name: title, id: valueId }) : '',
         h('ol', { class: 'story' }, rows.map((t) => {
           const memo = Array.isArray(t.memos) ? t.memos[0] : t.memos;
           const names = (memo.memo_values || []).map((mv) => mv.life_values && mv.life_values.name).filter(Boolean);
@@ -794,6 +868,8 @@
           });
           return rows.length ? h('div', {}, h('p', { class: 'field-label' }, 'Starter themes'), h('ul', { class: 'list starters' }, rows)) : '';
         })(),
+        h('h2', { class: 'section-heading' }, 'Your links'),
+        linksList(await API.shares().catch(() => null)),
         h('h2', { class: 'section-heading' }, 'Connect Claude'),
         h('p', {}, 'Claude can read your Narrative and memos, but can never change them. In Claude, open Settings, then Connectors, then Add custom connector, and paste:'),
         h('div', { class: 'inline-form' }, h('code', { class: 'code-line' }, API.MCP_URL), copy),
@@ -803,6 +879,19 @@
         delNote,
         h('p', { class: 'caption' }, h('a', { href: 'privacy/' }, 'Privacy'), ' · ', h('a', { href: 'terms/' }, 'Terms'))]));
     } catch (err) { failed(body, err, settingsView); }
+  }
+
+  // Every link the person made, each turned off at once.
+  function linksList(list) {
+    if (!list) return h('p', { class: 'caption' }, 'CentMemo couldn’t load your links.');
+    if (!list.length) return h('p', { class: 'caption' }, 'None. Make one from a memo or a theme.');
+    return h('ul', { class: 'list' }, list.map((l) => {
+      const off = h('button', { type: 'button', class: 'btn btn-small' }, 'Turn off');
+      const li = h('li', { class: 'row row-static link-row' }, h('span', { class: 'row-main' }, h('a', { class: 'row-title', href: '/s/#' + l.code, target: '_blank', rel: 'noopener' }, l.title),
+        h('span', { class: 'row-sub' }, 'Made ' + niceDate(l.created_at.slice(0, 10)))), off);
+      off.addEventListener('click', async () => { off.disabled = true; try { await API.turnOffShare(l.code); li.querySelector('.row-sub').textContent = 'Off'; off.remove(); } catch (err) { off.disabled = false; off.textContent = 'Try again'; } });
+      return li;
+    }));
   }
 
   /* ---- Auth ---- */

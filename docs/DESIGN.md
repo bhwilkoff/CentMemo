@@ -159,3 +159,10 @@ be able to design your 'share'."*
   underlined in each memo, one under another, so a theme reads as a poem of their
   own words (a memo with no underline gives its first sentence). Any memo can be
   left out; what does not fit is counted ("and 12 more"), never shrunk past reading.
+- **S7. A story link is a page, not a picture.** Ben, 2026-11-24: *"I really like the
+  bold colors and the touch of the pencil marks. I'd like to be able to choose which
+  words get the underline."* Bold (the theme's color as the page) is where it starts;
+  the writer chooses the marked words, the pencil (underline, two lines, circle,
+  highlighter), the color, what leads, the parts of a theme's page, and the place, time
+  and name in their own words, beside the reader's page, live. One module draws both
+  (`js/money/story-page.js`). What may be published is Decision 067.

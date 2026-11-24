@@ -87,7 +87,7 @@ account, 6 the Connect button):**
 - N2 ✅ Starter themes leave Unexamined; Settings keeps them (web + Apple).
 - N3 ✅ "Connect Apple Wallet" reads "Sync Apple Wallet" once connected.
 - N3b ✅ (tick 52) Audit every action's words on every platform.
-- N4 🟡 (DESIGN S; web live; draft for Ben https://claude.ai/artifact/XTgCwKxwxF6ZyAEuhYYcpc; memo and theme built on web, iPhone, iPad, Mac; links designed and liked by Ben; building them next) Design your share: Setting, memory, themes; the person chooses the look.
+- N4 🟡 (DESIGN S; web live; draft for Ben https://claude.ai/artifact/XTgCwKxwxF6ZyAEuhYYcpc; memo and theme built on web, iPhone, iPad, Mac; links live on the web (tick 56); links from iPhone and Mac, pencil choices on cards ⏳) Design your share: Setting, memory, themes; the person chooses the look.
   Design with the skills first, on every size. Links after the design.
 - N5 🟡 (rules: docs/DESIGN.md W; web at 375/768/1024/1440, iPad landscape, open Duo, Mac at 900/1180/1600 built and seen; Settings at wide and iPad portrait seen; closed Duo ⏳) Every screen size designed on purpose: iPhone 12, Duo closed and open, iPad
   portrait and landscape, Mac window small to large, web phone to desktop.
@@ -2345,3 +2345,14 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   read. Not tried: a real connector token (make_share refuses agents in code).
 - **Next:** the reader's page at /s/ (noindex, a report link), the maker on the event
   and Story pages, Your links in Settings, and the privacy policy's paragraph.
+
+### Tick 56 — 2026-11-24 — N4: story links on the web
+- **Built:** the reader's page (`/s/#code`: the code never reaches a server log; noindex;
+  a report link), the maker on the event and theme pages, Your links in Settings, the
+  privacy policy's paragraph and a report address on Support.
+- **Caught by looking:** the published page was gray where the preview was clay (a theme
+  with no stored color); the writer's color travels with the link now (migration 2).
+- **Privacy policy corrected:** it said CentMemo never asks for location; it does, once,
+  when Current Location is tapped, and records nothing.
+- **Verified:** test_shares (24), test_web_states (make, open as a reader, same color,
+  fits a phone, listed, turned off, then says so), frames at 375, 768 and 1440; test_all.

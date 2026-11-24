@@ -540,3 +540,9 @@ html[data-ground="pistachio"] { --color-yours: #B4C875; }
 .share-memo { padding: var(--space-2) 0; border-top: 1px solid var(--color-border); }
 .share-memo:first-of-type { border-top: 0; }
 #view-story .share-studio { grid-template-columns: minmax(0, 1fr); }
+
+/* ---- Make a link ---- */
+.link-stage { border: 1px solid var(--color-border); min-width: 0; max-height: 720px; overflow-y: auto; align-self: start; }
+.link-field { margin-top: var(--space-2); }
+.link-url { overflow-wrap: anywhere; min-width: 0; flex: 1; }
+.link-made { margin-top: var(--space-2); }

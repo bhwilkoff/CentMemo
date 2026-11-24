@@ -22,11 +22,11 @@ const made = [];
 const make = async (body, token = owner) => { const r = await rpc('make_share', body, token); if (r.status === 200) made.push(r.body); return r; };
 try {
   console.log('a person makes a link to one memo');
-  const one = await make({ p_kind: 'memo', p_value: theme.value_id, p_from: 'Ben', p_design: { lead: 'setting', paper: 'night', pencil: 'circle' }, p_items: [{ txn: ZOO, place: 'The zoo', when: 'November', mark: [16, 13] }] });
+  const one = await make({ p_kind: 'memo', p_value: theme.value_id, p_from: 'Ben', p_design: { lead: 'setting', paper: 'night', pencil: 'circle', color: 'plum' }, p_items: [{ txn: ZOO, place: 'The zoo', when: 'November', mark: [16, 13] }] });
   ok(one.status === 200 && /^[A-Za-z0-9_-]{22}$/.test(one.body), 'and gets a 22-character code');
   const page = await read(one.body);
   ok(page && page.items[0].memo === memo && page.items[0].place === 'The zoo' && page.items[0].when === 'November', 'a signed-out reader with the code sees the memo, the place and the time as typed');
-  ok(JSON.stringify(page.items[0].mark) === '[13,16]' && page.design.pencil === 'circle' && page.design.paper === 'night' && page.from === 'Ben', 'and the marked words and the look');
+  ok(JSON.stringify(page.items[0].mark) === '[13,16]' && page.design.pencil === 'circle' && page.design.paper === 'night' && page.design.color === 'plum' && page.from === 'Ben', 'and the marked words and the look');
   const raw = JSON.stringify(page);
   ok(!/amount|\$|account|email|user|merchant|source|txn|memo_ids|[0-9a-f]{8}-[0-9a-f]{4}/i.test(raw.replace(memo, '')), 'and no amount, account, person or id of any kind');
 
@@ -58,9 +58,9 @@ try {
   ok((await make({ p_kind: 'theme', p_value: theme.value_id, p_design: { cover: false, lines: false, mems: false }, p_items: [{ txn: ZOO }] })).status !== 200, 'a page with no parts is refused');
   const other = (await rows('memos?select=transaction_id&transaction_id=not.in.(' + inTheme.join(',') + ')&limit=1', owner))[0];
   if (other) ok((await make({ p_kind: 'theme', p_value: theme.value_id, p_items: [{ txn: other.transaction_id }] })).status !== 200, 'a memo without the theme cannot ride on its link');
-  const odd = await make({ p_kind: 'memo', p_from: 'x'.repeat(500), p_design: { lead: '<script>', paper: 7, pencil: null }, p_items: [{ txn: ZOO, place: '<b>' + 'p'.repeat(300), mark: ['a', -4] }] });
+  const odd = await make({ p_kind: 'memo', p_from: 'x'.repeat(500), p_design: { lead: '<script>', paper: 7, pencil: null, color: 'url(x)' }, p_items: [{ txn: ZOO, place: '<b>' + 'p'.repeat(300), mark: ['a', -4] }] });
   const oddPage = await read(odd.body);
-  ok(oddPage.design.lead === 'memory' && oddPage.design.paper === 'bold' && oddPage.from.length === 60 && oddPage.items[0].place.length === 80 && !('mark' in oddPage.items[0]), 'odd choices fall back to plain ones, and long words are cut');
+  ok(oddPage.design.lead === 'memory' && /^[a-z]+$/.test(oddPage.design.color) && oddPage.design.paper === 'bold' && oddPage.from.length === 60 && oddPage.items[0].place.length === 80 && !('mark' in oddPage.items[0]), 'odd choices fall back to plain ones, and long words are cut');
 
   console.log('turning it off');
   await call('/rest/v1/shares?code=eq.' + one.body, owner, { method: 'DELETE' });
