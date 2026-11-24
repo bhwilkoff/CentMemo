@@ -12,7 +12,13 @@ struct SettingsView: View {
     private let finance = FinanceSources.current
 
     @Environment(\.horizontalSizeClass) private var width
-    @State private var pane: SettingsPane = .look
+    @State private var pane: SettingsPane = {
+        #if DEBUG
+        // DEBUG door APP_START_PANE=themes (design_shots on the Duo's two panes).
+        if let raw = ProcessInfo.processInfo.environment["APP_START_PANE"], let p = SettingsPane(rawValue: raw) { return p }
+        #endif
+        return .look
+    }()
 
     var body: some View {
         Group {

@@ -1960,3 +1960,22 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   Ben to unlock it. Planned, read-only on Ben's data: Settings (his
   themes plus starters) and a Setting page (place guess shown, not
   confirmed).
+
+### Tick 39 — 2026-11-23, about 7:25pm — the Duo on Ben's data: themes fine, place guess finds nothing
+- New DEBUG door `APP_START_PANE=themes`. The Duo's two-pane Settings
+  opens on Ground, so a frame of the Themes pane needed it.
+- **Themes (Ben's data):** he has no themes yet. The pane says "Add a
+  theme from any memo." and offers all 13 starters in their colors. Frame
+  read; works as designed.
+- **Place (Ben's data), a real gap:** Apple Store shows 107 visits and no
+  guess. Ben's 107 Apple Store rows are all FinanceKit with merchant and
+  description both "Apple Store", so there are no place words. With no
+  confirmed places there's no home area, and Apple's retail stores are
+  named "Apple <mall>", which fails the 60% name match on "Apple Store".
+  The guess as built only works when the statement carries an address (CSV
+  exports). It misses the FinanceKit-only case Ben has.
+- **Next (D15b):** a home area from the person's own data (cities and ZIPs
+  in any statement, geocoded on the phone), chain-aware matching (brand
+  word plus Apple Maps category), and the one-time "Use where I am" button
+  from the proposal for when nothing else fits. Chains are confirmed per
+  visit.
