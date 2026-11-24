@@ -1955,3 +1955,8 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - The Duo is still away ("unavailable" in devicectl).
 - Still open for Ben: the throwaway account for the iPhone delete check,
   public links (D12), D7 words, iPad width, and the design sign-off for L2.
+- **About 6:20pm:** the Duo is back. The current build (themes, places,
+  files) is installed, but the phone is locked, so the captures wait for
+  Ben to unlock it. Planned, read-only on Ben's data: Settings (his
+  themes plus starters) and a Setting page (place guess shown, not
+  confirmed).
