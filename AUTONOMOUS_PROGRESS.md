@@ -91,7 +91,7 @@ account, 6 the Connect button):**
   Design with the skills first, on every size. Links after the design.
 - N5 🟡 (rules: docs/DESIGN.md W; web at 375/768/1024/1440, iPad landscape, open Duo, Mac at 900/1180/1600 built and seen; Settings at wide seen on the iPad; iPad portrait, closed Duo ⏳) Every screen size designed on purpose: iPhone 12, Duo closed and open, iPad
   portrait and landscape, Mac window small to large, web phone to desktop.
-- N6 🟡 macOS (tick 44, branch `macos`).
+- N6 🟡 macOS on TestFlight (tick 53, 1.0.26 (27)); Sign in with Apple on a Mac, saving a memo, and Ben's turn ⏳.
 - Design direction is chosen (item 4): don't ask for a sign-off again. L2 follows
   N1 to N5, because those change what the app looks like.
 - ✅ Delete account on the iPhone: done on Ben's Duo, 2026-11-24 1:15pm, with his OK
@@ -2303,3 +2303,14 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Settings at wide:** the choices keep a reading width beside the list (iPad seen).
 - **Verified:** 12 iPhone 12 tests (the empty-state one rerun after its words changed),
   test_all.
+
+### Tick 53 — 2026-11-24 — the Mac app on TestFlight (1.0.26 (27))
+- **Built:** a Mac icon (the circled cent in the Mac's rounded square, 16 to 512 at 1x
+  and 2x); the sign-in kept in the data protection keychain, so an update never asks
+  for the Mac's password; Settings names what to do on a Mac ("Connect Apple Wallet in
+  CentMemo on your iPhone, and your purchases appear here too.").
+- **Seen:** the Settings window (two tabs, light). The first Mac upload went through
+  from this Mac and is VALID; the internal group gets every build.
+- **Not seen:** Sign in with Apple on a Mac; a memo saved on a Mac (same code as the
+  phone's); Photos on a Mac.
+- **At L2:** the App Store record has no macOS version yet (only iOS 1.0 in preparation).

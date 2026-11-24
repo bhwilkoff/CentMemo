@@ -43,7 +43,7 @@ observation from 2026-11-21/22 behind it; built-but-unseen is 🚧.
 
 - **Web** (centmemo.com): import, write, ledger, story, connector consent.
 - **iOS/iPadOS**: TestFlight 1.0 (5). The only FinanceKit source.
-- **macOS** 🚧: builds and runs through the universal target (tick 44); no FinanceKit on Mac. Not yet on TestFlight.
+- **macOS** 🚧: on TestFlight through the universal target (1.0.26 (27)); no FinanceKit on Mac; sign-in not yet pressed there.
 - **tvOS** 🚫: writing and reflection, not lean-back.
 - **Android** 🚫: FinanceKit is Apple-only; a CSV-only app only if asked.
 

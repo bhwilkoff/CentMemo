@@ -20,8 +20,9 @@
   `/terms/`, `/brand/`). Apple sign-in on the web verified by Ben.
 - **Connector**: verified end to end as Claude drives it (`tools/test_connector.mjs`);
   read-only enforced in SQL; Wallet rows never shared (Addendum 3.2).
-- **iOS**: every major update ships to TestFlight (Ben, 2026-11-24). 1.0 (17)
-  and 1.0.17 (18) add the Wallet background delivery extension; a delivery is not yet seen.
+- **iOS**: every major update ships to TestFlight (Ben, 2026-11-24). current
+  builds carry the Wallet background delivery extension (a delivery is not yet seen),
+  the share studio, and the Mac app.
 - **Testing** (`docs/TESTING.md`): `tools/test_all.sh` off-device (RLS,
   connector, web states at 375px, Swift Core, builds); iPhone 12 tap and
   glass tiers; iPad Pro glass tier only.

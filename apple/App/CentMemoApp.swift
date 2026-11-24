@@ -91,6 +91,9 @@ struct RootView: View {
     @Environment(AppStore.self) private var store
     @Environment(SessionStore.self) private var session
     @Environment(\.scenePhase) private var phase
+    #if os(macOS)
+    @Environment(\.openSettings) private var openSettings
+    #endif
 
     var body: some View {
         platformRoot
@@ -113,6 +116,7 @@ struct RootView: View {
             // Release). APP_DOOR_SECONDS bounds the door's activity.
             .task {
                 #if DEBUG && os(macOS)
+                if ProcessInfo.processInfo.environment["APP_OPEN_SETTINGS"] == "1" { openSettings() }
                 // Harness doors: APP_WINDOW=900x700 and APP_APPEARANCE=light|dark (DESIGN W7).
                 if let size = ProcessInfo.processInfo.environment["APP_WINDOW"]?.split(separator: "x").compactMap({ Double($0) }), size.count == 2 {
                     NSApp.windows.first { $0.isVisible }?.setContentSize(NSSize(width: size[0], height: size[1]))

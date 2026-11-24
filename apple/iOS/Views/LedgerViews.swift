@@ -4,6 +4,11 @@ import SwiftUI
 /// Home: purchases with no memo yet, newest first (money-story-design).
 struct UnexaminedView: View {
     private let wallet = FinanceSources.current
+    #if os(macOS)
+    private static let emptyWords = "Connect Apple Wallet in CentMemo on your iPhone, or import an export from Apple Card, Venmo, PayPal, or Cash App here."
+    #else
+    private static let emptyWords = "Import an export from Apple Card, Venmo, PayPal, or Cash App to start writing."
+    #endif
     @Environment(SessionStore.self) private var session
     @State private var entries: [LedgerEntry] = []
     @State private var picked: [(APIClient.Suggestion, LedgerEntry)] = []
@@ -24,7 +29,7 @@ struct UnexaminedView: View {
                         // FinanceKit Addendum 3.3: what is read and why, before the person is asked.
                         Text(wallet.unavailableReason == nil
                             ? "CentMemo reads your Apple Card, Apple Cash, and Savings accounts and transactions and keeps them in your CentMemo account, so you can write memos on any device. \(ConnectorPolicy.walletDisclosure) [Privacy](https://centmemo.com/privacy/)"
-                            : "Import an export from Apple Card, Venmo, PayPal, or Cash App to start writing.")
+                            : Self.emptyWords)
                     } actions: {
                         if wallet.unavailableReason == nil { WalletSyncButton(finance: wallet).buttonStyle(.borderedProminent) }
                         ImportButton()

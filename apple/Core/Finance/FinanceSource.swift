@@ -80,7 +80,11 @@ enum FinanceSources {
 
 struct UnavailableFinanceSource: FinanceSource {
     var unavailableReason: String? {
+        #if os(macOS)
+        "Connect Apple Wallet in CentMemo on your iPhone, and your purchases appear here too."
+        #else
         "Apple Wallet isn't available here. Import an Apple Card export instead."
+        #endif
     }
     func requestAccess() async throws -> Bool { false }
     func changes(since token: Data?) async throws -> FinanceChanges { FinanceChanges() }
