@@ -91,13 +91,14 @@ if (process.argv[2] === '--widths') {
   mkdirSync(OUT_DIR, { recursive: true });
   const WIDTHS = (process.argv[3] || '375,768,1024,1440').split(',').map(Number);
   const item = 'a3b8c10c-68b8-4bfe-9380-c87b7015a49d';
-  const SCREENS = { unexamined: '#/unexamined', narrative: '#/ledger', story: '#/story', event: '#/t/' + item, setting: '#/setting/Denver%20Zoo', settings: '#/settings', import: '#/import' };
+  const SCREENS = { unexamined: '#/unexamined', narrative: '#/ledger', story: '#/story', event: '#/t/' + item, setting: '#/setting/Denver%20Zoo', settings: '#/settings', import: '#/import', share: '#/t/' + item };
   await openAs('owner', '#/unexamined');
   for (const w of WIDTHS) {
     await cdp('Emulation.setDeviceMetricsOverride', { width: w, height: w < 600 ? 812 : w < 900 ? 1024 : 900, deviceScaleFactor: 1, mobile: w < 600 });
     for (const [name, hash] of Object.entries(SCREENS)) {
       await evaluate(`location.hash = ${JSON.stringify(hash)}; true`);
       await sleep(1800);
+      if (name === 'share') { await evaluate('document.querySelector(".share-panel").open = true; document.querySelector(".share-panel").scrollIntoView(); true'); await sleep(600); }
       await shot(`${w}-${name}`);
       const over = await evaluate('document.documentElement.scrollWidth - innerWidth');
       if (over > 0) ok(false, `${name} scrolls sideways by ${over} at ${w}`);
@@ -213,12 +214,22 @@ console.log('event page (D6): the Setting and the memo lead; the money is a foot
   ok(await evaluate('/\\$/.test(document.querySelector(".txn-details summary").textContent) && !document.querySelector(".txn-details").open'), 'the amount sits in the closed footnote');
   ok(!(await evaluate('/\\bnull\\b/.test(document.querySelector("#view-txn").innerText)')), 'no stray "null" text on the page');
   await shot('event-memo-first');
-  // D12: the share card is private by default; Show where adds the place.
+  // N4: the person designs the share; nothing on it or in it is an amount.
   await evaluate('document.querySelector(".share-panel").open = true; true');
-  ok(await waitFor('document.querySelector(".share-line")?.textContent === "Nov 16, 2026"'), 'the share card shows only the date by default');
-  ok(await evaluate('/penguins/.test(document.querySelector(".share-card blockquote").textContent) && !!document.querySelector(".share-theme")'), 'with the memo and its theme');
-  await evaluate('document.getElementById("share-where").click(); true');
-  ok(await waitFor('document.querySelector(".share-line").textContent === "Nov 16, 2026 · Denver Zoo"'), 'Show where adds the place');
+  ok(await waitFor('document.querySelector(".share-canvas")?.width === 1080'), 'the share studio draws a square card');
+  const inked = 'new Set(document.querySelector(".share-canvas").getContext("2d").getImageData(0, 0, 1080, 600).data).size > 20';
+  ok(await waitFor(inked), 'with the memo drawn on it');
+  ok(await evaluate('!/\\$|amount/i.test(document.querySelector(".share-panel").innerText)'), 'and no amount is offered');
+  await evaluate('document.querySelector(".share-panel").scrollIntoView(); document.querySelectorAll(".share-words button")[13].click(); document.querySelectorAll(".share-words button")[16].click(); true');
+  ok(await evaluate('document.querySelectorAll(".share-words button[aria-pressed=true]").length === 4'), 'the person underlines the words that matter');
+  for (const look of ['setting', 'theme', 'words', 'page']) {
+    const was = await evaluate('document.querySelector(".share-canvas").toDataURL().length');
+    await evaluate(`document.getElementById("share-look-${look}").click(); true`);
+    ok(await waitFor(`document.querySelector(".share-canvas").toDataURL().length !== ${was}`), `the ${look} look draws`);
+  }
+  await evaluate('document.getElementById("share-shape-tall").click(); true');
+  ok(await waitFor('document.querySelector(".share-canvas").height === 1920'), 'and the tall shape');
+  await evaluate('document.getElementById("share-shape-square").click(); true');
   await shot('share-card');
   // D8: the Setting's page, every visit there; Back returns to the event.
   await evaluate('document.querySelector("[data-setting]").click(); true');

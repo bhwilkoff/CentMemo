@@ -88,7 +88,7 @@ account, 6 the Connect button):**
 - N2 ✅ Starter themes leave Unexamined; Settings keeps them (web + Apple).
 - N3 ✅ "Connect Apple Wallet" reads "Sync Apple Wallet" once connected.
 - N3b ⏳ Audit every action's words on every platform.
-- N4 ⏳ Design your share: Setting, memory, themes; the person chooses the look.
+- N4 🟡 (DESIGN S; web live; draft for Ben https://claude.ai/artifact/XTgCwKxwxF6ZyAEuhYYcpc; Apple twin, theme card and links ⏳) Design your share: Setting, memory, themes; the person chooses the look.
   Design with the skills first, on every size. Links after the design.
 - N5 🟡 (rules: docs/DESIGN.md W; web at 375/768/1024/1440, iPad landscape, open Duo, Mac at 900/1180/1600 built and seen; iPad portrait, closed Duo, Settings at wide on Apple ⏳) Every screen size designed on purpose: iPhone 12, Duo closed and open, iPad
   portrait and landscape, Mac window small to large, web phone to desktop.
@@ -2234,3 +2234,18 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Sign-in page:** serif sanguine title and sanguine links (DESIGN T1, C2).
 - **Verified:** 16 iPhone 12 tests, test_all, web states. Deletion: no
   delete_my_account call in the logs yet (12:31pm). Delivery: no wake yet.
+
+### Tick 48 — 2026-11-24 — N4: design your share (web)
+- **Design:** docs/DESIGN.md section S, drawn as one module (`js/money/share-card.js`)
+  and shown to Ben as a working page (docs/design/share-studio.html).
+  Four looks (Page, Setting, Theme, Words), three papers, three shapes, what shows,
+  and the words the person underlines in their own memo. No suggestions, no amount.
+- **Learning test:** choosing the words that matter is the act of rereading the
+  memo; every choice is the person's; nothing is generated.
+- **Web:** the event page's "Share this memo" is the studio; it shares a PNG through
+  the system sheet, or saves it where there is none. Read at 375, 768 and 1440.
+- **Held by:** share_no_money (now covers the drawing, and its colors against the
+  tokens) and test_web_states (every look and shape redraws, no amount offered).
+- **Changed on purpose:** the Setting shows by default now (Ben: highlight the
+  setting); it was off by default before. Each can be hidden.
+- **Next:** the Apple twin, then the theme card, then links.

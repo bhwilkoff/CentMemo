@@ -133,3 +133,24 @@ size."* The branch is on the room a screen has, never on the device.
 - **W7. Seeing it.** Every class is captured and read before a change is called
   done: iPhone 12 and the Duo both ways, iPad both ways, the Mac at 900, 1180 and
   1600, the web at 375, 768, 1024 and 1440 (`tools/test_web_states.mjs --widths`).
+
+## S. The share (N4)
+
+Ben, 2026-11-24: *"It should be well designed to highlight the 'setting', the
+'MEMOry', and the themes. No amount of money should ever be shared. You should
+be able to design your 'share'."*
+
+- **S1. The card is never given an amount.** The drawing takes the memo, the
+  Setting, the date and the themes (`js/money/share-card.js`; the Apple twin
+  follows). `tests/share_no_money.test.mjs` holds it.
+- **S2. The person designs it, and CentMemo suggests nothing.** They underline
+  the words that matter in their own memo (first word, then last), and choose a
+  look, a paper, a shape, and what shows.
+- **S3. Four looks, each leading with one thing.** Page: the memory. Setting: the
+  place, its tile, the date in a pencil loop. Theme: the theme as the card's
+  spine. Words: the underlined words, large, with the whole memo beneath.
+- **S4. The memo sets its own size:** the largest that fits. A memo too long for
+  its shape ends in an ellipsis on the card, never in smaller type than reads.
+- **S5. A card may wear its theme's color as its paper.** This is the one place
+  color is a ground (C1 is about the app's pages): the card is an object someone
+  sends, and cream on every theme color passes 4.5:1.
