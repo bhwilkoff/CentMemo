@@ -10,7 +10,7 @@ struct ThreadRow: View {
     /// On a Setting's own page the rows leave out the place (said once at the top).
     var showsPlace = true
     private var meta: String {
-        showsPlace ? "\(LedgerDate.display(entry.txnDate)) · \(entry.displayMerchant)" : LedgerDate.display(entry.txnDate)
+        showsPlace ? "\(LedgerDate.row(entry.txnDate)) · \(entry.displayMerchant)" : LedgerDate.row(entry.txnDate)
     }
 
     private var written: Bool { entry.memo != nil }

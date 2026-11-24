@@ -6,7 +6,7 @@ import XCTest
 /// authorizing there would copy a real person's Wallet data into test data.
 final class WalletAvailabilityUITests: DeviceTestCase {
     func testWalletOfferIsHonest() {
-        let app = launch(["APP_START_TAB": "settings"])
+        let app = launch(["APP_START_TAB": "settings", "APP_START_PANE": "moneyIn"])
         XCTAssertTrue(text(app, matching: "^Color$|Connect Claude").waitForExistence(timeout: 25))
         let button = app.buttons["wallet-sync"]
         let reason = text(app, matching: "isn't on this device|isn't available here")

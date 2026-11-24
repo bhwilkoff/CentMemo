@@ -37,7 +37,7 @@ struct EntryRow: View {
     }
 
     private var subtitle: String {
-        [LedgerDate.display(entry.txnDate), entry.category.isEmpty ? nil : entry.category,
+        [LedgerDate.row(entry.txnDate), entry.category.isEmpty ? nil : entry.category,
          entry.status == "pending" ? "Pending" : nil].compactMap { $0 }.joined(separator: " · ")
     }
 }

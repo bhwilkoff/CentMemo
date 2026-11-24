@@ -89,7 +89,7 @@ account, 6 the Connect button):**
 - N3b ✅ (tick 52) Audit every action's words on every platform.
 - N4 🟡 (DESIGN S; web live; draft for Ben https://claude.ai/artifact/XTgCwKxwxF6ZyAEuhYYcpc; memo and theme built on web, iPhone, iPad, Mac; links designed, waiting on Ben before anything public is built) Design your share: Setting, memory, themes; the person chooses the look.
   Design with the skills first, on every size. Links after the design.
-- N5 🟡 (rules: docs/DESIGN.md W; web at 375/768/1024/1440, iPad landscape, open Duo, Mac at 900/1180/1600 built and seen; Settings at wide seen on the iPad; iPad portrait, closed Duo ⏳) Every screen size designed on purpose: iPhone 12, Duo closed and open, iPad
+- N5 🟡 (rules: docs/DESIGN.md W; web at 375/768/1024/1440, iPad landscape, open Duo, Mac at 900/1180/1600 built and seen; Settings at wide and iPad portrait seen; closed Duo ⏳) Every screen size designed on purpose: iPhone 12, Duo closed and open, iPad
   portrait and landscape, Mac window small to large, web phone to desktop.
 - N6 🟡 macOS on TestFlight (tick 53, 1.0.26 (27)); Sign in with Apple on a Mac, saving a memo, and Ben's turn ⏳.
 - Design direction is chosen (item 4): don't ask for a sign-off again. L2 follows
@@ -156,7 +156,7 @@ Apple.
    - The connector excludes these rows (already in code).
 8. ✅ (tick 7) Web: verify account deletion, plus the empty, error, and offline
    states at 375px.
-9. 🟡 (tick 8: glass tier 5/5; tap tier blocked on Ben) The iPad Pro on the bench: run the tap tier there (the stand-in
+9. ✅ (tick 54: the full tap tier on the iPad) The iPad Pro on the bench: run the tap tier there (the stand-in
    device, never yet run).
 10. 🟡 (tick 11: iOS photos by reference ✅; files, upload, web ⏳) Photos and files attached to a memo by reference (M2, Decision 055
     attachments table; `money-story-design`).
@@ -182,9 +182,6 @@ Apple.
 - Push the template upstream: branch `upstream/centmemo-finance-connector`
   in ~/Documents/GitHub/UniversalAppTemplate (commit 7718d588). Ben looks
   at the three skills first (the plan), then: push and merge, or a PR.
-- iPad Pro UI automation: unlock the iPad, then Settings > Developer >
-  Enable UI Automation (and allow it if a prompt appears). The tap tier
-  times out with "Timed out while enabling automation mode" until then.
 - Sign in with Apple on the iPhone: sign out of the test account in
   Settings, then sign in.
 - The Claude Duet test: add the connector on claude.ai, then ask once live
@@ -2314,3 +2311,14 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Not seen:** Sign in with Apple on a Mac; a memo saved on a Mac (same code as the
   phone's); Photos on a Mac.
 - **At L2:** the App Store record has no macOS version yet (only iOS 1.0 in preparation).
+
+### Tick 54 — 2026-11-24 — the iPad's first full tap tier; portrait; shorter dates (1.0.27 (28))
+- **The iPad takes taps.** The first try timed out behind "Enter iPad Passcode for XCTest"
+  (photographed); the second passed. Retry before calling a device blocked.
+- **First full tier there:** 23 pass, 12 fail. None was an app bug: Settings is a sidebar
+  on the iPad, and the tests assumed the phone's one list (they pass APP_START_PANE now);
+  two failures were an earlier failed run's leftovers. All pass after.
+- **Portrait seen** (PortraitUITests turns the iPad upright and puts it back). Rows wrapped
+  because each date repeated the year: a row now names the year only when it isn't this
+  one, on web and Apple.
+- **Verified:** iPad tier, 15 iPhone 12 tests, test_all.

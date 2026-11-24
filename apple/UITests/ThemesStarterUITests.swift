@@ -11,7 +11,7 @@ final class ThemesStarterUITests: DeviceTestCase {
 
     /// Settings offers the starters the person doesn't have, in the color each would take.
     func testSettingsOffersStarters() {
-        let app = launch()
+        let app = launch(["APP_START_PANE": "themes"])
         openTab(app, "Settings")
         let add = app.buttons["add-starter-rose"]
         for _ in 0..<6 where !add.exists { app.swipeUp() }

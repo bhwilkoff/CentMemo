@@ -53,6 +53,11 @@
   const money = (minor, cur) => M.formatMinor(minor, cur || 'USD');
   // D8: Apple Card's category words for every event (plain_category, in the database).
   const catOf = (t) => t.plain_category || t.category || '';
+  // A row's date: the year only when it isn't this one (DESIGN W2).
+  function rowDate(iso) {
+    const full = niceDate(iso);
+    return iso && iso.slice(0, 4) === String(new Date().getUTCFullYear()) ? full.replace(/, \d{4}$/, '') : full;
+  }
   function niceDate(iso) {
     const [y, m, d] = iso.split('-').map(Number);
     return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
@@ -146,7 +151,7 @@
       tile(t),
       h('span', { class: 'row-main' },
         h('span', { class: 'row-title' }, merchantOf(t)),
-        h('span', { class: 'row-sub' }, [niceDate(t.txn_date), catOf(t), t.status === 'pending' ? 'Pending' : null].filter(Boolean).join(' · ')),
+        h('span', { class: 'row-sub' }, [rowDate(t.txn_date), catOf(t), t.status === 'pending' ? 'Pending' : null].filter(Boolean).join(' · ')),
         opts && opts.memo && memo ? h('span', { class: 'row-memo' }, memo.body) : null),
       h('span', { class: 'row-amount' + (t.amount_minor > 0 ? ' is-credit' : '') }, money(t.amount_minor, t.currency)));
   }
@@ -169,7 +174,7 @@
       h('span', { class: 'suggestion-reason' }, REASONS[s.kind] || ''),
       s.memo_body ? h('span', { class: 'suggestion-quote' }, '\u201C' + s.memo_body + '\u201D')
         : prompt ? h('span', { class: 'suggestion-prompt' }, prompt) : null,
-      h('span', { class: 'suggestion-place' }, tile(t), h('span', { class: 'caption' }, merchantOf(t) + ' · ' + niceDate(t.txn_date)),
+      h('span', { class: 'suggestion-place' }, tile(t), h('span', { class: 'caption' }, merchantOf(t) + ' · ' + rowDate(t.txn_date)),
         h('span', { class: 'caption suggestion-amount' }, money(t.amount_minor, t.currency))),
       h('span', { class: 'suggestion-act' }, s.memo_body ? 'Read it again' : 'Write a memo'));
   }
@@ -307,7 +312,7 @@
   function threadRow(t, opts) {
     const place = !(opts && opts.place === false);
     const memo = t.memos && (Array.isArray(t.memos) ? t.memos[0] : t.memos);
-    const meta = niceDate(t.txn_date) + (place ? ' · ' + merchantOf(t) : '');
+    const meta = rowDate(t.txn_date) + (place ? ' · ' + merchantOf(t) : '');
     if (!memo || !memo.body) {
       return h('a', { class: 'trow is-waiting', href: '#/t/' + t.id },
         h('span', { class: 'trow-mark', 'aria-hidden': 'true' }),

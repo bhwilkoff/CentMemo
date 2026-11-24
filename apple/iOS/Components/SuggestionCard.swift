@@ -26,7 +26,7 @@ struct SuggestionCard: View {
             }
             HStack(spacing: Spacing.s2) {
                 StoreTile(name: entry.displayMerchant, category: entry.category, size: 28)
-                Text([entry.displayMerchant, LedgerDate.display(entry.txnDate)].joined(separator: " · "))
+                Text([entry.displayMerchant, LedgerDate.row(entry.txnDate)].joined(separator: " · "))
                     .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted).lineLimit(2)
                 Spacer(minLength: Spacing.s2)
                 MoneyText(minor: entry.amountMinor, currency: entry.currency, font: TypeRamp.caption)

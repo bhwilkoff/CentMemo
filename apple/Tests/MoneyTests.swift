@@ -237,4 +237,10 @@ struct ThemeStripTests {
                     try entry("f", -700, memo: "x", themes: ["Joy"], skipped: true)]
         #expect(ThemeStrip.parts(list) == [.init(theme: "Great meals", spentMinor: 2500), .init(theme: "People I love", spentMinor: 1500)])
     }
+
+    @Test func aRowNamesTheYearOnlyWhenItIsNotThisOne() {
+        let today = LedgerDate.date("2026-11-24")!
+        #expect(LedgerDate.row("2026-11-14", today: today) == "Nov 14")
+        #expect(LedgerDate.row("2019-11-05", today: today) == "Nov 5, 2019")
+    }
 }

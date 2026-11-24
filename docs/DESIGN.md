@@ -117,7 +117,8 @@ size."* The branch is on the room a screen has, never on the device.
 
 - **W1. Compact is one column that pushes** (D2 first). Nothing below changes it.
 - **W2. The list gets the room its words need.** 380 at medium, 440 at wide: a
-  row's date and place stay on one line.
+  row's date and place stay on one line, and names the year only when it isn't
+  this one.
 - **W3. The purchase page is a desk at wide.** The memo is the page you write
   on (taller, never wider than 640); what belongs to it (themes, photos, files,
   the place, the bank's facts) stands beside it in a 340 column. Below that room

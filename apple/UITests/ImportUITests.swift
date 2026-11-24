@@ -14,7 +14,7 @@ final class ImportUITests: DeviceTestCase {
         let env = ["APP_TEST_EMAIL": email, "APP_TEST_PASSWORD": password, "APP_IMPORT_SAMPLE": "1"]
         // From Settings: Unexamined trades its empty state (and its import button)
         // for the list the moment the purchases arrive.
-        var app = launch(env.merging(["APP_START_TAB": "settings"]) { $1 })
+        var app = launch(env.merging(["APP_START_TAB": "settings", "APP_START_PANE": "moneyIn"]) { $1 })
         let result = app.staticTexts["import-result"]
         for _ in 0..<8 where !result.exists { app.swipeUp(); sleep(1) }
         XCTAssertTrue(result.waitForExistence(timeout: 40), "the import reports back")
@@ -22,7 +22,7 @@ final class ImportUITests: DeviceTestCase {
         shot(app, "import-first")
         app.terminate()
 
-        app = launch(env.merging(["APP_START_TAB": "settings"]) { $1 })
+        app = launch(env.merging(["APP_START_TAB": "settings", "APP_START_PANE": "moneyIn"]) { $1 })
         let again = app.staticTexts["import-result"]
         for _ in 0..<8 where !again.exists { app.swipeUp(); sleep(1) }
         XCTAssertTrue(again.waitForExistence(timeout: 30), "the second import reports back")
@@ -36,7 +36,7 @@ final class ImportUITests: DeviceTestCase {
         guard let email = runner["APP_TEST_STRANGER_EMAIL"], let password = runner["APP_TEST_STRANGER_PASSWORD"] else {
             XCTFail("stranger credentials not handed to the runner"); return
         }
-        let app = launch(["APP_TEST_EMAIL": email, "APP_TEST_PASSWORD": password, "APP_IMPORT_SAMPLE": "venmo", "APP_START_TAB": "settings"])
+        let app = launch(["APP_TEST_EMAIL": email, "APP_TEST_PASSWORD": password, "APP_IMPORT_SAMPLE": "venmo", "APP_START_TAB": "settings", "APP_START_PANE": "moneyIn"])
         let result = app.staticTexts["import-result"]
         for _ in 0..<8 where !result.exists { app.swipeUp(); sleep(1) }
         XCTAssertTrue(result.waitForExistence(timeout: 40), "the import reports back")

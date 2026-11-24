@@ -28,7 +28,8 @@ final class ShareUITests: DeviceTestCase {
         app.buttons["Tall"].firstMatch.tap()
         for _ in 0..<6 { app.swipeDown() }
         XCTAssertTrue(text(app, matching: "Setting card: First cold Sunday").waitForExistence(timeout: 5), "the look changes the card")
-        XCTAssertFalse(text(app, matching: "Show the amount|[$]").exists, "an amount is never offered")
+        XCTAssertFalse(text(app, matching: "Show the amount").exists, "an amount is never offered")
+        XCTAssertFalse(text(app, matching: "Setting card: ").label.contains("$"), "and none is on the card")
         shot(app, "share-setting-tall")
         XCTAssertTrue(app.buttons["share-send"].exists)
     }

@@ -4,7 +4,7 @@ import XCTest
 /// this test never removes one.
 final class ThemeRemoveUITests: DeviceTestCase {
     func testRemovingAsksFirst() {
-        let app = launch(["APP_START_TAB": "settings"])
+        let app = launch(["APP_START_TAB": "settings", "APP_START_PANE": "themes"])
         let field = app.textFields.matching(NSPredicate(format: "value == 'Being outside'")).firstMatch
         XCTAssertTrue(field.waitForExistence(timeout: 25))
         field.swipeLeft()

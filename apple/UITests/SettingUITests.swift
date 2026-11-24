@@ -59,7 +59,8 @@ final class SettingUITests: DeviceTestCase {
         shot(app, "entry-place")
         app.navigationBars.buttons.element(boundBy: 0).tap()
         XCTAssertTrue(saved.waitForExistence(timeout: 10))
-        saved.press(forDuration: 1.2)
+        // Under the map, on the place's name: a long press over the map is the map's on an iPad.
+        saved.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.92)).press(forDuration: 1.2)
         let again = app.buttons["Choose a different place"]
         XCTAssertTrue(again.waitForExistence(timeout: 5))
         again.tap()

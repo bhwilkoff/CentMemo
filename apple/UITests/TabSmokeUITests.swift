@@ -4,7 +4,8 @@ import XCTest
 /// tab-bar label: Ear Drama's bar words once made frames pass).
 final class TabSmokeUITests: DeviceTestCase {
     private func check(_ tab: String, _ rx: String) {
-        let app = launch(["APP_START_TAB": tab])
+        // At regular width Settings opens one section at a time; the phone ignores the pane.
+        let app = launch(["APP_START_TAB": tab, "APP_START_PANE": "themes"])
         XCTAssertTrue(text(app, matching: rx).waitForExistence(timeout: 25), "\(tab): /\(rx)/")
         XCTAssertFalse(app.buttons["Sign in with Apple"].exists, "\(tab): signed out")
         shot(app, "tab-\(tab)")
@@ -22,7 +23,7 @@ final class TabSmokeUITests: DeviceTestCase {
 
     /// Settings shows the connector's public address, not the database host's.
     func testConnectorAddress() {
-        let app = launch(["APP_START_TAB": "settings"])
+        let app = launch(["APP_START_TAB": "settings", "APP_START_PANE": "claude"])
         XCTAssertTrue(text(app, matching: "^Color$|Connect Claude").waitForExistence(timeout: 25))
         let address = text(app, matching: "mcp\\.centmemo\\.com")
         let form = app.collectionViews.firstMatch
@@ -34,7 +35,7 @@ final class TabSmokeUITests: DeviceTestCase {
 
     /// Settings tells where each source's CSV comes from (S1/S2).
     func testExportPaths() {
-        let app = launch(["APP_START_TAB": "settings"])
+        let app = launch(["APP_START_TAB": "settings", "APP_START_PANE": "moneyIn"])
         XCTAssertTrue(text(app, matching: "^Color$|Connect Claude").waitForExistence(timeout: 25))
         let group = app.buttons.matching(NSPredicate(format: "label CONTAINS 'Where to get a CSV'")).firstMatch
         let form = app.collectionViews.firstMatch

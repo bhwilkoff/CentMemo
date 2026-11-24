@@ -116,6 +116,13 @@ enum LedgerDate {
         style.timeZone = TimeZone(identifier: "UTC")!
         return d.formatted(style)
     }
+    /// A row's date: the year only when it isn't this one (DESIGN W2).
+    static func row(_ s: String, today: Date = Date()) -> String {
+        guard let d = date(s), s.prefix(4) == string(today).prefix(4) else { return display(s) }
+        var style = Date.FormatStyle.dateTime.month(.abbreviated).day().locale(Locale(identifier: "en_US"))
+        style.timeZone = TimeZone(identifier: "UTC")!
+        return d.formatted(style)
+    }
     /// "2026-11" -> "November 2026"
     static func monthName(_ ym: String) -> String {
         guard let d = date(ym + "-01") else { return ym }
