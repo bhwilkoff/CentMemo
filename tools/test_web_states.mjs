@@ -195,13 +195,20 @@ console.log('Themes as collections (D12)');
   ok(await waitFor('/Anniversary/.test(document.querySelector("#view-story .story")?.innerText || "") && !/penguins/.test(document.querySelector("#view-story .story")?.innerText || "")'), 'a theme shows only its memos');
   await shot('story-theme');
   ok(await evaluate('document.querySelector("#view-story .story-entry")?.firstElementChild?.classList.contains("story-text")'), 'a Story entry leads with its memo (D6)');
-  // D12: share the whole theme as one card; amounts off, any memo can be left out.
+  // N4: the whole theme, designed by the person; any memo can be left out.
   await evaluate('document.querySelector("#view-story [data-share-theme] summary").click(); true');
-  ok(await waitFor('/Anniversary/.test(document.querySelector("#view-story [data-share-theme] .share-card")?.innerText || "")'), 'Share this theme makes one card of the theme\'s memos');
-  ok(!(await evaluate('/\\$/.test(document.querySelector("#view-story [data-share-theme] .share-card").innerText)')), 'with no amounts unless turned on');
+  const tcard = '#view-story [data-share-theme] .share-canvas', label = `document.querySelector("${tcard}")?.getAttribute("aria-label") || ""`;
+  ok(await waitFor(`/Anniversary/.test(${label})`), 'Share this theme makes one card of the theme\'s memos');
+  ok(!(await evaluate('/[$]|amount/i.test(document.querySelector("#view-story [data-share-theme]").innerText)')), 'and offers no amount');
+  for (const look of ['pages', 'lines', 'cover']) {
+    const was = await evaluate(`document.querySelector("${tcard}").toDataURL().length`);
+    await evaluate(`document.getElementById("share-theme-look-${look}").click(); true`);
+    ok(await waitFor(`document.querySelector("${tcard}").toDataURL().length !== ${was}`), `the theme's ${look} look draws`);
+  }
+  await evaluate('document.getElementById("share-theme-look-lines").click(); document.querySelectorAll("#view-story .share-memo-words")[0].querySelectorAll("button")[1].click(); true');
   await shot('share-theme');
-  await evaluate('(() => { const b = document.getElementById("share-theme-0"); b.click(); return true; })()');
-  ok(await evaluate('document.querySelectorAll("#view-story [data-share-theme] .share-theme-list li").length === document.querySelectorAll("#view-story .story-entry").length - 1'), 'a memo the person unticks leaves the card');
+  await evaluate('document.getElementById("share-theme-0").click(); true');
+  ok(await waitFor(`!(${label}).includes(document.querySelectorAll("#view-story .story-text")[0].textContent)`), 'a memo the person unticks leaves the card');
   ok(await evaluate('!!document.querySelector("#view-story .theme-row.every")'), 'Every memo leads back');
 }
 
@@ -215,20 +222,20 @@ console.log('event page (D6): the Setting and the memo lead; the money is a foot
   ok(!(await evaluate('/\\bnull\\b/.test(document.querySelector("#view-txn").innerText)')), 'no stray "null" text on the page');
   await shot('event-memo-first');
   // N4: the person designs the share; nothing on it or in it is an amount.
-  await evaluate('document.querySelector(".share-panel").open = true; true');
-  ok(await waitFor('document.querySelector(".share-canvas")?.width === 1080'), 'the share studio draws a square card');
-  const inked = 'new Set(document.querySelector(".share-canvas").getContext("2d").getImageData(0, 0, 1080, 600).data).size > 20';
+  await evaluate('document.querySelector("#view-txn .share-panel").open = true; true');
+  ok(await waitFor('document.querySelector("#view-txn .share-canvas")?.width === 1080'), 'the share studio draws a square card');
+  const inked = 'new Set(document.querySelector("#view-txn .share-canvas").getContext("2d").getImageData(0, 0, 1080, 600).data).size > 20';
   ok(await waitFor(inked), 'with the memo drawn on it');
-  ok(await evaluate('!/\\$|amount/i.test(document.querySelector(".share-panel").innerText)'), 'and no amount is offered');
-  await evaluate('document.querySelector(".share-panel").scrollIntoView(); document.querySelectorAll(".share-words button")[13].click(); document.querySelectorAll(".share-words button")[16].click(); true');
-  ok(await evaluate('document.querySelectorAll(".share-words button[aria-pressed=true]").length === 4'), 'the person underlines the words that matter');
+  ok(await evaluate('!/\\$|amount/i.test(document.querySelector("#view-txn .share-panel").innerText)'), 'and no amount is offered');
+  await evaluate('document.querySelector("#view-txn .share-panel").scrollIntoView(); document.querySelectorAll("#view-txn .share-words button")[13].click(); document.querySelectorAll("#view-txn .share-words button")[16].click(); true');
+  ok(await evaluate('document.querySelectorAll("#view-txn .share-words button[aria-pressed=true]").length === 4'), 'the person underlines the words that matter');
   for (const look of ['setting', 'theme', 'words', 'page']) {
-    const was = await evaluate('document.querySelector(".share-canvas").toDataURL().length');
+    const was = await evaluate('document.querySelector("#view-txn .share-canvas").toDataURL().length');
     await evaluate(`document.getElementById("share-look-${look}").click(); true`);
-    ok(await waitFor(`document.querySelector(".share-canvas").toDataURL().length !== ${was}`), `the ${look} look draws`);
+    ok(await waitFor(`document.querySelector("#view-txn .share-canvas").toDataURL().length !== ${was}`), `the ${look} look draws`);
   }
   await evaluate('document.getElementById("share-shape-tall").click(); true');
-  ok(await waitFor('document.querySelector(".share-canvas").height === 1920'), 'and the tall shape');
+  ok(await waitFor('document.querySelector("#view-txn .share-canvas").height === 1920'), 'and the tall shape');
   await evaluate('document.getElementById("share-shape-square").click(); true');
   await shot('share-card');
   // D8: the Setting's page, every visit there; Back returns to the event.

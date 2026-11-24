@@ -50,6 +50,9 @@ figcaption { font-size: .85rem; color: var(--muted); margin-top: 6px; }
         <label><input type="checkbox" id="s-themes" checked>Themes</label></div></fieldset>
     </form>
   </div>
+  <h2>A whole theme</h2>
+  <p class="muted">Cover is the name and its Settings. Pages is every memo. Lines sets the words you underlined in each memo one under another. These follow the paper and shape chosen above.</p>
+  <div class="wall" id="themes"></div>
   <h2>The four looks</h2>
   <p class="muted">Page leads with the memory, Setting with the place, Theme with what it belongs to, and Words with the part you underlined. Choose one to try it above.</p>
   <div class="wall" id="wall"></div>
@@ -223,9 +226,78 @@ figcaption { font-size: .85rem; color: var(--muted); margin-top: 6px; }
     if (where) ctx.fillText(clip(ctx, where, room), X, H - M);
     return H - M - s * 2.4;
   }
+  /* ---- A whole theme (DESIGN S6): the memos that share one word ---- */
+  const THEME_LOOKS = ['cover', 'pages', 'lines'];
+  // The person's underlined words, or the memo's first sentence.
+  function linesOf(memo, mark) {
+    const w = wordsOf(memo);
+    if (mark && w.length) return w.slice(Math.min(...mark), Math.max(...mark) + 1);
+    const end = w.findIndex((x) => /[.!?]$/.test(x));
+    return end < 0 ? w : w.slice(0, end + 1);
+  }
+  // The largest size at which every block fits; at the smallest, as many as fit.
+  function stack(ctx, items, make, w, h, sizes, gap, cap) {
+    const measure = (s) => items.map((x) => lines(ctx, x, make(s), w));
+    const tall = (L, s) => L.reduce((a, l) => a + l.length * s * 1.28 + (cap ? s * .95 : 0) + s * gap, items.length ? -s * gap : 0);
+    for (const s of sizes) { const L = measure(s); if (tall(L, s) <= h && L.every((l) => l.every((r) => r.width <= w))) return { size: s, blocks: L }; }
+    const s = sizes[sizes.length - 1], L = measure(s), out = []; let used = 0;
+    for (const l of L) { const need = l.length * s * 1.28 + (cap ? s * .95 : 0) + (out.length ? s * gap : 0); if (used + need > h - s * 1.6) break; out.push(l); used += need; }
+    return { size: s, blocks: out };
+  }
+  /* d: { theme: { name, color, dark }, span, memos: [{ memo, setting, date, mark }] }
+   * c: { look, shape, paper, showSetting, showDate } */
+  function drawTheme(canvas, d, c) {
+    const [W, H] = SHAPES[c.shape] || SHAPES.square;
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d'), k = inks(c.paper, d.theme), short = Math.min(W, H), M = Math.round(short * .09);
+    const memo = (s) => `400 ${s}px ${SERIF}`, strong = (s) => `600 ${s}px ${SERIF}`, sans = (s) => `400 ${s}px ${SANS}`;
+    ctx.fillStyle = k.bg; ctx.fillRect(0, 0, W, H);
+    const s = Math.round(W * .026);
+    ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'right'; ctx.font = `600 ${Math.round(s * 1.05)}px ${SERIF}`; ctx.fillStyle = k.pencil; ctx.fillText('CentMemo', W - M, H - M);
+    const room = W - M * 2 - ctx.measureText('CentMemo').width - s * 1.5; ctx.textAlign = 'left';
+    const foot = (t) => { ctx.font = sans(s); ctx.fillStyle = k.muted; ctx.fillText(clip(ctx, t, room), M, H - M); };
+    const bottom = H - M - s * 2.6, many = d.memos.length === 1 ? '1 memo' : d.memos.length + ' memos';
+    const mark = (y) => { ctx.fillStyle = k.mark; pill(ctx, M, y, short * .09, short * .012); };
+
+    if (c.look === 'cover') {
+      const nw = wordsOf(d.theme.name), f = fit(ctx, nw, strong, { w: W - M * 2, h: (bottom - M) * .55 }, range(Math.round(short * .2), 48, 4));
+      mark(M);
+      const end = block(ctx, nw, f, strong, M, M + short * .035, c.paper === 'theme' ? k.ink : k.pencil, null);
+      const under = c.showSetting ? [...new Set(d.memos.map((m) => m.setting))] : [];
+      if (under.length) {
+        const words = under.join(' · ').split(' '), g = fit(ctx, words, memo, { w: W - M * 2, h: bottom - end - short * .03 }, range(Math.round(short * .05), 26, 2));
+        block(ctx, words, g, memo, M, end + short * .03, k.ink, null);
+      }
+      foot([many, c.showDate ? d.span : null].filter(Boolean).join(' · '));
+      return canvas;
+    }
+    if (c.look === 'lines') {
+      const items = d.memos.map((m) => linesOf(m.memo, m.mark)), f = stack(ctx, items, strong, W - M * 2, bottom - M, range(Math.round(short * .1), 26, 2), .55, false);
+      let y = M * .8;
+      f.blocks.forEach((L, i) => { block(ctx, items[i], { size: f.size, lines: L }, strong, M, y, k.ink, null); y += L.length * f.size * 1.28 + f.size * .55; });
+      const left = d.memos.length - f.blocks.length;
+      ctx.fillStyle = k.mark; pill(ctx, M, H - M - s * .5, s * .85, s * .28);
+      ctx.font = sans(s); ctx.fillStyle = k.muted; ctx.fillText(clip(ctx, [d.theme.name, left > 0 ? 'and ' + left + ' more' : null, c.showDate ? d.span : null].filter(Boolean).join(' · '), room - s * 1.2), M + s * 1.1, H - M);
+      return canvas;
+    }
+    const head = Math.round(short * .06); ctx.font = strong(head); ctx.fillStyle = c.paper === 'theme' ? k.ink : k.pencil;
+    ctx.fillText(clip(ctx, d.theme.name, W - M * 2), M, M + head); mark(M + head * 1.35);
+    const top = M + head * 2, cap = c.showSetting || c.showDate, items = d.memos.map((m) => wordsOf(m.memo));
+    const f = stack(ctx, items, memo, W - M * 2, bottom - top, range(Math.round(short * .055), 22, 1), .8, cap);
+    let y = top;
+    f.blocks.forEach((L, i) => {
+      block(ctx, items[i], { size: f.size, lines: L }, memo, M, y, k.ink, d.memos[i].mark ? { from: Math.min(...d.memos[i].mark), to: Math.max(...d.memos[i].mark), color: c.paper === 'theme' ? k.pencil : k.mark } : null);
+      y += L.length * f.size * 1.28;
+      if (cap) { const t = Math.round(Math.max(20, f.size * .62)); ctx.font = sans(t); ctx.fillStyle = k.muted; ctx.fillText([c.showSetting ? d.memos[i].setting : null, c.showDate ? d.memos[i].date : null].filter(Boolean).join(' · '), M, y + f.size * .72); y += f.size * .95; }
+      y += f.size * .8;
+    });
+    const left = d.memos.length - f.blocks.length;
+    foot(left > 0 ? 'and ' + left + ' more' : many);
+    return canvas;
+  }
   function round(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
 
-  const api = { LOOKS, SHAPES, PAPERS, draw, wordsOf, inks };
+  const api = { LOOKS, THEME_LOOKS, SHAPES, PAPERS, draw, drawTheme, linesOf, wordsOf, inks };
   root.CentShare = api;
   if (typeof module !== 'undefined') module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
@@ -239,7 +311,7 @@ const MEMOS = [
   { memo: 'A rainy-day book for the kids’ bedtime reading.', setting: 'Tattered Cover', initials: 'TC', date: 'Nov 19, 2026', themes: [th('Learning', 'slate')] },
   { memo: 'Opening weekend lift ticket. Three runs before the wind closed the top. My legs remembered how even when I didn’t think they would, and on the chair we talked about nothing for twenty minutes, which is the whole reason I keep buying these.', setting: 'Snowbird', initials: 'S', date: 'Nov 8, 2026', themes: [th('Health', 'moss')] },
 ];
-const NAMES = { page: 'Page', setting: 'Setting', theme: 'Theme', words: 'Words', paper: 'Paper', night: 'Night', square: 'Square', tall: 'Tall', wide: 'Wide' };
+const NAMES = { page: 'Page', setting: 'Setting', theme: 'Theme', words: 'Words', paper: 'Paper', night: 'Night', square: 'Square', tall: 'Tall', wide: 'Wide', cover: 'Cover', pages: 'Pages', lines: 'Lines' };
 const $ = (id) => document.getElementById(id);
 const c = { look: 'page', shape: 'square', paper: 'paper', showSetting: true, showDate: true, showThemes: true, mark: [13, 16] };
 let m = 0;
@@ -263,12 +335,25 @@ function words() {
 }
 function paint() {
   CentShare.draw($('card'), MEMOS[m], c);
+  themes();
   $('card').setAttribute('aria-label', NAMES[c.look] + ' card: ' + MEMOS[m].memo);
   $('wall').replaceChildren(...CentShare.LOOKS.map((look) => {
     const f = document.createElement('figure'), cv = document.createElement('canvas'), cap = document.createElement('figcaption');
     CentShare.draw(cv, MEMOS[m], { ...c, look }); cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', NAMES[look]);
     cv.addEventListener('click', () => { c.look = look; $('look-' + look).checked = true; paint(); });
     cap.textContent = NAMES[look]; f.append(cv, cap); return f;
+  }));
+}
+const FAMILY = { theme: th('People I love', 'rose'), span: 'Nov 7, 2026 to Nov 19, 2026', memos: [
+  { memo: MEMOS[2].memo, setting: 'Tattered Cover', date: 'Nov 19, 2026', mark: [4, 7] },
+  { memo: 'Birthday dinner. Ordered two pies because nobody could agree.', setting: 'Blue Pan Pizza', date: 'Nov 18, 2026', mark: [5, 8] },
+  { memo: MEMOS[0].memo, setting: 'Denver Zoo', date: 'Nov 16, 2026', mark: [13, 16] },
+  { memo: MEMOS[1].memo, setting: 'Water Grill', date: 'Nov 7, 2026', mark: [1, 3] }] };
+function themes() {
+  $('themes').replaceChildren(...CentShare.THEME_LOOKS.map((look) => {
+    const f = document.createElement('figure'), cv = document.createElement('canvas'), cap = document.createElement('figcaption');
+    CentShare.drawTheme(cv, FAMILY, { look, paper: c.paper, shape: c.shape, showSetting: c.showSetting, showDate: c.showDate });
+    cv.style.cursor = 'default'; cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', NAMES[look]); cap.textContent = NAMES[look]; f.append(cv, cap); return f;
   }));
 }
 MEMOS.forEach((x, i) => { const o = document.createElement('option'); o.value = i; o.textContent = x.setting + ', ' + x.date; $('which').append(o); });

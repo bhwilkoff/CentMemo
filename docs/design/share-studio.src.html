@@ -50,6 +50,9 @@ figcaption { font-size: .85rem; color: var(--muted); margin-top: 6px; }
         <label><input type="checkbox" id="s-themes" checked>Themes</label></div></fieldset>
     </form>
   </div>
+  <h2>A whole theme</h2>
+  <p class="muted">Cover is the name and its Settings. Pages is every memo. Lines sets the words you underlined in each memo one under another. These follow the paper and shape chosen above.</p>
+  <div class="wall" id="themes"></div>
   <h2>The four looks</h2>
   <p class="muted">Page leads with the memory, Setting with the place, Theme with what it belongs to, and Words with the part you underlined. Choose one to try it above.</p>
   <div class="wall" id="wall"></div>
@@ -64,7 +67,7 @@ const MEMOS = [
   { memo: 'A rainy-day book for the kids’ bedtime reading.', setting: 'Tattered Cover', initials: 'TC', date: 'Nov 19, 2026', themes: [th('Learning', 'slate')] },
   { memo: 'Opening weekend lift ticket. Three runs before the wind closed the top. My legs remembered how even when I didn’t think they would, and on the chair we talked about nothing for twenty minutes, which is the whole reason I keep buying these.', setting: 'Snowbird', initials: 'S', date: 'Nov 8, 2026', themes: [th('Health', 'moss')] },
 ];
-const NAMES = { page: 'Page', setting: 'Setting', theme: 'Theme', words: 'Words', paper: 'Paper', night: 'Night', square: 'Square', tall: 'Tall', wide: 'Wide' };
+const NAMES = { page: 'Page', setting: 'Setting', theme: 'Theme', words: 'Words', paper: 'Paper', night: 'Night', square: 'Square', tall: 'Tall', wide: 'Wide', cover: 'Cover', pages: 'Pages', lines: 'Lines' };
 const $ = (id) => document.getElementById(id);
 const c = { look: 'page', shape: 'square', paper: 'paper', showSetting: true, showDate: true, showThemes: true, mark: [13, 16] };
 let m = 0;
@@ -88,12 +91,25 @@ function words() {
 }
 function paint() {
   CentShare.draw($('card'), MEMOS[m], c);
+  themes();
   $('card').setAttribute('aria-label', NAMES[c.look] + ' card: ' + MEMOS[m].memo);
   $('wall').replaceChildren(...CentShare.LOOKS.map((look) => {
     const f = document.createElement('figure'), cv = document.createElement('canvas'), cap = document.createElement('figcaption');
     CentShare.draw(cv, MEMOS[m], { ...c, look }); cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', NAMES[look]);
     cv.addEventListener('click', () => { c.look = look; $('look-' + look).checked = true; paint(); });
     cap.textContent = NAMES[look]; f.append(cv, cap); return f;
+  }));
+}
+const FAMILY = { theme: th('People I love', 'rose'), span: 'Nov 7, 2026 to Nov 19, 2026', memos: [
+  { memo: MEMOS[2].memo, setting: 'Tattered Cover', date: 'Nov 19, 2026', mark: [4, 7] },
+  { memo: 'Birthday dinner. Ordered two pies because nobody could agree.', setting: 'Blue Pan Pizza', date: 'Nov 18, 2026', mark: [5, 8] },
+  { memo: MEMOS[0].memo, setting: 'Denver Zoo', date: 'Nov 16, 2026', mark: [13, 16] },
+  { memo: MEMOS[1].memo, setting: 'Water Grill', date: 'Nov 7, 2026', mark: [1, 3] }] };
+function themes() {
+  $('themes').replaceChildren(...CentShare.THEME_LOOKS.map((look) => {
+    const f = document.createElement('figure'), cv = document.createElement('canvas'), cap = document.createElement('figcaption');
+    CentShare.drawTheme(cv, FAMILY, { look, paper: c.paper, shape: c.shape, showSetting: c.showSetting, showDate: c.showDate });
+    cv.style.cursor = 'default'; cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', NAMES[look]); cap.textContent = NAMES[look]; f.append(cv, cap); return f;
   }));
 }
 MEMOS.forEach((x, i) => { const o = document.createElement('option'); o.value = i; o.textContent = x.setting + ', ' + x.date; $('which').append(o); });

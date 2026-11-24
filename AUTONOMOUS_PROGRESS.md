@@ -87,7 +87,7 @@ account, 6 the Connect button):**
 - N2 ✅ Starter themes leave Unexamined; Settings keeps them (web + Apple).
 - N3 ✅ "Connect Apple Wallet" reads "Sync Apple Wallet" once connected.
 - N3b ⏳ Audit every action's words on every platform.
-- N4 🟡 (DESIGN S; web live; draft for Ben https://claude.ai/artifact/XTgCwKxwxF6ZyAEuhYYcpc; iPhone, iPad and Mac built; theme card and links ⏳) Design your share: Setting, memory, themes; the person chooses the look.
+- N4 🟡 (DESIGN S; web live; draft for Ben https://claude.ai/artifact/XTgCwKxwxF6ZyAEuhYYcpc; memo and theme built on web, iPhone, iPad, Mac; links ⏳) Design your share: Setting, memory, themes; the person chooses the look.
   Design with the skills first, on every size. Links after the design.
 - N5 🟡 (rules: docs/DESIGN.md W; web at 375/768/1024/1440, iPad landscape, open Duo, Mac at 900/1180/1600 built and seen; iPad portrait, closed Duo, Settings at wide on Apple ⏳) Every screen size designed on purpose: iPhone 12, Duo closed and open, iPad
   portrait and landscape, Mac window small to large, web phone to desktop.
@@ -2266,3 +2266,11 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   The suite's own FAIL is its frames: they come from the Duo's dark outer display.
 - **Next for Ben:** sign in on the Duo and tap Connect Apple Wallet; the full history
   should come back (the token fix, tick 45).
+
+### Tick 50 — 2026-11-24 — N4: a whole theme, designed (web, iPhone, iPad, Mac; 1.0.24 (25))
+- **Design S6:** Cover, Pages, Lines. Lines is the theme as a poem of the words the
+  person underlined in each memo.
+- **Built:** `drawTheme` (web) and `ThemeShareCard` (Apple); both studios now share one
+  set of pieces on each platform.
+- **Verified:** test_web_states (each look redraws, no amount, an unticked memo leaves),
+  ShareCardTests (all 27 theme combinations, 60 memos, none), frames read.

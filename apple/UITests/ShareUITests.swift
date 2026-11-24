@@ -44,9 +44,12 @@ final class ShareUITests: DeviceTestCase {
         XCTAssertTrue(share.waitForExistence(timeout: 15), "Share this theme, when one theme is shown")
         share.tap()
         XCTAssertTrue(app.navigationBars["Share this theme"].waitForExistence(timeout: 10))
-        XCTAssertTrue(text(app, matching: "Anniversary").exists, "the card holds the theme's memos")
+        XCTAssertTrue(text(app, matching: "Great meals: .*Anniversary").waitForExistence(timeout: 5), "the card holds the theme's memos")
         XCTAssertFalse(text(app, matching: "Show the amount").exists, "an amount is never offered")
         shot(app, "share-theme")
+        app.buttons["Lines"].firstMatch.tap()
+        shot(app, "share-theme-lines")
+        XCTAssertTrue(app.buttons["share-theme-send"].exists)
         app.buttons["Done"].tap()
     }
 }

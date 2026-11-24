@@ -62,6 +62,53 @@ struct ShareCard: View {
     }
 }
 
+/// A whole theme as one card (DESIGN S6): the memos that share one word.
+struct ThemeShareContent: Equatable, Sendable {
+    struct Memo: Equatable, Sendable, Identifiable {
+        var id: String
+        var memo: String
+        var setting: String
+        var date: String
+        var day: String
+        var mark: ClosedRange<Int>?
+        var words: [String] { memo.split(whereSeparator: \.isWhitespace).map(String.init) }
+        /// The person's underlined words, or the memo's first sentence.
+        var line: [String] {
+            let w = words
+            if let m = mark, !w.isEmpty { return Array(w[m.clamped(to: 0...(w.count - 1))]) }
+            return w.firstIndex { $0.hasSuffix(".") || $0.hasSuffix("!") || $0.hasSuffix("?") }.map { Array(w[...$0]) } ?? w
+        }
+    }
+    var theme: ShareContent.Theme
+    var span: String
+    var memos: [Memo]
+}
+
+struct ThemeShareDesign: Equatable, Sendable {
+    enum Look: String, CaseIterable, Sendable { case cover, pages, lines }
+    var look = Look.cover
+    var paper = ShareDesign.Paper.paper
+    var shape = ShareDesign.Shape.square
+    var showSetting = true
+    var showDate = true
+}
+
+struct ThemeShareCard: View {
+    let content: ThemeShareContent
+    let design: ThemeShareDesign
+
+    var body: some View {
+        let size = design.shape.size
+        Canvas { ctx, _ in
+            let base = ShareContent(memo: "", setting: "", initials: "", date: "", themes: [content.theme])
+            Painter(ctx: ctx, c: base, d: ShareDesign(paper: design.paper, shape: design.shape)).paintTheme(content, design)
+        }
+        .frame(width: size.width, height: size.height)
+        .accessibilityElement()
+        .accessibilityLabel("\(content.theme.name): \(content.memos.map(\.memo).joined(separator: " "))")
+    }
+}
+
 /// The drawing, step for step the web's.
 private struct Painter {
     var ctx: GraphicsContext
@@ -204,6 +251,89 @@ private struct Painter {
             }
         }
         return H - M - s * 3.6
+    }
+
+    // MARK: A whole theme (S6)
+
+    /// The largest size at which every block fits; at the smallest, as many as fit.
+    static func stack(_ items: [[String]], _ face: Face, _ box: CGSize, _ top: CGFloat, _ bottom: CGFloat, _ step: CGFloat, gap: CGFloat, caption: Bool) -> (size: CGFloat, blocks: [[Line]]) {
+        func measure(_ s: CGFloat) -> [[Line]] { items.map { lines($0, ct(s, face), box.width) } }
+        func tall(_ l: [Line], _ s: CGFloat) -> CGFloat { CGFloat(l.count) * s * lead + (caption ? s * 0.95 : 0) }
+        var s = top
+        while s >= bottom {
+            let all = measure(s)
+            let h = all.reduce(0) { $0 + tall($1, s) } + CGFloat(max(0, all.count - 1)) * s * gap
+            if h <= box.height, all.allSatisfy({ $0.allSatisfy { $0.width <= box.width } }) { return (s, all) }
+            s -= step
+        }
+        var out: [[Line]] = [], used: CGFloat = 0
+        for l in measure(bottom) {
+            let need = tall(l, bottom) + (out.isEmpty ? 0 : bottom * gap)
+            if used + need > box.height - bottom * 1.6 { break }
+            out.append(l); used += need
+        }
+        return (bottom, out)
+    }
+
+    func paintTheme(_ t: ThemeShareContent, _ g: ThemeShareDesign) {
+        let size = g.shape.size, W = size.width, H = size.height, short = min(W, H), M = (short * 0.09).rounded()
+        let memo = Face(), strong = Face(weight: .semibold), sans = Face(serif: false), s = (W * 0.026).rounded()
+        ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(bg))
+        let bs = (s * 1.05).rounded(), bw = Self.width("CentMemo", Self.ct(bs, strong))
+        text("CentMemo", bs, strong, pencil, x: W - M - bw, base: H - M)
+        let room = W - M * 2 - bw - s * 1.5, bottom = H - M - s * 2.6
+        let many = t.memos.count == 1 ? "1 memo" : "\(t.memos.count) memos"
+        let head = g.paper == .theme ? ink : pencil
+        func foot(_ v: String, x: CGFloat = M, w: CGFloat? = nil) { text(clip(v, Self.ct(s, sans), w ?? room), s, sans, muted, x: x, base: H - M) }
+        func bar(_ y: CGFloat) { ctx.fill(Path(roundedRect: CGRect(x: M, y: y, width: short * 0.09, height: short * 0.012), cornerRadius: short * 0.006), with: .color(accent)) }
+        let span = g.showDate ? t.span : nil
+
+        switch g.look {
+        case .cover:
+            let name = t.theme.name.split(whereSeparator: \.isWhitespace).map(String.init)
+            let f = Self.fit(name, strong, CGSize(width: W - M * 2, height: (bottom - M) * 0.55), (short * 0.2).rounded(), 48, 4)
+            bar(M)
+            let end = block(name, f, strong, x: M, y: M + short * 0.035, head)
+            var seen = Set<String>()
+            let under = g.showSetting ? t.memos.map(\.setting).filter { seen.insert($0).inserted } : []
+            if !under.isEmpty {
+                let words = under.joined(separator: " · ").split(separator: " ").map(String.init)
+                block(words, Self.fit(words, memo, CGSize(width: W - M * 2, height: bottom - end - short * 0.03), (short * 0.05).rounded(), 26), memo, x: M, y: end + short * 0.03, ink)
+            }
+            foot([many, span].compactMap { $0 }.joined(separator: " · "))
+
+        case .lines:
+            let items = t.memos.map(\.line)
+            let f = Self.stack(items, strong, CGSize(width: W - M * 2, height: bottom - M), (short * 0.1).rounded(), 26, 2, gap: 0.55, caption: false)
+            var y = M * 0.8
+            for (i, l) in f.blocks.enumerated() {
+                block(items[i], Fitted(size: f.size, lines: l), strong, x: M, y: y, ink)
+                y += CGFloat(l.count) * f.size * Self.lead + f.size * 0.55
+            }
+            let left = t.memos.count - f.blocks.count
+            ctx.fill(Path(roundedRect: CGRect(x: M, y: H - M - s * 0.5, width: s * 0.85, height: s * 0.28), cornerRadius: s * 0.14), with: .color(accent))
+            foot([t.theme.name, left > 0 ? "and \(left) more" : nil, span].compactMap { $0 }.joined(separator: " · "), x: M + s * 1.1, w: room - s * 1.2)
+
+        case .pages:
+            let hs = (short * 0.06).rounded()
+            text(clip(t.theme.name, Self.ct(hs, strong), W - M * 2), hs, strong, head, x: M, base: M + hs)
+            bar(M + hs * 1.35)
+            let top = M + hs * 2, cap = g.showSetting || g.showDate, items = t.memos.map(\.words)
+            let f = Self.stack(items, memo, CGSize(width: W - M * 2, height: bottom - top), (short * 0.055).rounded(), 22, 1, gap: 0.8, caption: cap)
+            var y = top
+            for (i, l) in f.blocks.enumerated() {
+                block(items[i], Fitted(size: f.size, lines: l), memo, x: M, y: y, ink, mark: t.memos[i].mark)
+                y += CGFloat(l.count) * f.size * Self.lead
+                if cap {
+                    let cs = max(20, f.size * 0.62).rounded()
+                    text([g.showSetting ? t.memos[i].setting : nil, g.showDate ? t.memos[i].date : nil].compactMap { $0 }.joined(separator: " · "), cs, sans, muted, x: M, base: y + f.size * 0.72)
+                    y += f.size * 0.95
+                }
+                y += f.size * 0.8
+            }
+            let left = t.memos.count - f.blocks.count
+            foot(left > 0 ? "and \(left) more" : many)
+        }
     }
 
     // MARK: The four looks (S3)

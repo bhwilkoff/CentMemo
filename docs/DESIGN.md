@@ -153,3 +153,8 @@ be able to design your 'share'."*
 - **S5. A card may wear its theme's color as its paper.** This is the one place
   color is a ground (C1 is about the app's pages): the card is an object someone
   sends, and cream on every theme color passes 4.5:1.
+- **S6. A whole theme has three looks.** Cover: its name and its Settings. Pages:
+  its memos, each with its Setting and date. Lines: the words the person
+  underlined in each memo, one under another, so a theme reads as a poem of their
+  own words (a memo with no underline gives its first sentence). Any memo can be
+  left out; what does not fit is counted ("and 12 more"), never shrunk past reading.
