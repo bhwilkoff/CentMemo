@@ -2376,3 +2376,4 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   parts), Mac and iPad seen, unit tests, test_all.
 - **Not verified:** iPad taps (it wants its passcode for UI automation, Ben's to enter);
   the Duo (not reachable from this Mac at 4:40pm); a link sent from a share sheet.
+- **Shipped:** 1.0.28 (29) processed on TestFlight for iOS and Mac (4:58pm).
