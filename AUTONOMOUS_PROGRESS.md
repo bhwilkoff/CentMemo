@@ -40,7 +40,6 @@ sign-off.
   Current Location on his Duo's Apple Store page.
 - iOS photo copy upload ("Keep a copy in CentMemo"): the bench declines
   Photos access; needs a phone with access, and Ben's OK (writes to his account).
-- iOS Delete account: needs a throwaway account (Ben's call).
 
 - D15b update, 2026-11-24: on the iPhone 12 Find on the map shows and Current
   Location taps; iOS then asks for location (first use). The test answers Not
@@ -95,14 +94,8 @@ account, 6 the Connect button):**
 - N6 🟡 macOS (tick 44, branch `macos`).
 - Design direction is chosen (item 4): don't ask for a sign-off again. L2 follows
   N1 to N5, because those change what the app looks like.
-- Delete account on the iPhone: Ben was told his memos, themes, names and places
-  can't be re-imported, and answered, 2026-11-24: "You can use mine. I'm not saving
-  anything I need forever in my account yet." ONE deletion, on his Duo, with
-  `CENTMEMO_DELETE_REAL=1 CENTMEMO_UITEST_DUO=1 tools/ios_uitest.py --device duo --only
-  DeleteAccountUITests`. Tried 12:14pm: XCUITest cannot
-  enable automation mode on the Duo, so Ben taps it himself (asked 12:16pm). Before, 11:50am: 3 accounts, 6,982
-  events, 1 memo; the three synthetic users 22/22/0 events. After it, Ben signs in
-  and taps Connect Apple Wallet. Do not repeat it without asking.
+- ✅ Delete account on the iPhone: done on Ben's Duo, 2026-11-24 1:15pm, with his OK
+  ("You can use mine"). Do not repeat it without asking.
 
 ## Backlog
 
@@ -2261,3 +2254,15 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   the iPhone 12; iPad and Mac studio frames read (APP_START_SHARE door). 12 iPhone 12
   tests, test_all. **Not seen:** the open Duo; a picture actually sent.
 - **Next:** the theme card in the same design, then links.
+
+### 2026-11-24 1:15pm — Delete account pressed for real on the Duo
+- **Ben:** "You can use mine. I'm not saving anything I need forever in my account
+  yet." and "You can tap on my duo and have done so many times."
+- **I was wrong** that the Duo takes no taps: it ran 8 times on 2026-11-22. The 12:14pm
+  automation timeout was transient; the same command passed at 1:15pm.
+- **Verified:** testDeleteAccount passed (Keep my account keeps it; the second time
+  deletes and lands on sign-in). Server: 3 accounts, 6,982 events and 1 memo before;
+  the user and every row gone after; the three synthetic users unchanged (22/22/0).
+  The suite's own FAIL is its frames: they come from the Duo's dark outer display.
+- **Next for Ben:** sign in on the Duo and tap Connect Apple Wallet; the full history
+  should come back (the token fix, tick 45).
