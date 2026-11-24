@@ -26,6 +26,41 @@ The owner's requests jump the rotation.
 - DECISIONS entries are append-only (Decision 033): never edit one in place,
   even a superseded one. Supersession shows in the newer entry and the index.
 
+## Resume here (loop stopped by Ben, 2026-11-24 ~7am)
+
+Ben's order (2026-11-23): F1/F2 FinanceKit → D14 themes → D15 place → D12
+sharing → item 10 files → L2/L3 submission → macOS and iPad later. Done
+through item 10 except what is listed below. L2 stays held for Ben's design
+sign-off.
+
+**Unverified on a device (do first):**
+- D15b `SettingUITests/testFindOnTheMapNearHere` on the iPhone 12: Find on
+  the map → Current Location → a guess near the phone. The `canSearchNearby`
+  section condition (cb693f3) is fixed but never observed. Or Ben taps
+  Current Location on his Duo's Apple Store page.
+- iOS photo copy upload ("Keep a copy in CentMemo"): the bench declines
+  Photos access; needs a phone with access, and Ben's OK (writes to his account).
+- iOS Delete account: needs a throwaway account (Ben's call).
+
+**Bench facts:**
+- The iPhone 12 Screen Time limit blocks CentMemo from about 9:20pm to past
+  midnight (and likely overnight Downtime). Afternoons are clear. Never
+  change Screen Time.
+- Behind the limit the app looks signed out. `ios_uitest` now checks the
+  failure recording's last frame (f5fcf4c), so it names the overlay.
+
+**Waiting on Apple:** FinanceKit for `com.learningischange.centmemo.walletdelivery`
+(Ben submitted it). When granted, merge the extension target from branch
+`f2-wallet-delivery`, build, and test background delivery on the Duo.
+
+**Ben's choices, open:**
+1. Public links (D12). Recommendation: private links to his own words only.
+2. D7 writing-suggestion words.
+3. iPad readable width.
+4. Design sign-off before L2. At L2, re-check the App Privacy location answer
+   (confirmed places, one-time location).
+5. Throwaway account for the iOS Delete account check.
+
 ## Backlog
 
 Sources: Ben's requests first, then SCRATCHPAD.md, PARITY.md,
@@ -2034,3 +2069,6 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Correction to tick 40:** the replay shows the 9:21pm and 9:22pm D15b runs were also behind the Time Limit screen. So "the Find on the map link wasn't appearing because the page hid the whole place section" was never observed on a device. The `canSearchNearby` condition is still right on reading the code, but it is fixed, not verified. Only the 9:20pm Apple Aspen Grove false guess was a real device observation.
 - **Screen Time hours:** blocked about 9:20pm to past midnight (12:03am frame from the night before).
 - **Next:** iPhone 12 tomorrow afternoon for `testFindOnTheMapNearHere`, or Ben on the Duo.
+
+### Ticks 43–49 — 2026-11-24 12:32–6:26am — hold, then stopped
+- Hourly holds overnight: the iPhone 12 was under Screen Time and everything else waited on Ben. Ben stopped the loop around 7am. Resume state is under "Resume here" at the top of this file.

@@ -31,7 +31,9 @@
 - **Blocked on Ben**: iPhone Apple sign-in (via TestFlight); the Duet live and
   scheduled test; the FinanceKit grant (submitted, Apple's turn); iPad UI
   Automation (Settings > Developer).
-- **Loop**: backlog and tick log in `AUTONOMOUS_PROGRESS.md`.
+- **Loop**: stopped by Ben 2026-11-24. Start at "Resume here" in
+  `AUTONOMOUS_PROGRESS.md` (unverified device checks, Ben's open choices,
+  the FinanceKit walletdelivery grant, Screen Time hours).
 
 ## Milestones
 
