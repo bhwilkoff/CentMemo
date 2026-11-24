@@ -10,7 +10,7 @@ fail=0
 # above its last 15 lines), then the tail for context.
 run() { name="$1"; shift; if out=$("$@" 2>&1); then echo "PASS $name"; else echo "FAIL $name"; echo "$out" | grep -E "^\s*FAIL|Error|error:" | head -10; echo "  ..."; echo "$out" | tail -8; fail=1; fi; }
 
-run "money core + connector guard (node)" node --test tests/money.test.mjs tests/themes.test.mjs tests/connector_guard.test.mjs tests/connector_policy.test.mjs
+run "money core + connector guard (node)" node --test tests/money.test.mjs tests/themes.test.mjs tests/connector_guard.test.mjs tests/connector_policy.test.mjs tests/share_no_money.test.mjs
 run "design tokens: drift + contrast" node tools/test_design_tokens.mjs
 run "grounds: contrast + web/Apple parity" node tools/test_grounds.mjs
 run "US English" python3 tools/test_us_english.py
@@ -30,5 +30,7 @@ run "Swift Core tests (macOS)" xcodebuild test -project CentMemo.xcodeproj -sche
   -destination platform=macOS CODE_SIGNING_ALLOWED=NO -jobs 2 -quiet
 run "iOS app builds" xcodebuild build -project CentMemo.xcodeproj -scheme CentMemoUITests \
   -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO -jobs 2 -quiet
+run "Mac app builds" xcodebuild build -project CentMemo.xcodeproj -scheme CentMemo \
+  -destination 'generic/platform=macOS' CODE_SIGNING_ALLOWED=NO -jobs 2 -quiet
 [ $fail -eq 0 ] && echo "ALL PASS" || echo "SOME CHECKS FAILED"
 exit $fail

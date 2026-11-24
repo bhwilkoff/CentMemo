@@ -1,15 +1,14 @@
-#if os(iOS)
+#if os(iOS) || os(macOS)
 import SwiftUI
 
 /// D12: share a whole theme as one card: its name and mark, and the memos the
-/// person keeps in it. Private by default, like the memo card: places and
-/// amounts stay off, and the person can leave any memo out. The card is an
+/// person keeps in it. Private by default, like the memo card: places
+/// stay off, an amount is never shared, and the person can leave any memo out. The card is an
 /// image made on this phone; CentMemo publishes nothing.
 struct ThemeShareCard: View {
     let theme: String
     let entries: [LedgerEntry]
     var showPlace = false
-    var showAmount = false
     static let maxOnCard = 6
 
     private let ink = Color(red: 0.137, green: 0.106, blue: 0.11)
@@ -25,7 +24,7 @@ struct ThemeShareCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(e.memo?.body ?? "").font(.system(size: 19, design: .serif)).foregroundStyle(ink)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text(([LedgerDate.display(e.txnDate)] + (showPlace ? [e.displayMerchant] : []) + (showAmount ? [Money.format(-e.amountMinor)] : []))
+                    Text(([LedgerDate.display(e.txnDate)] + (showPlace ? [e.displayMerchant] : []))
                         .joined(separator: " · "))
                         .font(.system(size: 13)).foregroundStyle(muted)
                 }
@@ -48,15 +47,14 @@ struct ShareThemeSheet: View {
     let entries: [LedgerEntry]
     @State private var left: Set<String> = []
     @State private var showPlace = false
-    @State private var showAmount = false
     @Environment(\.dismiss) private var dismiss
 
     private var included: [LedgerEntry] { entries.filter { !left.contains($0.id) } }
-    private var card: ThemeShareCard { ThemeShareCard(theme: theme, entries: included, showPlace: showPlace, showAmount: showAmount) }
+    private var card: ThemeShareCard { ThemeShareCard(theme: theme, entries: included, showPlace: showPlace) }
     private var image: Image {
         let r = ImageRenderer(content: card)
         r.scale = 3
-        return r.uiImage.map { Image(uiImage: $0) } ?? Image(systemName: "photo")
+        return r.platformImage ?? Image(systemName: "photo")
     }
 
     var body: some View {
@@ -78,9 +76,8 @@ struct ShareThemeSheet: View {
                 }
                 Section {
                     Toggle("Show where", isOn: $showPlace).accessibilityIdentifier("share-theme-place")
-                    Toggle("Show the amounts", isOn: $showAmount).accessibilityIdentifier("share-theme-amount")
                 } footer: {
-                    Text("Only the theme, its memos, and their dates are shared unless you turn these on.")
+                    Text("Only the theme, its memos, and their dates are shared unless you turn this on. Never the amounts.")
                 }
                 Section {
                     ShareLink(item: image, preview: SharePreview(theme, image: image)) {
@@ -90,10 +87,12 @@ struct ShareThemeSheet: View {
                     .accessibilityIdentifier("share-theme-send")
                 }
             }
+            .cardForm()
             .navigationTitle("Share this theme")
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineTitle()
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Done") { dismiss() } } }
         }
+        .sheetSize()
     }
 }
 #endif

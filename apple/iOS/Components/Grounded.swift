@@ -1,4 +1,4 @@
-#if os(iOS)
+#if os(iOS) || os(macOS)
 import SwiftUI
 
 /// Paper behind every list and form (DESIGN C1). No screen-wide foreground:
@@ -18,6 +18,7 @@ extension View {
     func onGround() -> some View { listRowBackground(Color.clear) }
 }
 
+#if os(iOS)
 /// Serif navigation titles in sanguine, and a bar that lets the ground show.
 enum NavigationLook {
     static func apply() {
@@ -36,8 +37,9 @@ enum NavigationLook {
     }
 }
 #endif
+#endif
 
-#if os(iOS)
+#if os(iOS) || os(macOS)
 /// DESIGN M1: the pencil circle drawn around the Unexamined count. The same path
 /// as the web's `.pencil-circle` mask (css/styles.css), in a 100x60 box scaled to
 /// the content, so both platforms draw one hand-closed loop that overshoots its start.
@@ -66,7 +68,7 @@ nonisolated struct PencilCircle: Shape {
 }
 #endif
 
-#if os(iOS)
+#if os(iOS) || os(macOS)
 import Photos
 
 /// A photo attached by reference: drawn from this device's library when the
@@ -74,14 +76,14 @@ import Photos
 /// that says why it can't be shown (the photo may live on another device).
 struct AttachedPhoto: View {
     let ref: String
-    @State private var image: UIImage?
+    @State private var image: PlatformImage?
     @State private var note: String?
 
     var body: some View {
         ZStack {
             Rectangle().fill(Color.brandSurface)
             if let image {
-                Image(uiImage: image).resizable().scaledToFill()
+                Image(platform: image).resizable().scaledToFill()
             } else if let note {
                 Text(note).font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
                     .multilineTextAlignment(.center).padding(6)
@@ -120,7 +122,7 @@ struct AttachedPhoto: View {
         opts.deliveryMode = .highQualityFormat
         opts.isNetworkAccessAllowed = true
         opts.resizeMode = .exact
-        let img: UIImage? = await withCheckedContinuation { done in
+        let img: PlatformImage? = await withCheckedContinuation { done in
             PHImageManager.default().requestImage(for: asset, targetSize: CGSize(width: 1600, height: 1600),
                                                   contentMode: .aspectFit, options: opts) { img, info in
                 if (info?[PHImageResultIsDegradedKey] as? Bool) == true { return }
@@ -128,11 +130,7 @@ struct AttachedPhoto: View {
             }
         }
         guard let img else { return nil }
-        let size = img.size
-        let format = UIGraphicsImageRendererFormat.default()
-        format.scale = 1
-        let redrawn = UIGraphicsImageRenderer(size: size, format: format).image { _ in img.draw(in: CGRect(origin: .zero, size: size)) }
-        return redrawn.jpegData(compressionQuality: 0.8)
+        return Pixels.jpeg(img)
     }
 }
 #endif

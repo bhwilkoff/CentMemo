@@ -1,4 +1,4 @@
-#if os(iOS)
+#if os(iOS) || os(macOS)
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -21,6 +21,28 @@ struct SettingsView: View {
     }()
 
     var body: some View {
+        #if os(macOS)
+        // The Mac's Settings window: one tab per section, in the app menu (⌘,).
+        TabView(selection: $pane) {
+            ForEach(SettingsPane.allCases) { p in
+                Tab(p.title, systemImage: p.symbol, value: p) {
+                    Form {
+                        section(p)
+                        if let error { Section { Text(error).foregroundStyle(Color.semanticError) } }
+                    }
+                    .cardForm()
+                    .grounded()
+                }
+            }
+        }
+        .modifier(DeleteAccountAlert(shown: $confirmDelete) { await deleteAccount() })
+        .task(id: session.dataVersion) { await load() }
+        #else
+        phone
+        #endif
+    }
+
+    private var phone: some View {
         Group {
             if width == .regular {
                 // The open Duo (Ben, 2026-11-23): "work like a regular sidebar with the
@@ -29,7 +51,7 @@ struct SettingsView: View {
                 HStack(spacing: 0) {
                     List {
                         ForEach(SettingsPane.allCases) { p in
-                            Button { pane = p; UISelectionFeedbackGenerator().selectionChanged() } label: {
+                            Button { pane = p; Haptic.selection() } label: {
                                 Label(p.title, systemImage: p.symbol).frame(maxWidth: .infinity, alignment: .leading)
                                     .contentShape(Rectangle())
                             }
@@ -61,15 +83,7 @@ struct SettingsView: View {
         }
         .grounded()
         .navigationTitle("Settings")
-        // An alert, not a confirmation dialog: iOS 26 shows that dialog as a sheet with
-        // only the destructive button (cancel-role buttons hidden), and a permanent
-        // action needs a visible way back (seen on the iPhone 12, 2026-11-22).
-        .alert("Delete your account?", isPresented: $confirmDelete) {
-            Button("Keep my account", role: .cancel) { }
-            Button("Delete everything, permanently", role: .destructive) { Task { await deleteAccount() } }
-        } message: {
-            Text("This removes every event, memo, and theme, and can't be undone.")
-        }
+        .modifier(DeleteAccountAlert(shown: $confirmDelete) { await deleteAccount() })
         .task(id: session.dataVersion) { await load() }
     }
 
@@ -104,7 +118,7 @@ struct SettingsView: View {
                 ForEach($values) { $v in
                     HStack(spacing: Spacing.s3) {
                         Capsule().fill(ThemeHue.color(v.name)).frame(width: 4, height: 22)
-                        TextField("Theme", text: $v.name)
+                        TextField("Theme", text: $v.name).labelsHidden()
                             .onSubmit { Task { await rename(v) } }
                     }
                 }
@@ -159,7 +173,7 @@ struct SettingsView: View {
             Section {
                 Text(APIClient.mcpURL).font(.system(.caption, design: .monospaced)).textSelection(.enabled)
                 Button(copied ? "Copied" : "Copy connector address") {
-                    UIPasteboard.general.string = APIClient.mcpURL
+                    Clipboard.copy(APIClient.mcpURL)
                     copied = true
                 }
             } header: {
@@ -189,7 +203,7 @@ struct SettingsView: View {
             _ = try await APIClient.shared.addValue(s.name)
             values = try await APIClient.shared.values()
             session.didChangeData()
-            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            Haptic.success()
         } catch { self.error = session.handle(error) }
     }
     private func rename(_ v: LifeValue) async {
@@ -203,6 +217,22 @@ struct SettingsView: View {
     }
     private func deleteAccount() async {
         do { try await session.deleteAccount() } catch { self.error = session.handle(error) }
+    }
+}
+
+/// An alert, not a confirmation dialog: iOS 26 shows that dialog as a sheet with
+/// only the destructive button (cancel-role buttons hidden), and a permanent
+/// action needs a visible way back (seen on the iPhone 12, 2026-11-22).
+private struct DeleteAccountAlert: ViewModifier {
+    @Binding var shown: Bool
+    let delete: () async -> Void
+    func body(content: Content) -> some View {
+        content.alert("Delete your account?", isPresented: $shown) {
+            Button("Keep my account", role: .cancel) { }
+            Button("Delete everything, permanently", role: .destructive) { Task { await delete() } }
+        } message: {
+            Text("This removes every event, memo, and theme, and can't be undone.")
+        }
     }
 }
 
@@ -316,7 +346,7 @@ struct ImportButton: View {
             await importText(try String(contentsOf: url, encoding: .utf8), filename: url.lastPathComponent)
         } catch {
             result = session.handle(error)
-            UINotificationFeedbackGenerator().notificationOccurred(.error)
+            Haptic.error()
         }
     }
 
@@ -328,10 +358,10 @@ struct ImportButton: View {
             let r = try await APIClient.shared.importExport(kind, rows, filename: filename)
             result = "\(kind.displayName): \(r.inserted) new" + (r.skipped > 0 ? ", \(r.skipped) already in CentMemo." : ".")
             session.didChangeData()
-            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            Haptic.success()
         } catch {
             result = session.handle(error)
-            UINotificationFeedbackGenerator().notificationOccurred(.error)
+            Haptic.error()
         }
     }
 }
@@ -348,10 +378,12 @@ struct WalletSyncButton: View {
     @State private var result: String?
 
     private var tokenKey: String { FinanceSources.tokenKey(session.email) }
+    /// A saved history token means Wallet is connected and the tap brings what is new.
+    private var connected: Bool { Shared.financeToken(tokenKey) != nil }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.s1) {
-            Button(working ? "Syncing…" : "Connect Apple Wallet") { Task { await sync() } }
+            Button(working ? "Syncing…" : connected ? "Sync Apple Wallet" : "Connect Apple Wallet") { Task { await sync() } }
                 .disabled(working)
                 .accessibilityIdentifier("wallet-sync")
             if let result {
@@ -366,9 +398,9 @@ struct WalletSyncButton: View {
         defer { working = false }
         // Real Wallet data never syncs into a synthetic account (it once did, from a
         // test build left signed in on a personal phone, 2026-11-22).
-        if finance is FinanceKitSource, SessionStore.isSynthetic(session.email) {
+        if finance.isWallet, SessionStore.isSynthetic(session.email) {
             result = "This is a test account. Sign out and sign in with Apple to connect your Wallet."
-            UINotificationFeedbackGenerator().notificationOccurred(.error)
+            Haptic.error()
             return
         }
         do {
@@ -379,13 +411,13 @@ struct WalletSyncButton: View {
             let changes = try await finance.changes(since: Shared.financeToken(tokenKey))
             let r = try await APIClient.shared.syncFinance(changes)
             if let token = changes.newToken { Shared.setFinanceToken(token, tokenKey) }
-            if finance is FinanceKitSource { FinanceBackgroundSync.enable() }
+            if finance.isWallet { FinanceBackgroundSync.enable() }
             result = "Synced \(r.inserted) event\(r.inserted == 1 ? "" : "s") from \(changes.accounts.count) account\(changes.accounts.count == 1 ? "" : "s")."
             session.didChangeData()
-            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            Haptic.success()
         } catch {
             result = session.handle(error)
-            UINotificationFeedbackGenerator().notificationOccurred(.error)
+            Haptic.error()
         }
     }
 }

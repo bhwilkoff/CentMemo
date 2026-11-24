@@ -1,4 +1,4 @@
-#if os(iOS)
+#if os(iOS) || os(macOS)
 import SwiftUI
 import PhotosUI
 import Photos
@@ -97,7 +97,7 @@ struct EntryDetailView: View {
                             }
                         }
                         HStack {
-                            TextField("Add a theme", text: $newValue).onSubmit { Task { await addValue() } }
+                            TextField("Add a theme", text: $newValue, prompt: Text("Add a theme")).labelsHidden().onSubmit { Task { await addValue() } }
                             Button("Add") { Task { await addValue() } }.disabled(newValue.trimmingCharacters(in: .whitespaces).isEmpty)
                         }
                     }
@@ -190,6 +190,7 @@ struct EntryDetailView: View {
         // In a pane the Form's cards stood 1pt off the divider and 2pt off the strip
         // (measured on the open Duo, 2026-11-22): give them the pane's 20pt.
         .modifier(PaneMargins(on: inPane))
+        .cardForm()
         .grounded()
         .navigationTitle(inPane ? "" : (entry?.displayMerchant ?? ""))
         .modifier(InlineTitle(on: !inPane))
@@ -198,10 +199,11 @@ struct EntryDetailView: View {
         // tier: the keyboard covered a Save button at the bottom of the form).
         .toolbar {
             if entry != nil {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .mainAction) {
                     Button(saving ? "Saving…" : "Save") { writing = false; Task { await save() } }
                         .disabled(saving)
                         .fontWeight(.semibold)
+                        .keyboardShortcut("s", modifiers: .command)
                         .accessibilityIdentifier("save-memo")
                 }
                 // D12: share a written memo as a card (private by default).
@@ -222,10 +224,12 @@ struct EntryDetailView: View {
                     }
                     .accessibilityIdentifier("skip-event")
                 }
+                #if os(iOS)
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
                     Button("Done") { writing = false }
                 }
+                #endif
             }
         }
         .sheet(isPresented: $sharing) {
@@ -255,7 +259,7 @@ struct EntryDetailView: View {
 
     private func toggle(_ id: String) {
         if chosen.contains(id) { chosen.remove(id) } else { chosen.insert(id) }
-        UISelectionFeedbackGenerator().selectionChanged()
+        Haptic.selection()
     }
 
     private func load() async {
@@ -270,7 +274,7 @@ struct EntryDetailView: View {
             memo = entry?.memo?.body ?? ""
             chosen = Set(entry?.memo?.valueIDs ?? [])
             if let key = entry?.settingKey { place = (try? await APIClient.shared.loadSettingPlaces())?[key] }
-            #if DEBUG
+            #if DEBUG && os(iOS)
             if ProcessInfo.processInfo.environment["APP_ATTACH_SAMPLE_FILE"] == "1", !photos.contains(where: { $0.kind == "file" }) {
                 let pdf = UIGraphicsPDFRenderer(bounds: CGRect(x: 0, y: 0, width: 300, height: 200)).pdfData { ctx in
                     ctx.beginPage()
@@ -296,10 +300,10 @@ struct EntryDetailView: View {
     private func attach(_ ref: String) async {
         do {
             photos.append(try await APIClient.shared.attachPhoto(transactionID: entryID, deviceRef: ref))
-            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            Haptic.success()
         } catch {
             self.error = session.handle(error)
-            UINotificationFeedbackGenerator().notificationOccurred(.error)
+            Haptic.error()
         }
     }
 
@@ -318,17 +322,17 @@ struct EntryDetailView: View {
 
     private func upload(name: String, raw: Data, isPDF: Bool) async {
         let data: Data?
-        if isPDF { data = raw } else { data = UIImage(data: raw)?.jpegData(compressionQuality: 0.8) }
+        if isPDF { data = raw } else { data = PlatformImage(data: raw).flatMap(Pixels.jpeg) }
         guard let data, data.count <= 5_000_000 else {
             self.error = "That file is too large to keep (5 MB at most)."
-            UINotificationFeedbackGenerator().notificationOccurred(.error)
+            Haptic.error()
             return
         }
         do {
             let a = try await APIClient.shared.attachFile(transactionID: entryID, name: name, data: data, isPDF: isPDF)
             photos.append(a)
-            UINotificationFeedbackGenerator().notificationOccurred(.success)
-        } catch { self.error = session.handle(error); UINotificationFeedbackGenerator().notificationOccurred(.error) }
+            Haptic.success()
+        } catch { self.error = session.handle(error); Haptic.error() }
     }
 
     private func openFile(_ a: APIClient.Attachment) async {
@@ -342,21 +346,21 @@ struct EntryDetailView: View {
             let allowed = [.authorized, .limited].contains(PHPhotoLibrary.authorizationStatus(for: .readWrite))
             self.error = allowed ? "CentMemo couldn't read that photo from your library."
                 : "To keep a copy, allow CentMemo to see your photos in Settings, then try again."
-            UINotificationFeedbackGenerator().notificationOccurred(.error)
+            Haptic.error()
             return
         }
         do {
             let path = try await APIClient.shared.keepCopy(attachmentID: a.id, jpeg: jpeg)
             if let i = photos.firstIndex(where: { $0.id == a.id }) { photos[i].storagePath = path }
-            UINotificationFeedbackGenerator().notificationOccurred(.success)
-        } catch { self.error = session.handle(error); UINotificationFeedbackGenerator().notificationOccurred(.error) }
+            Haptic.success()
+        } catch { self.error = session.handle(error); Haptic.error() }
     }
 
     private func dropCopy(_ a: APIClient.Attachment, _ path: String) async {
         do {
             try await APIClient.shared.removeCopy(attachmentID: a.id, path: path)
             if let i = photos.firstIndex(where: { $0.id == a.id }) { photos[i].storagePath = nil }
-            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            Haptic.success()
         } catch { self.error = session.handle(error) }
     }
 
@@ -376,7 +380,7 @@ struct EntryDetailView: View {
         error = nil
         if memo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !chosen.isEmpty {
             error = "Write the memo first; themes belong to a memo."
-            UINotificationFeedbackGenerator().notificationOccurred(.error)
+            Haptic.error()
             return
         }
         saving = true
@@ -385,11 +389,11 @@ struct EntryDetailView: View {
             status = memo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Memo removed." : "Saved."
             drawn = 0
             withAnimation(.easeOut(duration: 0.9).delay(0.1)) { drawn = 1 }
-            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            Haptic.success()
             session.didChangeData()
         } catch {
             self.error = session.handle(error)
-            UINotificationFeedbackGenerator().notificationOccurred(.error)
+            Haptic.error()
         }
         saving = false
     }
@@ -398,7 +402,7 @@ struct EntryDetailView: View {
 private struct InlineTitle: ViewModifier {
     let on: Bool
     func body(content: Content) -> some View {
-        if on { content.navigationBarTitleDisplayMode(.inline) } else { content }
+        if on { content.inlineTitle() } else { content }
     }
 }
 #endif

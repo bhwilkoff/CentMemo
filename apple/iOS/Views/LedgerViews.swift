@@ -1,4 +1,4 @@
-#if os(iOS)
+#if os(iOS) || os(macOS)
 import SwiftUI
 
 /// Home: purchases with no memo yet, newest first (money-story-design).
@@ -8,8 +8,6 @@ struct UnexaminedView: View {
     @State private var picked: [(APIClient.Suggestion, LedgerEntry)] = []
     @State private var shown = 0
     @State private var hasAny = true
-    /// D14: no themes yet and the starter question not yet answered.
-    @State private var firstRun = false
     @State private var loading = true
     @State private var error: String?
 
@@ -29,10 +27,6 @@ struct UnexaminedView: View {
                 }
             } else {
                 List {
-                    if firstRun {
-                        FirstRunThemesSection { firstRun = false }
-                            .listRowBackground(Color.clear)
-                    }
                     // D7: one invitation at a time, with its reason; "Another" shows the
                     // next of up to three. No count of what is left (no to-do lists).
                     if !picked.isEmpty {
@@ -46,7 +40,7 @@ struct UnexaminedView: View {
                                     if picked.count > 1 {
                                         Button("Another suggestion", systemImage: "arrow.clockwise") {
                                             shown += 1
-                                            UISelectionFeedbackGenerator().selectionChanged()
+                                            Haptic.selection()
                                         }
                                         .labelStyle(.iconOnly)
                                         .buttonStyle(.borderless)
@@ -103,11 +97,6 @@ struct UnexaminedView: View {
             picked = await suggestionsFor(list)
             entries = list
             if entries.isEmpty { hasAny = try await APIClient.shared.hasAnyTransactions() }
-            if LaunchDoors.current.firstThemes { firstRun = true }
-            else if !entries.isEmpty, !FirstRunThemesSection.wasSeen {
-                let themes = try? await APIClient.shared.values()
-                firstRun = themes?.isEmpty ?? false
-            } else { firstRun = false }
             error = nil
         } catch { self.error = session.handle(error) }
         loading = false
@@ -193,7 +182,7 @@ struct LedgerView: View {
         .navigationTitle("Narrative")
         // D9: show only some kinds of events (a native filter menu).
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .mainAction) {
                 Menu {
                     Picker("Show", selection: $filter.show) {
                         ForEach(NarrativeFilter.Show.allCases, id: \.self) { Text($0.rawValue).tag($0) }
@@ -240,7 +229,7 @@ struct LedgerView: View {
     private func step(_ n: Int) {
         guard let month else { return }
         self.month = LedgerDate.step(month, by: n)
-        UISelectionFeedbackGenerator().selectionChanged()
+        Haptic.selection()
     }
 
     private func skip(_ e: LedgerEntry, _ skipped: Bool) async {

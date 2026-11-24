@@ -1,4 +1,4 @@
-#if os(iOS)
+#if os(iOS) || os(macOS)
 import SwiftUI
 
 /// The Narrative as a thread (D10, the Chronicle direction): a pencil line runs

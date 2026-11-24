@@ -1,4 +1,4 @@
-#if os(iOS)
+#if os(iOS) || os(macOS)
 import SwiftUI
 
 /// D8: one Setting's page, every visit there as a thread (the web's #/setting/<name>).
@@ -60,13 +60,13 @@ struct SettingPageView: View {
         }
         .grounded()
         .navigationTitle("")
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
         .toolbar {
             Button("Rename", systemImage: "pencil") { draft = shown; renaming = true }
                 .accessibilityIdentifier("setting-rename")
         }
         .alert("Rename \(name)", isPresented: $renaming) {
-            TextField("Name", text: $draft).textInputAutocapitalization(.words)
+            TextField("Name", text: $draft).capitalizesWords()
             Button("Save") { Task { await rename(draft) } }
             if placeName != nil { Button("Use the statement name") { Task { await rename("") } } }
             Button("Cancel", role: .cancel) {}
@@ -81,7 +81,7 @@ struct SettingPageView: View {
             try await APIClient.shared.renameSetting(name, to: new)
             placeName = APIClient.shared.settingNames?[name]
             session.didChangeData()
-            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            Haptic.success()
         } catch { self.error = session.handle(error) }
     }
 

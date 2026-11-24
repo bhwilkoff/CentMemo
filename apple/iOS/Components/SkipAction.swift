@@ -1,4 +1,4 @@
-#if os(iOS)
+#if os(iOS) || os(macOS)
 import SwiftUI
 
 extension View {
@@ -7,7 +7,7 @@ extension View {
     func skipAction(_ e: LedgerEntry, perform: @escaping () async -> Void) -> some View {
         swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button {
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                Haptic.light()
                 Task { await perform() }
             } label: {
                 Label(e.isSkipped ? "Bring back" : "Skip", systemImage: e.isSkipped ? "arrow.uturn.backward" : "forward")

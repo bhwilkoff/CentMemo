@@ -49,13 +49,12 @@ targets:
     # every file compiles into every slice with no exclusion lists.
     # Decision 055: iPhone and iPad now (FinanceKit is iPhone-only); macOS
     # joins later through this same target; tvOS is out of scope.
-    supportedDestinations: [iOS]
+    supportedDestinations: [iOS, macOS]
     sources:
       - path: apple
         excludes:
           - "Tests/**"
           - "tvOS/**"
-          - "macOS/**"
           - "UITests/**"
           - "Extensions/**"
           # The folder READMEs are notes for people, not app resources.
@@ -64,11 +63,13 @@ targets:
       # F2: FinanceKit background delivery (iOS 26); embedded in Extensions/.
       - target: CentMemoWalletDelivery
         embed: true
+        platformFilter: iOS
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.learningischange.centmemo
         PRODUCT_NAME: CentMemo
         CODE_SIGN_ENTITLEMENTS: apple/Resources/CentMemo.entitlements
+        "CODE_SIGN_ENTITLEMENTS[sdk=macosx*]": apple/Resources/CentMemo-macOS.entitlements
         # Xcode writes the Info.plist from INFOPLIST_KEY_* settings, so there
         # is no plist file to drift. CFBundleVersion and the short version are
         # filled from AppVersion.xcconfig automatically.

@@ -19,7 +19,8 @@ final class ShareUITests: DeviceTestCase {
         // behind the sheet also says "Denver Zoo", so check this line, not the screen).
         let line = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Nov 16, 2026'")).firstMatch
         XCTAssertTrue(line.exists, "the card's date line")
-        XCTAssertEqual(line.label, "Nov 16, 2026", "the place and amount are off by default")
+        XCTAssertEqual(line.label, "Nov 16, 2026", "the place is off by default")
+        XCTAssertFalse(text(app, matching: "Show the amount").exists, "an amount is never offered")
         shot(app, "share-default")
         // A tap at a Toggle row's center lands on its label and does nothing: tap the switch.
         app.switches["share-place"].coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
@@ -39,7 +40,7 @@ final class ShareUITests: DeviceTestCase {
         share.tap()
         XCTAssertTrue(app.navigationBars["Share this theme"].waitForExistence(timeout: 10))
         XCTAssertTrue(text(app, matching: "Anniversary").exists, "the card holds the theme's memos")
-        XCTAssertEqual(app.switches["share-theme-amount"].value as? String, "0", "amounts off by default")
+        XCTAssertFalse(text(app, matching: "Show the amount").exists, "an amount is never offered")
         shot(app, "share-theme")
         app.buttons["Done"].tap()
     }

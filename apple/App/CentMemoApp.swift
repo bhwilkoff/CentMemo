@@ -44,6 +44,20 @@ struct CentMemoApp: App {
                     // }
                 }
         }
+        #if os(macOS)
+        .defaultSize(width: 1180, height: 760)
+        .windowResizability(.contentMinSize)
+        .commands { MacCommands(store: store) }
+        #endif
+        #if os(macOS)
+        Settings {
+            SettingsView()
+                .environment(store)
+                .environment(session)
+                .tint(Color.brandPrimary)
+                .frame(width: 560, height: 520)
+        }
+        #endif
         // SwiftData: do NOT use the bare .modelContainer(for:) modifier if
         // this target includes tvOS. Its default store lives in Application
         // Support, which is NOT writable on a real Apple TV (the simulator

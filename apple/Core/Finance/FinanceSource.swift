@@ -9,9 +9,15 @@ import FinanceKit
 protocol FinanceSource {
     /// Why this source can't be used right now, in words for the person; nil when it can.
     var unavailableReason: String? { get }
+    /// The person's own Wallet, not a sample: never synced into a test account.
+    var isWallet: Bool { get }
     func requestAccess() async throws -> Bool
     /// Changes since the saved history token (nil = everything shared).
     func changes(since token: Data?) async throws -> FinanceChanges
+}
+
+extension FinanceSource {
+    var isWallet: Bool { false }
 }
 
 struct FinanceChanges: Sendable {
@@ -110,6 +116,7 @@ struct SampleFinanceSource: FinanceSource {
 /// only FinanceKit call made before checking it: the others terminate the app
 /// where Wallet data doesn't exist (iPad, the simulator).
 struct FinanceKitSource: FinanceSource {
+    var isWallet: Bool { true }
     var unavailableReason: String? {
         FinanceStore.isDataAvailable(.financialData) ? nil
             : "Apple Wallet's financial data isn't on this device. Import an Apple Card export instead."

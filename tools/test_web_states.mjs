@@ -303,17 +303,17 @@ console.log('import (stranger, through the real file input)');
     ok(await waitFor(`(${lines}).some(l => l.trim() === "0 new, ${n} already in CentMemo.")`, 20000), `second import: 0 new, ${n} already in CentMemo (Decision 057)`);
     await cdp('Page.navigate', { url: SITE + '#/ledger' });
     ok(await waitFor('document.querySelectorAll("#view-ledger .trow").length > 0'), 'the imported purchases appear in the Narrative');
-    // D14: with purchases and no themes, Unexamined asks which starter themes fit (all unticked).
-    // The harness profile lasts the day; forget an earlier run's answer first.
-    await evaluate('localStorage.removeItem("cm-starters-seen"); location.hash = "#/settings"; true');
+    // D14: the starters are in Settings; Unexamined never asks (Ben, 2026-11-24).
     await evaluate('location.hash = "#/unexamined"; true');
-    ok(await waitFor('!!document.querySelector("#view-unexamined .first-themes")'), 'first run asks "Which of these sound like you?"');
-    ok(await evaluate('document.querySelectorAll("#view-unexamined .starter-pick input").length === 13 && ![...document.querySelectorAll("#view-unexamined .starter-pick input")].some(b => b.checked)'), 'all 13 starter themes, none ticked');
-    await shot('first-themes');
-    await evaluate('document.getElementById("starter-moss").click(); [...document.querySelectorAll(".first-themes button")].find(b => b.textContent === "Keep these").click(); true');
-    ok(await waitFor('!document.querySelector("#view-unexamined .first-themes")'), 'Keep these closes the card');
+    ok(await waitFor('document.querySelectorAll("#view-unexamined .list > *").length > 0'), 'Unexamined lists purchases');
+    ok(await evaluate('!document.querySelector("#view-unexamined .starter, #view-unexamined [data-starter]") && !/sound like you/.test(document.getElementById("view-unexamined").innerText)'), 'and offers no starter themes');
+    await evaluate('location.hash = "#/settings"; true');
+    ok(await waitFor('document.querySelectorAll("#view-settings [data-starter]").length === 13'), 'Settings offers all 13 starter themes');
+    await shot('settings-starters');
+    await evaluate('document.querySelector(\'#view-settings [data-starter="Health"] button\').click(); true');
+    ok(await waitFor('document.querySelectorAll("#view-settings [data-starter]").length === 12'), 'adding one takes it off the list');
     const kept = await (await fetch(P + '/rest/v1/life_values?select=name,color', { headers: hdr })).json();
-    ok(Array.isArray(kept) && kept.length === 1 && kept[0].name === 'Health', 'and keeps exactly the ticked theme (Health)');
+    ok(Array.isArray(kept) && kept.length === 1 && kept[0].name === 'Health', 'and keeps exactly the added theme (Health)');
     ok(kept[0]?.color === 'moss', `which stores its own color at creation (moss; got ${kept[0]?.color})`);
     // S1: a Venmo statement through the same file input lands in its own account, with its notes.
     await evaluate('location.hash = "#/import"; true');

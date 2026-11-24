@@ -41,7 +41,4 @@ struct ContentView_iOS: View {
             .navigationDestination(for: SettingRoute.self) { SettingPageView(name: $0.name) }
     }
 }
-
-/// Every push to a purchase goes through this one route type.
-struct EntryRoute: Hashable { let id: String }
 #endif

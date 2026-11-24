@@ -1,14 +1,14 @@
-#if os(iOS)
+#if os(iOS) || os(macOS)
 import SwiftUI
 
 /// D12: share one memo as a card. Private by default (story-design-research):
-/// the place and the amount stay off unless the person turns them on.
+/// the place stays off unless the
+/// person turns it on, and an amount is never shared (Ben, 2026-11-24).
 struct MemoShareCard: View {
     let entry: LedgerEntry
     let memo: String
     let theme: String?
     var showPlace = false
-    var showAmount = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.s4) {
@@ -22,7 +22,7 @@ struct MemoShareCard: View {
                         Text(theme).font(.system(size: 15, weight: .medium))
                     }
                 }
-                Text(([LedgerDate.display(entry.txnDate)] + (showPlace ? [entry.displayMerchant] : []) + (showAmount ? [Money.format(-entry.amountMinor)] : [])).joined(separator: " · "))
+                Text(([LedgerDate.display(entry.txnDate)] + (showPlace ? [entry.displayMerchant] : [])).joined(separator: " · "))
                     .font(.system(size: 15))
             }
             .foregroundStyle(Color(red: 0.37, green: 0.33, blue: 0.33))
@@ -42,15 +42,14 @@ struct ShareMemoSheet: View {
     let memo: String
     let theme: String?
     @State private var showPlace = false
-    @State private var showAmount = false
     @Environment(\.dismiss) private var dismiss
 
-    private var card: MemoShareCard { MemoShareCard(entry: entry, memo: memo, theme: theme, showPlace: showPlace, showAmount: showAmount) }
+    private var card: MemoShareCard { MemoShareCard(entry: entry, memo: memo, theme: theme, showPlace: showPlace) }
 
     private var image: Image {
         let r = ImageRenderer(content: card)
         r.scale = 3
-        return r.uiImage.map { Image(uiImage: $0) } ?? Image(systemName: "photo")
+        return r.platformImage ?? Image(systemName: "photo")
     }
 
     var body: some View {
@@ -59,9 +58,8 @@ struct ShareMemoSheet: View {
                 Section { card.frame(maxWidth: .infinity).listRowBackground(Color.clear) }
                 Section {
                     Toggle("Show where", isOn: $showPlace).accessibilityIdentifier("share-place")
-                    Toggle("Show the amount", isOn: $showAmount).accessibilityIdentifier("share-amount")
                 } footer: {
-                    Text("Only the memo, its date, and its theme are shared unless you turn these on.")
+                    Text("Only the memo, its date, and its theme are shared unless you turn this on. Never the amount.")
                 }
                 Section {
                     ShareLink(item: image, preview: SharePreview("A memo", image: image)) {
@@ -70,10 +68,12 @@ struct ShareMemoSheet: View {
                     .accessibilityIdentifier("share-send")
                 }
             }
+            .cardForm()
             .navigationTitle("Share this memo")
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineTitle()
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Done") { dismiss() } } }
         }
+        .sheetSize()
     }
 }
 #endif

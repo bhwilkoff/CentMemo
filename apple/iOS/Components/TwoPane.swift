@@ -1,4 +1,4 @@
-#if os(iOS)
+#if os(iOS) || os(macOS)
 import SwiftUI
 
 /// At regular width (the open iPhone Duo, an iPad) a list and the purchase it
@@ -61,6 +61,9 @@ private struct ColumnRowInsets: ViewModifier {
         }
     }
 }
+
+/// Every push to a purchase goes through this one route type.
+struct EntryRoute: Hashable { let id: String }
 
 @Observable final class PaneSelection {
     var route: EntryRoute?

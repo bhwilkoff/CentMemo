@@ -1,6 +1,8 @@
-#if os(iOS)
+#if os(iOS) || os(macOS)
 import CoreLocation
+#if os(iOS)
 import CoreLocationUI
+#endif
 import MapKit
 import SwiftUI
 
@@ -22,6 +24,12 @@ final class SettingPlaceModel {
     /// D15b: nothing in the statement or the person's places to search near
     /// (FinanceKit often says only "Apple Store"): offer "Find on the map".
     var canSearchNearby = false
+    /// Not on the Mac: where the Mac sits is not where the purchase was.
+    #if os(iOS)
+    private let nearbyHelps = true
+    #else
+    private let nearbyHelps = false
+    #endif
     var findingNearby = false
 
     func load(setting: String, shownName: String, entries: [LedgerEntry]) async {
@@ -31,7 +39,7 @@ final class SettingPlaceModel {
         let home = APIClient.shared.settingPlaces?.values.map { CLLocationCoordinate2D(latitude: $0.lat, longitude: $0.lon) } ?? []
         guesses = await PlaceGuess.search(setting: shownName, entries: entries, near: home)
         index = 0
-        canSearchNearby = guesses.isEmpty
+        canSearchNearby = nearbyHelps && guesses.isEmpty
     }
 
     /// The person tapped Apple's one-time location button: search near there.
@@ -39,7 +47,7 @@ final class SettingPlaceModel {
         guesses = await PlaceGuess.search(setting: shownName, entries: entries, near: [], here: here)
         index = 0
         findingNearby = false
-        canSearchNearby = guesses.isEmpty
+        canSearchNearby = nearbyHelps && guesses.isEmpty
     }
 
     func confirm(_ item: MKMapItem, setting: String, shownName: String) async throws {
@@ -100,6 +108,7 @@ struct SettingPlaceSection: View {
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("place-guess")
         } else if model.canSearchNearby {
+            #if os(iOS)
             if model.findingNearby {
                 VStack(alignment: .leading, spacing: Spacing.s2) {
                     Text("Search near where you are now. CentMemo uses it once, for this search.")
@@ -115,9 +124,11 @@ struct SettingPlaceSection: View {
                     .font(TypeRamp.caption)
                     .accessibilityIdentifier("place-find")
             }
+            #endif
         }
     }
 
+    #if os(iOS)
     /// One reading from the location Apple's button just allowed; never stored.
     private func locate() async {
         do {
@@ -129,9 +140,10 @@ struct SettingPlaceSection: View {
             }
         } catch { _ = session.handle(error) }
     }
+    #endif
 
     private func run(_ work: () async throws -> Void) async {
-        do { try await work(); UINotificationFeedbackGenerator().notificationOccurred(.success) }
+        do { try await work(); Haptic.success() }
         catch { _ = session.handle(error) }
     }
 }

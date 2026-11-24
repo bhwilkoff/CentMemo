@@ -1,4 +1,4 @@
-#if os(iOS)
+#if os(iOS) || os(macOS)
 import SwiftUI
 import AuthenticationServices
 import CryptoKit
@@ -63,22 +63,22 @@ struct SignInView: View {
             } else {
                 message = "Apple couldn't sign you in: \(error.localizedDescription)"
             }
-            UINotificationFeedbackGenerator().notificationOccurred(.error)
+            Haptic.error()
         case .success(let auth):
             guard let credential = auth.credential as? ASAuthorizationAppleIDCredential,
                   let tokenData = credential.identityToken, let token = String(data: tokenData, encoding: .utf8) else {
                 message = "Apple didn't return a sign-in token. Try again."
-                UINotificationFeedbackGenerator().notificationOccurred(.error)
+                Haptic.error()
                 return
             }
             working = true
             do {
                 try await APIClient.shared.signInWithApple(idToken: token, nonce: nonce)
                 session.didSignIn()
-                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                Haptic.success()
             } catch {
                 message = "CentMemo couldn't finish signing in: \(error.localizedDescription)"
-                UINotificationFeedbackGenerator().notificationOccurred(.error)
+                Haptic.error()
             }
             working = false
         }

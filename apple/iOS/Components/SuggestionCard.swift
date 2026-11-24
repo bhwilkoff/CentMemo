@@ -1,4 +1,4 @@
-#if os(iOS)
+#if os(iOS) || os(macOS)
 import SwiftUI
 
 /// One invitation to write (D7). Ben, 2026-11-23: the cards "look almost identical

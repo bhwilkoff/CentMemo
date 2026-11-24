@@ -1,4 +1,4 @@
-#if os(iOS)
+#if os(iOS) || os(macOS)
 import SwiftUI
 
 /// A theme's color: the store hues chosen by the theme's name (Money.merchantHue),

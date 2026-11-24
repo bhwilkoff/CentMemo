@@ -173,8 +173,7 @@
     return [box];
   }
 
-  /* ---- D14: starter themes (Ben's approved list), at first run and in Settings ---- */
-  const STARTERS_SEEN = 'cm-starters-seen';
+  /* ---- D14: starter themes (Ben's approved list), in Settings only (Ben, 2026-11-24) ---- */
   function starterRows(held, onAdd) {
     const have = new Set(held.map((v) => v.name.trim().toLowerCase()));
     return CentThemes.STARTERS.filter((t) => !have.has(t.name.toLowerCase())).map((t) => {
@@ -187,36 +186,6 @@
         h('span', { class: 'starter-text' }, h('strong', {}, t.name), h('span', { class: 'caption' }, t.meaning)), add);
     });
   }
-  // First run: no themes yet. Unticked, so the person chooses (Ben's list, D14).
-  function firstRunThemes(onDone) {
-    const boxes = CentThemes.STARTERS.map((t) => {
-      const box = h('input', { type: 'checkbox', id: 'starter-' + t.color, value: t.name });
-      return h('label', { class: 'starter-pick', for: 'starter-' + t.color }, box,
-        h('i', { class: 'theme-mark', style: 'background: var(--color-theme-' + t.color + ')' }),
-        h('span', { class: 'starter-text' }, h('strong', {}, t.name), h('span', { class: 'caption' }, t.meaning)));
-    });
-    const keep = h('button', { type: 'button', class: 'btn btn-primary' }, 'Keep these');
-    const later = h('button', { type: 'button', class: 'btn btn-quiet' }, 'Not now');
-    const note = h('p', { class: 'caption', role: 'status' });
-    const seen = () => { try { localStorage.setItem(STARTERS_SEEN, '1'); } catch (_) {} };
-    keep.addEventListener('click', async () => {
-      const names = boxes.map((b) => b.querySelector('input')).filter((b) => b.checked).map((b) => b.value);
-      if (!names.length) { note.textContent = 'Tick the themes that sound like you, or choose Not now.'; return; }
-      keep.disabled = true;
-      try { for (const n of names) await API.addValue(n); seen(); onDone(); }
-      catch (err) { keep.disabled = false; note.textContent = err.message; }
-    });
-    later.addEventListener('click', () => { seen(); onDone(); });
-    return h('section', { class: 'first-themes', 'aria-labelledby': 'first-themes-h' },
-      h('h2', { class: 'section-heading', id: 'first-themes-h' }, 'Which of these sound like you?'),
-      h('p', { class: 'caption' }, 'Themes collect your memos. Rename or remove them any time in Settings.'),
-      h('div', { class: 'starter-list' }, boxes), h('div', { class: 'actions' }, keep, later), note);
-  }
-  async function needsFirstRun() {
-    try { if (localStorage.getItem(STARTERS_SEEN)) return false; } catch (_) {}
-    return !(await API.values()).length;
-  }
-
   async function unexaminedView() {
     const body = showView('unexamined', 'unexamined');
     const heading = $('h-unexamined');
@@ -233,8 +202,7 @@
       // D7: one invitation at a time, "Another" for the next of up to three; no
       // count of what is left (as the iPhone's SuggestionCard).
       const picks = await suggestionCards(rows).catch(() => []);
-      const first = (await needsFirstRun().catch(() => false)) ? firstRunThemes(unexaminedView) : '';
-      body.replaceChildren(first, picks.length === 1 ? h('div', { class: 'suggestions' }, picks) : picks.length ? picks[0] : '',
+      body.replaceChildren(picks.length === 1 ? h('div', { class: 'suggestions' }, picks) : picks.length ? picks[0] : '',
         h('div', { class: 'list' }, rows.map((t) => txnRow(t))),
         count > rows.length ? h('p', { class: 'caption' }, 'Showing the newest ' + rows.length + '.') : null);
     } catch (err) { failed(body, err, unexaminedView); }
@@ -508,12 +476,11 @@
   function sharePanel(t, memo) {
     const theme = ((memo.memo_values || [])[0] || {}).life_values;
     const where = h('input', { type: 'checkbox', id: 'share-where' });
-    const amount = h('input', { type: 'checkbox', id: 'share-amount' });
     const line = h('span', { class: 'share-line' });
     const status = h('span', { class: 'caption', role: 'status' });
-    const text = () => [niceDate(t.txn_date), where.checked ? merchantOf(t) : null, amount.checked ? money(-t.amount_minor) : null].filter(Boolean).join(' · ');
+    const text = () => [niceDate(t.txn_date), where.checked ? merchantOf(t) : null].filter(Boolean).join(' · ');
     const draw = () => { line.textContent = text(); };
-    where.addEventListener('change', draw); amount.addEventListener('change', draw); draw();
+    where.addEventListener('change', draw); draw();
     const send = h('button', { type: 'button', class: 'btn' }, 'Share');
     send.addEventListener('click', async () => {
       const body = memo.body + '\n' + (theme ? theme.name + ' · ' : '') + text() + '\nCentMemo';
@@ -527,23 +494,21 @@
         theme ? h('span', { class: 'share-theme' }, h('i', { style: 'background: ' + themeHue(theme.name) }), theme.name) : null,
         line, h('span', { class: 'share-brand' }, 'CentMemo')),
       h('label', { class: 'filter-check' }, where, ' Show where'),
-      h('label', { class: 'filter-check' }, amount, ' Show the amount'),
-      h('p', { class: 'caption' }, 'Only the memo, its date, and its theme are shared unless you turn these on.'),
+      h('p', { class: 'caption' }, 'Only the memo, its date, and its theme are shared unless you turn this on. Never the amount.'),
       h('div', { class: 'actions' }, send, status));
   }
   // D12: a whole theme as one card (as the iPhone's ShareThemeSheet): its memos,
-  // any left out by the person; places and amounts off unless turned on.
+  // any left out by the person; places off unless turned on, never an amount.
   function shareThemePanel(themeName, rows) {
     const where = h('input', { type: 'checkbox', id: 'share-theme-where' });
-    const amount = h('input', { type: 'checkbox', id: 'share-theme-amount' });
     const status = h('span', { class: 'caption', role: 'status' });
     const memoOf = (t) => (Array.isArray(t.memos) ? t.memos[0] : t.memos) || {};
     const picks = rows.map((t, i) => h('input', { type: 'checkbox', id: 'share-theme-' + i, checked: true }));
     const list = h('ol', { class: 'share-theme-list' });
-    const lineOf = (t) => [niceDate(t.txn_date), where.checked ? merchantOf(t) : null, amount.checked ? money(-t.amount_minor) : null].filter(Boolean).join(' · ');
+    const lineOf = (t) => [niceDate(t.txn_date), where.checked ? merchantOf(t) : null].filter(Boolean).join(' · ');
     const chosen = () => rows.filter((_, i) => picks[i].checked);
     const draw = () => list.replaceChildren(...chosen().map((t) => h('li', {}, h('blockquote', {}, memoOf(t).body), h('span', { class: 'share-line' }, lineOf(t)))));
-    [where, amount, ...picks].forEach((b) => b.addEventListener('change', draw)); draw();
+    [where, ...picks].forEach((b) => b.addEventListener('change', draw)); draw();
     const send = h('button', { type: 'button', class: 'btn' }, 'Share');
     send.addEventListener('click', async () => {
       const items = chosen();
@@ -561,8 +526,7 @@
       h('p', { class: 'field-label' }, 'Memos on the card'),
       h('div', { class: 'share-picks' }, rows.map((t, i) => h('label', { class: 'filter-check' }, picks[i], ' ' + memoOf(t).body.slice(0, 60)))),
       h('label', { class: 'filter-check' }, where, ' Show where'),
-      h('label', { class: 'filter-check' }, amount, ' Show the amounts'),
-      h('p', { class: 'caption' }, 'Only the theme, its memos, and their dates are shared unless you turn these on.'),
+      h('p', { class: 'caption' }, 'Only the theme, its memos, and their dates are shared unless you turn this on. Never the amounts.'),
       h('div', { class: 'actions' }, send, status));
   }
   function fact(k, v) { return h('div', {}, h('dt', {}, k), h('dd', {}, v)); }

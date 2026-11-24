@@ -65,13 +65,39 @@ without opening the app. TestFlight 1.0 (17) carries it: uploaded and VALID.
 Developer Support on 2026-11-24. Ben sent the question that day, Case ID
 103023652799 (`docs/store/DEVELOPER-SUPPORT-QUESTION.md`). The switch stays off.
 
-**Ben's choices, open:**
-1. Public links (D12). Recommendation: private links to his own words only.
-2. D7 writing-suggestion words.
-3. iPad readable width.
-4. Design sign-off before L2. At L2, re-check the App Privacy location answer
-   (confirmed places, one-time location).
-5. Throwaway account for the iOS Delete account check.
+**Ben's answers, 2026-11-24 (verbatim; his numbers follow the list he was sent:
+1 public links, 2 suggestion wording, 3 iPad width, 4 design sign-off, 5 throwaway
+account, 6 the Connect button):**
+
+> 1. Links to stories only make sense with a lot of design. It should be well
+> designed to highlight the "setting", the "MEMOry", and the themes. No amount of
+> money should ever be shared. You should be able to design your "share".
+> 2. The default themes should be on the settings and not on the I examined page
+> (I'm okay if we build out an onboarding system that lets you select these, but
+> without it, they should go in the settings tab).
+> 3. The design of any app layout should be done with design skills for that
+> specific device size. Design and implement for every screen size.
+> 4. I'm pretty sure we already made design calls based upon your artifacts.
+> 5. We can always re-import to my account, so you can add and delete as you see fit.
+> 6. And yes, definitely change language so that it makes sense for the actions
+> we are taking.
+
+**Work that follows, in order:**
+- N1 ✅ No amount in anything shared: remove the amount toggles (memo card, theme
+  card, web + Apple). A check must hold it.
+- N2 ✅ Starter themes leave Unexamined; Settings keeps them (web + Apple).
+- N3 ✅ "Connect Apple Wallet" reads "Sync Apple Wallet" once connected.
+- N3b ⏳ Audit every action's words on every platform.
+- N4 ⏳ Design your share: Setting, memory, themes; the person chooses the look.
+  Design with the skills first, on every size. Links after the design.
+- N5 ⏳ Every screen size designed on purpose: iPhone 12, Duo closed and open, iPad
+  portrait and landscape, Mac window small to large, web phone to desktop.
+- N6 🟡 macOS (tick 44, branch `macos`).
+- Design direction is chosen (item 4): don't ask for a sign-off again. L2 follows
+  N1 to N5, because those change what the app looks like.
+- Delete account on the iPhone: Ben allows adding and deleting in his account.
+  His memos, themes, names and places can't be re-imported, so deleting the whole
+  account is not done without him confirming that loss.
 
 ## Backlog
 
@@ -2145,3 +2171,19 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   **Not verified:** a delivery; the re-enable on real Wallet data.
 - **Open, Ben's words:** the button reads "Connect Apple Wallet" even once connected.
 - **Next:** check the logs again after the Duo runs 19; then macOS (13).
+
+### Tick 44 — 2026-11-24 — the Mac app runs; Ben's answers N1 to N3 (1.0.19 (20))
+- **Delivery logs, about 11:15am:** no extension wake; the Duo had not opened 1.0.18.
+- **Mac (item 13, Decision 055):** the universal target builds for macOS 26.
+  `NavigationSplitView` shell, Settings window, ⌘1 to ⌘3, ⌘S; the lists and the
+  purchase page are the phone's views behind `apple/iOS/Components/Platform.swift`
+  (haptics now mapped in that one place, as AGENTS.md asks). No FinanceKit and no
+  "search near me" on the Mac. Signed, sandboxed, frames read in dark mode
+  (build/qa/mac): three flaws seen and fixed. **Not checked:** the Settings window,
+  sign-in with Apple, saving a memo, light mode, small and large windows.
+- **N1:** no amount on any share surface, web and Apple; `share_no_money` holds it.
+- **N2:** the starter themes left Unexamined, web and Apple; Settings keeps them.
+- **N3:** the Wallet button reads "Sync Apple Wallet" once connected.
+- **Verified:** full iPhone 12 tier on the shared-view change (32 pass, 4 skip), then
+  the 13 tests nearest N1 to N3; `tools/test_all.sh` (now builds the Mac too).
+- **Next:** N5 with the Mac included, then N4.
