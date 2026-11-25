@@ -56,9 +56,8 @@ sign-off.
 in project.yml, and FinanceKit is turned on for the walletdelivery App ID (portal,
 Ben signed in). Signed build rc=0; app and appex both carry `financial-data` and
 the App Group, and both profiles allow it. test_all rc=0. The debug build is on the
-Duo and opens to Settings (frame read). **Not verified:** delivery itself. Ben taps
-Connect Apple Wallet once (that enables hourly delivery); then a new purchase should arrive
-without opening the app. TestFlight 1.0 (17) carries it: uploaded and VALID.
+Duo and opens to Settings (frame read). **Verified 2026-11-24 5:42pm:** a
+new purchase arrived without opening the app (tick 59). TestFlight 1.0 (17) carries it: uploaded and VALID.
 
 **Connector question (case 23676235):** Wallet Entitlements referred Ben to Apple
 Developer Support on 2026-11-24. Ben sent the question that day, Case ID
@@ -2395,3 +2394,12 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Noted:** every connector test run leaves a registered test client and consent on the
   synthetic owner (350 and 346). Harmless; worth a cleanup with Ben's OK.
 - **Duo:** still not reachable from this Mac at 5:10pm.
+
+### Tick 59 — 2026-11-24 — The first background Wallet delivery
+- **Seen:** 5:42pm, `CentMemoWalletDelivery/24` on the Duo: token refresh 200, accounts
+  read 200, accounts upsert 200, transactions 201; one new row in the database at that
+  second. The Duo's app had last called the server at 2:02pm (build 24), so nothing
+  but the extension did this.
+- **Still open:** iPad taps (asked again, timed out; it wants its passcode); the Duo is
+  not reachable from this Mac and has build 24; nothing else in the backlog is free of
+  Ben or Apple.
