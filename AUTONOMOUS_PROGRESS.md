@@ -2387,7 +2387,9 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   purchases are still shared (control).
 - **Was it used?** Data API callers since 2026-11-22 (Ben's first Wallet sync), by user
   agent: the app, the test runners, the site in a browser, and our own connector.
-  User agent only; one Python request on 2026-11-24 is described in the report.
+  One other, a Python script from a hosting company
+  (2026-11-24 05:11 UTC, no sign-in), got 401 and nothing else. User agents can be faked,
+  so this is what the logs show, not proof.
 - **Also verified:** removing a theme, a memo, or the purchase turns its links off; the
   account's deletion cascades (`confdeltype = c`).
 - **Noted:** every connector test run leaves a registered test client and consent on the
