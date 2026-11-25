@@ -2518,3 +2518,4 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Verified:** mac_uitest 25 of 25 (stored files unreadable, offline, slow network, words
   being written survive a late answer, sign-out wipes); test_all rc=0. **Not verified:** the
   iPhone 12 (Time Limit at 6:55am), a Duo photo under a slow network (it had locked).
+- **Shipped:** 1.0.33 (34) VALID on TestFlight for iOS and Mac (7:21am); the web and the query are live.
