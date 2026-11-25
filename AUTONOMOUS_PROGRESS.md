@@ -2526,7 +2526,7 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Cause:** one navigation bar over two columns; its large title follows whichever column
   scrolls. All four sections had it. Now the name stands in the left column (DESIGN W8).
   Reproduced and fixed on an iPad simulator in landscape (TwoColumnUITests: the old titles
-  fail on all four). **Not yet seen on the Duo** (locked at 7:21am and 8:30am).
+  fail on all four). **Not yet seen on the Duo** (locked at 7:21am and 7:42am).
 - **Found by the simulator:** 1.0.28 to 1.0.33 could not start on iOS 18 at all: one WebKit
   call needs libswiftWebKit, which iOS 18 lacks. Replaced; tools/test_ios_libraries.py in
   test_all (fails on the old build) holds it. No newer device could have shown it.
@@ -2542,3 +2542,4 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Mine:** I overwrote the template's tools/test_ios_floor.py with a new check of the same
   name; restored from git, mine is test_ios_libraries.py. The template's reports FAIL here
   (the Wallet extension's own 26.0), before and after: look at it before a cloud build (L2).
+- **Shipped:** 1.0.34 (35) VALID on TestFlight for iOS and Mac (8:32am); no libswiftWebKit in the uploaded build.
