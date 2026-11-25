@@ -2428,3 +2428,26 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Duo:** open, build 30 debug installed, Settings with Your links seen; its closed
   display is still off.
 - **iPad taps:** tried 8:33pm, timed out enabling automation. No reply from Apple.
+
+### Tick 62 — 2026-11-24 — The Mac pressed for the first time; Share right after Save — v1.0.30 (31)
+- **State found:** saving a memo on the Mac was listed as waiting on Ben. It was not: this
+  Mac's terminal already has Accessibility permission. `tools/mac_uitest.py` (+
+  `mac_ax.swift`) presses the Mac app's own buttons in the background as the synthetic
+  owner, never in front: save, relaunch, read back, remove; Skip and Bring back; Rename
+  and its statement name back. Seen to fail first (no Save press; old builds).
+- **Bug 1, every platform:** after Save the page kept the purchase as it was when opened,
+  so Share and Make a link were missing after a first memo and held the old words after an
+  edit. Fixed on Apple and web; test_web_states failed on the old code (2 checks), passes.
+- **Bug 2, Mac:** Rename opened blank the second time (the Mac empties an alert's field; the
+  same words set again are no change to SwiftUI). A new field per opening. Resetting the
+  draft when the alert closes did not fix it.
+- **PARITY audited:** a Mac column; four stale cells (Wallet sync, delivery, iPhone sign-in, iPad).
+- **Lessons:** a button that closes its own sheet reports an AXError after working. A busy
+  Mac (load 12, other builds) answers accessibility late: BLIND, not a hang (sampled: main
+  thread idle or laying out its first window). A covered window's capture is stale for
+  native views too, so read the control tree.
+- **Certificate emails:** "Your Certificate Has Been Revoked" (three times today) is not
+  this Mac's: BE4F3F4F, its development certificate, is still on App Store Connect.
+- **Not verified:** the fix on an iPhone (iPhone 12 under Time Limit at 9:48pm, frame seen;
+  MemoUITests now checks it; run it in the afternoon). iPad: 9:35pm, automation mode timed out.
+- **Gate:** test_all rc=0.

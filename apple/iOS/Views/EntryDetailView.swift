@@ -444,6 +444,8 @@ struct EntryDetailView: View {
             withAnimation(.easeOut(duration: 0.9).delay(0.1)) { drawn = 1 }
             Haptic.success()
             session.didChangeData()
+            // Share and Make a link read the saved memo, not the one this page opened with.
+            if let fresh = try? await APIClient.shared.transaction(entryID) { entry = fresh }
         } catch {
             self.error = session.handle(error)
             Haptic.error()

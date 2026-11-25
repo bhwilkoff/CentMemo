@@ -12,6 +12,7 @@ struct SettingPageView: View {
     @State private var placeName: String?
     @State private var renaming = false
     @State private var draft = ""
+    @State private var openings = 0
     /// D15: a SettingPlaceModel on iOS 26 (typed loosely for the iOS 18 floor).
     @State private var places: AnyObject? = nil
 
@@ -81,12 +82,14 @@ struct SettingPageView: View {
         .navigationTitle("")
         .inlineTitle()
         .toolbar {
-            Button("Rename", systemImage: "pencil") { draft = shown; renaming = true }
+            Button("Rename", systemImage: "pencil") { draft = shown; openings += 1; renaming = true }
                 .accessibilityIdentifier("setting-rename")
         }
         .alert("Rename \(name)", isPresented: $renaming) {
-            TextField("Name", text: $draft).capitalizesWords()
-            Button("Save") { Task { await rename(draft) } }
+            // A new field each time: the Mac empties an alert's field when it closes, and the
+            // same words set again are no change to SwiftUI, so Rename opened blank.
+            TextField("Name", text: $draft).capitalizesWords().id(openings)
+            Button("Save") { let words = draft; Task { await rename(words) } }
             if placeName != nil { Button("Use the statement name") { Task { await rename("") } } }
             Button("Cancel", role: .cancel) {}
         } message: {

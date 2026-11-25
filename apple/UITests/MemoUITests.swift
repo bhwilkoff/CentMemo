@@ -31,6 +31,13 @@ final class MemoUITests: DeviceTestCase {
         XCTAssertTrue(app.staticTexts["memo-status"].waitForExistence(timeout: 15), "save status")
         XCTAssertEqual(app.staticTexts["memo-status"].label, "Saved.")
         shot(app, "memo-saved")
+        // The memo can be shared at once, without leaving the page and coming back.
+        let more = app.navigationBars.buttons.matching(NSPredicate(format: "label == 'More' OR identifier == 'more'")).firstMatch
+        XCTAssertTrue(more.waitForExistence(timeout: 10), "the ⋯ menu")
+        more.tap()
+        XCTAssertTrue(app.buttons["Make a link"].firstMatch.waitForExistence(timeout: 10), "Make a link, right after Save")
+        XCTAssertTrue(app.buttons["Share"].firstMatch.exists, "Share, right after Save")
+        shot(app, "memo-saved-more")
 
         // Relaunch: the memo is read back from the server, not the screen's memory.
         app.terminate()

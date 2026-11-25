@@ -418,9 +418,21 @@
         try {
           await API.saveMemo(t.id, area.value, [...chosen]);
           status.textContent = area.value.trim() ? 'Saved.' : 'Memo removed.';
+          // Share and Make a link read the saved memo, not the one this page opened with.
+          const fresh = await API.transaction(t.id).catch(() => null);
+          if (fresh) drawShare(fresh);
         } catch (err) { status.textContent = ''; error.textContent = err.message; error.hidden = false; }
         save.disabled = false;
       });
+
+      const share = h('div', {});
+      const drawShare = (row) => {
+        const m = row.memos && (Array.isArray(row.memos) ? row.memos[0] : row.memos);
+        if (!m || !m.body) return fill(share);
+        const first = (m.memo_values || [])[0];
+        fill(share, sharePanel(row, m), linkPanel('memo', [row], first && first.life_values ? { name: first.life_values.name, id: first.value_id || first.life_values.id } : null));
+      };
+      drawShare(t);
 
       // D6 (Decision 065): the Setting and the memo lead; the money and the
       // bank's facts are a footnote, as on the iPhone.
@@ -455,8 +467,7 @@
             t.status !== 'booked' ? fact('Status', t.status) : null,
             t.accounts ? fact('Account', t.accounts.display_name) : null,
             t.description && t.description !== t.merchant ? fact('Statement', t.description) : null))])),
-        memo && memo.body ? sharePanel(t, memo) : '',
-        memo && memo.body ? linkPanel('memo', [t], ((memo.memo_values || [])[0] || {}).life_values ? { name: memo.memo_values[0].life_values.name, id: memo.memo_values[0].value_id || memo.memo_values[0].life_values.id } : null) : '');
+        share);
     } catch (err) { failed(body, err, () => txnView(id)); }
   }
   // D8: a Setting's page, every visit there as a thread (as the iPhone's SettingView).
