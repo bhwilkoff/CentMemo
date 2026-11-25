@@ -90,7 +90,7 @@ account, 6 the Connect button):**
   Design with the skills first, on every size. Links after the design.
 - N5 🟡 (rules: docs/DESIGN.md W; web at 375/768/1024/1440, iPad landscape, open Duo, Mac at 900/1180/1600 built and seen; Settings at wide and iPad portrait seen; closed Duo ⏳) Every screen size designed on purpose: iPhone 12, Duo closed and open, iPad
   portrait and landscape, Mac window small to large, web phone to desktop.
-- N6 🟡 macOS on TestFlight (tick 53, 1.0.26 (27)); Sign in with Apple on a Mac, saving a memo, and Ben's turn ⏳.
+- N6 🟡 macOS on TestFlight (tick 53, 1.0.26 (27)); saving a memo, Skip and Rename pressed (tick 62); Sign in with Apple on a Mac and Ben's turn ⏳.
 - Design direction is chosen (item 4): don't ask for a sign-off again. L2 follows
   N1 to N5, because those change what the app looks like.
 - ✅ Delete account on the iPhone: done on Ben's Duo, 2026-11-24 1:15pm, with his OK
@@ -2451,3 +2451,5 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Not verified:** the fix on an iPhone (iPhone 12 under Time Limit at 9:48pm, frame seen;
   MemoUITests now checks it; run it in the afternoon). iPad: 9:35pm, automation mode timed out.
 - **Gate:** test_all rc=0.
+- **Shipped:** 1.0.30 (31) VALID on TestFlight for iOS and Mac (11:01pm); the web fix is live.
+- **Next:** more Mac presses (theme on a memo, filters, a link made and turned off, empty and error states); the iPhone 12 in the afternoon.
