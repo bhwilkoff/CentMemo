@@ -2427,4 +2427,4 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   window is covered; use `takeSnapshot` before calling it a bug.**
 - **Duo:** open, build 30 debug installed, Settings with Your links seen; its closed
   display is still off.
-- **iPad taps:** tried 8:35pm, same passcode prompt. No reply from Apple.
+- **iPad taps:** tried 8:33pm, timed out enabling automation. No reply from Apple.
