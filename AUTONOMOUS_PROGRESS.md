@@ -2466,3 +2466,5 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Still 🚧 on the Mac:** import, photos and files, a place confirmed, share cards saved,
   Delete account, Sign in with Apple (Ben's).
 - **Apple:** no reply at 11:43pm.
+- **Shipped:** 1.0.31 (32) VALID on TestFlight for iOS and Mac (12:01am).
+- **Next:** Mac import (APP_IMPORT_SAMPLE, stranger), a place confirmed; the iPhone 12 in the afternoon.
