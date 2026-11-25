@@ -54,12 +54,22 @@ launch it.
 Test data is synthetic (`tools/seed_demo.mjs`, `~/.centmemo/test-users.json`,
 mode 600, outside the repo). Tests that change data put it back.
 
+## Simulators (2026-11-25)
+
+The tap tier also runs on an iOS 18.5 simulator, the oldest iOS served, and is not touched
+by the iPhone 12's Screen Time: `xcrun simctl create`, boot one at a time, then
+`xcodebuild test -scheme CentMemoUITests -destination id=<sim> -collect-test-diagnostics never`
+with TEST_RUNNER_APP_TEST_EMAIL and _PASSWORD set (without that flag a failure hangs
+xcodebuild for minutes). `TwoColumnUITests` needs an iPad simulator.
+
 ## On this Mac
 
 - **Tap tier**: `/usr/bin/python3 tools/mac_uitest.py [--only part-of-a-name]` after a
   Debug Mac build. Presses the app's real buttons through accessibility, in the
   background, as the synthetic owner (the stranger for the empty state), and leaves the
   data as found. BLIND means the app had not answered yet, usually a busy Mac.
+- BLIND with "no windows (AXError 0)" while someone works in a full-screen space: new
+  windows open on another space, unseen. Other apps read the same way. Wait; never switch it.
 - Pictures of a covered window are stale; read the control tree (`mac_ax <pid> dump`).
 
 ## Web

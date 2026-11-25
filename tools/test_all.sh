@@ -31,7 +31,8 @@ xcodegen generate -q >/dev/null 2>&1
 run "Swift Core tests (macOS)" xcodebuild test -project CentMemo.xcodeproj -scheme CentMemoTests \
   -destination platform=macOS CODE_SIGNING_ALLOWED=NO -jobs 2 -quiet
 run "iOS app builds" xcodebuild build -project CentMemo.xcodeproj -scheme CentMemoUITests \
-  -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO -jobs 2 -quiet
+  -destination 'generic/platform=iOS' -derivedDataPath build/dd-check CODE_SIGNING_ALLOWED=NO -jobs 2 -quiet
+run "the iPhone app can start on iOS 18" python3 tools/test_ios_libraries.py build/dd-check
 run "Mac app builds" xcodebuild build -project CentMemo.xcodeproj -scheme CentMemo \
   -destination 'generic/platform=macOS' CODE_SIGNING_ALLOWED=NO -jobs 2 -quiet
 [ $fail -eq 0 ] && echo "ALL PASS" || echo "SOME CHECKS FAILED"

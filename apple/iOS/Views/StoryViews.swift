@@ -11,6 +11,10 @@ struct ThemeShareItem: Identifiable { let name: String; var id: String { name } 
     var values: [LifeValue] = []
     var counts: [String: Int] = [:]
     var entries: [LedgerEntry] = []
+    /// What `entries` answers: after a theme is chosen they are still the last list's, and a
+    /// card or a link made then would carry the wrong memos.
+    var loaded: APIClient.StoryScope?
+    var showsItsOwn: Bool { scope != nil && loaded == scope }
     var loading = true
     var error: String?
 
@@ -27,7 +31,7 @@ struct ThemeShareItem: Identifiable { let name: String; var id: String { name } 
 
     func load(_ session: SessionStore) async {
         loading = true
-        if entries.isEmpty { await APIClient.shared.kept { try await self.read() } }
+        if loaded == nil || loaded != scope { await APIClient.shared.kept { try await self.read() } }
         do {
             try await read()
             error = nil
@@ -44,7 +48,11 @@ struct ThemeShareItem: Identifiable { let name: String; var id: String { name } 
         values = try await themes
         counts = await counted ?? [:]
         if scope == nil { scope = .month(latest) }
-        entries = try await APIClient.shared.stories(scope!)
+        let asked = scope!
+        let found = try await APIClient.shared.stories(asked)
+        guard asked == scope else { return }
+        entries = found
+        loaded = asked
     }
 }
 
@@ -59,7 +67,7 @@ struct StoryView: View {
         LoadState(isLoading: model.loading && model.entries.isEmpty, error: model.error, holds: !model.entries.isEmpty, retry: { await model.load(session) }) {
             if width == .regular {
                 HStack(spacing: 0) {
-                    List { StoryShelf(model: model) }.listStyle(.plain).frame(width: 320)
+                    List { StoryShelf(model: model) }.listStyle(.plain).columnTitle("Story").frame(width: 320)
                     Divider()
                     StoryReading(model: model)
                 }
@@ -80,7 +88,7 @@ struct StoryView: View {
             }
         }
         .grounded()
-        .navigationTitle("Story")
+        .columnBar("Story")
         .modifier(StoryChrome(model: model))
     }
 }
@@ -95,7 +103,7 @@ struct StoryChrome: ViewModifier {
         content
             .toolbar {
                 // D12: a whole theme as one card, when the Story shows one theme.
-                if let name = model.themeName, !model.entries.isEmpty {
+                if let name = model.themeName, model.showsItsOwn, !model.entries.isEmpty {
                     Button("Share this theme", systemImage: "square.and.arrow.up") { sharingTheme = name }
                         .accessibilityIdentifier("share-theme")
                     Button("Make a link to this theme", systemImage: "link") { linkingTheme = model.values.first { $0.id == model.themeID } }

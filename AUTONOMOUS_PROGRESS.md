@@ -2519,3 +2519,26 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   being written survive a late answer, sign-out wipes); test_all rc=0. **Not verified:** the
   iPhone 12 (Time Limit at 6:55am), a Duo photo under a slow network (it had locked).
 - **Shipped:** 1.0.33 (34) VALID on TestFlight for iOS and Mac (7:21am); the web and the query are live.
+
+### 2026-11-25 — Column titles stay put; the app starts on iOS 18 again — v1.0.34 (35)
+- **Ben:** "when I scroll the right column on my duo, the title of the page on the left
+  column (Unexamined) scrolls with it. That shouldn't happen"
+- **Cause:** one navigation bar over two columns; its large title follows whichever column
+  scrolls. All four sections had it. Now the name stands in the left column (DESIGN W8).
+  Reproduced and fixed on an iPad simulator in landscape (TwoColumnUITests: the old titles
+  fail on all four). **Not yet seen on the Duo** (locked at 7:21am and 8:30am).
+- **Found by the simulator:** 1.0.28 to 1.0.33 could not start on iOS 18 at all: one WebKit
+  call needs libswiftWebKit, which iOS 18 lacks. Replaced; tools/test_ios_libraries.py in
+  test_all (fails on the old build) holds it. No newer device could have shown it.
+- **Found by a flaky test:** on a theme, Share and Make a link stood over the previous
+  list's memos until its own arrived, so a link could have been made of the wrong ones. They
+  wait now (testThemeButtonsWaitForTheirMemos, failed on the old code).
+- **Found in a frame:** the Narrative's theme colors were wrong until redrawn (they load
+  after the list, and 1.0.33 draws it sooner). Colors are observed now, kept ones first.
+- **Verified on an iOS 18.5 iPhone simulator:** Memo, ErrorState, Filter and Share suites
+  (ticks 62 and 64 and 068 on an iPhone, at last off the iPhone 12's Screen Time);
+  testMakeALinkThenTurnItOff failed once in 3 ("stays in sight while they type").
+- **Not run:** the Mac taps on this build (Ben in a full-screen space; BLIND). test_all rc=0.
+- **Mine:** I overwrote the template's tools/test_ios_floor.py with a new check of the same
+  name; restored from git, mine is test_ios_libraries.py. The template's reports FAIL here
+  (the Wallet extension's own 26.0), before and after: look at it before a cloud build (L2).

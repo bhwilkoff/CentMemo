@@ -94,6 +94,52 @@ private struct ColumnRowInsets: ViewModifier {
     }
 }
 
+extension View {
+    /// A section's name. With two columns it stands over the left one, in that column: the
+    /// navigation bar's large title moves with whichever column scrolls, so reading on the
+    /// right carried the left one's title away (Ben, 2026-11-25).
+    func columnTitle(_ title: String) -> some View { modifier(ColumnTitle(title: title)) }
+    /// The bar beside a column title keeps the name (for Back and VoiceOver) and shows none.
+    func columnBar(_ title: String) -> some View { modifier(ColumnBar(title: title)) }
+}
+
+private struct ColumnTitle: ViewModifier {
+    let title: String
+    @Environment(\.horizontalSizeClass) private var width
+    func body(content: Content) -> some View {
+        #if os(iOS)
+        if width == .regular {
+            VStack(alignment: .leading, spacing: 0) {
+                Text(title).font(.system(.largeTitle, design: .serif, weight: .bold)).foregroundStyle(Color.brandPrimary)
+                    .accessibilityAddTraits(.isHeader)
+                    .padding(.horizontal, PaneEdges.words).padding(.bottom, Spacing.s2)
+                content
+            }
+        } else {
+            content
+        }
+        #else
+        content
+        #endif
+    }
+}
+
+private struct ColumnBar: ViewModifier {
+    let title: String
+    @Environment(\.horizontalSizeClass) private var width
+    func body(content: Content) -> some View {
+        #if os(iOS)
+        if width == .regular {
+            content.navigationTitle(title).inlineTitle().toolbar(removing: .title)
+        } else {
+            content.navigationTitle(title)
+        }
+        #else
+        content.navigationTitle(title)
+        #endif
+    }
+}
+
 /// Every push to a purchase goes through this one route type.
 struct EntryRoute: Hashable { let id: String }
 

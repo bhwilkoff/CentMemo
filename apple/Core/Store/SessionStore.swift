@@ -17,6 +17,12 @@ final class SessionStore {
         setLocal(g)
     }
 
+    /// Every list wears the themes' colors: the kept ones at once, then the server's.
+    func loadThemes() async {
+        _ = await APIClient.shared.kept { try await APIClient.shared.values() }
+        _ = try? await APIClient.shared.values()
+    }
+
     func choose(_ g: Ground) async throws {
         setLocal(g)
         try await APIClient.shared.setGround(g)

@@ -65,6 +65,7 @@ struct SettingsView: View {
                         }
                     }
                     .listStyle(.plain)
+                    .columnTitle("Settings")
                     .frame(width: 380)
                     Divider()
                     // W5: the choices keep a reading width beside the list, and start at the divider.
@@ -86,7 +87,7 @@ struct SettingsView: View {
             }
         }
         .grounded()
-        .navigationTitle("Settings")
+        .columnBar("Settings")
         .modifier(DeleteAccountAlert(shown: $confirmDelete) { await deleteAccount() })
         .modifier(RemoveThemeAlert(theme: $removing) { await remove($0) })
         .task(id: session.dataVersion) { await load() }

@@ -43,13 +43,19 @@ struct StoryPagePreview {
             guard let data = try? JSONEncoder().encode(draft.preview), let json = String(data: data, encoding: .utf8), json != shown else { return }
             guard ready else { waiting = json; return }
             shown = json
-            web.callAsyncJavaScript("CentStory.render(document.getElementById('page'), JSON.parse(p))", arguments: ["p": json], in: nil, in: .page)
+            Self.render(json, on: web)
+        }
+        /// Not callAsyncJavaScript: its Swift form lives in a library iOS 18 does not have,
+        /// and the app then cannot start there (seen on the iOS 18.5 simulator, 2026-11-25).
+        private static func render(_ json: String, on web: WKWebView) {
+            guard let data = try? JSONEncoder().encode(json), let literal = String(data: data, encoding: .utf8) else { return }
+            web.evaluateJavaScript("CentStory.render(document.getElementById('page'), JSON.parse(\(literal))); null", completionHandler: nil)
         }
         func webView(_ web: WKWebView, didFinish navigation: WKNavigation!) {
             ready = true
             guard let json = waiting else { return }
             waiting = nil; shown = json
-            web.callAsyncJavaScript("CentStory.render(document.getElementById('page'), JSON.parse(p))", arguments: ["p": json], in: nil, in: .page)
+            Self.render(json, on: web)
         }
         func webView(_ web: WKWebView, decidePolicyFor action: WKNavigationAction) async -> WKNavigationActionPolicy {
             action.request.url?.scheme == "about" ? .allow : .cancel

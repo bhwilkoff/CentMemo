@@ -54,6 +54,7 @@ struct ContentView_macOS: View {
             .environment(\.horizontalSizeClass, .regular)
             .environment(pane)
             .tint(Color.brandPrimary)
+            .task { await session.loadThemes() }
             .task { await session.loadGround() }
             .onChange(of: pane.route) { store.navigationPath = NavigationPath() }
             .onChange(of: store.openedItem, initial: true) { _, id in

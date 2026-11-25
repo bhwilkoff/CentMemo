@@ -249,6 +249,25 @@ def read_one_theme(open_app):
         app.quit()
 
 
+def theme_buttons_wait(open_app):
+    """On a slow network a theme's Share waits for its own memos."""
+    app = open_app()
+    try:
+        app.wait("theme-Great meals")
+        app.shows("penguins")
+        app.do("press", "theme-Great meals")
+        time.sleep(2)
+        tree = app.ax("dump")[1]
+        if "penguins" in tree and "share-theme" in tree:
+            raise Failed("Share this theme is offered over another list's memos")
+        app.wait("share-theme")
+        if "penguins" in app.ax("dump")[1]:
+            raise Failed("Share this theme is offered over another list's memos")
+        print("PASS a theme's Share and link wait for that theme's memos")
+    finally:
+        app.quit()
+
+
 def filter_narrative(open_app):
     app = open_app()
     try:
@@ -506,7 +525,8 @@ def main():
         link = go(APP_START_TAB="story", APP_START_ITEM=ZOO, APP_START_SHARE="link")
         settings = go(APP_START_TAB="story", APP_OPEN_SETTINGS="1", APP_START_PANE="links")
         tests = [(memo_round_trip, item), (skip_round_trip, item), (rename_round_trip, zoo), (theme_on_memo, zoo),
-                 (read_one_theme, go(APP_START_TAB="story")), (filter_narrative, go(APP_START_TAB="ledger")),
+                 (read_one_theme, go(APP_START_TAB="story")),
+                 (theme_buttons_wait, go(APP_START_TAB="story", APP_SLOW_MS="6000")), (filter_narrative, go(APP_START_TAB="ledger")),
                  (link_made_and_off, link, settings), (settings_sections, settings),
                  (theme_added_and_removed, go(APP_START_TAB="story", APP_OPEN_SETTINGS="1", APP_START_PANE="themes")),
                  (sign_out_leaves_nothing, go(APP_START_TAB="story", APP_OPEN_SETTINGS="1", APP_START_PANE="themes")),

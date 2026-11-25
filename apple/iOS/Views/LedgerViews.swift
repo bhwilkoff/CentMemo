@@ -74,8 +74,9 @@ struct UnexaminedView: View {
                 .opensFirst(picked.first?.1.id ?? entries.first?.id)
             }
         }
+        .columnTitle("Unexamined")
         .grounded()
-        .navigationTitle("Unexamined")
+        .columnBar("Unexamined")
         .refreshable { await load() }
         .task(id: session.dataVersion) { await load() }
     }
@@ -199,8 +200,9 @@ struct LedgerView: View {
             .listStyle(.plain)
             .opensFirst(entries.first { !$0.isSkipped && !$0.isQuietDetail }?.id)
         }
+        .columnTitle("Narrative")
         .grounded()
-        .navigationTitle("Narrative")
+        .columnBar("Narrative")
         // D9: show only some kinds of events (a native filter menu).
         .toolbar {
             ToolbarItem(placement: .mainAction) {

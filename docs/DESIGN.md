@@ -134,6 +134,10 @@ size."* The branch is on the room a screen has, never on the device.
 - **W7. Seeing it.** Every class is captured and read before a change is called
   done: iPhone 12 and the Duo both ways, iPad both ways, the Mac at 900, 1180 and
   1600, the web at 375, 768, 1024 and 1440 (`tools/test_web_states.mjs --widths`).
+- **W8. A column's title belongs to its column.** With two columns the section's name
+  stands over the left one and never moves when the right one scrolls (Ben, 2026-11-25:
+  "That shouldn't happen"). The navigation bar's large title follows whichever column
+  scrolls, so it is not used there (`columnTitle`, `TwoColumnUITests`).
 
 ## S. The share (N4)
 

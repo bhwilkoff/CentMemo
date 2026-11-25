@@ -1,4 +1,5 @@
 import Foundation
+import Observation
 
 /// D14: the starter themes Ben approved (tests/fixtures/starter-themes.json is
 /// the source; ThemesTests holds this copy to it) and the rule that gives each
@@ -42,7 +43,11 @@ enum Themes {
     ]
 
     /// The signed-in person's theme colors, refreshed whenever their themes load.
-    static var current: [String: String] = [:]
+    /// Observed: a list drawn before they arrive takes them when they do.
+    static var current: [String: String] {
+        get { ThemeColors.shared.map }
+        set { if newValue != ThemeColors.shared.map { ThemeColors.shared.map = newValue } }
+    }
 
     /// The color a theme shows: its assigned one, else a starter's, else a
     /// stable pick from the palette (a name seen before the themes loaded).
@@ -88,4 +93,9 @@ enum Themes {
         }
         return out
     }
+}
+
+@Observable final class ThemeColors {
+    static let shared = ThemeColors()
+    var map: [String: String] = [:]
 }

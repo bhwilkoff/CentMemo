@@ -26,7 +26,7 @@ final class ShareUITests: DeviceTestCase {
         setting.tap()
         XCTAssertTrue(reach(app, app.buttons["Tall"].firstMatch, swipes: 4))
         app.buttons["Tall"].firstMatch.tap()
-        for _ in 0..<6 { app.swipeDown() }
+        for _ in 0..<6 where !text(app, matching: "Setting card: First cold Sunday").exists { app.swipeDown(velocity: .slow) }
         XCTAssertTrue(text(app, matching: "Setting card: First cold Sunday").waitForExistence(timeout: 5), "the look changes the card")
         XCTAssertFalse(text(app, matching: "Show the amount").exists, "an amount is never offered")
         XCTAssertFalse(text(app, matching: "Setting card: ").label.contains("$"), "and none is on the card")
@@ -111,5 +111,19 @@ final class ShareUITests: DeviceTestCase {
         XCTAssertFalse(app.buttons["link-make"].isEnabled, "a page with no parts can't be made")
         shot(app, "link-theme-empty")
         app.buttons["Done"].firstMatch.tap()
+    }
+
+    /// On a slow network a theme's Share and link wait for that theme's own memos.
+    func testThemeButtonsWaitForTheirMemos() {
+        let app = launch(["APP_START_TAB": "story", "APP_SLOW_MS": "5000"])
+        let theme = app.buttons["theme-Great meals"]
+        XCTAssertTrue(theme.waitForExistence(timeout: 60))
+        XCTAssertTrue(text(app, matching: "penguins").waitForExistence(timeout: 30))
+        sleep(12)  // the first reads are over
+        theme.tap()
+        sleep(2)
+        if text(app, matching: "penguins").exists { XCTAssertFalse(app.buttons["share-theme"].exists, "not over another list's memos") }
+        XCTAssertTrue(app.buttons["share-theme"].waitForExistence(timeout: 30))
+        XCTAssertFalse(text(app, matching: "penguins").exists, "offered over its own")
     }
 }
