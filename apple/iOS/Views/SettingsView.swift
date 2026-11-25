@@ -125,6 +125,12 @@ struct SettingsView: View {
                         Capsule().fill(ThemeHue.color(v.name)).frame(width: 4, height: 22)
                         TextField("Theme", text: $v.name).labelsHidden()
                             .onSubmit { Task { await rename(v) } }
+                        #if os(macOS)
+                        // The Mac's forms have no swipe.
+                        Button("Remove \(v.name)", systemImage: "minus.circle") { removing = v }
+                            .labelStyle(.iconOnly).buttonStyle(.borderless)
+                            .help("Remove this theme")
+                        #endif
                     }
                 }
                 .onDelete { idx in removing = idx.first.map { values[$0] } }

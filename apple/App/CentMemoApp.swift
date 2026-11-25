@@ -47,7 +47,7 @@ struct CentMemoApp: App {
         #if os(macOS)
         .defaultSize(width: 1180, height: 760)
         .windowResizability(.contentMinSize)
-        .commands { MacCommands(store: store) }
+        .commands { MacCommands(store: store, session: session) }
         #endif
         #if os(macOS)
         Settings {
@@ -55,7 +55,7 @@ struct CentMemoApp: App {
                 .environment(store)
                 .environment(session)
                 .tint(Color.brandPrimary)
-                .frame(width: 560, height: 520)
+                .frame(width: 640, height: 520)  // wide enough for every section's tab
         }
         #endif
         // SwiftData: do NOT use the bare .modelContainer(for:) modifier if

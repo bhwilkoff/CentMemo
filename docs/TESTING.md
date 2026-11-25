@@ -54,6 +54,14 @@ launch it.
 Test data is synthetic (`tools/seed_demo.mjs`, `~/.centmemo/test-users.json`,
 mode 600, outside the repo). Tests that change data put it back.
 
+## On this Mac
+
+- **Tap tier**: `/usr/bin/python3 tools/mac_uitest.py [--only part-of-a-name]` after a
+  Debug Mac build. Presses the app's real buttons through accessibility, in the
+  background, as the synthetic owner (the stranger for the empty state), and leaves the
+  data as found. BLIND means the app had not answered yet, usually a busy Mac.
+- Pictures of a covered window are stale; read the control tree (`mac_ax <pid> dump`).
+
 ## Web
 
 The web app runs locally (`python3 -m http.server 8765`). Chrome checks it

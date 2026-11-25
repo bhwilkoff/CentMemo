@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """The Mac's tap tier, through the real buttons, data left as found: a memo saved, read
 back after a relaunch and removed; a purchase skipped and brought back; a place renamed
-and given its statement name back.
+and given its statement name back; a theme put on a memo; one theme read; the Narrative
+filtered; a link made, listed and turned off; every section of Settings in sight.
 
 Signs in as the synthetic owner through the DEBUG door, never as a person. Presses
 controls by accessibility and by process id, so nothing comes to the front. Needs the
@@ -12,6 +13,7 @@ terminal's existing Accessibility permission; without it the run is BLIND, not a
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -39,6 +41,21 @@ def build_tool():
         out.parent.mkdir(parents=True, exist_ok=True)
         subprocess.run(["swiftc", "-O", str(src), "-o", str(out)], check=True)
     return out
+
+
+def skip_on_server(user, on):
+    from datetime import datetime, timezone
+    from urllib.request import Request, urlopen
+    js = (REPO / "js/config.js").read_text() if (REPO / "js/config.js").exists() else (REPO / "js/api.js").read_text()
+    base, key = re.search(r"https://[a-z0-9]+\.supabase\.co", js).group(0), re.search(r"sb_publishable_[\w-]+|eyJ[\w.-]{60,}", js).group(0)
+
+    def call(path, body, method="POST", token=None):
+        h = {"apikey": key, "content-type": "application/json", **({"Authorization": f"Bearer {token}"} if token else {})}
+        raw = urlopen(Request(base + path, json.dumps(body).encode(), h, method=method), timeout=20).read()
+        return json.loads(raw) if raw else None
+    token = call("/auth/v1/token?grant_type=password", {"email": user["email"], "password": user["password"]})["access_token"]
+    when = datetime.now(timezone.utc).isoformat() if on else None
+    call(f"/rest/v1/transactions?id=eq.{UNEXAMINED}", {"skipped_at": when}, "PATCH", token)
 
 
 class App:
@@ -75,6 +92,13 @@ class App:
         seen = SHOTS / "failed-tree.txt"
         seen.write_text(self.ax("dump")[1])
         raise Failed(f"{ident}: waited {seconds}s, last read {last!r}; the screen's controls are in {seen}")
+
+    def shows(self, text, seconds=40, gone=False):
+        for _ in range(seconds):
+            if (text in self.ax("dump")[1]) != gone:
+                return
+            time.sleep(1)
+        raise Failed(f"{text!r} {'still there' if gone else 'not shown'} after {seconds}s")
 
     def quit(self):
         try:
@@ -178,20 +202,198 @@ def rename_round_trip(open_app):
         app.quit()
 
 
+def theme_on_memo(open_app):
+    chip = "Great meals"
+    app = open_app()
+    try:
+        app.wait("memo-editor", lambda v: v != "")
+        on = lambda: "AXSelected 1" in app.ax("state", chip)[1]  # noqa: E731
+        if on():
+            raise Failed(f"the fixture already has {chip}")
+        for want in (True, False):
+            app.do("press", chip)
+            app.do("press", "save-memo")
+            app.wait("memo-status", lambda v: "Saved." in v)
+            time.sleep(2)
+            app.quit()
+            app = open_app()
+            app.wait("memo-editor", lambda v: v != "")
+            if on() != want:
+                raise Failed(f"{chip} {'did not stay' if want else 'did not come off'}")
+        print("PASS a theme goes on a memo, and comes off, across relaunches")
+    finally:
+        app.quit()
+
+
+def read_one_theme(open_app):
+    app = open_app()
+    try:
+        app.shows("penguins")
+        app.do("press", "theme-Great meals")
+        app.shows("penguins", gone=True)
+        app.shows("Anniversary")
+        for i in ("share-theme", "link-theme"):
+            app.wait(i)
+        app.do("press", "every-memo")
+        app.shows("penguins")
+        print("PASS one theme is read alone, and Every memo leads back")
+    finally:
+        app.quit()
+
+
+def filter_narrative(open_app):
+    app = open_app()
+    try:
+        app.shows("· Shell")
+        app.do("press", "narrative-filter")
+        time.sleep(1)
+        app.do("press", "Written")
+        app.shows("· Shell", gone=True)
+        app.shows("penguins")
+        print("PASS the Narrative shows only what is written")
+    finally:
+        app.quit()
+
+
+def link_made_and_off(open_app, open_settings):
+    app = open_app()
+    try:
+        app.wait("link-make")
+        app.shows("penguins")
+        app.do("press", "share-word-13")
+        app.do("press", "share-word-16")
+        app.do("press", "Circle")
+        app.do("press", "link-make")
+        app.wait("link-send")
+        app.shows("centmemo.com/s/#")
+        print("PASS a link is made, with its address shown")
+    finally:
+        app.quit()
+    app = open_settings()
+    try:
+        app.shows("link-off-")
+        offs = app.do("ids", "link-off-").split()
+        for i in offs:
+            app.do("press", i)
+            time.sleep(3)
+        app.shows("link-off-", gone=True)
+        print(f"PASS Settings lists it and turns it off ({len(offs)})")
+    finally:
+        app.quit()
+
+
+def failing_network(*opens):
+    for open_app, words in zip(opens, ("CentMemo couldn't reach its server.", "You're offline.")):
+        app = open_app()
+        try:
+            app.shows(words)
+            app.do("press", "Try again")
+            app.shows(words)
+            if "NSURL" in app.ax("dump")[1]:
+                raise Failed("the system's own words on screen")
+        finally:
+            app.quit()
+    print("PASS unreachable and offline each say so, with Try again")
+
+
+def empty_account(open_app):
+    app = open_app()
+    try:
+        app.shows("Nothing in your Narrative yet")
+        app.shows("Import")
+        macapp.capture(app.pid, str(SHOTS / "empty.png"))
+        print("PASS an empty account says so and offers Import")
+    finally:
+        app.quit()
+
+
+def theme_added_and_removed(open_app):
+    app, name, added = open_app(), "Remove People I love", False
+    try:
+        app.shows("Starter themes")
+        if name in app.ax("dump")[1]:
+            raise Failed("the fixture already has People I love")
+        app.do("press", app.do("ids", "add-starter-").split()[0])
+        added = True
+        app.shows(name)
+        app.do("press", name)
+        app.wait("Keep it")
+        app.do("press", "Keep it")
+        time.sleep(2)
+        app.shows(name)
+        print("PASS a starter theme is added; removing asks first, and Keep it keeps it")
+    finally:
+        if added:
+            app.do("press", name)
+            app.wait("Remove from all memos")
+            app.do("press", "Remove from all memos")
+            app.shows(name, gone=True)
+            print("PASS and Remove from all memos removes it")
+        app.quit()
+
+
+def reload_lists(open_app, change):
+    """A memo-less purchase skipped somewhere else leaves the Mac's list on Reload."""
+    app = open_app()
+    try:
+        app.shows("King Soopers, Nov 17 · ")
+        change(True)
+        try:
+            time.sleep(3)
+            if "King Soopers, Nov 17 · " not in app.ax("dump")[1]:
+                raise Failed("the list changed before Reload: this proves nothing")
+            app.do("press", "menu:Reload")
+            app.shows("King Soopers, Nov 17 · ", gone=True)
+        finally:
+            change(False)
+        app.do("press", "menu:Reload")
+        app.shows("King Soopers, Nov 17 · ")
+        print("PASS View > Reload shows what changed elsewhere")
+    finally:
+        app.quit()
+
+
+def settings_sections(open_app):
+    app = open_app()
+    try:
+        app.shows("Connect Claude")
+        tree = app.ax("dump")[1]
+        if "more toolbar items" in tree or "Privacy and terms" not in tree:
+            raise Failed("a section of Settings is hidden behind an arrow")
+        print("PASS every section of Settings is in sight")
+    finally:
+        app.quit()
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--binary", default=str(BINARY))
+    p.add_argument("--only", help="part of a test's name")
     a = p.parse_args()
-    user = json.loads((Path.home() / ".centmemo/test-users.json").read_text())["owner"]
+    users = json.loads((Path.home() / ".centmemo/test-users.json").read_text())
+    user = users["owner"]
     tool = build_tool()
     SHOTS.mkdir(parents=True, exist_ok=True)
     with devlease.hold(["mac"], task="centmemo mac taps", wait=120):
-        item = {"APP_START_TAB": "unexamined", "APP_START_ITEM": UNEXAMINED}
-        place = {"APP_START_TAB": "story", "APP_START_ITEM": ZOO}
+        go = lambda **d: lambda: App(tool, a.binary, user, d)  # noqa: E731
+        item = go(APP_START_TAB="unexamined", APP_START_ITEM=UNEXAMINED)
+        zoo = go(APP_START_TAB="story", APP_START_ITEM=ZOO)
+        link = go(APP_START_TAB="story", APP_START_ITEM=ZOO, APP_START_SHARE="link")
+        settings = go(APP_START_TAB="story", APP_OPEN_SETTINGS="1", APP_START_PANE="links")
+        tests = [(memo_round_trip, item), (skip_round_trip, item), (rename_round_trip, zoo), (theme_on_memo, zoo),
+                 (read_one_theme, go(APP_START_TAB="story")), (filter_narrative, go(APP_START_TAB="ledger")),
+                 (link_made_and_off, link, settings), (settings_sections, settings),
+                 (theme_added_and_removed, go(APP_START_TAB="story", APP_OPEN_SETTINGS="1", APP_START_PANE="themes")),
+                 (reload_lists, go(APP_START_TAB="unexamined"), lambda on: skip_on_server(user, on)),
+                 (failing_network, go(APP_START_TAB="ledger", APP_FAIL_NETWORK="unreachable"),
+                  go(APP_START_TAB="ledger", APP_FAIL_NETWORK="offline")),
+                 (empty_account, lambda: App(tool, a.binary, users["stranger"], {"APP_START_TAB": "unexamined"}))]
         bad = 0
-        for test, doors in ((memo_round_trip, item), (skip_round_trip, item), (rename_round_trip, place)):
+        for test, *opens in tests:
+            if a.only and a.only not in test.__name__:
+                continue
             try:
-                test(lambda d=doors: App(tool, a.binary, user, d))
+                test(*opens)
             except Failed as e:
                 bad += 1
                 print("BLIND" if "BLIND" in str(e) else "FAIL", test.__name__, e)

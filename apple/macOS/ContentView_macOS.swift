@@ -91,9 +91,11 @@ enum MacSection: String, CaseIterable, Identifiable {
     }
 }
 
-/// The menu bar: the sections on ⌘1 to ⌘3. There is no File ▸ New.
+/// The menu bar: the sections on ⌘1 to ⌘3, and Reload (⌘R), the Mac's pull to refresh.
+/// There is no File ▸ New.
 struct MacCommands: Commands {
     let store: AppStore
+    let session: SessionStore
     var body: some Commands {
         CommandGroup(replacing: .newItem) {}
         CommandGroup(before: .sidebar) {
@@ -101,6 +103,10 @@ struct MacCommands: Commands {
                 Button(s.title) { store.selectedTab = s.rawValue }
                     .keyboardShortcut(KeyEquivalent(Character("\(i + 1)")), modifiers: .command)
             }
+            Divider()
+            Button("Reload") { session.didChangeData() }
+                .keyboardShortcut("r", modifiers: .command)
+                .disabled(!session.isSignedIn)
             Divider()
         }
     }

@@ -2446,10 +2446,23 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   Mac (load 12, other builds) answers accessibility late: BLIND, not a hang (sampled: main
   thread idle or laying out its first window). A covered window's capture is stale for
   native views too, so read the control tree.
-- **Certificate emails:** "Your Certificate Has Been Revoked" (three times today) is not
+- **Certificate emails:** "Your Certificate Has Been Revoked" (four today) is not
   this Mac's: BE4F3F4F, its development certificate, is still on App Store Connect.
 - **Not verified:** the fix on an iPhone (iPhone 12 under Time Limit at 9:48pm, frame seen;
   MemoUITests now checks it; run it in the afternoon). iPad: 9:35pm, automation mode timed out.
 - **Gate:** test_all rc=0.
 - **Shipped:** 1.0.30 (31) VALID on TestFlight for iOS and Mac (11:01pm); the web fix is live.
 - **Next:** more Mac presses (theme on a memo, filters, a link made and turned off, empty and error states); the iPhone 12 in the afternoon.
+
+### Tick 63 — 2026-11-25 — The rest of the Mac pressed; what only a swipe could do — v1.0.31 (32)
+- **Pressed on the Mac:** a theme on and off a memo, one theme read alone, the filter, a
+  link made, listed and turned off, unreachable and offline, the empty account
+  (mac_uitest: 10 tests, 17 checks, all passing in one run).
+- **Found and fixed, Mac only:** Settings hid Privacy and terms behind an arrow since Your
+  links joined it (560pt to 640pt; the check failed on the old build). A theme could not
+  be removed (swipe only): a minus button that asks first. Nothing reloaded the lists
+  (pull only): View > Reload, ⌘R.
+- **Verified by** mac_uitest; frames of Settings read; test_all rc=0. No iPhone change.
+- **Still 🚧 on the Mac:** import, photos and files, a place confirmed, share cards saved,
+  Delete account, Sign in with Apple (Ben's).
+- **Apple:** no reply at 11:43pm.

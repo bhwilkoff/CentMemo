@@ -1,7 +1,7 @@
 // Press and read the Mac app's controls through accessibility, by process id, without
 // bringing it to the front. Needs the terminal's existing Accessibility permission; it
 // never asks for it.
-//   mac_ax <pid> dump | get <id> | press <id> | type <id> <text> | clear <id>
+//   mac_ax <pid> dump | get <id> | ids <prefix> | state <id> | press <id> | type <id> <text> | clear <id>
 // <id> is an accessibility identifier, or a control's exact title or label; `sheet-field`
 // is the text field of an open alert.
 import ApplicationServices
@@ -47,7 +47,20 @@ if roots.isEmpty {
     fail("BLIND: no windows (AXError \(e.rawValue))")
 }
 
+/// Menu-bar items are asked for as `menu:Title`.
+func menuItem(_ title: String) -> AXUIElement {
+    var hit: AXUIElement?
+    if let bar = attr(app, kAXMenuBarAttribute) {
+        _ = walk(bar as! AXUIElement) { e, _ in
+            if str(e, kAXRoleAttribute) == kAXMenuItemRole, str(e, kAXTitleAttribute) == title { hit = e; return true }
+            return false
+        }
+    }
+    guard let hit else { fail("not found: menu item \(title)") }
+    return hit
+}
 func find(_ id: String) -> AXUIElement {
+    if id.hasPrefix("menu:") { return menuItem(String(id.dropFirst(5))) }
     var hit: AXUIElement?
     if id == "sheet-field" {  // an alert's text field carries no name of its own
         for r in roots where hit == nil {
@@ -98,6 +111,14 @@ case "dump":
 case "get":
     let e = find(args[3])
     print((attr(e, kAXValueAttribute) as? String) ?? name(e).joined(separator: " "))
+case "ids":  // the identifiers that begin with <id>
+    for r in roots { _ = walk(r) { e, _ in
+        if str(e, "AXIdentifier").hasPrefix(args[3]) { print(str(e, "AXIdentifier")) }
+        return false
+    } }
+case "state":  // every attribute that can carry a chosen state
+    let e = find(args[3])
+    for n in ["AXSelected", "AXValue", "AXSubrole"] { if let v = attr(e, n) { print(n, v) } }
 case "press":
     let e = find(args[3])
     if (attr(e, kAXEnabledAttribute) as? Bool) == false { fail("disabled: \(args[3])") }
