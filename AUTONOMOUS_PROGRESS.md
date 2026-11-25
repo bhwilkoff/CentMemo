@@ -2494,3 +2494,9 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   the server, Reload, and both windows go to signed out with no themes left. Sign-in after
   it works (read_one_theme). Test only; nothing to ship. Not run on an iPhone.
 - **Not tried at 2:10am:** phone and iPad taps (they light the screens). No reply from Apple.
+
+### Loop stopped by Ben — 2026-11-25
+- **Ben:** "You can stop the loop and report all of the updates made and things you are waiting on for me."
+- **State left:** 1.0.32 (33) VALID on TestFlight for iOS and Mac; tree clean; no Apple reply
+  at 4:09am. Unverified: ticks 62 and 64 on an iPhone (run MemoUITests and ShareUITests in an
+  afternoon), iPad taps, the closed Duo, a theme's link on the Duo.
