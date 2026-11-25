@@ -51,7 +51,8 @@ struct CentMemoApp: App {
         #endif
         #if os(macOS)
         Settings {
-            SettingsView()
+            // Signed out, the window keeps nothing of the person who was here.
+            Group { if session.isSignedIn { SettingsView() } else { SignedOutSettings() } }
                 .environment(store)
                 .environment(session)
                 .tint(Color.brandPrimary)
@@ -105,6 +106,14 @@ struct RootView: View {
                 Task {
                     await FinanceRevocation.check(email: session.email)
                     await FinanceBackgroundSync.enableIfConnected(email: session.email)
+                }
+            }
+            .onChange(of: session.isSignedIn) { _, signedIn in
+                if !signedIn {
+                    store.forgetPerson()
+                    #if os(iOS) || os(macOS)
+                    ImportStatus.shared.text = nil
+                    #endif
                 }
             }
             // The ONE place the inbox is consumed: deep links and test doors

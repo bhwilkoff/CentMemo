@@ -2468,3 +2468,21 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Apple:** no reply at 11:43pm.
 - **Shipped:** 1.0.31 (32) VALID on TestFlight for iOS and Mac (12:01am).
 - **Next:** Mac import (APP_IMPORT_SAMPLE, stranger), a place confirmed; the iPhone 12 in the afternoon.
+
+### Tick 64 — 2026-11-25 — What signing out left behind; the Mac's tests keep their own sign-in — v1.0.32 (33)
+- **Pressed on the Mac:** an Apple Card export twice (3 new, then none) and a Venmo one
+  (stranger, cleaned), and a place confirmed from the statement (forgotten after). The
+  imports use the DEBUG door; the file panel itself is the system's, and the sandbox
+  allows a file the person picks (entitlement read from the signed app).
+- **Found and fixed:** after signing out on the Mac an open Settings window still held the
+  person's themes, Sign out and Delete account; it now says to sign in. On Apple, place
+  names, places and theme colors cleared only on Sign out, not when the server ended the
+  session; now they clear whenever the person changes. The Mac's Story and open purchase,
+  and the last link opened, are forgotten too.
+- **Found before it hurt:** the Mac's Debug build and TestFlight share one Keychain item, so
+  the fake account would have been signed in when Ben opened the TestFlight app. Cleared
+  (two ordinary launches show Sign in with Apple); test runs now use their own item.
+- **Verified:** mac_uitest (sign_out failed on the old build; the import door once ran under
+  the account before the switch and imported nothing; it now waits for its account, 3 of 3);
+  test_all rc=0, then both apps built again after that door edit.
+- **Apple:** no reply at 12:52am.

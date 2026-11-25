@@ -2,7 +2,8 @@
 """The Mac's tap tier, through the real buttons, data left as found: a memo saved, read
 back after a relaunch and removed; a purchase skipped and brought back; a place renamed
 and given its statement name back; a theme put on a memo; one theme read; the Narrative
-filtered; a link made, listed and turned off; every section of Settings in sight.
+filtered; a link made, listed and turned off; a place confirmed; exports
+imported; every section of Settings in sight.
 
 Signs in as the synthetic owner through the DEBUG door, never as a person. Presses
 controls by accessibility and by process id, so nothing comes to the front. Needs the
@@ -17,6 +18,7 @@ import re
 import subprocess
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -43,19 +45,24 @@ def build_tool():
     return out
 
 
-def skip_on_server(user, on):
-    from datetime import datetime, timezone
+def as_user(user):
+    """Calls the server as the person would, to change or clean what a test needs."""
     from urllib.request import Request, urlopen
-    js = (REPO / "js/config.js").read_text() if (REPO / "js/config.js").exists() else (REPO / "js/api.js").read_text()
+    js = (REPO / "js/api.js").read_text()
     base, key = re.search(r"https://[a-z0-9]+\.supabase\.co", js).group(0), re.search(r"sb_publishable_[\w-]+|eyJ[\w.-]{60,}", js).group(0)
 
-    def call(path, body, method="POST", token=None):
+    def call(path, body=None, method="POST", token=None):
         h = {"apikey": key, "content-type": "application/json", **({"Authorization": f"Bearer {token}"} if token else {})}
-        raw = urlopen(Request(base + path, json.dumps(body).encode(), h, method=method), timeout=20).read()
+        data = None if body is None else json.dumps(body).encode()
+        raw = urlopen(Request(base + path, data, h, method=method), timeout=20).read()
         return json.loads(raw) if raw else None
     token = call("/auth/v1/token?grant_type=password", {"email": user["email"], "password": user["password"]})["access_token"]
+    return lambda path, body=None, method="POST": call(path, body, method, token)
+
+
+def skip_on_server(user, on):
     when = datetime.now(timezone.utc).isoformat() if on else None
-    call(f"/rest/v1/transactions?id=eq.{UNEXAMINED}", {"skipped_at": when}, "PATCH", token)
+    as_user(user)(f"/rest/v1/transactions?id=eq.{UNEXAMINED}", {"skipped_at": when}, "PATCH")
 
 
 class App:
@@ -353,6 +360,61 @@ def reload_lists(open_app, change):
         app.quit()
 
 
+def import_twice(*opens):
+    clean = lambda: subprocess.run(["node", str(REPO / "tools/cleanup_stranger.mjs")], check=True, capture_output=True)  # noqa: E731
+    clean()
+    try:
+        _import_twice(*opens)
+    finally:
+        clean()
+
+
+def _import_twice(*opens):
+    for open_app, words in zip(opens, ("Apple Card: 3 new.", "Apple Card: 0 new, 3 already in CentMemo.", "Venmo: 3 new.")):
+        app = open_app()
+        try:
+            got = app.wait("import-result", lambda v: v != "")
+            if got != words:
+                raise Failed(f"import said {got!r}, not {words!r}")
+        finally:
+            app.quit()
+    print("PASS an Apple Card export adds 3, again adds none; a Venmo export adds its own 3")
+
+
+def place_confirmed(open_app, forget):
+    app = open_app()
+    try:
+        app.wait("every-visit")
+        app.do("press", "every-visit")
+        app.wait("setting-summary")
+        app.wait("place-confirm")
+        app.do("press", "place-confirm")
+        app.shows("Opens in Maps")
+        app.shows("Is this the place?", gone=True)
+        print("PASS a place guessed from the statement is confirmed")
+    finally:
+        app.quit()
+        forget()
+
+
+def sign_out_leaves_nothing(open_app):
+    app = open_app()
+    try:
+        app.shows("Remove Great meals")
+        app.do("press", "Account")
+        app.wait("Delete account")
+        app.do("press", "Sign out")
+        app.shows("Sign in with Apple")
+        app.shows("Sign in to see your settings.")
+        tree = app.ax("dump")[1]
+        for left in ("Great meals", "Delete account", "Sign out", "Copy connector"):
+            if left in tree:
+                raise Failed(f"{left!r} is still on screen after signing out")
+        print("PASS signing out leaves nothing of the person, in either window")
+    finally:
+        app.quit()
+
+
 def settings_sections(open_app):
     app = open_app()
     try:
@@ -384,7 +446,11 @@ def main():
                  (read_one_theme, go(APP_START_TAB="story")), (filter_narrative, go(APP_START_TAB="ledger")),
                  (link_made_and_off, link, settings), (settings_sections, settings),
                  (theme_added_and_removed, go(APP_START_TAB="story", APP_OPEN_SETTINGS="1", APP_START_PANE="themes")),
+                 (sign_out_leaves_nothing, go(APP_START_TAB="story", APP_OPEN_SETTINGS="1", APP_START_PANE="themes")),
                  (reload_lists, go(APP_START_TAB="unexamined"), lambda on: skip_on_server(user, on)),
+                 (import_twice, *(lambda k=k: App(tool, a.binary, users["stranger"], {
+                     "APP_START_TAB": "story", "APP_OPEN_SETTINGS": "1", "APP_START_PANE": "moneyIn", "APP_IMPORT_SAMPLE": k}) for k in ("1", "1", "venmo"))),
+                 (place_confirmed, zoo, lambda: as_user(user)("/rest/v1/setting_places?setting=eq.Denver%20Zoo", method="DELETE")),
                  (failing_network, go(APP_START_TAB="ledger", APP_FAIL_NETWORK="unreachable"),
                   go(APP_START_TAB="ledger", APP_FAIL_NETWORK="offline")),
                  (empty_account, lambda: App(tool, a.binary, users["stranger"], {"APP_START_TAB": "unexamined"}))]

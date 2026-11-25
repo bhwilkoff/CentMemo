@@ -201,10 +201,7 @@ struct SettingsView: View {
                 Button("Delete account", role: .destructive) { confirmDelete = true }
             }
         case .about:
-            Section {
-                Link("Privacy", destination: URL(string: "https://centmemo.com/privacy/")!)
-                Link("Terms", destination: URL(string: "https://centmemo.com/terms/")!)
-            }
+            AboutSection()
         }
     }
 
@@ -229,6 +226,29 @@ struct SettingsView: View {
         do { try await session.deleteAccount() } catch { self.error = session.handle(error) }
     }
 }
+
+private struct AboutSection: View {
+    var body: some View {
+        Section {
+            Link("Privacy", destination: URL(string: "https://centmemo.com/privacy/")!)
+            Link("Terms", destination: URL(string: "https://centmemo.com/terms/")!)
+        }
+    }
+}
+
+#if os(macOS)
+/// The Mac's Settings window can be open with nobody signed in.
+struct SignedOutSettings: View {
+    var body: some View {
+        Form {
+            Section { Text("Sign in to see your settings.") }
+            AboutSection()
+        }
+        .cardForm()
+        .grounded()
+    }
+}
+#endif
 
 /// Removing a theme takes it off every memo that wears it, so it asks first.
 private struct RemoveThemeAlert: ViewModifier {
@@ -335,7 +355,16 @@ struct ImportButton: View {
             let door = ProcessInfo.processInfo.environment["APP_IMPORT_SAMPLE"]
             if let door, !Self.sampleImported {
                 Self.sampleImported = true
-                await importText(door == "venmo" ? Self.venmoSample : Self.sample, filename: "sample.csv")
+                // The Mac's Settings window opens before the test sign-in has finished, and
+                // closes over a switch of accounts: wait for the named one, outside the view.
+                let who = ProcessInfo.processInfo.environment["APP_TEST_EMAIL"]?.lowercased()
+                Task {
+                    for _ in 0..<60 where !session.isSignedIn || session.email?.lowercased() != who {
+                        try? await Task.sleep(for: .seconds(0.5))
+                    }
+                    guard session.isSignedIn, session.email?.lowercased() == who else { return }
+                    await importText(door == "venmo" ? Self.venmoSample : Self.sample, filename: "sample.csv")
+                }
             }
         }
         #endif

@@ -46,6 +46,13 @@ final class AppStore {
         }
     }
 
+    /// Signed out: the next person starts where a new one does.
+    func forgetPerson() {
+        navigationPath = NavigationPath()
+        openedItem = nil
+        selectedTab = "unexamined"
+    }
+
     @ObservationIgnored private var doorsOpened = false
 
     /// Posts the launch doors once per process (a second macOS window must not

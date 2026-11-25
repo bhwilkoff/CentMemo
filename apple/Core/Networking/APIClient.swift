@@ -40,6 +40,12 @@ final class APIClient {
         didSet {
             if let session, let data = try? JSONEncoder().encode(session) { Keychain.save(data, account: "session") }
             else { Keychain.delete(account: "session") }
+            // Nothing one person named is read by the next, however the session ended.
+            if oldValue?.userID != session?.userID {
+                settingNames = nil
+                settingPlaces = nil
+                Themes.current = [:]
+            }
         }
     }
 
@@ -75,8 +81,6 @@ final class APIClient {
         // This device only: the server's default ends the person's sign-in everywhere.
         _ = try? await raw("auth/v1/logout", query: [.init(name: "scope", value: "local")], method: "POST", body: [String: String](), authed: true)
         session = nil
-        settingNames = nil
-        settingPlaces = nil
     }
 
     /// In-app account deletion (Decision 035): every row cascades.
@@ -84,8 +88,6 @@ final class APIClient {
         try await removeAllCopies()
         _ = try await raw("rest/v1/rpc/delete_my_account", method: "POST", body: [String: String]())
         session = nil
-        settingNames = nil
-        settingPlaces = nil
     }
 
     private static var expireDoor: Bool {

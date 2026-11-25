@@ -17,6 +17,12 @@ struct ContentView_macOS: View {
     }
 
     var body: some View {
+        content.onChange(of: session.isSignedIn) { _, signedIn in
+            if !signedIn { pane.route = nil; story = StoryModel() }
+        }
+    }
+
+    @ViewBuilder private var content: some View {
         if session.isSignedIn {
             @Bindable var store = store
             NavigationSplitView {

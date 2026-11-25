@@ -5,7 +5,15 @@ import Security
 /// never in cleartext on disk). This-device-only: a restored backup signs out.
 /// The Wallet extension shares it through the App Group (Shared.group).
 enum Keychain {
-    private static let service = "com.learningischange.centmemo.session"
+    /// On a Mac a test run is the same app as the TestFlight one, so it keeps its fake
+    /// sign-in in a slot of its own and never reads or replaces the person's.
+    private static let service: String = {
+        let real = "com.learningischange.centmemo.session"
+        #if DEBUG && os(macOS)
+        if ProcessInfo.processInfo.environment["APP_TEST_EMAIL"] != nil { return real + ".test" }
+        #endif
+        return real
+    }()
 
     /// The Mac keeps it in the data protection keychain, as the phone does: the older
     /// file keychain asks for the Mac's password whenever the app's signature changes.
