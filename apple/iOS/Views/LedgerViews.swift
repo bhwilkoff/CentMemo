@@ -18,7 +18,7 @@ struct UnexaminedView: View {
     @State private var error: String?
 
     var body: some View {
-        LoadState(isLoading: loading && entries.isEmpty, error: error, retry: load) {
+        LoadState(isLoading: loading && entries.isEmpty, error: error, holds: !entries.isEmpty, retry: load) {
             if entries.isEmpty {
                 if hasAny {
                     ContentUnavailableView("Every purchase has a memo.", systemImage: "checkmark")
@@ -81,8 +81,7 @@ struct UnexaminedView: View {
     }
 
     /// Suggestions are a garnish: if they fail to load, the list still shows.
-    private func suggestionsFor(_ list: [LedgerEntry]) async -> [(APIClient.Suggestion, LedgerEntry)] {
-        guard let found = try? await APIClient.shared.suggestions() else { return [] }
+    private func pick(_ found: [APIClient.Suggestion], from list: [LedgerEntry]) async -> [(APIClient.Suggestion, LedgerEntry)] {
         var out: [(APIClient.Suggestion, LedgerEntry)] = []
         for s in found.prefix(3) {
             if let e = list.first(where: { $0.id == s.transactionID }) { out.append((s, e)) }
@@ -100,15 +99,24 @@ struct UnexaminedView: View {
 
     private func load() async {
         loading = true
+        // What this device last held, at once; the server's answer replaces it.
+        if entries.isEmpty, let list = await APIClient.shared.kept({ try await APIClient.shared.unexamined() }), !list.isEmpty {
+            picked = await APIClient.shared.kept { await pick(try await APIClient.shared.suggestions(), from: list) } ?? []
+            entries = list
+            LaunchTrace.mark("Unexamined shows \(list.count) kept")
+        }
         do {
             // The list and its suggestions arrive together, so at regular width the
             // first suggestion (not the first row) opens on the right.
+            async let found = try? APIClient.shared.suggestions()
             let list = try await APIClient.shared.unexamined()
-            picked = await suggestionsFor(list)
-            entries = list
+            let picks = await pick(await found ?? [], from: list)
+            if picks.map(\.0) != picked.map(\.0) || picks.map(\.1) != picked.map(\.1) { picked = picks }
+            if list != entries { entries = list }
+            LaunchTrace.mark("Unexamined shows \(list.count)")
             if entries.isEmpty { hasAny = try await APIClient.shared.hasAnyTransactions() }
             error = nil
-        } catch { self.error = session.handle(error) }
+        } catch { if !Task.isCancelled { self.error = session.handle(error) } }
         loading = false
     }
 }
@@ -119,12 +127,15 @@ struct LedgerView: View {
     @State private var showSkipped = false
     @State private var filter = NarrativeFilter()
     @State private var month: String?
+    /// The month on screen, and whether the person chose it.
+    @State private var loaded: String?
+    @State private var stepped = false
     @State private var entries: [LedgerEntry] = []
     @State private var loading = true
     @State private var error: String?
 
     var body: some View {
-        LoadState(isLoading: loading && entries.isEmpty, error: error, retry: load) {
+        LoadState(isLoading: loading && entries.isEmpty, error: error, holds: !entries.isEmpty, retry: load) {
             List {
                 if let month {
                     // The month bar is a row, so it stands on the same edges as every
@@ -238,6 +249,7 @@ struct LedgerView: View {
 
     private func step(_ n: Int) {
         guard let month else { return }
+        stepped = true
         self.month = LedgerDate.step(month, by: n)
         Haptic.selection()
     }
@@ -250,10 +262,26 @@ struct LedgerView: View {
     private func load() async {
         loading = true
         do {
-            if month == nil { month = try await APIClient.shared.latestMonth() ?? LedgerDate.thisMonth }
-            entries = try await APIClient.shared.month(month!)
+            if month == nil {
+                // Choosing the month runs this again, for that month.
+                if let m = await APIClient.shared.kept({ try await APIClient.shared.latestMonth() }) ?? nil { month = m }
+                else { month = try await APIClient.shared.latestMonth() ?? LedgerDate.thisMonth }
+                return
+            }
+            let asked = month!
+            if loaded != asked, let held = await APIClient.shared.kept({ try await APIClient.shared.month(asked) }), !held.isEmpty {
+                entries = held
+                LaunchTrace.mark("Narrative shows \(held.count) kept")
+            }
+            // A month that began since this device last looked.
+            async let newest = stepped ? nil : APIClient.shared.latestMonth()
+            let rows = try await APIClient.shared.month(asked)
+            if rows != entries { entries = rows }
+            loaded = asked
+            LaunchTrace.mark("Narrative shows \(rows.count)")
             error = nil
-        } catch { self.error = session.handle(error) }
+            if let newest = try await newest, newest != asked, !stepped { month = newest; return }
+        } catch { if !Task.isCancelled { self.error = session.handle(error) } }
         loading = false
     }
 }

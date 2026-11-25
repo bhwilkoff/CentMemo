@@ -40,7 +40,7 @@ struct SettingPageView: View {
     }
 
     var body: some View {
-        LoadState(isLoading: loading && entries.isEmpty, error: error, retry: load) {
+        LoadState(isLoading: loading && entries.isEmpty, error: error, holds: !entries.isEmpty, retry: load) {
             HStack(alignment: .top, spacing: 0) {
             List {
                 HStack(alignment: .center, spacing: Spacing.s3) {

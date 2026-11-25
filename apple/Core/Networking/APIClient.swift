@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 /// The one client every view goes through (AGENTS.md hard rule), the Swift twin
 /// of js/api.js. Talks to Supabase's REST endpoints directly with URLSession
@@ -41,16 +42,38 @@ final class APIClient {
             if let session, let data = try? JSONEncoder().encode(session) { Keychain.save(data, account: "session") }
             else { Keychain.delete(account: "session") }
             // Nothing one person named is read by the next, however the session ended.
+            Self.signedInID.withLock { [id = session?.userID] in $0 = id }
             if oldValue?.userID != session?.userID {
                 settingNames = nil
                 settingPlaces = nil
                 Themes.current = [:]
+                ReadStore.wipe()
             }
         }
     }
 
+    /// No URLCache and no cookies: answers are kept only by ReadStore, encrypted.
+    private let web: URLSession = {
+        let c = URLSessionConfiguration.ephemeral
+        c.urlCache = nil
+        c.requestCachePolicy = .reloadIgnoringLocalCacheData
+        return URLSession(configuration: c)
+    }()
+
+    /// Inside `kept`, reads answer from this device and nothing goes to the network.
+    @TaskLocal private static var onDevice = false
+
+    /// What the server last said, or nil. For the first picture of a screen, before the
+    /// real read arrives.
+    func kept<T>(_ read: () async throws -> T) async -> T? {
+        try? await Self.$onDevice.withValue(true) { try await read() }
+    }
+
     private init() {
+        URLCache.shared = URLCache(memoryCapacity: 0, diskCapacity: 0)
+        ReadStore.tidy()
         session = Keychain.load(account: "session").flatMap { try? JSONDecoder().decode(Session.self, from: $0) }
+        Self.signedInID.withLock { [id = session?.userID] in $0 = id }
     }
 
     var isSignedIn: Bool { session != nil }
@@ -98,10 +121,21 @@ final class APIClient {
         #endif
     }
 
+    /// Screens ask for several things at once; one refresh serves them all.
+    private var refreshing: Task<Void, Error>?
+
     private func refreshIfNeeded(force: Bool = false) async throws {
         adoptNewerStoredSession()
         guard let s = session else { throw APIError.signedOut }
         guard force || Self.expireDoor || s.expiresAt < Date().timeIntervalSince1970 + 60 else { return }
+        if let refreshing { return try await refreshing.value }
+        let task = Task { try await renew(s) }
+        refreshing = task
+        defer { refreshing = nil }
+        try await task.value
+    }
+
+    private func renew(_ s: Session) async throws {
         do {
             try await refresh(with: s.refreshToken)
         } catch {
@@ -163,6 +197,11 @@ final class APIClient {
     private func raw(_ path: String, query: [URLQueryItem] = [], method: String = "GET",
                      body: (any Encodable)? = nil, prefer: String? = nil, authed: Bool = true,
                      retried: Bool = false) async throws -> Data {
+        let name = readName(path, query, method)
+        if Self.onDevice {
+            guard let name, let data = ReadStore.load(name) else { throw APIError.server("Not on this device.") }
+            return data
+        }
         if authed { try await refreshIfNeeded() }
         var comps = URLComponents(url: Self.projectURL.appending(path: path), resolvingAgainstBaseURL: false)!
         if !query.isEmpty { comps.queryItems = query }
@@ -182,7 +221,15 @@ final class APIClient {
             throw URLError(fail == "offline" ? .notConnectedToInternet : .cannotConnectToHost)
         }
         #endif
-        let (data, response) = try await URLSession.shared.data(for: req)
+        #if DEBUG
+        // DEBUG door APP_SLOW_MS: a slow network, to see what stands before the answer comes.
+        if path.hasPrefix("rest/v1"), let ms = ProcessInfo.processInfo.environment["APP_SLOW_MS"].flatMap(Int.init) {
+            try await Task.sleep(for: .milliseconds(ms))
+        }
+        #endif
+        let began = LaunchTrace.now
+        let (data, response) = try await web.data(for: req)
+        LaunchTrace.mark("\(method) \(path) \(data.count) bytes", since: began)
         let code = (response as? HTTPURLResponse)?.statusCode ?? 0
         if code == 401, authed, !retried {
             try await refreshIfNeeded(force: true)
@@ -192,8 +239,21 @@ final class APIClient {
             throw path == "auth/v1/token" ? APIError.refused(Self.message(from: data, code: code), code: code)
                 : APIError.server(Self.message(from: data, code: code))
         }
+        if let name, let who = session?.userID, name.hasPrefix(who) {
+            ReadStore.save(data, as: name, if: { Self.signedInID.withLock { $0 } == who })
+        }
         return data
     }
+
+    /// The reads a screen opens with, named by person; nil for anything else.
+    private func readName(_ path: String, _ query: [URLQueryItem], _ method: String) -> String? {
+        guard let who = session?.userID else { return nil }
+        let read = method == "GET" && path.hasPrefix("rest/v1/") || path == "rest/v1/rpc/memo_suggestions"
+        return read ? ([who, path] + query.map { "\($0.name)=\($0.value ?? "")" }).joined(separator: "|") : nil
+    }
+
+    /// Who is signed in, for ReadStore's queue to ask.
+    nonisolated private static let signedInID = OSAllocatedUnfairLock<String?>(initialState: nil)
 
     private static func message(from data: Data, code: Int) -> String {
         if let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
@@ -233,7 +293,7 @@ final class APIClient {
         struct Row: Decodable { let setting: String; let name: String }
         let rows: [Row] = try await rest("setting_names", [.init(name: "select", value: "setting,name")])
         let names = Dictionary(rows.map { ($0.setting, $0.name) }, uniquingKeysWith: { a, _ in a })
-        settingNames = names
+        if !Self.onDevice { settingNames = names }
         return names
     }
 
@@ -241,7 +301,7 @@ final class APIClient {
         if let settingPlaces { return settingPlaces }
         let rows: [SettingPlace] = try await rest("setting_places", [.init(name: "select", value: "setting,name,address,lat,lon")])
         let places = Dictionary(rows.map { ($0.setting, $0) }, uniquingKeysWith: { a, _ in a })
-        settingPlaces = places
+        if !Self.onDevice { settingPlaces = places }
         return places
     }
 
@@ -274,15 +334,18 @@ final class APIClient {
         }
     }
 
-    private func named(_ rows: [LedgerEntry]) async -> [LedgerEntry] {
-        guard let names = try? await loadSettingNames(), !names.isEmpty else { return rows }
+    /// The rows and the person's names for their places, asked for together.
+    private func named(_ read: () async throws -> [LedgerEntry]) async throws -> [LedgerEntry] {
+        async let asked = try? loadSettingNames()
+        let rows = try await read()
+        guard let names = await asked, !names.isEmpty else { return rows }
         return rows.map { var e = $0; e.placeName = names[e.settingKey]; return e }
     }
 
     func unexamined(limit: Int = 200) async throws -> [LedgerEntry] {
-        await named(try await rest("unexamined_transactions", [.init(name: "select", value: Self.txnColumns),
+        try await named { try await rest("unexamined_transactions", [.init(name: "select", value: Self.txnColumns),
                                                    .init(name: "order", value: "txn_date.desc"),
-                                                   .init(name: "limit", value: String(limit))]))
+                                                   .init(name: "limit", value: String(limit))]) }
     }
 
     /// D7: what to write about, chosen in the database by readable rules (memo_suggestions).
@@ -321,11 +384,11 @@ final class APIClient {
     }
 
     func month(_ ym: String) async throws -> [LedgerEntry] {
-        await named(try await rest("transactions", [.init(name: "select", value: Self.txnColumns + ",memos(body,memo_values(value_id,life_values(name)))"),
+        try await named { try await rest("transactions", [.init(name: "select", value: Self.txnColumns + ",memos(body,memo_values(value_id,life_values(name)))"),
                                         .init(name: "txn_date", value: "gte.\(ym)-01"),
                                         .init(name: "txn_date", value: "lte.\(LedgerDate.lastDay(ym))"),
                                         .init(name: "order", value: "txn_date.desc"),
-                                        .init(name: "limit", value: "2000")]))
+                                        .init(name: "limit", value: "2000")]) }
     }
 
     /// D8: every event at one Setting (as the web's atSetting): the pattern finds each
@@ -337,14 +400,14 @@ final class APIClient {
             .init(name: "select", value: Self.txnColumns + ",memos(body,memo_values(value_id,life_values(name)))"),
             .init(name: "or", value: "(merchant.ilike.\(p),description.ilike.\(p))"),
             .init(name: "order", value: "txn_date.desc"), .init(name: "limit", value: "1000")])
-        return await named(rows.filter { $0.settingKey == name })
+        return try await named { rows.filter { $0.settingKey == name } }
     }
 
     func transaction(_ id: String) async throws -> LedgerEntry? {
         let rows: [LedgerEntry] = try await rest("transactions", [
             .init(name: "select", value: Self.txnColumns + ",accounts(display_name),memos(body,memo_values(value_id,life_values(name)))"),
             .init(name: "id", value: "eq.\(id)"), .init(name: "limit", value: "1")])
-        return await named(rows).first
+        return try await named { rows }.first
     }
 
     enum StoryScope: Hashable { case month(String), value(String) }
@@ -362,7 +425,7 @@ final class APIClient {
             if links.isEmpty { return [] }
             q.append(.init(name: "id", value: "in.(\(links.map(\.transaction_id).joined(separator: ",")))"))
         }
-        return await named(try await rest("transactions", q))
+        return try await named { try await rest("transactions", q) }
     }
 
     // MARK: - The person's ground (Decision 059)
@@ -597,7 +660,7 @@ final class APIClient {
         if let contentType { req.setValue(contentType, forHTTPHeaderField: "Content-Type") }
         if upsert { req.setValue("true", forHTTPHeaderField: "x-upsert") }
         req.httpBody = body
-        let (data, response) = try await URLSession.shared.data(for: req)
+        let (data, response) = try await web.data(for: req)
         let code = (response as? HTTPURLResponse)?.statusCode ?? 0
         guard (200..<300).contains(code) else { throw APIError.server(Self.message(from: data, code: code)) }
         return data
@@ -619,6 +682,7 @@ final class APIClient {
     /// balances, memos, and attachments cascade. Used when access is revoked.
     func deleteFinanceKitData() async throws {
         try await raw("rest/v1/accounts", query: [.init(name: "source", value: "eq.financekit")], method: "DELETE")
+        ReadStore.wipe()
     }
 
     /// Writes one batch of FinanceKit changes: accounts upserted by their

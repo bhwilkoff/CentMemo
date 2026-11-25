@@ -4,7 +4,7 @@ import Security
 /// The session lives in the Keychain, never in UserDefaults (AGENTS.md: secrets
 /// never in cleartext on disk). This-device-only: a restored backup signs out.
 /// The Wallet extension shares it through the App Group (Shared.group).
-enum Keychain {
+nonisolated enum Keychain {
     /// On a Mac a test run is the same app as the TestFlight one, so it keeps its fake
     /// sign-in in a slot of its own and never reads or replaces the person's.
     private static let service: String = {

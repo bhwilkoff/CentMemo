@@ -4,7 +4,7 @@ import Foundation
 /// defaults hold each person's FinanceKit history tokens, and the session's
 /// Keychain item lives in the same group (Keychain.swift). Builds before F2
 /// kept the tokens in standard defaults; the first read moves them over.
-enum Shared {
+nonisolated enum Shared {
     static let group = "group.com.learningischange.centmemo"
 
     static var defaults: UserDefaults { UserDefaults(suiteName: group) ?? .standard }

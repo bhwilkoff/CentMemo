@@ -485,3 +485,19 @@ them", and Addendum 3.2 does not turn on which door was used.
 - If Apple permits sharing (case 103023652799), these policies and `SHARE_FINANCEKIT`
   change together, by a decision.
 
+
+## 068. The apps keep what they last showed, sealed, and draw it first
+
+**Why:** Ben, 2026-11-25: "it takes multiple seconds to load all of the items in my
+account on the app. It should be instantaneous when you open the app." Measured on the
+Duo: 4.7 to 5.4 s, of which 4.3 s was one database query the list waited for; the rest was
+the network. Fixing the query gave 0.5 to 0.75 s; only drawing from the device gives 0.14 s.
+Looking also found that URLSession.shared had kept answers, sign-in tokens included, in a
+cleartext Cache.db.
+
+**How to apply:** Reads are kept by `ReadStore` only: AES-GCM with a Keychain key, in
+Caches, named by person, erased whenever the person changes. A screen calls
+`APIClient.kept { ... }` first and the real read second, and assigns only what differs; a
+page with a person's unsaved words takes the server's words only while theirs are unchanged.
+Never use `URLSession.shared` for CentMemo's server. Never make a list wait for a garnish.
+Measure with `APP_LAUNCH_DIAG=1`; see what stands before an answer with `APP_SLOW_MS`.

@@ -88,11 +88,23 @@ struct FlowLayout: Layout {
 struct LoadState<Content: View>: View {
     let isLoading: Bool
     let error: String?
+    /// There is something to show: an error is then a line above it, not instead of it.
+    var holds = false
     let retry: () async -> Void
     @ViewBuilder let content: () -> Content
 
     var body: some View {
-        if let error {
+        if let error, holds {
+            VStack(spacing: 0) {
+                HStack {
+                    Text(error).font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
+                    Spacer()
+                    Button("Try again") { Task { await retry() } }.font(TypeRamp.caption)
+                }
+                .padding(.horizontal, PaneEdges.words).padding(.vertical, Spacing.s2)
+                content()
+            }
+        } else if let error {
             ContentUnavailableView {
                 Label("Couldn't load", systemImage: "exclamationmark.triangle")
             } description: {

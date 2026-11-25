@@ -206,6 +206,7 @@ struct SettingsView: View {
     }
 
     private func load() async {
+        if values.isEmpty, let held = await APIClient.shared.kept({ try await APIClient.shared.values() }) { values = held }
         do { values = try await APIClient.shared.values(); error = nil } catch { self.error = session.handle(error) }
     }
     private func addStarter(_ s: Themes.Starter) async {

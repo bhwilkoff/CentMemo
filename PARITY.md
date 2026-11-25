@@ -149,6 +149,7 @@ When shipping any user-facing feature:
 | Empty state with a next action | ✅ | ✅ | ✅ | Both seen with the empty stranger account: test_web_states, EmptyStateUITests (iPhone 12) |
 | Error with Try again | ✅ | ✅ | ✅ | iOS: ErrorStateUITests on the iPhone 12 (2026-11-23): unreachable and offline each say so in plain words with Try again, retry stays alive, never URLSession's words; the control loads. |
 | Offline | ✅ | ✅ | ✅ | Web banner and message tested. iOS: "Couldn't load / You're offline." with Try again (ErrorStateUITests.testOffline, frame read); no separate always-on banner. |
+| Opens with the last lists, then refreshes | 🚫 | ✅ | ✅ | Apple: ReadStore, encrypted, erased at sign-out (mac_uitest). Offline shows them with a line and Try again. Web: not kept, since a browser may be shared; its requests run together |
 | Hints and walkthroughs | 🚫 | 🚫 | 🚫 | The Unexamined count is the only prompt CentMemo needs (DESIGN C4) |
 
 ## 6. Sign-in

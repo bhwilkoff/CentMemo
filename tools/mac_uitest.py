@@ -3,7 +3,7 @@
 back after a relaunch and removed; a purchase skipped and brought back; a place renamed
 and given its statement name back; a theme put on a memo; one theme read; the Narrative
 filtered; a link made, listed and turned off; a place confirmed; exports
-imported; every section of Settings in sight.
+imported; the last lists kept, sealed, shown first and offline; every section of Settings in sight.
 
 Signs in as the synthetic owner through the DEBUG door, never as a person. Presses
 controls by accessibility and by process id, so nothing comes to the front. Needs the
@@ -15,6 +15,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -290,6 +291,7 @@ def link_made_and_off(open_app, open_settings):
 
 
 def failing_network(*opens):
+    shutil.rmtree(CACHES / "reads", ignore_errors=True)  # nothing kept: the whole screen says so
     for open_app, words in zip(opens, ("CentMemo couldn't reach its server.", "You're offline.")):
         app = open_app()
         try:
@@ -431,6 +433,51 @@ def server_ends_the_session(open_app, end):
         app.quit()
 
 
+CACHES = Path.home() / "Library/Containers/com.learningischange.centmemo/Data/Library/Caches"
+
+
+def kept_on_this_mac(seen, slow, offline, desk):
+    """Opening shows what this Mac last held, before and without the network."""
+    for open_app, words in ((seen, "penguins"), (desk[0], "every-visit")):
+        app = open_app()
+        app.shows(words)
+        time.sleep(4)
+        app.quit()
+    files = list((CACHES / "reads").iterdir())
+    raw = b"".join(f.read_bytes() for f in files)
+    for word in (b"penguins", b"Denver Zoo", b"txn_date", b"access_token"):
+        if word in raw:
+            raise Failed(f"{word!r} can be read in the stored files")
+    if not files or any((CACHES / "com.learningischange.centmemo" / n).exists() for n in ("Cache.db", "fsCachedData")):
+        raise Failed("nothing stored, or the cleartext cache is back")
+    print(f"PASS {len(files)} answers stored, none readable, no cleartext cache")
+    app = slow()
+    try:
+        app.shows("penguins", seconds=20)
+        print("PASS the Narrative stands while the network has not answered")
+    finally:
+        app.quit()
+    app = offline()
+    try:
+        app.shows("You're offline.")
+        app.shows("penguins", seconds=3)
+        app.do("press", "Try again")
+        app.shows("penguins", seconds=3)
+        print("PASS offline shows the last lists, says so, and offers Try again")
+    finally:
+        app.quit()
+    app = desk[1]()
+    try:
+        app.wait("memo-editor", seconds=25)
+        app.do("type", "memo-editor", "words typed before the answer")
+        time.sleep(45)
+        if app.do("get", "memo-editor") != "words typed before the answer":
+            raise Failed("the late answer replaced the person's words")
+        print("PASS a late answer never replaces words being written")
+    finally:
+        app.quit()
+
+
 def settings_sections(open_app):
     app = open_app()
     try:
@@ -463,6 +510,8 @@ def main():
                  (link_made_and_off, link, settings), (settings_sections, settings),
                  (theme_added_and_removed, go(APP_START_TAB="story", APP_OPEN_SETTINGS="1", APP_START_PANE="themes")),
                  (sign_out_leaves_nothing, go(APP_START_TAB="story", APP_OPEN_SETTINGS="1", APP_START_PANE="themes")),
+                 (kept_on_this_mac, go(APP_START_TAB="ledger"), go(APP_START_TAB="ledger", APP_SLOW_MS="40000"),
+                  go(APP_START_TAB="ledger", APP_FAIL_NETWORK="offline"), (item, go(APP_START_TAB="unexamined", APP_START_ITEM=UNEXAMINED, APP_SLOW_MS="40000"))),
                  (server_ends_the_session, go(APP_START_TAB="story", APP_OPEN_SETTINGS="1", APP_START_PANE="themes", APP_EXPIRE_SESSION="1"),
                   lambda: as_user(user)("/auth/v1/logout?scope=global", {})),
                  (reload_lists, go(APP_START_TAB="unexamined"), lambda on: skip_on_server(user, on)),

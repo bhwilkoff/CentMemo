@@ -2500,3 +2500,21 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **State left:** 1.0.32 (33) VALID on TestFlight for iOS and Mac; tree clean; no Apple reply
   at 4:09am. Unverified: ticks 62 and 64 on an iPhone (run MemoUITests and ShareUITests in an
   afternoon), iPad taps, the closed Duo, a theme's link on the Duo.
+
+### 2026-11-25 — Opening is instant — v1.0.33 (34), Decision 068
+- **Ben:** "I noticed that it takes multiple seconds to load all of the items in my account
+  on the app. It should be instantaneous when you open the app. Can you investigate what is
+  taking so long and look for ways to optimize for speed on startup?"
+- **Measured on the Duo (his account, APP_LAUNCH_DIAG):** list on screen at 5.39, 4.73 and
+  4.73 s; the rows had arrived at 0.26 to 0.52 s and waited for memo_suggestions (4.3 s in
+  the database). After the query alone: 0.75, 0.49, 0.53 s (live, no update needed). After
+  ReadStore: 0.14, 0.14, 0.13 s kept, refreshed at about 0.3 s; a first open 0.65 s.
+- **Query:** 4,303 ms to 56 ms; identical to the old one in 28 comparisons (year_ago not
+  exercised: that account has no memos; its rule is unchanged but for a tie-break).
+- **Also:** requests run together on Apple and the web; one token refresh serves all; the
+  Story and Narrative stopped waiting in line.
+- **Found:** URLSession.shared kept answers, sign-in tokens included, in a cleartext
+  Cache.db (AGENTS.md: never in cleartext on disk). Gone, and old files deleted at launch.
+- **Verified:** mac_uitest 25 of 25 (stored files unreadable, offline, slow network, words
+  being written survive a late answer, sign-out wipes); test_all rc=0. **Not verified:** the
+  iPhone 12 (Time Limit at 6:55am), a Duo photo under a slow network (it had locked).

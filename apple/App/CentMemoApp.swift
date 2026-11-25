@@ -12,12 +12,6 @@ struct CentMemoApp: App {
         #if os(iOS)
         NavigationLook.apply()
         #endif
-        // 100 MB memory / 500 MB disk — mirrors Android's Coil 3 config
-        // so image cache behavior is symmetric across platforms.
-        URLCache.shared = URLCache(
-            memoryCapacity: 100_000_000,
-            diskCapacity: 500_000_000
-        )
     }
 
     var body: some Scene {

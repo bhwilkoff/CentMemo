@@ -178,9 +178,9 @@
         h('span', { class: 'caption suggestion-amount' }, money(t.amount_minor, t.currency))),
       h('span', { class: 'suggestion-act' }, s.memo_body ? 'Read it again' : 'Write a memo'));
   }
-  async function suggestionCards(rows) {
+  async function suggestionCards(rows, asked) {
     const out = [];
-    for (const s of (await API.suggestions()).slice(0, 3)) {
+    for (const s of (await asked).slice(0, 3)) {
       const t = rows.find((r) => r.id === s.transaction_id) || await API.transaction(s.transaction_id).catch(() => null);
       if (t) out.push(suggestionCard(s, t));
     }
@@ -216,6 +216,8 @@
     heading.textContent = 'Unexamined';
     loading(body);
     try {
+      // Asked for together: neither waits for the other.
+      const asked = API.suggestions().catch(() => []);
       const { rows, count } = await API.unexamined();
       if (!rows.length) {
         const any = await API.transactionCount();
@@ -225,7 +227,7 @@
       }
       // D7: one invitation at a time, "Another" for the next of up to three; no
       // count of what is left (as the iPhone's SuggestionCard).
-      const picks = await suggestionCards(rows).catch(() => []);
+      const picks = await suggestionCards(rows, asked).catch(() => []);
       const invite = picks.length === 1 ? h('div', { class: 'suggestions' }, picks) : picks.length ? picks[0] : null;
       const list = [h('div', { class: 'list' }, rows.map((t) => txnRow(t))),
         count > rows.length ? h('p', { class: 'caption' }, 'Showing the newest ' + rows.length + '.') : null];

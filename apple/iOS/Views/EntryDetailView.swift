@@ -311,16 +311,13 @@ struct EntryDetailView: View {
     }
 
     private func load() async {
-        loading = true
+        loading = entry == nil
+        if entry == nil {
+            await APIClient.shared.kept { try await self.read() }
+            if entry != nil { loading = false }
+        }
         do {
-            async let e = APIClient.shared.transaction(entryID)
-            async let v = APIClient.shared.values()
-            async let p = APIClient.shared.attachments(for: entryID)
-            entry = try await e
-            values = try await v
-            photos = try await p
-            memo = entry?.memo?.body ?? ""
-            chosen = Set(entry?.memo?.valueIDs ?? [])
+            try await read()
             if let key = entry?.settingKey { place = (try? await APIClient.shared.loadSettingPlaces())?[key] }
             #if DEBUG
             // DEBUG door APP_START_SHARE=1: the share studio, for captures where nothing can tap (iPad, Duo).
@@ -339,6 +336,23 @@ struct EntryDetailView: View {
             error = nil
         } catch { self.error = session.handle(error) }
         loading = false
+    }
+
+    /// The words and themes follow the server only while the person has not changed them.
+    private func read() async throws {
+        async let e = APIClient.shared.transaction(entryID)
+        async let v = APIClient.shared.values()
+        async let p = APIClient.shared.attachments(for: entryID)
+        let fresh = try await e, themes = try await v, attached = try await p
+        let was = entry?.memo
+        let untouched = memo == (was?.body ?? "") && chosen == Set(was?.valueIDs ?? [])
+        values = themes
+        photos = attached
+        entry = fresh
+        if untouched {
+            memo = fresh?.memo?.body ?? ""
+            chosen = Set(fresh?.memo?.valueIDs ?? [])
+        }
     }
 
     /// Asks for Photos access when the person chooses to add one, with the reason in

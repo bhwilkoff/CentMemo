@@ -27,16 +27,24 @@ struct ThemeShareItem: Identifiable { let name: String; var id: String { name } 
 
     func load(_ session: SessionStore) async {
         loading = true
+        if entries.isEmpty { await APIClient.shared.kept { try await self.read() } }
         do {
-            let latest = try await APIClient.shared.latestMonth() ?? LedgerDate.thisMonth
-            months = (0..<24).map { LedgerDate.step(latest, by: -$0) }
-            values = try await APIClient.shared.values()
-            counts = (try? await APIClient.shared.themeCounts()) ?? [:]
-            if scope == nil { scope = .month(latest) }
-            entries = try await APIClient.shared.stories(scope!)
+            try await read()
             error = nil
-        } catch { self.error = session.handle(error) }
+        } catch { if !Task.isCancelled { self.error = session.handle(error) } }
         loading = false
+    }
+
+    private func read() async throws {
+        async let newest = APIClient.shared.latestMonth()
+        async let themes = APIClient.shared.values()
+        async let counted = try? APIClient.shared.themeCounts()
+        let latest = try await newest ?? LedgerDate.thisMonth
+        months = (0..<24).map { LedgerDate.step(latest, by: -$0) }
+        values = try await themes
+        counts = await counted ?? [:]
+        if scope == nil { scope = .month(latest) }
+        entries = try await APIClient.shared.stories(scope!)
     }
 }
 
@@ -48,7 +56,7 @@ struct StoryView: View {
     @State private var model = StoryModel()
 
     var body: some View {
-        LoadState(isLoading: model.loading && model.entries.isEmpty, error: model.error, retry: { await model.load(session) }) {
+        LoadState(isLoading: model.loading && model.entries.isEmpty, error: model.error, holds: !model.entries.isEmpty, retry: { await model.load(session) }) {
             if width == .regular {
                 HStack(spacing: 0) {
                     List { StoryShelf(model: model) }.listStyle(.plain).frame(width: 320)
