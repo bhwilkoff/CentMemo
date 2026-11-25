@@ -2418,3 +2418,13 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   Mac's 16pt wider choices (builds only).
 - The Duo holds a debug 1.0.28 (29) of this work; TestFlight 30 replaces it.
 - **Shipped:** 1.0.29 (30) VALID on TestFlight for iOS and Mac. iPad taps tried again ~7:30pm: still could not start UI automation.
+
+### Tick 61 — 2026-11-24 — The Mac's link screen; a blank preview that was the capture
+- **Mac at 1180x800:** the wider choices column fits. The preview was white in the window
+  capture, with and without tick 60's change. The page had drawn (a snapshot taken by the
+  web view itself shows it): the window was fully covered, and macOS does not paint web
+  content in a covered window. **A Mac window capture is blind to a WKWebView when the
+  window is covered; use `takeSnapshot` before calling it a bug.**
+- **Duo:** open, build 30 debug installed, Settings with Your links seen; its closed
+  display is still off.
+- **iPad taps:** tried 8:35pm, same passcode prompt. No reply from Apple.
