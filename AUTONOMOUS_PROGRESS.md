@@ -123,7 +123,7 @@ docs/research/apple-card-financekit-connector.md, and the M1/M2 plan.
 
 ### FinanceKit (2026-11-22): Ben: "Finance kit entitlement approval just came in!"
 F1. ✅ (launch tick 2; Ben's real syncs on TestFlight 12 and 13, his Wallet rows in his account) Real FinanceKit in the app. Revocation delete still unseen on real data.
-F2. ⏳ FinanceKit background delivery extension (iOS 26).
+F2. ✅ (tick 59) FinanceKit background delivery extension (iOS 26): first delivery seen 2026-11-24 5:42pm.
 
 ### Ben's request (2026-11-22): "Start with item one and keep going. You can also do the recording too. The skills should be built for that in at least one of my repositories. Start an autonomous loop to make sure you get it all done."
 L1. ✅ (launch tick 1) First sign-in from inside Claude: the same-window Apple fallback asks
