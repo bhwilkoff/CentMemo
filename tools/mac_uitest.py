@@ -415,6 +415,22 @@ def sign_out_leaves_nothing(open_app):
         app.quit()
 
 
+def server_ends_the_session(open_app, end):
+    """APP_EXPIRE_SESSION makes every call refresh, so the server's refusal is met at once."""
+    app = open_app()
+    try:
+        app.shows("Remove Great meals")
+        end()
+        app.do("press", "menu:Reload")
+        app.shows("Sign in with Apple")
+        app.shows("Sign in to see your settings.")
+        if "Great meals" in app.ax("dump")[1]:
+            raise Failed("the person's themes are still on screen")
+        print("PASS a session the server ends leaves nothing of the person either")
+    finally:
+        app.quit()
+
+
 def settings_sections(open_app):
     app = open_app()
     try:
@@ -447,6 +463,8 @@ def main():
                  (link_made_and_off, link, settings), (settings_sections, settings),
                  (theme_added_and_removed, go(APP_START_TAB="story", APP_OPEN_SETTINGS="1", APP_START_PANE="themes")),
                  (sign_out_leaves_nothing, go(APP_START_TAB="story", APP_OPEN_SETTINGS="1", APP_START_PANE="themes")),
+                 (server_ends_the_session, go(APP_START_TAB="story", APP_OPEN_SETTINGS="1", APP_START_PANE="themes", APP_EXPIRE_SESSION="1"),
+                  lambda: as_user(user)("/auth/v1/logout?scope=global", {})),
                  (reload_lists, go(APP_START_TAB="unexamined"), lambda on: skip_on_server(user, on)),
                  (import_twice, *(lambda k=k: App(tool, a.binary, users["stranger"], {
                      "APP_START_TAB": "story", "APP_OPEN_SETTINGS": "1", "APP_START_PANE": "moneyIn", "APP_IMPORT_SAMPLE": k}) for k in ("1", "1", "venmo"))),

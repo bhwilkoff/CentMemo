@@ -2486,5 +2486,11 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   the account before the switch and imported nothing; it now waits for its account, 3 of 3);
   test_all rc=0, then both apps built again after that door edit.
 - **Apple:** no reply at 12:52am.
-- **Shipped:** 1.0.32 (33) VALID on TestFlight for iOS and Mac (about 1:20am).
+- **Shipped:** 1.0.32 (33) VALID on TestFlight for iOS and Mac (1:11am).
 - **Next:** the iPhone 12 in the afternoon (MemoUITests, ShareUITests); iPad after its passcode; on the Mac only photos, files, a saved share card, Delete account and Sign in with Apple are unpressed.
+
+### Tick 65 — 2026-11-25 — A session the server ends (Mac)
+- **Verified:** mac_uitest `server_ends_the_session`: the fake account's sessions ended on
+  the server, Reload, and both windows go to signed out with no themes left. Sign-in after
+  it works (read_one_theme). Test only; nothing to ship. Not run on an iPhone.
+- **Not tried at 2:10am:** phone and iPad taps (they light the screens). No reply from Apple.
