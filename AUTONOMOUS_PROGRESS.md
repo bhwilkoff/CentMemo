@@ -2403,3 +2403,17 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Still open:** iPad taps (asked again, timed out; it wants its passcode); the Duo is
   not reachable from this Mac and has build 24; nothing else in the backlog is free of
   Ben or Apple.
+
+### Tick 60 — 2026-11-24 — The share screens on the open Duo — v1.0.29 (30)
+- **State found:** the Duo answered again (unlocked, 1.0.23 (24)). Seen there for the
+  first time, the link and card screens were one narrow column, the choices mostly below
+  the fold: the Duo gives a sheet 653pt, under the 760pt two-column rule. A custom
+  PresentationSizing asking for 900pt is ignored (seen).
+- **Done:** beside from 640pt (DESIGN S9), a 16pt margin beside the preview on the Duo and
+  iPad (the form had none), the preview runs to the sheet's bottom edge, "Highlighter" (cut
+  off) is "Highlight" on Apple and web. DEBUG door `APP_SHARE_MEMO` shows the screens on
+  an account with no memos; it saves and publishes nothing.
+- **Verified:** open Duo and iPad landscape seen; iPhone 12 share taps 4 of 4; test_all rc=0.
+- **Not verified:** the Duo closed (display off), a theme's link on the Duo, iPad taps, the
+  Mac's 16pt wider choices (builds only).
+- The Duo holds a debug 1.0.28 (29) of this work; TestFlight 30 replaces it.

@@ -502,7 +502,7 @@
   }
   // N4 (DESIGN S): the person designs their share. The card is drawn from the memo,
   // the Setting, the date and the themes; it is never given an amount.
-  const SHARE_NAMES = { page: 'Page', setting: 'Setting', theme: 'Theme', words: 'Words', paper: 'Paper', night: 'Night', themeColor: 'Theme color', square: 'Square', tall: 'Tall', wide: 'Wide', cover: 'Cover', pages: 'Pages', lines: 'Lines', underline: 'Underline', double: 'Two lines', circle: 'Circle', highlight: 'Highlighter' };
+  const SHARE_NAMES = { page: 'Page', setting: 'Setting', theme: 'Theme', words: 'Words', paper: 'Paper', night: 'Night', themeColor: 'Theme color', square: 'Square', tall: 'Tall', wide: 'Wide', cover: 'Cover', pages: 'Pages', lines: 'Lines', underline: 'Underline', double: 'Two lines', circle: 'Circle', highlight: 'Highlight' };
   const THEME_HEX = { clay: ['#A33E25', '#FCA48D'], persimmon: ['#964D09', '#FEA668'], ochre: ['#815C0A', '#E9B452'], olive: ['#686800', '#C3C55A'], moss: ['#2F751D', '#90D281'], sage: ['#1B735B', '#54D8B1'], teal: ['#157171', '#2AD7D7'], sky: ['#006D91', '#60CCFC'], slate: ['#2F60B2', '#98BFFE'], iris: ['#6451AC', '#BCB3FA'], plum: ['#8A428E', '#E8A0EC'], rose: ['#9D3A67', '#FF99C2'], stone: ['#6F6964', '#B3ACA6'] };
   const themeOf = (n) => { const [color, dark] = THEME_HEX[themeKey(n)] || THEME_HEX.stone; return { name: n, color, dark }; };
   // The pieces both studios share: a choice, a switch, the words, and sending.
@@ -635,7 +635,7 @@
           return h('div', { class: 'share-memo' }, h('label', { class: 'filter-check' }, box, ' ' + m.shown + ', ' + m.shownWhen), body);
         })),
         anyWallet ? h('p', { class: 'caption' }, 'For Apple Card purchases, Where and When start empty. Apple’s rules don’t let CentMemo publish the store or the date, so you write them.') : null,
-        pick('Pencil', 'pencil', [['underline', 'Underline'], ['double', 'Two lines'], ['circle', 'Circle'], ['highlight', 'Highlighter']]),
+        pick('Pencil', 'pencil', [['underline', 'Underline'], ['double', 'Two lines'], ['circle', 'Circle'], ['highlight', 'Highlight']]),
         pick('Color', 'paper', [['bold', 'Bold'], ['paper', 'Paper'], ['night', 'Night']]),
         kind === 'memo' ? pick('What leads', 'lead', [['memory', 'The memory'], ['setting', 'The place']].concat(theme ? [['theme', 'The theme']] : []))
           : h('fieldset', { class: 'share-set' }, h('legend', {}, 'Parts of the page'), h('div', { class: 'share-opts' }, check('cover', 'Cover'), check('lines', 'Lines'), check('mems', 'Each memory'))),

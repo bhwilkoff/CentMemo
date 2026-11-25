@@ -107,12 +107,12 @@ struct EntryDetailView: View {
             }
         }
         .sheet(isPresented: $sharing) {
-            if let e = entry, let body = e.memo?.body {
+            if let e = entry, let body = e.memo?.body ?? Self.standInMemo {
                 ShareMemoSheet(entry: e, memo: body)
             }
         }
         .sheet(isPresented: $linking) {
-            if let e = entry, let body = e.memo?.body {
+            if let e = entry, let body = e.memo?.body ?? Self.standInMemo {
                 MakeLinkSheet(entry: e, memo: body)
             }
         }
@@ -300,6 +300,16 @@ struct EntryDetailView: View {
         Haptic.selection()
     }
 
+    /// DEBUG door APP_SHARE_MEMO: words for a share capture on a phone whose account has
+    /// no memos. Never saved, and the server publishes only a saved memo.
+    private static var standInMemo: String? {
+        #if DEBUG
+        ProcessInfo.processInfo.environment["APP_SHARE_MEMO"]
+        #else
+        nil
+        #endif
+    }
+
     private func load() async {
         loading = true
         do {
@@ -314,8 +324,8 @@ struct EntryDetailView: View {
             if let key = entry?.settingKey { place = (try? await APIClient.shared.loadSettingPlaces())?[key] }
             #if DEBUG
             // DEBUG door APP_START_SHARE=1: the share studio, for captures where nothing can tap (iPad, Duo).
-            if ProcessInfo.processInfo.environment["APP_START_SHARE"] == "1", entry?.memo != nil { sharing = true }
-            if ProcessInfo.processInfo.environment["APP_START_SHARE"] == "link", entry?.memo != nil { linking = true }
+            if ProcessInfo.processInfo.environment["APP_START_SHARE"] == "1", entry?.memo != nil || Self.standInMemo != nil { sharing = true }
+            if ProcessInfo.processInfo.environment["APP_START_SHARE"] == "link", entry?.memo != nil || Self.standInMemo != nil { linking = true }
             #endif
             #if DEBUG && os(iOS)
             if ProcessInfo.processInfo.environment["APP_ATTACH_SAMPLE_FILE"] == "1", !photos.contains(where: { $0.kind == "file" }) {

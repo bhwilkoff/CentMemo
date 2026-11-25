@@ -35,7 +35,7 @@ struct ShareDesign: Equatable, Sendable {
     }
     enum Pencil: String, CaseIterable, Sendable {
         case underline, double, circle, highlight
-        var title: String { switch self { case .underline: "Underline"; case .double: "Two lines"; case .circle: "Circle"; case .highlight: "Highlighter" } }
+        var title: String { switch self { case .underline: "Underline"; case .double: "Two lines"; case .circle: "Circle"; case .highlight: "Highlight" } }
     }
     var look = Look.page
     var paper = Paper.paper

@@ -37,11 +37,12 @@ struct MakeLinkSheet: View {
     var body: some View {
         NavigationStack {
             Group {
-                if room >= 760 || height == .compact {
+                if room >= StudioRoom.beside || height == .compact {
                     HStack(spacing: 0) {
-                        StoryPagePreview(draft: draft)
+                        StoryPagePreview(draft: draft).ignoresSafeArea(.container, edges: .bottom)
                         Divider()
-                        form.frame(width: min(380, room * 0.5))
+                        form.padding(.leading, height == .compact ? 0 : StudioRoom.gap)
+                            .frame(width: height == .compact ? min(380, room * 0.5) : StudioRoom.choices(room))
                     }
                 } else {
                     VStack(spacing: 0) {

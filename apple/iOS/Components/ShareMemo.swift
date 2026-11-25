@@ -70,11 +70,11 @@ struct ShareStudio<Card: View, Choices: View, Send: View>: View {
     var body: some View {
         NavigationStack {
             Group {
-                if room >= 760 {
+                if room >= StudioRoom.beside {
                     HStack(spacing: 0) {
-                        preview(maxWidth: room - 380 - PaneEdges.pane * 2, maxHeight: 560)
+                        preview(maxWidth: room - StudioRoom.choices(room) - PaneEdges.pane * 2, maxHeight: 560)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        Form { choices() }.cardForm().frame(width: 380)
+                        Form { choices() }.cardForm().padding(.leading, StudioRoom.gap).frame(width: StudioRoom.choices(room))
                     }
                 } else {
                     Form {

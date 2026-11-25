@@ -34,6 +34,21 @@ extension View {
     }
 }
 
+/// Where a share screen puts its choices beside the preview. The open Duo gives a sheet
+/// 653pt whatever is asked for (a custom PresentationSizing is ignored, 2026-11-24).
+enum StudioRoom {
+    static let beside: CGFloat = 640
+    static func choices(_ room: CGFloat) -> CGFloat { room >= 760 ? 396 : 348 }
+    /// An iOS form beside another column has no margin of its own on that side; the Mac's does.
+    static var gap: CGFloat {
+        #if os(macOS)
+        0
+        #else
+        16
+        #endif
+    }
+}
+
 enum PaneEdges {
     static let words: CGFloat = 20
     static let box: CGFloat = 16

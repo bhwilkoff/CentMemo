@@ -11,7 +11,7 @@ nonisolated struct StoryLinkDraft: Equatable, Sendable {
     }
     enum Pencil: String, CaseIterable, Encodable, Sendable {
         case underline, double, circle, highlight
-        var title: String { switch self { case .underline: "Underline"; case .double: "Two lines"; case .circle: "Circle"; case .highlight: "Highlighter" } }
+        var title: String { switch self { case .underline: "Underline"; case .double: "Two lines"; case .circle: "Circle"; case .highlight: "Highlight" } }
     }
     enum Lead: String, CaseIterable, Encodable, Sendable {
         case memory, setting, theme
