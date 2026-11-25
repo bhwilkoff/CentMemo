@@ -2417,3 +2417,4 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Not verified:** the Duo closed (display off), a theme's link on the Duo, iPad taps, the
   Mac's 16pt wider choices (builds only).
 - The Duo holds a debug 1.0.28 (29) of this work; TestFlight 30 replaces it.
+- **Shipped:** 1.0.29 (30) VALID on TestFlight for iOS and Mac. iPad taps tried again ~7:30pm: still could not start UI automation.
