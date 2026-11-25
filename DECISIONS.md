@@ -94,6 +94,7 @@ Roll again past ~50 KB. Never trim, edit, or summarize an entry in place.
 - 065: The story vocabulary: Narrative, memo, Story, plot point, Skip, Theme, Setting
 - 066: Wallet data in the connector is built and off until Apple answers in writing
 - 067: A story link publishes only what the server reads from the person's own memos
+- 068: The database keeps Wallet from agents; the connector's code is the second lock
 
 ---
 
@@ -463,3 +464,24 @@ name, or words that are not a memo; hiding a place with CSS would still publish 
 - Add a field to a link only inside `make_share`, with a check in `tools/test_shares.mjs`.
 - A Wallet purchase's store and date are never prefilled in the link form.
 - A link is a snapshot and never changes; turning it off deletes the row.
+
+---
+
+## 068: The database keeps Wallet from agents; the connector's code is the second lock
+*Date: 2026-11-24*
+
+Restrictive select policies hide every Wallet row, and what hangs off one, from any
+token with a `client_id`. Tables the connector never reads (attachments, imports,
+setting places, shares, stored copies) are closed to agents outright.
+
+**Why**: `SHARE_FINANCEKIT` and `guarded()` filter inside the MCP function, but the
+token Claude holds also works against the data API. A test that asked directly with a
+real connector token reached Wallet rows 11 ways; the app says "Claude never sees
+them", and Addendum 3.2 does not turn on which door was used.
+
+**How to apply**:
+- A new table gets an agent select policy in the migration that creates it, and a way
+  in `tools/test_connector.mjs` (seen to fail first).
+- If Apple permits sharing (case 103023652799), these policies and `SHARE_FINANCEKIT`
+  change together, by a decision.
+

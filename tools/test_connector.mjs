@@ -151,6 +151,56 @@ const upd = await fetch(PROJECT + '/rest/v1/memos?transaction_id=not.is.null', {
 ok(!upd.ok || (await upd.json()).length === 0, `agent token changes no memo (${upd.status})`);
 // Control: the same insert with the person's own token succeeds, so the 403 above
 // comes from the token being an agent's, not from inserts being broken.
+// Addendum 3.2 at the database, not only in the connector's code: the token itself
+// reaches nothing from Wallet (Decision 068). A made-up Wallet purchase, every direct way in.
+console.log('the token cannot reach Wallet');
+{
+  const post = async (table, body) => (await (await fetch(`${PROJECT}/rest/v1/${table}`, { method: 'POST', headers: { ...asOwner, prefer: 'return=representation' }, body: JSON.stringify(body) })).json())[0];
+  const get = async (path, headers) => { const r = await fetch(`${PROJECT}/rest/v1/${path}`, { headers }); return r.ok ? r.json() : []; };
+  const acc = await post('accounts', { kind: 'liability', display_name: 'Wallet probe', institution: 'probe', currency: 'USD', source: 'financekit', source_id: 'agent-probe' });
+  try {
+    const tx = await post('transactions', { account_id: acc.id, source: 'financekit', source_id: 'agent-probe', txn_date: '2019-01-02', amount_minor: -123, currency: 'USD', description: 'WALLETPROBE', merchant: 'Walletprobe Cafe' });
+    await post('memos', { transaction_id: tx.id, body: 'A Wallet probe memo.' });
+    const val = (await get('life_values?select=id&limit=1', asOwner))[0];
+    await post('memo_values', { transaction_id: tx.id, value_id: val.id });
+    await post('balances', { account_id: acc.id, as_of: '2019-01-02T00:00:00Z', booked_minor: 5, currency: 'USD' });
+    await post('attachments', { transaction_id: tx.id, kind: 'photo', device_ref: 'agent-probe' });
+    await post('import_batches', { source: 'financekit', filename: 'agent-probe', row_count: 1 });
+    await post('setting_names', { setting: 'Walletprobe Cafe', name: 'Probe' });
+    await post('setting_places', { setting: 'Walletprobe Cafe', name: 'Probe', lat: 1, lon: 1 });
+    const ways = [['transactions', `transactions?select=id&id=eq.${tx.id}`], ['accounts', `accounts?select=id&id=eq.${acc.id}`], ['balances', `balances?select=id&account_id=eq.${acc.id}`],
+      ['memos', `memos?select=body&transaction_id=eq.${tx.id}`], ['memo themes', `memo_values?select=value_id&transaction_id=eq.${tx.id}`], ['attachments', `attachments?select=id&transaction_id=eq.${tx.id}`],
+      ['imports', 'import_batches?select=id&filename=eq.agent-probe'], ['setting names', 'setting_names?select=name&setting=eq.Walletprobe%20Cafe'], ['setting places', 'setting_places?select=name&setting=eq.Walletprobe%20Cafe']];
+    for (const [what, path] of ways) {
+      ok((await get(path, asOwner)).length === 1, `control: the person reads their Wallet ${what}`);
+      ok((await get(path, asAgent)).length === 0, `the agent's token reads no Wallet ${what}`);
+    }
+    const call = async (fn, body, headers) => { const r = await fetch(`${PROJECT}/rest/v1/rpc/${fn}`, { method: 'POST', headers, body: JSON.stringify(body) }); return JSON.stringify(r.ok ? await r.json() : null); };
+    const range = { from_date: '2019-01-01', to_date: '2019-01-31', group_by: 'month', exclude_financekit: false };
+    ok(/123/.test(await call('spending_summary', range, asOwner)) && !/123/.test(await call('spending_summary', range, asAgent)), 'nor a total of it, even when it asks for one');
+    await fetch(`${PROJECT}/rest/v1/memos?transaction_id=eq.${tx.id}`, { method: 'DELETE', headers: asOwner });
+    ok((await get(`unexamined_transactions?select=id&id=eq.${tx.id}`, asOwner)).length === 1 && (await get(`unexamined_transactions?select=id&id=eq.${tx.id}`, asAgent)).length === 0, 'nor as unexamined');
+    ok((await get('transactions?select=id&source=eq.csv&limit=1', asAgent)).length === 1 && (await get('memos?select=body&limit=1', asAgent)).length === 1 && (await get('memo_values?select=value_id&limit=1', asAgent)).length === 1, 'control: imported purchases, their memos and themes are still shared');
+  } finally {
+    for (const p of [`accounts?id=eq.${acc.id}`, 'import_batches?filename=eq.agent-probe', 'setting_names?setting=eq.Walletprobe%20Cafe', 'setting_places?setting=eq.Walletprobe%20Cafe']) await fetch(`${PROJECT}/rest/v1/${p}`, { method: 'DELETE', headers: asOwner });
+  }
+}
+// Story links: made by the person only, and never read by an agent, whose page could
+// hold a memo on a Wallet purchase (Addendum 3.2).
+{
+  const ZOO = 'a3b8c10c-68b8-4bfe-9380-c87b7015a49d';
+  const link = (headers) => fetch(PROJECT + '/rest/v1/rpc/make_share', { method: 'POST', headers, body: JSON.stringify({ p_kind: 'memo', p_items: [{ txn: ZOO }] }) });
+  ok(!(await link(asAgent)).ok, 'the agent cannot make a story link');
+  const byOwner = await link(asOwner), code = byOwner.ok ? await byOwner.json() : null;
+  ok(!!code, 'control: the person can');
+  const seen = await fetch(PROJECT + '/rest/v1/shares?select=*', { headers: asAgent });
+  ok(!seen.ok || (await seen.json()).length === 0, 'the agent cannot read the person\'s links');
+  const off = await fetch(PROJECT + '/rest/v1/shares?code=eq.' + code, { method: 'DELETE', headers: asAgent });
+  ok(!off.ok || (await off.json()).length === 0, 'nor turn one off');
+  const still = await (await fetch(PROJECT + '/rest/v1/shares?select=code&code=eq.' + code, { headers: asOwner })).json();
+  ok(still.length === 1, 'control: the person still has it');
+  if (code) await fetch(PROJECT + '/rest/v1/shares?code=eq.' + code, { method: 'DELETE', headers: asOwner });
+}
 const ownerWrite = await fetch(PROJECT + '/rest/v1/life_values', { method: 'POST', headers: { ...asOwner, prefer: 'return=representation' }, body: JSON.stringify({ name: 'control probe ' + Date.now() }) });
 const made = ownerWrite.ok ? await ownerWrite.json() : [];
 ok(ownerWrite.ok && made.length === 1, `control: the person's own token can insert (${ownerWrite.status})`);

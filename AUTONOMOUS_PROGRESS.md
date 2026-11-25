@@ -2377,3 +2377,19 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Not verified:** iPad taps (it wants its passcode for UI automation, Ben's to enter);
   the Duo (not reachable from this Mac at 4:40pm); a link sent from a share sheet.
 - **Shipped:** 1.0.28 (29) processed on TestFlight for iOS and Mac (4:58pm).
+
+### Tick 58 — 2026-11-24 — An agent's token could reach Wallet rows directly; closed in the database
+- **How it was found:** closing the untested claims about links (theme removal, agents).
+  The agent could list `shares`, whose page can hold a memo on a Wallet purchase. The
+  same question of the other tables: 11 direct ways to Wallet rows with a real token.
+- **Fixed:** migrations 20261124030000 and 20261124040000, Decision 068. Only agents'
+  reads change. Seen to fail first (11), then all 56 connector checks pass; imported
+  purchases are still shared (control).
+- **Was it used?** Data API callers since 2026-11-22 (Ben's first Wallet sync), by user
+  agent: the app, the test runners, the site in a browser, and our own connector.
+  User agent only; one Python request on 2026-11-24 is described in the report.
+- **Also verified:** removing a theme, a memo, or the purchase turns its links off; the
+  account's deletion cascades (`confdeltype = c`).
+- **Noted:** every connector test run leaves a registered test client and consent on the
+  synthetic owner (350 and 346). Harmless; worth a cleanup with Ben's OK.
+- **Duo:** still not reachable from this Mac at 5:10pm.

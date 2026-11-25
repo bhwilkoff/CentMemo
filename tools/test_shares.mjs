@@ -78,6 +78,17 @@ try {
   ok(r.status === 200 && (await read(r.body)) !== null, 'a link to a memo works');
   await call('/rest/v1/memos?transaction_id=eq.' + tx[0]?.id, stranger, { method: 'DELETE' });
   ok((await read(r.body)) === null, 'and deleting the memo turns its link off');
+  const val = (await (await call('/rest/v1/life_values', stranger, { method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ name: 'Share probe' }) })).json())[0];
+  await call('/rest/v1/memos', stranger, { method: 'POST', body: JSON.stringify({ transaction_id: tx[0]?.id, body: 'A probe memo.' }) });
+  await call('/rest/v1/memo_values', stranger, { method: 'POST', body: JSON.stringify({ transaction_id: tx[0]?.id, value_id: val?.id }) });
+  const th = await rpc('make_share', { p_kind: 'theme', p_value: val?.id, p_items: [{ txn: tx[0]?.id }] }, stranger);
+  ok(th.status === 200 && (await read(th.body)) !== null, 'a link to a theme works');
+  await call('/rest/v1/life_values?id=eq.' + val?.id, stranger, { method: 'DELETE' });
+  ok((await read(th.body)) === null, 'and removing the theme turns its link off');
+  const again = await rpc('make_share', { p_kind: 'memo', p_items: [{ txn: tx[0]?.id }] }, stranger);
+  ok(again.status === 200 && (await read(again.body)) !== null, 'another link to the memo works');
+  await call('/rest/v1/transactions?id=eq.' + tx[0]?.id, stranger, { method: 'DELETE' });
+  ok((await read(again.body)) === null, 'and it goes when the purchase does, as when Wallet access is turned off');
   await call('/rest/v1/accounts?source_id=eq.share-probe', stranger, { method: 'DELETE' });
 }
 console.log(failures ? `FAIL: ${failures} check(s)` : 'PASS: story links');
