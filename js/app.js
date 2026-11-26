@@ -562,7 +562,8 @@
         head,
         h('label', { class: 'field-label', for: 'memo-body' }, 'Memo'),
         formatBar,
-        area]), h('div', { class: 'split-side' }, [
+        area,
+        inkList(t.attachments) || '']), h('div', { class: 'split-side' }, [
         h('p', { class: 'field-label' }, 'Themes'),
         chips,
         starters,
@@ -822,6 +823,15 @@
       });
     }).catch(() => {});
     return h('div', {}, h('p', { class: 'field-label' }, 'Files'), ul);
+  }
+  // W5: drawings made with Apple Pencil (or a finger) on the iPhone and iPad, shown as kept.
+  function inkList(list) {
+    const inks = (list || []).filter((a) => a.kind === 'ink' && a.storage_path);
+    if (!inks.length) return null;
+    const box = h('div', { class: 'ink-list', 'data-ink': '' });
+    API.copyUrls(inks.map((a) => a.storage_path)).then((urls) => fill(box, ...inks.filter((a) => urls[a.storage_path])
+      .map((a) => h('img', { class: 'ink-picture', src: urls[a.storage_path], alt: 'A drawing in this memo', loading: 'lazy' })))).catch(() => {});
+    return h('div', {}, h('p', { class: 'field-label' }, 'Drawing'), box);
   }
   function photosNote(list) {
     const photos = (list || []).filter((a) => a.kind === 'photo');

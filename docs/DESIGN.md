@@ -197,3 +197,8 @@ underline in a memo: underline is the share's pencil mark (S). No colors or size
 **E3. Where the styles live.** iPhone and iPad: a bar over the keyboard drawn like the
 keyboard, the six styles in sanguine, then Done; never a menu (it moved the caret).
 Mac: the Format menu and its shortcuts. Web: a bar of six buttons above the memo.
+**E4. Ink is a memo part** (W5). A Drawing section follows the memo: each drawing on
+paper, as wide as the memo, at most 360pt tall, a hairline edge; tap to draw on it again.
+The canvas is a sheet: paper, the sanguine pen (the system tool picker for others), Cancel,
+Done, and "Add as words". The picture is made in the light appearance so it reads the
+same on a dark page. Handwriting in the memo itself is Scribble's, not ours.

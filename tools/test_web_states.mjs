@@ -247,6 +247,36 @@ console.log('a memo saves itself (W3), and can be shared in the words just writt
   ok(await waitFor('document.querySelector("#view-txn #memo-body")?.value === "" && /King Soopers/.test(document.querySelector("#h-txn")?.textContent || "") && !document.querySelector("#view-txn .share-panel")'), 'an emptied memo is removed on leaving, and Share with it');
 }
 
+console.log('a drawing made on the iPhone shows on the web memo page (W5)');
+{
+  const page = '#/t/e5626ed0-b9f2-48a0-8df7-672ae6016a40';
+  // Made here as the iPhone makes one: a row of kind "ink" and a PNG in the person's folder.
+  const made = await evaluate(`(async () => {
+    const db = API.client(), { data: { user } } = await db.auth.getUser();
+    const { data: row, error } = await db.from('attachments').insert({ transaction_id: 'e5626ed0-b9f2-48a0-8df7-672ae6016a40', kind: 'ink', caption: 'Drawing' }).select('id').single();
+    if (error) return 'insert: ' + error.message;
+    const c = document.createElement('canvas'); c.width = 200; c.height = 120;
+    const g = c.getContext('2d'); g.fillStyle = '#FBFAF7'; g.fillRect(0, 0, 200, 120); g.strokeStyle = '#4A1520'; g.lineWidth = 4; g.beginPath(); g.moveTo(20, 60); g.lineTo(180, 70); g.stroke();
+    const png = await new Promise((r) => c.toBlob(r, 'image/png'));
+    const path = user.id + '/' + row.id + '.png';
+    const up = await db.storage.from('attachments').upload(path, png, { contentType: 'image/png', upsert: true });
+    if (up.error) return 'upload: ' + up.error.message;
+    await db.from('attachments').update({ storage_path: path }).eq('id', row.id);
+    window.__ink = { id: row.id, path };
+    return 'ok';
+  })()`);
+  ok(made === 'ok', 'a drawing is kept in the person\'s folder (' + made + ')');
+  try {
+    await evaluate('location.hash = "#/unexamined"; true');
+    await waitFor('!document.querySelector("#view-txn:not([hidden])")');
+    await evaluate(`location.hash = "${page}"; true`);
+    ok(await waitFor('(() => { const i = document.querySelector("#view-txn .ink-picture"); return !!(i && i.complete && i.naturalWidth === 200); })()'), 'the drawing shows under the memo');
+    await shot('memo-with-drawing');
+  } finally {
+    await evaluate(`(async () => { const db = API.client(); await db.storage.from('attachments').remove([window.__ink.path]); await db.from('attachments').delete().eq('id', window.__ink.id); return true; })()`);
+  }
+}
+
 console.log('event page (D6): the Setting and the memo lead; the money is a footnote');
 {
   await evaluate('location.hash = "#/t/a3b8c10c-68b8-4bfe-9380-c87b7015a49d"; true');

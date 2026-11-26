@@ -610,6 +610,55 @@ final class APIClient {
         return a
     }
 
+    // MARK: - Ink (W5, Decision 069): a drawing is a memo part
+
+    /// Keeps a drawing: the PencilKit data (to draw on again) and a PNG of it on paper (for
+    /// the Mac, the web and shares), both in the person's own folder. A new drawing makes a
+    /// row; a drawing drawn on again replaces its two files.
+    func saveInk(transactionID: String, existing: Attachment?, drawing: Data, png: Data) async throws -> Attachment {
+        guard let uid = session?.userID else { throw APIError.signedOut }
+        var a: Attachment
+        if let existing { a = existing } else {
+            struct Row: Encodable { let transaction_id: String; let kind = "ink"; let caption = "Drawing" }
+            let made: Data = try await raw("rest/v1/attachments", query: [.init(name: "select", value: "id,kind,device_ref,storage_path,caption")],
+                                           method: "POST", body: Row(transaction_id: transactionID), prefer: "return=representation")
+            guard let row = try JSONDecoder().decode([Attachment].self, from: made).first else { throw APIError.decoding("no attachment returned") }
+            a = row
+        }
+        let path = "\(uid)/\(a.id).png"
+        do {
+            _ = try await storage("POST", "object/attachments/\(uid)/\(a.id).drawing", body: drawing, contentType: "application/octet-stream", upsert: true)
+            _ = try await storage("POST", "object/attachments/" + path, body: png, contentType: "image/png", upsert: true)
+        } catch {
+            if existing == nil { try? await raw("rest/v1/attachments", query: [.init(name: "id", value: "eq." + a.id)], method: "DELETE") }
+            throw error
+        }
+        if a.storagePath != path {
+            try await raw("rest/v1/attachments", query: [.init(name: "id", value: "eq." + a.id)], method: "PATCH", body: ["storage_path": path])
+            a.storagePath = path
+        }
+        return a
+    }
+
+    /// The drawing behind an ink part, to draw on again.
+    func inkDrawing(_ a: Attachment) async throws -> Data {
+        guard let png = a.storagePath else { throw APIError.decoding("no drawing") }
+        return try await storage("GET", "object/attachments/" + png.replacingOccurrences(of: ".png", with: ".drawing"))
+    }
+
+    /// The picture of a kept copy or a drawing.
+    func copyData(_ path: String) async throws -> Data {
+        try await storage("GET", "object/attachments/" + path)
+    }
+
+    func removeInk(_ a: Attachment) async throws {
+        if let png = a.storagePath {
+            _ = try? await storage("DELETE", "object/attachments/" + png.replacingOccurrences(of: ".png", with: ".drawing"))
+            _ = try? await storage("DELETE", "object/attachments/" + png)
+        }
+        try await raw("rest/v1/attachments", query: [.init(name: "id", value: "eq." + a.id)], method: "DELETE")
+    }
+
     /// A link to a kept copy that works for an hour.
     func copyURL(_ path: String) async throws -> URL {
         struct Signed: Decodable { let signedURL: String }

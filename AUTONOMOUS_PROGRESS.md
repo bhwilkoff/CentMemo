@@ -58,7 +58,7 @@ PARITY.md updated; TestFlight when devices need it):
   lists, quote; stored so the connector and the web read it (likely a Markdown
   subset in the existing memo column; decide in W0). iOS 18 floor: TextEditor
   with AttributedString is iOS 26 only.
-- **W5 Handwriting with Apple Pencil**: iPad and the Duo. Scribble into the
+- ✅ **W5 Handwriting with Apple Pencil** (2026-11-26; real Pencil unseen): iPad and the Duo. Scribble into the
   text (stays searchable), and ink kept as ink (PencilKit drawing as a memo
   part). The ink stays the person's; recognized text only when they choose.
 - **W6 One Share**: Share and Make a link become one Share with a choice
@@ -2646,3 +2646,20 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   the server's Markdown via DEBUG door APP_SHOW_MARKDOWN), ShareUITests 5/5; frames read.
   Mac tap tier memo parts pass. Web checks pass. test_all rc=0.
 - **Next:** W5 Apple Pencil.
+
+### 2026-11-26 — W5: drawing in a memo — 1.0.38 (39)
+- **Ben:** "I'd like to take advantage of the ability to hand write a memo using an
+  Apple Pencil (both for iPad and iPhone Duo)."
+- **Done:** attachments kind `ink` (migration 20261126010000, applied live via the
+  connector; additive). iPhone/iPad: a Drawing section under the memo; a PencilKit sheet
+  (paper, sanguine pen, system tool picker; finger on iPhone, the Pencil setting on iPad);
+  kept as `.drawing` + `.png` in the private folder; draw on again; remove. "Add as words"
+  reads the handwriting into the memo on request. Scribble already writes into the
+  memo's text view. Mac and web show drawings.
+- **Found on the iPhone 12:** the tool picker gave the canvas its own black pen; it now
+  starts on the sanguine one (frame read).
+- **Verified:** iPhone 12 build 38 debug: InkUITests (draw with a finger, keep, relaunch,
+  remove); frames read. Web: a drawing shows under the memo (new check, frame read in
+  dark). test_all rc=0. **Not seen:** a real Apple Pencil (iPad needs its passcode for
+  XCTest; Ben's Duo has no test account), "Add as words", the Mac's drawing display.
+- **Next:** W6 one Share.

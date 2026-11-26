@@ -2,6 +2,9 @@
 import SwiftUI
 import PhotosUI
 import Photos
+#if os(iOS)
+import PencilKit
+#endif
 
 /// One purchase: what the bank says, then the memo in the person's own words
 /// and the values they name. Only the person writes here (Decision 056).
@@ -24,6 +27,8 @@ struct EntryDetailView: View {
     @State private var picked: PhotosPickerItem?
     @State private var picking = false
     @State private var choosingFile = false
+    /// W5: the drawing open on the canvas; `nil` id for a new one.
+    @State private var inking: InkEdit?
     @Environment(\.openURL) private var openURL
     @State private var sharing = false
     @State private var linking = false
@@ -102,6 +107,13 @@ struct EntryDetailView: View {
             }
         }
         .task { await load() }
+        #if os(iOS)
+        .sheet(item: $inking) { edit in
+            InkSheet(load: { await edit.attachment.asyncMap { try? await APIClient.shared.inkDrawing($0) } ?? nil },
+                     keep: { d in await keepInk(d, edit.attachment) },
+                     words: { found in memo += (memo.isEmpty || memo.hasSuffix("\n") ? "" : "\n") + found })
+        }
+        #endif
         // W3 (Decision 069): no Save button. A pause in the writing sends it; leaving the
         // page or the app sends it at once. An empty memo is removed only on leaving, so
         // clearing the words to start again never drops the themes on the way.
@@ -184,6 +196,36 @@ struct EntryDetailView: View {
                 Label(unsent, systemImage: "icloud.slash")
                     .font(TypeRamp.caption).foregroundStyle(Color.brandText)
                     .accessibilityIdentifier("memo-unsent")
+            }
+        }
+        // W5: ink is a memo part, after the words. Drawn on iPhone and iPad; the Mac shows it.
+        let inks = photos.filter { $0.kind == "ink" }
+        #if os(iOS)
+        let canDraw = true
+        #else
+        let canDraw = false
+        #endif
+        if !inks.isEmpty || canDraw {
+            Section {
+                ForEach(inks) { a in
+                    if let path = a.storagePath {
+                        Button { inking = InkEdit(attachment: a) } label: { InkPicture(path: path) }
+                            .buttonStyle(.plain)
+                            .disabled(!canDraw)
+                            .contextMenu {
+                                if canDraw { Button("Draw on it", systemImage: "pencil.tip") { inking = InkEdit(attachment: a) } }
+                                Button("Remove from this memo", systemImage: "trash", role: .destructive) { Task { await removeInk(a) } }
+                            }
+                    }
+                }
+                #if os(iOS)
+                Button { inking = InkEdit(attachment: nil) } label: {
+                    Label(inks.isEmpty ? "Draw or write by hand" : "Add a drawing", systemImage: "pencil.tip.crop.circle.badge.plus")
+                }
+                .accessibilityIdentifier("add-ink")
+                #endif
+            } header: {
+                Text("Drawing")
             }
         }
     }
@@ -450,6 +492,27 @@ struct EntryDetailView: View {
         } catch { self.error = session.handle(error) }
     }
 
+    #if os(iOS)
+    private func keepInk(_ d: PKDrawing, _ existing: APIClient.Attachment?) async -> Bool {
+        guard let png = InkRender.png(d) else { return false }
+        do {
+            let a = try await APIClient.shared.saveInk(transactionID: entryID, existing: existing, drawing: d.dataRepresentation(), png: png)
+            if let i = photos.firstIndex(where: { $0.id == a.id }) {
+                photos[i] = a
+                // Same path, new picture: dropped and put back so it loads again.
+                photos.remove(at: i); try? await Task.sleep(for: .milliseconds(50)); photos.insert(a, at: i)
+            } else { photos.append(a) }
+            Haptic.success()
+            return true
+        } catch { self.error = session.handle(error); Haptic.error(); return false }
+    }
+    #endif
+
+    private func removeInk(_ a: APIClient.Attachment) async {
+        do { try await APIClient.shared.removeInk(a); photos.removeAll { $0.id == a.id } }
+        catch { self.error = session.handle(error) }
+    }
+
     private func addStarter(_ s: Themes.Starter) async {
         do {
             let v = try await APIClient.shared.addValue(s.name)
@@ -496,6 +559,18 @@ private struct InlineTitle: ViewModifier {
     let on: Bool
     func body(content: Content) -> some View {
         if on { content.inlineTitle() } else { content }
+    }
+}
+/// W5: which drawing is open on the canvas, and its strokes once they arrive.
+struct InkEdit: Identifiable {
+    let id = UUID()
+    let attachment: APIClient.Attachment?
+}
+
+extension Optional {
+    func asyncMap<T>(_ f: (Wrapped) async -> T) async -> T? {
+        guard let self else { return nil }
+        return await f(self)
     }
 }
 #endif

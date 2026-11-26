@@ -563,3 +563,5 @@ html[data-ground="pistachio"] { --color-yours: #B4C875; }
 .memo-text .memo-heading { margin-top: .5em; }
 .memo-text .memo-list { margin: 0 0 .35em; padding-left: 1.2em; }
 .memo-text .memo-quote { margin: 0 0 .35em; padding-left: .9em; border-left: 2px solid var(--color-primary); color: var(--color-text-muted, inherit); font-style: italic; }
+.ink-list { display: grid; gap: var(--space-2); margin-top: var(--space-3); }
+.ink-picture { width: 100%; max-height: 360px; object-fit: contain; border: 1px solid var(--color-border); border-radius: calc(var(--radius-card, 12px) / 2); background: #FBFAF7; }
