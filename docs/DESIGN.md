@@ -206,3 +206,8 @@ same on a dark page. Handwriting in the memo itself is Scribble's, not ours.
 iPhone and iPad, the toolbar on the Mac, one disclosure on the web). Inside, a segmented
 Picture | Link switch replaces the title, with one line of fact under it: "A picture you
 send. Nothing is kept online." or "A page at centmemo.com. You can turn it off."
+**E6. Pictures in a share** (W7). Under Pictures the memo's photos and drawings, 72pt
+thumbnails, each off until tapped (sanguine stroke and check), at most three. On the card
+they take the top (42%, 36% on Tall) or the right 42% of Wide; photos fill, drawings fit
+on their paper. A picture that reads as money is dimmed and can't be chosen, with one line
+saying why. Files never go into a share: a receipt carries an amount.

@@ -16,7 +16,18 @@ struct ShareContent: Equatable, Sendable {
     var initials: String
     var date: String
     var themes: [Theme] = []
+    /// W7: the memo's pictures the person turned on, in their order (at most three).
+    var pictures: [SharePicture] = []
     var words: [String] { memo.split(whereSeparator: \.isWhitespace).map(String.init) }
+}
+
+/// A picture on a share card: a memo's photo or drawing, already checked for money.
+struct SharePicture: Identifiable, Equatable, @unchecked Sendable {
+    let id: String
+    let image: CGImage
+    /// A drawing is shown whole on its paper; a photo fills its frame.
+    var whole = false
+    static func == (a: SharePicture, b: SharePicture) -> Bool { a.id == b.id }
 }
 
 /// What the person chose (S2). `mark` is the first and last word they underlined.
@@ -63,7 +74,7 @@ struct ShareCard: View {
         Canvas { ctx, _ in Painter(ctx: ctx, c: content, d: design).paint() }
             .frame(width: size.width, height: size.height)
             .accessibilityElement()
-            .accessibilityLabel("\(design.look.rawValue.capitalized) card: \(content.memo)")
+            .accessibilityLabel("\(design.look.rawValue.capitalized) card\(content.pictures.isEmpty ? "" : content.pictures.count == 1 ? " with a picture" : " with \(content.pictures.count) pictures"): \(content.memo)")
     }
 }
 
@@ -385,44 +396,75 @@ private struct Painter {
 
     // MARK: The four looks (S3)
 
+    /// W7: the chosen pictures side by side, each filling its frame from the center, a
+    /// thread of paper between them. They take the card's top, or its right on a wide card.
+    private func picturesBand(_ r: CGRect) {
+        let n = CGFloat(c.pictures.count), gap: CGFloat = 8
+        let wide = r.width > r.height * 1.2 || d.shape != .wide
+        let each = wide ? CGSize(width: (r.width - gap * (n - 1)) / n, height: r.height) : CGSize(width: r.width, height: (r.height - gap * (n - 1)) / n)
+        for (i, p) in c.pictures.enumerated() {
+            let o = wide ? CGPoint(x: r.minX + CGFloat(i) * (each.width + gap), y: r.minY) : CGPoint(x: r.minX, y: r.minY + CGFloat(i) * (each.height + gap))
+            let frame = CGRect(origin: o, size: each)
+            let iw = CGFloat(p.image.width), ih = CGFloat(p.image.height)
+            let scale = p.whole ? min(frame.width / iw, frame.height / ih) : max(frame.width / iw, frame.height / ih)
+            let drawn = CGSize(width: iw * scale, height: ih * scale)
+            var clip = ctx
+            clip.clip(to: Path(frame))
+            clip.draw(Image(decorative: p.image, scale: 1), in: CGRect(x: frame.midX - drawn.width / 2, y: frame.midY - drawn.height / 2, width: drawn.width, height: drawn.height))
+        }
+    }
+
     func paint() {
-        let size = d.shape.size, W = size.width, H = size.height, short = min(W, H)
+        let size = d.shape.size, H = size.height
+        var W = size.width, top: CGFloat = 0
+        ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(bg))
+        if !c.pictures.isEmpty {
+            if d.shape == .wide {
+                let pw = (W * 0.42).rounded()
+                picturesBand(CGRect(x: W - pw, y: 0, width: pw, height: H))
+                W -= pw
+            } else {
+                let ph = (H * (H > W * 1.5 ? 0.36 : 0.42)).rounded()
+                picturesBand(CGRect(x: 0, y: 0, width: W, height: ph))
+                top = ph
+            }
+        }
+        let short = min(W, H)
         let M = (short * 0.09).rounded(), words = c.words
         let memo = Face(), strong = Face(weight: .semibold)
         let big = (short * (H > W * 1.5 ? 0.112 : 0.085)).rounded()
         let mark = d.mark.flatMap { m in words.isEmpty ? nil : m.clamped(to: 0...(words.count - 1)) }
-        ctx.fill(Path(CGRect(origin: .zero, size: size)), with: .color(bg))
 
         switch d.look {
         case .theme:
             let spine = (short * 0.13).rounded()
-            ctx.fill(Path(CGRect(x: 0, y: 0, width: spine, height: H)), with: .color(d.paper == .theme ? Color.black.opacity(0.18) : accent))
+            ctx.fill(Path(CGRect(x: 0, y: top, width: spine, height: H - top)), with: .color(d.paper == .theme ? Color.black.opacity(0.18) : accent))
             let ls = (spine * 0.36).rounded(), label = d.showThemes ? (first?.name ?? c.date) : c.date
             var turned = ctx
             turned.translateBy(x: spine * 0.62, y: H - M)
             turned.rotate(by: .degrees(-90))
-            let shown = clip(label, Self.ct(ls, strong), H - M * 2)
+            let shown = clip(label, Self.ct(ls, strong), H - top - M * 2)
             turned.draw(Text(shown).font(Self.font(ls, strong)).foregroundStyle(d.paper == .night ? hex(0x171615) : hex(0xFBFAF7)),
                         at: CGPoint(x: 0, y: -CTFontGetAscent(Self.ct(ls, strong))), anchor: .topLeading)
             let x = spine + M * 0.8, bottom = footer(W, H, M, left: x, spine: true)
-            block(words, Self.fit(words, memo, CGSize(width: W - x - M, height: bottom - M), big, 28), memo, x: x, y: M, ink, mark: mark)
+            block(words, Self.fit(words, memo, CGSize(width: W - x - M, height: bottom - top - M), big, 28), memo, x: x, y: top + M, ink, mark: mark)
 
         case .setting:
             let bottom = footer(W, H, M, left: M, spine: false)
             let t = (short * 0.15).rounded()
             var x = M
             if d.showSetting {
-                let box = CGRect(x: M, y: M, width: t, height: t)
+                let box = CGRect(x: M, y: top + M, width: t, height: t)
                 ctx.stroke(Path(roundedRect: box, cornerRadius: t * 0.2), with: .color(muted), lineWidth: 3)
                 let s = (t * 0.36).rounded(), w = Self.width(c.initials, Self.ct(s, strong))
-                text(c.initials, s, strong, ink, x: M + (t - w) / 2, base: M + t * 0.56)
-                ctx.fill(Path(CGRect(x: M + t * 0.18, y: M + t * 0.76, width: t * 0.64, height: t * 0.05)), with: .color(accent))
+                text(c.initials, s, strong, ink, x: M + (t - w) / 2, base: top + M + t * 0.56)
+                ctx.fill(Path(CGRect(x: M + t * 0.18, y: top + M + t * 0.76, width: t * 0.64, height: t * 0.05)), with: .color(accent))
                 x = M + t + M * 0.45
             }
             let name = (d.showSetting ? c.setting : c.date).split(whereSeparator: \.isWhitespace).map(String.init)
             let nf = Self.fit(name, strong, CGSize(width: W - x - M, height: t), (t * 0.62).rounded(), 30)
-            block(name, nf, strong, x: x, y: M + max(0, (t - CGFloat(nf.lines.count) * nf.size * Self.lead) / 2), ink)
-            var y = M + t + M * 0.5
+            block(name, nf, strong, x: x, y: top + M + max(0, (t - CGFloat(nf.lines.count) * nf.size * Self.lead) / 2), ink)
+            var y = top + M + t + M * 0.5
             if d.showDate, d.showSetting {
                 let s = (W * 0.026).rounded(), sans = Face(serif: false), w = Self.width(c.date, Self.ct(s, sans))
                 text(c.date, s, sans, muted, x: M + s * 0.9, base: y + s * 1.15)
@@ -435,8 +477,8 @@ private struct Painter {
             let bottom = footer(W, H, M, left: M, spine: false)
             let sentence = words.firstIndex { $0.hasSuffix(".") || $0.hasSuffix("!") || $0.hasSuffix("?") }.map { Array(words[...$0]) } ?? words
             let chosen = mark.map { Array(words[$0]) } ?? sentence, whole = chosen.count == words.count
-            let f = Self.fit(chosen, strong, CGSize(width: W - M * 2, height: (bottom - M) * (whole ? 1 : 0.62)), (short * 0.16).rounded(), 34, 3)
-            let end = block(chosen, f, strong, x: M, y: M * 0.8, d.paper == .theme ? ink : pencil)
+            let f = Self.fit(chosen, strong, CGSize(width: W - M * 2, height: (bottom - top - M) * (whole ? 1 : 0.62)), (short * 0.16).rounded(), 34, 3)
+            let end = block(chosen, f, strong, x: M, y: top + M * 0.8, d.paper == .theme ? ink : pencil)
             if !whole {
                 let rest = Self.fit(words, memo, CGSize(width: W - M * 2, height: bottom - end - M * 0.4), (big * 0.6).rounded(), 24)
                 block(words, rest, memo, x: M, y: end + M * 0.4, ink)
@@ -444,7 +486,7 @@ private struct Painter {
 
         case .page:
             let bottom = footer(W, H, M, left: M, spine: false)
-            block(words, Self.fit(words, memo, CGSize(width: W - M * 2, height: bottom - M), (big * 1.1).rounded(), 28), memo, x: M, y: M * 0.8, ink, mark: mark)
+            block(words, Self.fit(words, memo, CGSize(width: W - M * 2, height: bottom - top - M), (big * 1.1).rounded(), 28), memo, x: M, y: top + M * 0.8, ink, mark: mark)
         }
     }
 }

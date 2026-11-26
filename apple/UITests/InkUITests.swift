@@ -24,6 +24,30 @@ final class InkUITests: DeviceTestCase {
         sleep(2)
         shot(app, "ink-kept")
 
+        // W7: with a memo written, the drawing can go on the share card.
+        let editor = app.textViews["memo-editor"]
+        reach(app, editor)
+        editor.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.6)).tap()
+        editor.typeText("Drew the line at the carousel.")
+        let share = app.buttons["share-memo"]
+        XCTAssertTrue(share.waitForExistence(timeout: 20), "Share, once the memo has sent itself")
+        share.tap()
+        let offer = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'share-picture-'")).firstMatch
+        XCTAssertTrue(reach(app, offer, swipes: 4), "the drawing is offered for the card")
+        let enabled = NSPredicate(format: "isEnabled == true")
+        XCTAssertEqual(XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: enabled, object: offer)], timeout: 20), .completed, "once it is read and checked")
+        offer.tap()
+        for _ in 0..<6 where !text(app, matching: "card with a picture").exists { app.swipeDown(velocity: .slow) }
+        XCTAssertTrue(text(app, matching: "card with a picture: Drew the line").waitForExistence(timeout: 5), "the card carries it")
+        shot(app, "share-with-drawing")
+        app.buttons["Done"].firstMatch.tap()
+        // The memo comes off again (the test leaves the account as found).
+        reach(app, editor)
+        editor.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.9)).tap()
+        editor.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 40))
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        sleep(3)
+
         app.terminate()
         let again = launch(["APP_START_ITEM": Fixture.unexamined])
         XCTAssertTrue(again.textViews["memo-editor"].waitForExistence(timeout: 25))

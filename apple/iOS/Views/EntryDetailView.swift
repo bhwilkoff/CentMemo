@@ -96,7 +96,7 @@ struct EntryDetailView: View {
         .sheet(isPresented: $sharing) {
             if let e = entry, let body = e.memo?.body ?? Self.standInMemo {
                 OneShareSheet(start: linking ? .link : .picture) {
-                    ShareMemoSheet(entry: e, memo: MemoText.plain(body))
+                    ShareMemoSheet(entry: e, memo: MemoText.plain(body), attachments: photos)
                 } page: {
                     MakeLinkSheet(entry: e, memo: MemoText.plain(body))
                 }

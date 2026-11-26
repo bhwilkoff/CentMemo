@@ -2676,3 +2676,18 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   (`share-page`, `share-as-link`). Mac tap tier memo and theme parts pass. Web: 3 new checks.
   test_all rc=0.
 - **Next:** W7 photos and files in the share.
+
+### 2026-11-26 — W7 (part 1): pictures on a memo's share card — 1.0.40 (41)
+- **Ben:** "When I add images or files, shouldn't they also come into the shared memo?"
+- **Done (iOS, iPad, Mac):** `SharePictureChoices` reads the memo's photos (kept copy or
+  the library) and drawings; each is checked on the device for money words (`MoneyWords`,
+  Vision) before it can be chosen. The card (`ShareCard`) draws up to three in a top band
+  or a right panel. Files are left out on purpose (receipts carry amounts).
+- **Found on the iPhone 12:** a drawing was cropped to fill the band; drawings now fit
+  whole (frame read).
+- **Verified:** iPhone 12 build 40 debug: InkUITests draws, writes a memo, puts the
+  drawing on the card ("card with a picture"), removes both. MoneyWordsTests (seen to fail
+  when "total" was dropped). test_all rc=0. **Not yet:** a camera photo on the card, the
+  money block on a real receipt photo, the Mac, the web, link pages, theme cards.
+- **Next:** W7 part 2: pictures on a link page (a shared copy, removed when the link is
+  turned off), then W8.

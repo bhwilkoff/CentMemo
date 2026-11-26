@@ -7,7 +7,10 @@ import UniformTypeIdentifiers
 struct ShareMemoSheet: View {
     let entry: LedgerEntry
     let memo: String
+    /// W7: the memo's photos and drawings, which the person may put on the card.
+    var attachments: [APIClient.Attachment] = []
     @State private var design = ShareDesign()
+    @State private var pictures = SharePictureChoices()
 
     private var content: ShareContent {
         ShareContent(memo: memo, setting: entry.displayMerchant, initials: Money.merchantInitials(entry.displayMerchant),
@@ -15,12 +18,14 @@ struct ShareMemoSheet: View {
                      themes: (entry.memo?.valueNames ?? []).map { n in
                          let c = Themes.hex[Themes.colorKey(n)] ?? (0x6F6964, 0xB3ACA6)
                          return .init(name: n, paper: c.0, night: c.1)
-                     })
+                     },
+                     pictures: pictures.pictures)
     }
 
     var body: some View {
         ShareStudio(title: "Share this memo", shape: design.shape, card: { ShareCard(content: content, design: design) },
                     choices: { choices }, send: { send })
+            .task { await pictures.load(attachments) }
     }
 
     private var send: some View {
@@ -32,6 +37,7 @@ struct ShareMemoSheet: View {
     }
 
     @ViewBuilder private var choices: some View {
+        SharePictureRow(choices: pictures)
         Section {
             ShareWords(words: content.words, mark: $design.mark, prefix: nil)
         } header: {
