@@ -405,9 +405,15 @@ html[data-ground="pistachio"] { --color-yours: #B4C875; }
   background: linear-gradient(transparent 12%, var(--color-yours) 12%, var(--color-yours) 88%, transparent 88%);
   color: var(--color-on-yours); padding: 0 .3em; border-radius: 3px;
 }
-/* C3.2 What you value: value chips wear the person's color. */
-.chip[aria-pressed="true"], .chips-static .chip { background: var(--color-yours); border-color: var(--color-yours); color: var(--color-on-yours); }
+/* C3.2 What you value (W2): each theme chip carries its own color as a mark, a dot
+   beside the name and a stroke when it is on; the words stay ink. */
+.chip[style*="--hue"]::before { content: ""; display: inline-block; width: .5rem; height: .5rem; border-radius: 50%; background: var(--hue); margin-right: .35rem; vertical-align: .05em; }
+.chip[aria-pressed="true"], .chips-static .chip { background: transparent; border: 2px solid var(--hue, var(--color-yours)); color: var(--color-text); }
+.chips-static .chip { border-width: 1px; }
 .chip[aria-pressed="false"] { background: transparent; border-color: var(--color-border); color: var(--color-text); }
+.chip-starter { background: transparent; border: 1.5px dashed var(--hue); color: var(--color-text); }
+.chip-starter::before { display: none !important; }
+.starter-offer .caption { margin: var(--space-2) 0; }
 
 /* ---- Editorial type: Newsreader for headings and the person's memos ---- */
 :root { --font-display: "Newsreader", Georgia, "Times New Roman", serif; }

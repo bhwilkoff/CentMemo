@@ -23,8 +23,8 @@ are sanguine. It never carries content meaning.
 (measured on the iPhone 12, 2026-11-22); give ink only to the views that
 need it, never to a whole screen.
 
-**C3. The person's color (aqua by default) has exactly two jobs, both
-meaning, never chrome:**
+**C3. Color means something, never chrome. The person's color (aqua by
+default) and each theme's color have these jobs:**
 1. **What still needs you.** On the Unexamined screen, where every row is
    waiting, only the count sits on the person's color (one mark, not fifteen).
    In the Ledger, where examined and waiting purchases mix, a purchase
@@ -33,8 +33,15 @@ meaning, never chrome:**
    color is gone from the screen: the reward is a calm page, not a badge.
    On the light page the color is soft (about 1.8:1), so it is never the only
    signal: the waiting row also has no memo line, and the count is ink text.
-2. **What you value.** The values the person names (chips on a memo and in
-   the story) are filled with their color, because they are theirs.
+2. **What you value.** Each theme carries its own color (D14). On a memo and
+   in the Story a theme chip shows it as a mark: a dot beside the name, and a
+   stroke of the color when the theme is on. The words stay ink. (Was: chips
+   filled with the person's one color; Ben, 2026-11-26: "they are not
+   color-coded as they should be".)
+3. **Starter themes where there are none** (W1). With no themes, the memo's
+   Themes row and the Story's shelf offer Ben's starters in place, each with a
+   dashed outline or mark in the color it would take; a tap adds it. Settings
+   lists the starters not yet held. No slide deck.
 
 On screen it is called **Color** (Ben, 2026-11-24). "Ground" survives only in
 code and the database, from 059.

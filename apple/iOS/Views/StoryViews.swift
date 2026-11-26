@@ -27,6 +27,14 @@ struct ThemeShareItem: Identifiable { let name: String; var id: String { name } 
         if case .month(let m) = scope { return LedgerDate.monthName(m) }
         return "Story"
     }
+    func addStarter(_ s: Themes.Starter, _ session: SessionStore) async {
+        do {
+            _ = try await APIClient.shared.addValue(s.name)
+            values = try await APIClient.shared.values()
+            session.didChangeData()
+            Haptic.success()
+        } catch { self.error = session.handle(error) }
+    }
     func everyMemo() { scope = .month(months.first ?? LedgerDate.thisMonth) }
 
     func load(_ session: SessionStore) async {
@@ -121,8 +129,18 @@ struct StoryChrome: ViewModifier {
 /// The shelf: the themes that hold memos, then the month.
 struct StoryShelf: View {
     @Bindable var model: StoryModel
+    @Environment(SessionStore.self) private var session
 
     var body: some View {
+        // W1: no themes yet, so the starters are offered here, each in its color.
+        if model.values.isEmpty && !model.loading {
+            Section {
+                StarterThemeRows(held: model.values) { s in await model.addStarter(s, session) }
+            } header: {
+                Text("Themes gather your memos into stories. Start with one.")
+                    .font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted).textCase(nil)
+            }
+        }
         if !model.shelf.isEmpty {
             Section {
                 ForEach(model.shelf) { v in

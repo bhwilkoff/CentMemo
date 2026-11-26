@@ -42,14 +42,14 @@ design) within an autonomous loop?"
 
 Order (each item: iOS + iPad + Duo, Mac, web, in one change set where it fits;
 PARITY.md updated; TestFlight when devices need it):
-- **W0 Research + design** (artifact Ben can look at): writing apps (Notes,
+- ✅ **W0 Research + design** (2026-11-26, `docs/research/memo-writing.md`, Decision 069) (artifact Ben can look at): writing apps (Notes,
   Day One, Bear, Craft, Journal), the iOS 18 floor for rich text and PencilKit,
   Scribble on the Duo, how styled text stays readable to the connector, how a
   share carries photos without money. Decisions logged before code.
-- **W1 Starter themes offered where themes are missing**: an in-place
+- ✅ **W1 Starter themes offered where themes are missing**: an in-place
   suggestion (not a slide deck) on Story, the memo's Theme row, and Settings
   when the person has no themes; the person picks which. Learn by doing.
-- **W2 Theme colors in the starter picker**: each starter shows its color mark
+- ✅ **W2 Theme colors in the starter picker**: each starter shows its color mark
   as it is being added (DESIGN C: color as a mark).
 - **W3 Autosave**: no Save button; saves as the person writes (debounced, on
   leaving, on backgrounding), a quiet saved state, undo kept, offline writes
@@ -2586,3 +2586,18 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   name; restored from git, mine is test_ios_libraries.py. The template's reports FAIL here
   (the Wallet extension's own 26.0), before and after: look at it before a cloud build (L2).
 - **Shipped:** 1.0.34 (35) VALID on TestFlight for iOS and Mac (8:32am); no libswiftWebKit in the uploaded build.
+
+### 2026-11-26 — memo writing loop: W0 research, W1 starters in place, W2 colored chips — 1.0.35 (36)
+- **Ben:** the memo writing message quoted at the top of this file.
+- **W0:** two research passes (Apple SDK availability checked in the local SDKs; writing
+  apps). Findings and six decisions in `docs/research/memo-writing.md`, Decision 069.
+- **W2 cause:** the memo's theme chips were filled with the person's one color
+  (DESIGN C3.2 from before D14), so every theme looked the same. Now each chip shows its
+  theme's color as a dot and, when on, a stroke; words stay ink. iOS, Mac, web; Story too.
+- **W1:** with no themes, the memo's Themes row offers the starters as dashed chips in
+  their colors (a tap adds and chooses), and the Story shelf lists them with Add. Settings
+  uses the same rows. Web the same.
+- **Verified:** iOS and Mac builds; test_all rc=0; web check "theme chips wear their own
+  colors" (new), picture read at 375px (dark). Not seen: the no-themes offer on a device
+  (the test accounts all hold themes).
+- **Next:** W3 autosave.

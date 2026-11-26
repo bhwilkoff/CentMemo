@@ -239,6 +239,10 @@ console.log('event page (D6): the Setting and the memo lead; the money is a foot
   ok(await evaluate('/\\$/.test(document.querySelector(".txn-details summary").textContent) && !document.querySelector(".txn-details").open'), 'the amount sits in the closed footnote');
   ok(!(await evaluate('/\\bnull\\b/.test(document.querySelector("#view-txn").innerText)')), 'no stray "null" text on the page');
   await shot('event-memo-first');
+  // W2 (Ben, 2026-11-26: "they are not color-coded as they should be"): each theme
+  // chip carries its own color, not the person's one color.
+  const dots = await evaluate('JSON.stringify([...document.querySelectorAll("#view-txn .chips .chip")].map((c) => getComputedStyle(c, "::before").backgroundColor))');
+  ok(JSON.parse(dots).length > 1 && new Set(JSON.parse(dots)).size > 1, 'theme chips wear their own colors');
   // N4: the person designs the share; nothing on it or in it is an amount.
   await evaluate('document.querySelector("#view-txn .share-panel").open = true; true');
   ok(await waitFor('document.querySelector("#view-txn .share-canvas")?.width === 1080'), 'the share studio draws a square card');

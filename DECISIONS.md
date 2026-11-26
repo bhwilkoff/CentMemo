@@ -501,3 +501,21 @@ Caches, named by person, erased whenever the person changes. A screen calls
 page with a person's unsaved words takes the server's words only while theirs are unchanged.
 Never use `URLSession.shared` for CentMemo's server. Never make a list wait for a garnish.
 Measure with `APP_LAUNCH_DIAG=1`; see what stands before an answer with `APP_SLOW_MS`.
+
+
+## 069. The memo saves itself, is styled in Markdown, and holds ink and photos as parts
+
+**Why:** Ben, 2026-11-26: "Do we need a "save" button on a memo? Why not just have it
+autosave? Also, can we allow for fully text styling in the memo? Why are "share" and "make
+a link" different things? When I add images or files, shouldn't they also come into the
+shared memo?" Research (`docs/research/memo-writing.md`): no writing app people know has a
+Save button; SwiftUI's styled TextEditor is iOS 26 only and the floor is 18; Markdown has
+no underline; the Mac SDK cannot draw PencilKit ink.
+
+**How to apply:** No Save button or "Saved" label; only a failure to send speaks. The memo
+column holds a Markdown subset (bold, italic, strikethrough, one heading, lists, quote),
+never HTML, so Claude, the web and old memos read it as text; a golden round-trip test
+guards the writer. No underline in a memo: underline is the share's pencil mark. Ink and
+photos are parts after the words, each with its own style, never inline attachments in
+the text. One Share button with Picture or Link inside; chosen photos travel with it, a
+link's copies are deleted when the link is turned off, and no share carries money.

@@ -390,7 +390,8 @@
       const chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Themes' });
       function drawChips(list) {
         fill(chips, ...list.map((v) => {
-          const b = h('button', { type: 'button', class: 'chip', 'aria-pressed': chosen.has(v.id) ? 'true' : 'false' }, v.name);
+          // W2: each theme in its own color, as a mark (DESIGN C3.2).
+          const b = h('button', { type: 'button', class: 'chip', style: '--hue: ' + themeHue(v.name), 'aria-pressed': chosen.has(v.id) ? 'true' : 'false' }, v.name);
           b.addEventListener('click', () => {
             if (chosen.has(v.id)) chosen.delete(v.id); else chosen.add(v.id);
             b.setAttribute('aria-pressed', chosen.has(v.id) ? 'true' : 'false');
@@ -399,6 +400,27 @@
         }));
       }
       drawChips(vals);
+      // W1: no themes yet, so the starters are offered on the memo; a tap adds one
+      // and gives it to this memo.
+      const starters = h('div', { class: 'starter-offer' });
+      const drawStarters = () => {
+        if (vals.length) return fill(starters);
+        fill(starters, h('p', { class: 'caption' }, 'Start with one of these, or name your own.'),
+          h('div', { class: 'chips' }, CentThemes.STARTERS.map((st) => {
+            const b = h('button', { type: 'button', class: 'chip chip-starter', style: '--hue: var(--color-theme-' + st.color + ')', 'aria-label': 'Add ' + st.name }, '+ ' + st.name);
+            b.addEventListener('click', async () => {
+              b.disabled = true;
+              try {
+                const v = await API.addValue(st.name);
+                vals.push(v);
+                THEME_COLORS = CentThemes.assignColors(await API.values());
+                chosen.add(v.id); drawChips(vals); drawStarters();
+              } catch (err) { b.disabled = false; error.textContent = err.message; error.hidden = false; }
+            });
+            return b;
+          })));
+      };
+      drawStarters();
       const newValue = h('input', { type: 'text', class: 'field-input field-inline', maxlength: '60', 'aria-label': 'New theme', placeholder: 'Add a theme' });
       const addBtn = h('button', { type: 'button', class: 'btn btn-small' }, 'Add theme');
       addBtn.addEventListener('click', async () => {
@@ -408,7 +430,7 @@
           const v = await API.addValue(name);
           vals.push(v); vals.sort((a, b) => a.name.localeCompare(b.name));
           THEME_COLORS = CentThemes.assignColors(await API.values());
-          chosen.add(v.id); newValue.value = ''; drawChips(vals);
+          chosen.add(v.id); newValue.value = ''; drawChips(vals); drawStarters();
         } catch (err) { error.textContent = /duplicate|unique/i.test(err.message) ? 'You already have that theme.' : err.message; error.hidden = false; }
       });
 
@@ -452,6 +474,7 @@
         area]), h('div', { class: 'split-side' }, [
         h('p', { class: 'field-label' }, 'Themes'),
         chips,
+        starters,
         h('div', { class: 'inline-form' }, newValue, addBtn),
         error,
         h('div', { class: 'actions' }, save, status, skipBtn),
@@ -757,7 +780,14 @@
         shelfVals.map((v) => h('a', { class: 'theme-row', href: valueId === v.id ? '#/story/' + latest : '#/story/value:' + v.id,
           'aria-current': valueId === v.id ? 'true' : null, 'data-theme': v.name },
           h('i', { style: 'background: ' + themeHue(v.name) }), h('span', {}, v.name), h('span', { class: 'caption' }, String(counts[v.id])))),
-        valueId ? h('a', { class: 'theme-row every', href: '#/story/' + latest }, 'Every memo') : null) : '';
+        valueId ? h('a', { class: 'theme-row every', href: '#/story/' + latest }, 'Every memo') : null)
+        // W1: no themes yet, so the starters are offered here, each in its color.
+        : vals.length ? '' : h('nav', { class: 'theme-shelf starter-shelf', 'aria-label': 'Starter themes' },
+          h('p', { class: 'caption' }, 'Themes gather your memos into stories. Start with one.'),
+          h('ul', { class: 'list starters' }, starterRows(vals, async (t, btn) => {
+            btn.disabled = true;
+            try { await API.addValue(t.name); route(); } catch (err) { btn.disabled = false; failed(body, err, route); }
+          })));
       const none = rows.length ? null : h('div', { class: 'state state-empty' },
         h('p', {}, valueId ? 'No memos carry this theme yet.' : 'No memos written for ' + title + '.'),
         h('a', { class: 'btn', href: '#/unexamined' }, 'Write a memo'));
@@ -774,7 +804,7 @@
           // D6: the memo is the headline; when, where and how much are its footnote.
           return h('li', { class: 'story-entry' },
             h('p', { class: 'story-text' }, memo.body),
-            names.length ? h('p', { class: 'chips chips-static' }, names.map((n) => h('span', { class: 'chip' }, n))) : null,
+            names.length ? h('p', { class: 'chips chips-static' }, names.map((n) => h('span', { class: 'chip', style: '--hue: ' + themeHue(n) }, n))) : null,
             h('a', { class: 'story-meta', href: '#/t/' + t.id },
               h('span', {}, niceDate(t.txn_date) + ' · ' + merchantOf(t)),
               h('span', { class: 'row-amount' }, money(t.amount_minor, t.currency))));
@@ -876,7 +906,7 @@
         h('h2', { class: 'section-heading' }, 'Color'),
         picker,
         h('h2', { class: 'section-heading' }, 'Themes'),
-        vals.length ? valueList : h('p', { class: 'caption' }, 'Add a theme from any memo.'),
+        vals.length ? valueList : h('p', { class: 'caption' }, 'Add a starter theme below, or name one on any memo.'),
         (() => {
           const rows = starterRows(vals, async (t, btn) => {
             btn.disabled = true;

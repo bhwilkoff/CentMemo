@@ -291,18 +291,22 @@ struct LedgerView: View {
 /// DESIGN C3.2: the values a person names wear their color. Static chips (in
 /// the story) are always filled; on a memo, unselected ones are outlined.
 struct ValueChip: View {
-    @Environment(SessionStore.self) private var session
     let name: String
     let isOn: Bool
     var isStatic = false
+    /// W2: each theme in its own color (D14), as a mark: a dot beside the name, and a
+    /// stroke of the color when the theme is on. The words stay ink (DESIGN C3).
     var body: some View {
-        let filled = isOn || isStatic
-        Text(name)
-            .font(TypeRamp.caption)
-            .padding(.horizontal, Spacing.s3).padding(.vertical, Spacing.s1)
-            .background(filled ? session.ground.color : Color.clear, in: Capsule())
-            .overlay(Capsule().strokeBorder(filled ? Color.clear : Color.brandBorder))
-            .foregroundStyle(filled ? Ground.onColor : Color.brandText)
+        let hue = ThemeHue.color(name)
+        let marked = isOn || isStatic
+        HStack(spacing: Spacing.s1) {
+            Image(systemName: isOn ? "checkmark.circle.fill" : "circle.fill")
+                .font(.system(size: isOn ? 12 : 8)).foregroundStyle(hue)
+            Text(name).font(TypeRamp.caption)
+        }
+        .padding(.horizontal, Spacing.s3).padding(.vertical, Spacing.s1)
+        .overlay(Capsule().strokeBorder(marked ? hue : Color.brandBorder, lineWidth: isOn ? 2 : 1))
+        .foregroundStyle(Color.brandText)
     }
 }
 #endif

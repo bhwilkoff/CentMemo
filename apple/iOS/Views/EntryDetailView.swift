@@ -11,6 +11,7 @@ struct EntryDetailView: View {
     @Environment(\.inPane) private var inPane
     @State private var entry: LedgerEntry?
     @State private var values: [LifeValue] = []
+    @State private var valuesLoaded = false
     @State private var memo = ""
     @State private var chosen: Set<String> = []
     @State private var newValue = ""
@@ -199,6 +200,9 @@ struct EntryDetailView: View {
     /// What belongs to the memo: themes, photos, files, the place, the bank's facts.
     @ViewBuilder private func belongings(_ e: LedgerEntry) -> some View {
         Section("Themes") {
+            if values.isEmpty && valuesLoaded {
+                StarterThemeChips { s in await addStarter(s) }
+            }
             if !values.isEmpty {
                 FlowLayout(spacing: 8) {
                     ForEach(values) { v in
@@ -347,6 +351,7 @@ struct EntryDetailView: View {
         let was = entry?.memo
         let untouched = memo == (was?.body ?? "") && chosen == Set(was?.valueIDs ?? [])
         values = themes
+        valuesLoaded = true
         photos = attached
         entry = fresh
         if untouched {
@@ -427,6 +432,16 @@ struct EntryDetailView: View {
         do {
             try await APIClient.shared.removeCopy(attachmentID: a.id, path: path)
             if let i = photos.firstIndex(where: { $0.id == a.id }) { photos[i].storagePath = nil }
+            Haptic.success()
+        } catch { self.error = session.handle(error) }
+    }
+
+    private func addStarter(_ s: Themes.Starter) async {
+        do {
+            let v = try await APIClient.shared.addValue(s.name)
+            values.append(v); values.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+            chosen.insert(v.id); error = nil
+            session.didChangeData()
             Haptic.success()
         } catch { self.error = session.handle(error) }
     }

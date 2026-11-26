@@ -119,7 +119,7 @@ struct SettingsView: View {
         case .themes:
             Section("Themes") {
                 if values.isEmpty {
-                    Text("Add a theme from any memo.").foregroundStyle(Color.brandTextMuted)
+                    Text("Add a starter theme below, or name one on any memo.").foregroundStyle(Color.brandTextMuted)
                 }
                 ForEach($values) { $v in
                     HStack(spacing: Spacing.s3) {
@@ -139,18 +139,9 @@ struct SettingsView: View {
             // D14: Ben's starter themes the person doesn't have yet, each in the
             // color it would take.
             let held = Set(values.map { Themes.key($0.name) })
-            let offered = Themes.starters.filter { !held.contains(Themes.key($0.name)) }
-            if !offered.isEmpty {
+            if Themes.starters.contains(where: { !held.contains(Themes.key($0.name)) }) {
                 Section("Starter themes") {
-                    ForEach(offered, id: \.name) { s in
-                        HStack {
-                            StarterThemeLabel(starter: s, color: Themes.nextColor(joining: values, name: s.name))
-                            Spacer()
-                            Button("Add") { Task { await addStarter(s) } }
-                                .buttonStyle(.bordered)
-                                .accessibilityIdentifier("add-starter-\(s.color)")
-                        }
-                    }
+                    StarterThemeRows(held: values) { s in await addStarter(s) }
                 }
             }
         case .moneyIn:
