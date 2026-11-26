@@ -129,6 +129,8 @@
     try {
       try { NAMES = await API.settingNames(); } catch (_) { NAMES = {}; }
       try { THEME_COLORS = CentThemes.assignColors(await API.values()); } catch (_) { THEME_COLORS = {}; }
+      if (leaveMemo) { const leave = leaveMemo; leaveMemo = null; await leave(); }
+      await sendUnsent();
       if (name === 'ledger') { lastList = location.hash; return await ledgerView(arg); }
       if (name === 't' && arg) return await txnView(arg);
       if (name === 'setting' && arg) return await settingView(decodeURIComponent(arg));
@@ -367,6 +369,25 @@
     location.hash = '#/ledger/' + stepMonth(ym, Number(b.dataset.monthStep));
   }));
 
+  /* ---- W3 (Decision 069): a memo saves itself. What the person wrote is kept in this
+     browser until the server has it, so a closed tab or a lost connection loses nothing. */
+  const UNSENT = 'centmemo-unsent-';
+  let leaveMemo = null;
+  const keepUnsent = (id, d) => { try { localStorage.setItem(UNSENT + id, JSON.stringify(d)); } catch (_) {} };
+  const readUnsent = (id) => { try { return JSON.parse(localStorage.getItem(UNSENT + id)); } catch (_) { return null; } };
+  const dropUnsent = (id, d) => {
+    try { if (localStorage.getItem(UNSENT + id) === JSON.stringify(d)) localStorage.removeItem(UNSENT + id); } catch (_) {}
+  };
+  async function sendUnsent() {
+    let keys = [];
+    try { keys = Object.keys(localStorage).filter((k) => k.startsWith(UNSENT)); } catch (_) { return; }
+    for (const k of keys) {
+      const id = k.slice(UNSENT.length), d = readUnsent(id);
+      if (!d) continue;
+      try { await API.saveMemo(id, d.body, d.ids); dropUnsent(id, d); } catch (_) { return; }
+    }
+  }
+
   /* ---- One transaction: the memo is written here ---- */
   async function txnView(id) {
     const body = showView('txn', null);
@@ -377,7 +398,9 @@
       const memo = t.memos && (Array.isArray(t.memos) ? t.memos[0] : t.memos);
       const chosen = new Set(memo ? (memo.memo_values || []).map((v) => v.value_id) : []);
       const area = h('textarea', { id: 'memo-body', class: 'field-input memo-input', rows: '6', maxlength: '10000' });
-      area.value = memo ? memo.body : '';
+      const kept = readUnsent(id);
+      area.value = kept ? kept.body : memo ? memo.body : '';
+      if (kept) { chosen.clear(); kept.ids.forEach((v) => chosen.add(v)); }
       area.placeholder = 'What do you want to remember?';
       const status = h('p', { class: 'caption', role: 'status' });
       const error = h('div', { class: 'banner banner-error', role: 'alert', hidden: true });
@@ -395,6 +418,7 @@
           b.addEventListener('click', () => {
             if (chosen.has(v.id)) chosen.delete(v.id); else chosen.add(v.id);
             b.setAttribute('aria-pressed', chosen.has(v.id) ? 'true' : 'false');
+            soon();
           });
           return b;
         }));
@@ -414,7 +438,7 @@
                 const v = await API.addValue(st.name);
                 vals.push(v);
                 THEME_COLORS = CentThemes.assignColors(await API.values());
-                chosen.add(v.id); drawChips(vals); drawStarters();
+                chosen.add(v.id); drawChips(vals); drawStarters(); soon();
               } catch (err) { b.disabled = false; error.textContent = err.message; error.hidden = false; }
             });
             return b;
@@ -430,24 +454,43 @@
           const v = await API.addValue(name);
           vals.push(v); vals.sort((a, b) => a.name.localeCompare(b.name));
           THEME_COLORS = CentThemes.assignColors(await API.values());
-          chosen.add(v.id); newValue.value = ''; drawChips(vals); drawStarters();
+          chosen.add(v.id); newValue.value = ''; drawChips(vals); drawStarters(); soon();
         } catch (err) { error.textContent = /duplicate|unique/i.test(err.message) ? 'You already have that theme.' : err.message; error.hidden = false; }
       });
 
-      const save = h('button', { type: 'button', class: 'btn btn-primary' }, 'Save');
-      save.addEventListener('click', async () => {
-        error.hidden = true;
-        if (!area.value.trim() && chosen.size) { error.textContent = 'Write the memo first; themes belong to a memo.'; error.hidden = false; return; }
-        save.disabled = true; status.textContent = 'Saving…';
+      // No Save button: a pause in the writing sends it; leaving the page or the tab sends
+      // it at once. An empty memo is removed only on leaving, so clearing the words to
+      // start again never drops the themes on the way. Only a failure speaks.
+      let sent = { body: memo ? memo.body.trim() : '', ids: [...(memo ? (memo.memo_values || []).map((v) => v.value_id) : [])].sort() };
+      const now = () => ({ body: area.value, ids: [...chosen].sort() });
+      const same = (a, b) => a.body.trim() === b.body.trim() && a.ids.join() === b.ids.join();
+      let timer = null;
+      async function send(leaving) {
+        clearTimeout(timer);
+        const d = now();
+        if (same(d, sent) || (!leaving && !d.body.trim())) return;
+        keepUnsent(id, d);
         try {
-          await API.saveMemo(t.id, area.value, [...chosen]);
-          status.textContent = area.value.trim() ? 'Saved.' : 'Memo removed.';
+          await API.saveMemo(t.id, d.body, d.ids);
+          sent = { body: d.body.trim(), ids: d.ids };
+          dropUnsent(id, d);
+          status.textContent = '';
+          if (leaving) return;
           // Share and Make a link read the saved memo, not the one this page opened with.
           const fresh = await API.transaction(t.id).catch(() => null);
           if (fresh) drawShare(fresh);
-        } catch (err) { status.textContent = ''; error.textContent = err.message; error.hidden = false; }
-        save.disabled = false;
-      });
+        } catch (_) { status.textContent = 'Not sent yet. It\'s kept in this browser.'; }
+      }
+      function soon() {
+        clearTimeout(timer);
+        if (area.value.trim()) keepUnsent(id, now());
+        timer = setTimeout(() => send(false), 1200);
+      }
+      area.addEventListener('input', soon);
+      const hidden = () => { if (document.visibilityState === 'hidden') send(true); };
+      document.addEventListener('visibilitychange', hidden);
+      leaveMemo = async () => { document.removeEventListener('visibilitychange', hidden); await send(true); };
+      if (kept) soon();
 
       const share = h('div', {});
       const drawShare = (row) => {
@@ -477,7 +520,7 @@
         starters,
         h('div', { class: 'inline-form' }, newValue, addBtn),
         error,
-        h('div', { class: 'actions' }, save, status, skipBtn),
+        h('div', { class: 'actions' }, status, skipBtn),
         photosNote(t.attachments) || '',
         filesList(t.attachments) || '',
         h('details', { class: 'txn-details' },

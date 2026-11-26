@@ -17,27 +17,30 @@ final class MemoUITests: DeviceTestCase {
         shot(app, "detail-with-memo")
     }
 
+    /// W3 (Decision 069): no Save button; a pause sends the memo, leaving removes an emptied one.
     func testWriteThenRemoveMemo() {
         let app = launch(["APP_START_ITEM": Fixture.unexamined])
         let editor = app.textViews["memo-editor"]
         XCTAssertTrue(editor.waitForExistence(timeout: 25), "memo editor")
+        XCTAssertFalse(app.buttons["save-memo"].exists, "there is no Save button")
         let note = "UI test memo \(Int(Date().timeIntervalSince1970))"
         editor.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.6)).tap()
         editor.typeText(note)
-        // Save is in the navigation bar, reachable with the keyboard up.
-        let save = app.buttons["save-memo"]
-        XCTAssertTrue(save.waitForExistence(timeout: 5) && save.isHittable, "Save reachable while writing")
-        save.tap()
-        XCTAssertTrue(app.staticTexts["memo-status"].waitForExistence(timeout: 15), "save status")
-        XCTAssertEqual(app.staticTexts["memo-status"].label, "Saved.")
-        shot(app, "memo-saved")
-        // The memo can be shared at once, without leaving the page and coming back.
+        shot(app, "memo-written")
+        // After a pause the memo is on the server: Share and Make a link appear, on this page.
         let more = app.navigationBars.buttons.matching(NSPredicate(format: "label == 'More' OR identifier == 'more'")).firstMatch
         XCTAssertTrue(more.waitForExistence(timeout: 10), "the ⋯ menu")
-        more.tap()
-        XCTAssertTrue(app.buttons["Make a link"].firstMatch.waitForExistence(timeout: 10), "Make a link, right after Save")
-        XCTAssertTrue(app.buttons["Share"].firstMatch.exists, "Share, right after Save")
-        shot(app, "memo-saved-more")
+        let deadline = Date().addingTimeInterval(20)
+        var shown = false
+        while Date() < deadline, !shown {
+            more.tap()
+            shown = app.buttons["Make a link"].firstMatch.waitForExistence(timeout: 2)
+            if !shown { app.tap(); sleep(1) }
+        }
+        XCTAssertTrue(shown, "Make a link, once the memo has sent itself")
+        XCTAssertTrue(app.buttons["Share"].firstMatch.exists, "Share too")
+        XCTAssertFalse(app.staticTexts["memo-unsent"].exists, "no warning when it was sent")
+        shot(app, "memo-sent-more")
 
         // Relaunch: the memo is read back from the server, not the screen's memory.
         app.terminate()
@@ -46,16 +49,55 @@ final class MemoUITests: DeviceTestCase {
         XCTAssertTrue(editor2.waitForExistence(timeout: 25))
         XCTAssertTrue((editor2.value as? String ?? "").contains(note), "memo survives a relaunch")
 
-        // Put it back: clear and save.
-        // Clear it by selecting, not by placing a caret: taps put the caret at the
-        // start or mid-text on the iPhone 12 (seen in frames), and the edit menu's
-        // "Select All" did not reliably appear. A triple tap selects the paragraph.
-        editor2.tap(withNumberOfTaps: 3, numberOfTouches: 1)
-        editor2.typeText(XCUIKeyboardKey.delete.rawValue)
+        // Put it back: clear it and leave the page, which removes it.
+        clear(editor2, note)
         XCTAssertEqual((editor2.value as? String ?? "").trimmingCharacters(in: .whitespacesAndNewlines), "", "memo cleared")
-        again.buttons["save-memo"].tap()
-        XCTAssertTrue(again.staticTexts["memo-status"].waitForExistence(timeout: 15))
-        XCTAssertEqual(again.staticTexts["memo-status"].label, "Memo removed.")
-        shot(again, "memo-removed")
+        again.navigationBars.buttons.element(boundBy: 0).tap()
+        sleep(3)
+        again.terminate()
+        let third = launch(["APP_START_ITEM": Fixture.unexamined])
+        let editor3 = third.textViews["memo-editor"]
+        XCTAssertTrue(editor3.waitForExistence(timeout: 25))
+        XCTAssertEqual((editor3.value as? String ?? "").trimmingCharacters(in: .whitespacesAndNewlines), "", "the emptied memo was removed on leaving")
+        shot(third, "memo-removed")
+    }
+
+    /// W3: written with no network, the memo stays on the device, says so, and is sent
+    /// when the app opens with a network again.
+    func testOfflineMemoIsKeptThenSent() {
+        // Reads work; every write fails, as on a connection that drops.
+        let offline = launch(["APP_START_ITEM": Fixture.unexamined, "APP_FAIL_NETWORK": "writes"])
+        let e1 = offline.textViews["memo-editor"]
+        XCTAssertTrue(e1.waitForExistence(timeout: 25), "memo editor offline")
+        let note = "Offline memo \(Int(Date().timeIntervalSince1970))"
+        e1.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.6)).tap()
+        e1.typeText(note)
+        let warning = offline.descendants(matching: .any)["memo-unsent"]
+        XCTAssertTrue(warning.waitForExistence(timeout: 15), "it says the memo is only on this device")
+        shot(offline, "memo-unsent")
+        offline.terminate()
+
+        let back = launch(["APP_START_ITEM": Fixture.unexamined])
+        let e2 = back.textViews["memo-editor"]
+        XCTAssertTrue(e2.waitForExistence(timeout: 25))
+        XCTAssertTrue((e2.value as? String ?? "").contains(note), "the kept memo is on the page")
+        sleep(4)
+        XCTAssertFalse(back.descendants(matching: .any)["memo-unsent"].exists, "and was sent")
+        // Clean up: clear and leave.
+        clear(e2, note)
+        back.navigationBars.buttons.element(boundBy: 0).tap()
+        sleep(3)
+    }
+
+    /// The caret at the end (a tap low and right), then one delete per character: triple
+    /// taps selected nothing on the simulator and only a word on the iPhone 12.
+    /// Repeats, since a tap can land the caret short of the end.
+    private func clear(_ editor: XCUIElement, _ words: String) {
+        for _ in 0..<4 {
+            let left = editor.value as? String ?? words
+            if left.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return }
+            editor.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.9)).tap()
+            editor.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: left.count + 2))
+        }
     }
 }

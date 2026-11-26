@@ -15,17 +15,17 @@ struct EntryDetailView: View {
     @State private var memo = ""
     @State private var chosen: Set<String> = []
     @State private var newValue = ""
-    @State private var status: String?
     @State private var error: String?
     @State private var loading = true
-    @State private var saving = false
+    /// W3: nil when the server has the memo; otherwise why it is only on this device.
+    @State private var unsent: String?
+    @Environment(\.scenePhase) private var phase
     @FocusState private var writing: Bool
     @State private var photos: [APIClient.Attachment] = []
     @State private var picked: PhotosPickerItem?
     @State private var picking = false
     @State private var choosingFile = false
     @Environment(\.openURL) private var openURL
-    @State private var drawn: CGFloat = 0
     @State private var sharing = false
     @State private var linking = false
     @State private var room: CGFloat = 0
@@ -66,17 +66,8 @@ struct EntryDetailView: View {
         .navigationTitle(inPane ? "" : (entry?.displayMerchant ?? ""))
         .modifier(InlineTitle(on: !inPane))
         .scrollDismissesKeyboard(.interactively)
-        // Save stays reachable while the keyboard is up (found by the iPhone 12 tap
-        // tier: the keyboard covered a Save button at the bottom of the form).
         .toolbar {
             if entry != nil {
-                ToolbarItem(placement: .mainAction) {
-                    Button(saving ? "Saving…" : "Save") { writing = false; Task { await save() } }
-                        .disabled(saving)
-                        .fontWeight(.semibold)
-                        .keyboardShortcut("s", modifiers: .command)
-                        .accessibilityIdentifier("save-memo")
-                }
                 // D12: share a written memo as a card (private by default).
                 if let e = entry, let body = e.memo?.body, !body.isEmpty {
                     ToolbarItem(placement: .secondaryAction) {
@@ -118,6 +109,20 @@ struct EntryDetailView: View {
             }
         }
         .task { await load() }
+        // W3 (Decision 069): no Save button. A pause in the writing sends it; leaving the
+        // page or the app sends it at once. An empty memo is removed only on leaving, so
+        // clearing the words to start again never drops the themes on the way.
+        .task(id: draft) {
+            guard !loading, entry != nil, !isSent(draft) else { return }
+            // Kept at once, so a memo emptied or written just before the app closes still counts.
+            APIClient.shared.keep(draft, for: entryID)
+            guard !draft.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+            try? await Task.sleep(for: .seconds(1.2))
+            guard !Task.isCancelled else { return }
+            await send(draft)
+        }
+        .onDisappear { flush() }
+        .onChange(of: phase) { _, now in if now != .active { flush() } }
         // The picker exists only while this sheet is up: created with the shared
         // library it asks for Photos access as soon as it appears, so it must not
         // sit in the form (the iPhone 12 tap tier caught the prompt on scroll).
@@ -180,19 +185,11 @@ struct EntryDetailView: View {
         } header: {
             Text("Memo")
         } footer: {
-            // The confirmation sits under the memo, where the person is
-            // looking (the iPhone 12 tap tier found it off-screen below).
-            if let status {
-                HStack(spacing: Spacing.s2) {
-                    // The moment a memo is kept: one pencil stroke draws in.
-                    if status == "Saved." {
-                        PencilStroke().trim(from: 0, to: drawn)
-                            .stroke(Color.brandPrimary, style: StrokeStyle(lineWidth: 2, lineCap: .round))
-                            .frame(width: 72, height: 8)
-                            .accessibilityHidden(true)
-                    }
-                    Text(status).accessibilityIdentifier("memo-status")
-                }
+            // Only a failure speaks (W3): the memo is safe here, and not yet sent.
+            if let unsent {
+                Label(unsent, systemImage: "icloud.slash")
+                    .font(TypeRamp.caption).foregroundStyle(Color.brandText)
+                    .accessibilityIdentifier("memo-unsent")
             }
         }
     }
@@ -344,6 +341,9 @@ struct EntryDetailView: View {
 
     /// The words and themes follow the server only while the person has not changed them.
     private func read() async throws {
+        // Looked at before the reads go out: a memo kept here and sent meanwhile is newer
+        // than an answer the server gave before it arrived.
+        let pending = APIClient.shared.unsent()[entryID]
         async let e = APIClient.shared.transaction(entryID)
         async let v = APIClient.shared.values()
         async let p = APIClient.shared.attachments(for: entryID)
@@ -355,9 +355,29 @@ struct EntryDetailView: View {
         photos = attached
         entry = fresh
         if untouched {
-            memo = fresh?.memo?.body ?? ""
-            chosen = Set(fresh?.memo?.valueIDs ?? [])
+            // A memo written here and not yet sent is newer than the server's.
+            if let kept = pending {
+                memo = kept.body; chosen = Set(kept.valueIDs)
+            } else {
+                memo = fresh?.memo?.body ?? ""
+                chosen = Set(fresh?.memo?.valueIDs ?? [])
+            }
         }
+    }
+
+    private var draft: MemoDraft { MemoDraft(body: memo, valueIDs: chosen.sorted()) }
+
+    /// The server already holds these words and themes.
+    private func isSent(_ d: MemoDraft) -> Bool {
+        d.same(as: MemoDraft(body: entry?.memo?.body ?? "", valueIDs: entry?.memo?.valueIDs ?? []))
+    }
+
+    /// Leaving the page or the app: whatever differs goes now, an empty memo included.
+    private func flush() {
+        guard !loading, entry != nil, !isSent(draft) else { return }
+        let d = draft
+        APIClient.shared.keep(d, for: entryID)
+        Task { await send(d, leaving: true) }
     }
 
     /// Asks for Photos access when the person chooses to add one, with the reason in
@@ -458,28 +478,23 @@ struct EntryDetailView: View {
         }
     }
 
-    private func save() async {
-        error = nil
-        if memo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !chosen.isEmpty {
-            error = "Write the memo first; themes belong to a memo."
-            Haptic.error()
-            return
-        }
-        saving = true
+    private func send(_ d: MemoDraft, leaving: Bool = false) async {
+        let wasEmpty = (entry?.memo?.body ?? "").isEmpty, isEmpty = d.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let themesChanged = d.valueIDs != (entry?.memo?.valueIDs ?? []).sorted()
         do {
-            try await APIClient.shared.saveMemo(transactionID: entryID, body: memo, valueIDs: Array(chosen))
-            status = memo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Memo removed." : "Saved."
-            drawn = 0
-            withAnimation(.easeOut(duration: 0.9).delay(0.1)) { drawn = 1 }
-            Haptic.success()
-            session.didChangeData()
+            try await APIClient.shared.send(d, for: entryID)
+            unsent = nil
             // Share and Make a link read the saved memo, not the one this page opened with.
             if let fresh = try? await APIClient.shared.transaction(entryID) { entry = fresh }
+            // The lists follow when a memo appears or goes, its themes change, or the page closes.
+            if leaving || wasEmpty != isEmpty || themesChanged { session.didChangeData() }
         } catch {
-            self.error = session.handle(error)
-            Haptic.error()
+            #if os(macOS)
+            unsent = "Not sent yet. It's kept on this Mac."
+            #else
+            unsent = "Not sent yet. It's kept on this \(UIDevice.current.model)."
+            #endif
         }
-        saving = false
     }
 }
 /// Inline title on a pushed purchase; in a pane the list keeps the screen's title.

@@ -51,7 +51,7 @@ PARITY.md updated; TestFlight when devices need it):
   when the person has no themes; the person picks which. Learn by doing.
 - ✅ **W2 Theme colors in the starter picker**: each starter shows its color mark
   as it is being added (DESIGN C: color as a mark).
-- **W3 Autosave**: no Save button; saves as the person writes (debounced, on
+- ✅ **W3 Autosave** (2026-11-26): no Save button; saves as the person writes (debounced, on
   leaving, on backgrounding), a quiet saved state, undo kept, offline writes
   kept and sent later. Web and Mac too.
 - **W4 Styled text**: bold, italic, underline, strikethrough, headings,
@@ -2601,3 +2601,23 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   colors" (new), picture read at 375px (dark). Not seen: the no-themes offer on a device
   (the test accounts all hold themes).
 - **Next:** W3 autosave.
+
+### 2026-11-26 — W3: the memo saves itself — 1.0.36 (37)
+- **Ben:** "Do we need a "save" button on a memo? Why not just have it autosave?"
+- **Done (iOS, iPad, Mac, web):** no Save button. A pause of 1.2 s sends the memo; leaving
+  the page or the app sends it at once; an emptied memo is removed only on leaving, so
+  clearing words to start over never drops the themes. Every change is kept first, sealed
+  in Application Support (`MemoOutbox`, ReadStore `durable`), and leaves only when the
+  server has that exact draft; the app sends what is left on each return to the
+  foreground. Web keeps it in localStorage and sends on the next route. Only a failure
+  speaks: "Not sent yet. It's kept on this iPhone." The "Saved." pencil stroke is gone.
+- **Found:** the page read the server before looking at the kept draft, so a draft sent
+  at launch lost to the older answer; it now looks first. Unsigned simulator builds can't
+  use the Keychain, so the sealing key vanished on quit (TESTING.md already said to sign;
+  the script now signs ad hoc). New DEBUG door APP_FAIL_NETWORK=writes.
+- **Verified:** iOS 18.5 simulator: MemoUITests (3, incl. offline kept-then-sent),
+  ShareUITests (5), Themes (3); Mac tap tier memo and theme parts pass; web 6 new checks;
+  test_all rc=0. Not on a device yet.
+- **Note:** 1.0.35 reached TestFlight for iPhone only; its Mac archive compiled a file
+  mid-edit. 1.0.36 goes to both. Lesson: no edits while an archive builds.
+- **Next:** W4 styled text.

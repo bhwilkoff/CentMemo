@@ -98,6 +98,8 @@ struct RootView: View {
             .onChange(of: phase, initial: true) { _, now in
                 guard now == .active, session.isSignedIn else { return }
                 Task {
+                    // W3: memos written but not yet sent (offline, or the app closed first).
+                    if await APIClient.shared.sendUnsent() > 0 { session.didChangeData() }
                     await FinanceRevocation.check(email: session.email)
                     await FinanceBackgroundSync.enableIfConnected(email: session.email)
                 }

@@ -214,20 +214,32 @@ console.log('Themes as collections (D12)');
   ok(await evaluate('!!document.querySelector("#view-story .theme-row.every")'), 'Every memo leads back');
 }
 
-console.log('a memo just saved can be shared, in the words just saved');
+console.log('a memo saves itself (W3), and can be shared in the words just written');
 {
-  await evaluate('location.hash = "#/t/e5626ed0-b9f2-48a0-8df7-672ae6016a40"; true');
+  const page = '#/t/e5626ed0-b9f2-48a0-8df7-672ae6016a40';
+  await evaluate(`location.hash = "${page}"; true`);
   await waitFor('document.querySelector("#view-txn #memo-body")?.value === "" && /King Soopers/.test(document.querySelector("#h-txn")?.textContent || "")');
-  const write = (words) => evaluate(`(() => { const a = document.querySelector("#view-txn #memo-body"); a.value = ${JSON.stringify(words)}; [...document.querySelectorAll("#view-txn .actions button")].find((b) => b.textContent === "Save").click(); return true; })()`);
+  ok(await evaluate('![...document.querySelectorAll("#view-txn button")].some((b) => b.textContent === "Save")'), 'there is no Save button');
+  const write = (words) => evaluate(`(() => { const a = document.querySelector("#view-txn #memo-body"); a.value = ${JSON.stringify(words)}; a.dispatchEvent(new Event("input")); return true; })()`);
   const said = '[...document.querySelectorAll("#view-txn .share-panel:not(.link-panel) .share-words")].map((n) => n.textContent).join(" ")';
   ok(await evaluate('!document.querySelector("#view-txn .share-panel")'), 'with no memo there is nothing to share');
   try {
     await write('Apples for the pie.');
-    ok(await waitFor(`/Apples/.test(${said}) && !!document.querySelector("#view-txn .link-panel")`), 'after Save, Share and Make a link are there');
+    ok(await waitFor(`/Apples/.test(${said}) && !!document.querySelector("#view-txn .link-panel")`), 'after a pause it is sent, and Share and Make a link are there');
     await write('Pears for the tart.');
     ok(await waitFor(`/Pears/.test(${said}) && !/Apples/.test(${said})`), 'after an edit, they hold the new words');
-  } finally { await write(''); }
-  ok(await waitFor('/Memo removed/.test(document.querySelector("#view-txn .actions").innerText) && !document.querySelector("#view-txn .share-panel")'), 'and they go when the memo does');
+    await evaluate('location.hash = "#/unexamined"; true');
+    await waitFor('!document.querySelector("#view-txn:not([hidden])")');
+    await evaluate(`location.hash = "${page}"; true`);
+    ok(await waitFor('document.querySelector("#view-txn #memo-body")?.value === "Pears for the tart."'), 'and it is there when the page opens again');
+    ok(await evaluate('!Object.keys(localStorage).some((k) => k.startsWith("centmemo-unsent-"))'), 'nothing is left waiting in the browser');
+  } finally {
+    await write('');
+    await evaluate('location.hash = "#/unexamined"; true');
+    await waitFor('!document.querySelector("#view-txn:not([hidden])")');
+    await evaluate(`location.hash = "${page}"; true`);
+  }
+  ok(await waitFor('document.querySelector("#view-txn #memo-body")?.value === "" && /King Soopers/.test(document.querySelector("#h-txn")?.textContent || "") && !document.querySelector("#view-txn .share-panel")'), 'an emptied memo is removed on leaving, and Share with it');
 }
 
 console.log('event page (D6): the Setting and the memo lead; the money is a footnote');

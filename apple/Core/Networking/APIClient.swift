@@ -217,7 +217,11 @@ final class APIClient {
         // (sign-in still works), so the error state can be seen on a device.
         // With APP_EXPIRE_SESSION=1 the token refresh fails the same way.
         let refreshing = query.contains { $0.value == "refresh_token" } && Self.expireDoor
-        if path.hasPrefix("rest/v1") || refreshing, let fail = ProcessInfo.processInfo.environment["APP_FAIL_NETWORK"] {
+        // APP_FAIL_NETWORK=writes fails only what changes data (a memo written offline, W3).
+        if path.hasPrefix("rest/v1"), method != "GET", ProcessInfo.processInfo.environment["APP_FAIL_NETWORK"] == "writes" {
+            throw URLError(.notConnectedToInternet)
+        }
+        if path.hasPrefix("rest/v1") || refreshing, let fail = ProcessInfo.processInfo.environment["APP_FAIL_NETWORK"], fail != "writes" {
             throw URLError(fail == "offline" ? .notConnectedToInternet : .cannotConnectToHost)
         }
         #endif
@@ -253,7 +257,7 @@ final class APIClient {
     }
 
     /// Who is signed in, for ReadStore's queue to ask.
-    nonisolated private static let signedInID = OSAllocatedUnfairLock<String?>(initialState: nil)
+    nonisolated static let signedInID = OSAllocatedUnfairLock<String?>(initialState: nil)
 
     private static func message(from data: Data, code: Int) -> String {
         if let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {

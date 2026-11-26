@@ -31,8 +31,7 @@ final class ReviewTourUITests: DeviceTestCase {
         app.buttons["Done"].firstMatch.tap(); pause(2.5)   // the written memo, on screen
         let chip = app.buttons["Great meals"]
         if chip.waitForExistence(timeout: 5) { chip.tap(); pause() }
-        app.buttons["save-memo"].tap()
-        XCTAssertTrue(app.staticTexts["memo-status"].waitForExistence(timeout: 15)); pause(2.5)
+        pause(2.5)   // the memo sends itself after a pause (W3)
 
         // Put it back (the tour leaves the account as it found it), off camera time kept short.
         mark("clear the memo again")
@@ -42,8 +41,7 @@ final class ReviewTourUITests: DeviceTestCase {
         editor.tap(withNumberOfTaps: 3, numberOfTouches: 1); editor.typeText(XCUIKeyboardKey.delete.rawValue)
         XCTAssertEqual((editor.value as? String ?? "").trimmingCharacters(in: .whitespacesAndNewlines), "", "memo cleared")
         if chip.exists, chip.isSelected { chip.tap() }
-        app.buttons["save-memo"].tap(); pause(1.5)
-        XCTAssertEqual(app.staticTexts["memo-status"].label, "Memo removed.", "the tour leaves no memo behind")
+        // Leaving the page removes the emptied memo (W3).
         app.navigationBars.buttons.element(boundBy: 0).tap(); pause()
 
         mark("ledger"); openTab(app, "Narrative"); pause(3)

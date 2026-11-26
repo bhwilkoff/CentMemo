@@ -127,12 +127,12 @@ def memo_round_trip(open_app):
             raise Failed("Share offered with no memo")
         app.do("type", "memo-editor", note)
         app.wait("memo-editor", lambda v: v == note, 40)
-        app.do("press", "save-memo")
-        app.wait("memo-status", lambda v: "Saved." in v, 40)
+        if app.ax("get", "save-memo")[0] == 0:
+            raise Failed("a Save button is still there (W3: the memo saves itself)")
         saved = True
         app.wait("share-memo", seconds=40)
         app.wait("link-memo", seconds=40)
-        print("PASS Share and Make a link are there right after Save")
+        print("PASS the memo sends itself after a pause; Share and Make a link appear")
         macapp.capture(app.pid, str(SHOTS / "memo-saved.png"))
         app.quit()
         app = open_app()
@@ -142,11 +142,14 @@ def memo_round_trip(open_app):
         if saved:
             app.do("clear", "memo-editor")
             app.wait("memo-editor", lambda v: v == "", 40)
-            app.do("press", "save-memo")
-            app.wait("memo-status", lambda v: "Memo removed." in v, 40)
+            time.sleep(1)
+            app.quit()
+            app = open_app()
+            if app.wait("memo-editor") != "":
+                raise Failed("an emptied memo was not removed when the app closed")
             if app.ax("get", "share-memo")[0] == 0:
                 raise Failed("Share still offered after the memo was removed")
-            print("PASS and is removed again, and Share with it")
+            print("PASS an emptied memo is removed when the app closes, and Share with it")
         app.quit()
 
 
@@ -220,9 +223,7 @@ def theme_on_memo(open_app):
             raise Failed(f"the fixture already has {chip}")
         for want in (True, False):
             app.do("press", chip)
-            app.do("press", "save-memo")
-            app.wait("memo-status", lambda v: "Saved." in v)
-            time.sleep(2)
+            time.sleep(4)  # the change sends itself after a pause (W3)
             app.quit()
             app = open_app()
             app.wait("memo-editor", lambda v: v != "")

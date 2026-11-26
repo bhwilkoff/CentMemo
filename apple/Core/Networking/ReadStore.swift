@@ -15,9 +15,15 @@ nonisolated enum ReadStore {
         FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appending(path: "reads", directoryHint: .isDirectory)
     }
 
-    private static func file(_ name: String) -> URL? {
+    /// W3: what the person wrote and the server has not yet confirmed. Application
+    /// Support, so the system never purges it; erased with the reads when the person changes.
+    private static var kept: URL? {
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?.appending(path: "unsent", directoryHint: .isDirectory)
+    }
+
+    private static func file(_ name: String, durable: Bool = false) -> URL? {
         let digest = SHA256.hash(data: Data(name.utf8)).map { String(format: "%02x", $0) }.joined()
-        return folder?.appending(path: digest)
+        return (durable ? kept : folder)?.appending(path: digest)
     }
 
     /// Guarded by `queue`.
@@ -33,20 +39,20 @@ nonisolated enum ReadStore {
         return fresh
     }
 
-    static func load(_ name: String) -> Data? {
+    static func load(_ name: String, durable: Bool = false) -> Data? {
         guard !isExtension else { return nil }
         return queue.sync {
-            guard let url = file(name), let sealed = try? Data(contentsOf: url), let key = key(making: false),
+            guard let url = file(name, durable: durable), let sealed = try? Data(contentsOf: url), let key = key(making: false),
                   let box = try? AES.GCM.SealedBox(combined: sealed) else { return nil }
             return try? AES.GCM.open(box, using: key)
         }
     }
 
     /// `current` is asked on the queue, so a save that lost a race with a sign-out writes nothing.
-    static func save(_ data: Data, as name: String, if current: @escaping @Sendable () -> Bool) {
+    static func save(_ data: Data, as name: String, durable: Bool = false, if current: @escaping @Sendable () -> Bool) {
         guard !isExtension else { return }
         queue.async {
-            guard current(), let folder, let url = file(name), let key = key(making: true),
+            guard current(), let folder = durable ? kept : folder, let url = file(name, durable: durable), let key = key(making: true),
                   let sealed = try? AES.GCM.seal(data, using: key).combined else { return }
             try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
             #if os(macOS)
@@ -61,6 +67,7 @@ nonisolated enum ReadStore {
         guard !isExtension else { return }
         queue.sync {
             if let folder { try? FileManager.default.removeItem(at: folder) }
+            if let kept { try? FileManager.default.removeItem(at: kept) }
             Keychain.delete(account: keyName)
             held = nil
         }

@@ -60,7 +60,11 @@ The tap tier also runs on an iOS 18.5 simulator, the oldest iOS served, and is n
 by the iPhone 12's Screen Time: `xcrun simctl create`, boot one at a time, then
 `xcodebuild test -scheme CentMemoUITests -destination id=<sim> -collect-test-diagnostics never`
 with TEST_RUNNER_APP_TEST_EMAIL and _PASSWORD set (without that flag a failure hangs
-xcodebuild for minutes). `TwoColumnUITests` needs an iPad simulator.
+xcodebuild for minutes). `TwoColumnUITests` needs an iPad simulator. Sign it ad hoc
+(`CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= PROVISIONING_PROFILE_SPECIFIER=`),
+never `CODE_SIGNING_ALLOWED=NO`: unsigned, the Keychain refuses the app, so the key that
+seals the device's copies lives only until the app quits and a kept memo reads back empty
+(2026-11-26, found by `testOfflineMemoIsKeptThenSent`).
 
 ## On this Mac
 
