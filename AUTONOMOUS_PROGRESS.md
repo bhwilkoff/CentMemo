@@ -2615,7 +2615,9 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   at launch lost to the older answer; it now looks first. Unsigned simulator builds can't
   use the Keychain, so the sealing key vanished on quit (TESTING.md already said to sign;
   the script now signs ad hoc). New DEBUG door APP_FAIL_NETWORK=writes.
-- **Verified:** iOS 18.5 simulator: MemoUITests (3, incl. offline kept-then-sent),
+- **Ben, 2026-11-26: "WE DON'T USE SIMULATORS. WE TEST ON REAL DEVICES."** The simulator
+  runs below do not count; W1 to W3 are unverified on iOS until the iPhone 12 run.
+- **Ran (simulator, not verification):** MemoUITests (3, incl. offline kept-then-sent),
   ShareUITests (5), Themes (3); Mac tap tier memo and theme parts pass; web 6 new checks;
   test_all rc=0. Not on a device yet.
 - **Note:** 1.0.35 reached TestFlight for iPhone only; its Mac archive compiled a file

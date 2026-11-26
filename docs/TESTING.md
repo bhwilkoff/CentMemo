@@ -54,17 +54,12 @@ launch it.
 Test data is synthetic (`tools/seed_demo.mjs`, `~/.centmemo/test-users.json`,
 mode 600, outside the repo). Tests that change data put it back.
 
-## Simulators (2026-11-25)
+## No simulators (Ben, 2026-11-26)
 
-The tap tier also runs on an iOS 18.5 simulator, the oldest iOS served, and is not touched
-by the iPhone 12's Screen Time: `xcrun simctl create`, boot one at a time, then
-`xcodebuild test -scheme CentMemoUITests -destination id=<sim> -collect-test-diagnostics never`
-with TEST_RUNNER_APP_TEST_EMAIL and _PASSWORD set (without that flag a failure hangs
-xcodebuild for minutes). `TwoColumnUITests` needs an iPad simulator. Sign it ad hoc
-(`CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= PROVISIONING_PROFILE_SPECIFIER=`),
-never `CODE_SIGNING_ALLOWED=NO`: unsigned, the Keychain refuses the app, so the key that
-seals the device's copies lives only until the app quits and a kept memo reads back empty
-(2026-11-26, found by `testOfflineMemoIsKeptThenSent`).
+"WE DON'T USE SIMULATORS. WE TEST ON REAL DEVICES." The tap tier runs on the iPhone 12
+(`tools/ios_uitest.py`), the iPad when its passcode allows, debug installs on the Duo, and
+the Mac (`tools/mac_uitest.py`). A simulator result is never verification. When a device
+is blocked (Screen Time, locked), say so and try again later; never substitute a simulator.
 
 ## On this Mac
 
