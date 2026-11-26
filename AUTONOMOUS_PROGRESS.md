@@ -66,7 +66,7 @@ PARITY.md updated; TestFlight when devices need it):
 - ✅ **W7 Photos and files in the share** (2026-11-26; memo cards and memo links; web and theme shares ⏳; files out on purpose): the person picks which photos and
   files go into the card or the page; a page needs a shared copy (removed when
   the link is turned off). Never money: warn when a photo reads as a receipt.
-- **W8 Photos styled in the memo**: placed in the memo body, size, crop,
+- ✅ **W8 Photos styled in the memo** (2026-11-26): placed in the memo body, size, crop,
   mount, caption (`artwork-presentation-design`); the share keeps the styling.
 
 ## Resume here (loop resumed by Ben, 2026-11-24 ~11am: "Can we resume the work loop for what has been documented? We need to keep building this out.")
@@ -2708,3 +2708,20 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   (200), removes the memo, probes again (gone); fixture left clean (checked by script).
   test_rls 9 new checks pass. test_all rc=0.
 - **Next:** W8 photo styles in the memo.
+
+### 2026-11-26 — W8: photo styles in the memo — 1.0.42 (43); the memo loop's list is done
+- **Ben:** "I'd like to be able to style the photos as a part of the memo."
+- **Done:** attachments.style (migration 20261126030000, applied live). `MemoPhotos`:
+  Plate, Mounted, Strip, words under each, in the memo column (moved up from the side).
+  Mounted carries its mat onto the share card. Web: styled kept copies with a style menu
+  and a words field.
+- **Found on the iPhone 12:** with photos moved up, the memo page's message (e.g. "allow
+  Photos access") sat off screen below the files; it is now a banner pinned above the tab
+  bar (DESIGN E8). The share sheet read its Picture/Link start once, so a door could open
+  on the wrong side; the memo page now holds the choice.
+- **Verified:** iPhone 12 build 42 debug: PhotoStyleUITests, PhotoAttachUITests (banner
+  frame read), Memo 4, Share 5, Ink, File, ErrorState 4, Themes, ThemesStarter; Mac tap
+  tier memo parts; web 3 new checks; test_all rc=0.
+- **Left from W0-W8 (for Ben):** web pictures in shares (needs a money check there);
+  theme-link pictures; link pages unstyled photos; a real Apple Pencil and "Add as
+  words"; a camera photo and a receipt photo on a card; the Mac's new views pictured.

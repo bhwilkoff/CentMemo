@@ -15,24 +15,21 @@ extension EnvironmentValues {
 }
 
 struct OneShareSheet<Picture: View, Page: View>: View {
-    @State private var kind: ShareKind
-    let picture: () -> Picture
-    let page: () -> Page
-
-    init(start: ShareKind = .picture, @ViewBuilder picture: @escaping () -> Picture, @ViewBuilder page: @escaping () -> Page) {
-        _kind = State(initialValue: start)
-        self.picture = picture
-        self.page = page
-    }
+    @State private var own: ShareKind = .picture
+    /// The opener's choice when it keeps one (a memo, so a test door can open Link).
+    var kind: Binding<ShareKind>?
+    @ViewBuilder let picture: () -> Picture
+    @ViewBuilder let page: () -> Page
 
     var body: some View {
+        let k = kind ?? $own
         Group {
-            switch kind {
+            switch k.wrappedValue {
             case .picture: picture()
             case .link: page()
             }
         }
-        .environment(\.shareKind, $kind)
+        .environment(\.shareKind, k)
     }
 }
 

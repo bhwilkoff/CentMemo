@@ -38,12 +38,9 @@ final class PhotoAttachUITests: DeviceTestCase {
         shot(app, "picker-open")
         photo.tap()
 
-        let grid = app.otherElements["attached-photos"].exists ? app.otherElements["attached-photos"] : app.collectionViews["attached-photos"]
-        let tile = app.staticTexts["Allow Photos access to show it"].exists
-            ? app.staticTexts["Allow Photos access to show it"]
-            : app.descendants(matching: .any).matching(NSPredicate(format: "label == 'Attached photo' OR label == 'Allow Photos access to show it'")).firstMatch
-        XCTAssertTrue(tile.waitForExistence(timeout: 15), "the attachment shows as a tile")
-        _ = grid
+        // W8: the photo stands in the memo in its style (Plate first).
+        let tile = app.descendants(matching: .any).matching(NSPredicate(format: "identifier BEGINSWITH 'memo-photo-'")).firstMatch
+        XCTAssertTrue(tile.waitForExistence(timeout: 15), "the photo stands in the memo")
         shot(app, "photo-attached")
 
         // Item 10: the menu offers a copy in CentMemo. With Photos access declined

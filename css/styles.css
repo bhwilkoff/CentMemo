@@ -574,3 +574,14 @@ html[data-ground="pistachio"] { --color-yours: #B4C875; }
 .share-kinds .kind:has(input:checked) { background: var(--color-primary); color: var(--color-on-primary); }
 .share-kinds .kind:has(input:focus-visible) { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 .share-fact { margin: 0 0 var(--space-2); }
+/* W8: a memo's photos in the person's styles. */
+.memo-photos { display: grid; gap: var(--space-4); margin-top: var(--space-2); }
+.memo-photo { margin: 0; }
+.memo-photo img { display: block; width: 100%; max-height: 520px; object-fit: contain; }
+.memo-photo-plate img { border-radius: 6px; }
+.memo-photo-mounted { background: var(--color-surface); border: 1px solid var(--color-border); padding: 14px 14px 22px; }
+.memo-photo-strip .memo-photo-pics { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
+.memo-photo-strip img { aspect-ratio: 1; object-fit: cover; border-radius: 4px; }
+.memo-photo figcaption { margin-top: var(--space-2); font-size: var(--type-caption-size); color: var(--color-text-muted); }
+.memo-photo-tool { display: flex; gap: var(--space-2); margin-top: var(--space-2); }
+.memo-photo-tool select { font: inherit; }

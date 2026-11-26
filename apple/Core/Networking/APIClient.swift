@@ -596,12 +596,23 @@ final class APIClient {
         /// Item 10: set only when the person chose to keep a copy in CentMemo.
         var storagePath: String? = nil
         var caption: String? = nil
-        enum CodingKeys: String, CodingKey { case id, kind, deviceRef = "device_ref", storagePath = "storage_path", caption }
+        /// W8: plate, mounted, or strip.
+        var style: String? = nil
+        enum CodingKeys: String, CodingKey { case id, kind, deviceRef = "device_ref", storagePath = "storage_path", caption, style }
+    }
+
+    /// W8: how a photo stands in the memo, and the words under it.
+    func setPhoto(_ id: String, style: String? = nil, caption: String? = nil) async throws {
+        var body: [String: String] = [:]
+        if let style { body["style"] = style }
+        if let caption { body["caption"] = String(caption.prefix(500)) }
+        guard !body.isEmpty else { return }
+        try await raw("rest/v1/attachments", query: [.init(name: "id", value: "eq." + id)], method: "PATCH", body: body)
     }
 
     func attachments(for transactionID: String) async throws -> [Attachment] {
         try await rest("attachments", [.init(name: "transaction_id", value: "eq." + transactionID),
-                                      .init(name: "select", value: "id,kind,device_ref,storage_path,caption"),
+                                      .init(name: "select", value: "id,kind,device_ref,storage_path,caption,style"),
                                       .init(name: "order", value: "created_at")])
     }
 
@@ -618,7 +629,7 @@ final class APIClient {
     /// its reference would only work on this device. `name` is shown with it.
     func attachFile(transactionID: String, name: String, data: Data, isPDF: Bool) async throws -> Attachment {
         struct Row: Encodable { let transaction_id: String; let kind = "file"; let device_ref: String; let caption: String }
-        let made: Data = try await raw("rest/v1/attachments", query: [.init(name: "select", value: "id,kind,device_ref,storage_path,caption")], method: "POST",
+        let made: Data = try await raw("rest/v1/attachments", query: [.init(name: "select", value: "id,kind,device_ref,storage_path,caption,style")], method: "POST",
                                        body: Row(transaction_id: transactionID, device_ref: String(name.prefix(300)), caption: String(name.prefix(500))),
                                        prefer: "return=representation")
         guard var a = try JSONDecoder().decode([Attachment].self, from: made).first, let uid = session?.userID else { throw APIError.decoding("no attachment returned") }
@@ -644,7 +655,7 @@ final class APIClient {
         var a: Attachment
         if let existing { a = existing } else {
             struct Row: Encodable { let transaction_id: String; let kind = "ink"; let caption = "Drawing" }
-            let made: Data = try await raw("rest/v1/attachments", query: [.init(name: "select", value: "id,kind,device_ref,storage_path,caption")],
+            let made: Data = try await raw("rest/v1/attachments", query: [.init(name: "select", value: "id,kind,device_ref,storage_path,caption,style")],
                                            method: "POST", body: Row(transaction_id: transactionID), prefer: "return=representation")
             guard let row = try JSONDecoder().decode([Attachment].self, from: made).first else { throw APIError.decoding("no attachment returned") }
             a = row

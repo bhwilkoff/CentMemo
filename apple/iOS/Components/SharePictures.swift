@@ -33,7 +33,7 @@ final class SharePictureChoices {
             let image = await Self.image(a)
             guard let i = candidates.firstIndex(where: { $0.id == a.id }) else { continue }
             if let image {
-                candidates[i].picture = SharePicture(id: a.id, image: image, whole: a.kind == "ink")
+                candidates[i].picture = SharePicture(id: a.id, image: image, whole: a.kind == "ink", mounted: a.style == "mounted")
                 candidates[i].showsMoney = await Self.readsAsMoney(image)
             } else {
                 candidates[i].missing = true

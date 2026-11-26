@@ -400,6 +400,13 @@ console.log('event page (D6): the Setting and the memo lead; the money is a foot
     await openAs('owner', '#/ledger');
     await evaluate('location.hash = "#/t/a3b8c10c-68b8-4bfe-9380-c87b7015a49d"; true');
     ok(await waitFor('[...document.querySelectorAll("#view-txn [data-photo-copies] img")].some(i => i.complete && i.naturalWidth > 0 && /token=/.test(i.src))'), 'a kept photo copy shows on the web, through a signed link');
+    // W8: the person styles it and writes under it, here as on the iPhone.
+    await evaluate('(() => { const s = document.querySelector("#view-txn .memo-photo-tool select"); s.value = "mounted"; s.dispatchEvent(new Event("change")); const w = document.querySelector("#view-txn .memo-photo-tool input"); w.value = "Penguin house"; w.dispatchEvent(new Event("change")); return true; })()');
+    ok(await waitFor('!!document.querySelector("#view-txn .memo-photo-mounted") && document.querySelector("#view-txn .memo-photo figcaption")?.textContent === "Penguin house"'), 'a photo is mounted, with words under it');
+    await openAs('owner', '#/ledger');
+    await evaluate('location.hash = "#/t/a3b8c10c-68b8-4bfe-9380-c87b7015a49d"; true');
+    ok(await waitFor('!!document.querySelector("#view-txn .memo-photo-mounted img") && /Penguin house/.test(document.querySelector("#view-txn .memo-photo figcaption")?.textContent || "")'), 'and stays so when the page opens again');
+    await shot('photo-mounted');
     // A file (kind file, caption its name) lists by name and links privately.
     await fetch(P + '/rest/v1/attachments?id=eq.' + att.id, { method: 'PATCH', headers: oh, body: JSON.stringify({ kind: 'file', caption: 'Receipt.jpg' }) });
     await openAs('owner', '#/ledger');

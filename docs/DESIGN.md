@@ -211,3 +211,10 @@ thumbnails, each off until tapped (sanguine stroke and check), at most three. On
 they take the top (42%, 36% on Tall) or the right 42% of Wide; photos fill, drawings fit
 on their paper. A picture that reads as money is dimmed and can't be chosen, with one line
 saying why. Files never go into a share: a receipt carries an amount.
+**E7. Photos stand in the memo** (W8). After the words and the ink, each photo at the
+memo's width in its style: Plate (its own shape, 6pt corners), Mounted (on the surface
+with a hairline, 14pt mat, 22pt below for words), Strip (two to four neighbours, square,
+6pt apart, one line of words). The style and words live in the photo's menu. No filters,
+tilts, tape or drop shadows (M).
+**E8. A message stays in sight.** On the memo page a problem shows as a banner pinned
+above the tab bar (error icon, the sentence, a dismiss), never as a row far down the form.

@@ -27,6 +27,8 @@ struct SharePicture: Identifiable, Equatable, @unchecked Sendable {
     let image: CGImage
     /// A drawing is shown whole on its paper; a photo fills its frame.
     var whole = false
+    /// W8: a photo the person mounted keeps its paper mat on the card.
+    var mounted = false
     static func == (a: SharePicture, b: SharePicture) -> Bool { a.id == b.id }
 }
 
@@ -404,7 +406,13 @@ private struct Painter {
         let each = wide ? CGSize(width: (r.width - gap * (n - 1)) / n, height: r.height) : CGSize(width: r.width, height: (r.height - gap * (n - 1)) / n)
         for (i, p) in c.pictures.enumerated() {
             let o = wide ? CGPoint(x: r.minX + CGFloat(i) * (each.width + gap), y: r.minY) : CGPoint(x: r.minX, y: r.minY + CGFloat(i) * (each.height + gap))
-            let frame = CGRect(origin: o, size: each)
+            var frame = CGRect(origin: o, size: each)
+            if p.mounted {
+                ctx.fill(Path(frame), with: .color(hex(0xFBFAF7)))
+                ctx.stroke(Path(frame.insetBy(dx: 0.5, dy: 0.5)), with: .color(hex(0xD9D2CF)), lineWidth: 1)
+                let m = min(frame.width, frame.height) * 0.06
+                frame = CGRect(x: frame.minX + m, y: frame.minY + m, width: frame.width - m * 2, height: frame.height - m * 2.6)
+            }
             let iw = CGFloat(p.image.width), ih = CGFloat(p.image.height)
             let scale = p.whole ? min(frame.width / iw, frame.height / ih) : max(frame.width / iw, frame.height / ih)
             let drawn = CGSize(width: iw * scale, height: ih * scale)

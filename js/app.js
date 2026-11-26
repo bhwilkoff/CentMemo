@@ -563,14 +563,14 @@
         h('label', { class: 'field-label', for: 'memo-body' }, 'Memo'),
         formatBar,
         area,
-        inkList(t.attachments) || '']), h('div', { class: 'split-side' }, [
+        inkList(t.attachments) || '',
+        photosNote(t.attachments) || '']), h('div', { class: 'split-side' }, [
         h('p', { class: 'field-label' }, 'Themes'),
         chips,
         starters,
         h('div', { class: 'inline-form' }, newValue, addBtn),
         error,
         h('div', { class: 'actions' }, status, skipBtn),
-        photosNote(t.attachments) || '',
         filesList(t.attachments) || '',
         h('details', { class: 'txn-details' },
           h('summary', {},
@@ -853,20 +853,41 @@
       .map((a) => h('img', { class: 'ink-picture', src: urls[a.storage_path], alt: 'A drawing in this memo', loading: 'lazy' })))).catch(() => {});
     return h('div', {}, h('p', { class: 'field-label' }, 'Drawing'), box);
   }
+  // W8 (Decision 069): photos stand in the memo, each in the person's style (Plate,
+  // Mounted, Strip) with their words under it. Copies kept in CentMemo show here; the
+  // rest live on the iPhone.
   function photosNote(list) {
     const photos = (list || []).filter((a) => a.kind === 'photo');
     if (!photos.length) return null;
-    // Item 10: copies the person chose to keep show here; the rest live on the iPhone.
     const kept = photos.filter((a) => a.storage_path);
     const onPhone = photos.length - kept.length;
-    const grid = h('div', { class: 'photo-copies', 'data-photo-copies': '' });
-    if (kept.length) {
-      API.copyUrls(kept.map((a) => a.storage_path)).then((urls) => fill(grid, ...kept.filter((a) => urls[a.storage_path])
-        .map((a) => h('img', { src: urls[a.storage_path], alt: 'A photo attached to this memo', loading: 'lazy' })))).catch(() => {});
-    }
-    return h('div', {}, kept.length ? grid : null,
+    const box = h('div', { class: 'memo-photos', 'data-photo-copies': '' });
+    const draw = (urls) => {
+      const groups = [];
+      for (const a of kept) {
+        const last = groups[groups.length - 1];
+        if ((a.style || 'plate') === 'strip' && last && last.length < 4 && (last[0].style || 'plate') === 'strip') last.push(a); else groups.push([a]);
+      }
+      fill(box, groups.map((g) => {
+        const style = g[0].style || 'plate';
+        const fig = h('figure', { class: 'memo-photo memo-photo-' + style },
+          h('div', { class: 'memo-photo-pics' }, g.map((a) => h('img', { src: urls[a.storage_path], alt: a.caption || 'A photo in this memo', loading: 'lazy' }))),
+          g.find((a) => a.caption) ? h('figcaption', {}, g.find((a) => a.caption).caption) : null);
+        const tools = h('div', { class: 'memo-photo-tools' }, g.map((a) => {
+          const pick = h('select', { 'aria-label': 'Style of this photo' }, ['plate', 'mounted', 'strip'].map((v) => h('option', { value: v, selected: (a.style || 'plate') === v }, v[0].toUpperCase() + v.slice(1))));
+          pick.addEventListener('change', async () => { try { await API.setPhoto(a.id, { style: pick.value }); a.style = pick.value; draw(urls); } catch (_) { pick.value = a.style || 'plate'; } });
+          const words = h('input', { type: 'text', class: 'field-input', maxlength: '500', placeholder: 'Words under it', value: a.caption || '', 'aria-label': 'Words under this photo' });
+          words.addEventListener('change', async () => { try { await API.setPhoto(a.id, { caption: words.value.trim() }); a.caption = words.value.trim(); draw(urls); } catch (_) { words.value = a.caption || ''; } });
+          return h('div', { class: 'memo-photo-tool' }, pick, words);
+        }));
+        return h('div', {}, fig, tools);
+      }));
+    };
+    if (kept.length) API.copyUrls(kept.map((a) => a.storage_path)).then(draw).catch(() => {});
+    return h('div', {}, h('p', { class: 'field-label' }, 'Photos'), kept.length ? box : null,
       onPhone ? h('p', { class: 'caption photos-note' }, onPhone === 1 ? '1 photo attached in the CentMemo iPhone app.' : onPhone + ' photos attached in the CentMemo iPhone app.') : null);
   }
+
 
 
   /* ---- Story: the memos, read in order ---- */

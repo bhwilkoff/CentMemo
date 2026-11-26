@@ -29,9 +29,12 @@ struct EntryDetailView: View {
     @State private var choosingFile = false
     /// W5: the drawing open on the canvas; `nil` id for a new one.
     @State private var inking: InkEdit?
+    /// W8: the photo whose words are being written.
+    @State private var captioning: APIClient.Attachment?
+    @State private var captionText = ""
     @Environment(\.openURL) private var openURL
     @State private var sharing = false
-    @State private var linking = false
+    @State private var shareKind: ShareKind = .picture
     @State private var room: CGFloat = 0
     /// D15: the Setting's confirmed place, if the person confirmed one.
     @State private var place: APIClient.SettingPlace?
@@ -66,6 +69,25 @@ struct EntryDetailView: View {
             }
         }
         .readsRoom($room)
+        // A message stays in sight wherever the person is on the page: a section below the
+        // files was off screen once photos moved up (W8; PhotoAttachUITests, iPhone 12).
+        .safeAreaInset(edge: .bottom) {
+            if let error, entry != nil {
+                HStack(alignment: .top, spacing: Spacing.s2) {
+                    Image(systemName: "exclamationmark.circle").foregroundStyle(Color.semanticError)
+                    Text(error).font(TypeRamp.caption).foregroundStyle(Color.brandText).frame(maxWidth: .infinity, alignment: .leading)
+                    Button("Dismiss", systemImage: "xmark") { self.error = nil }.labelStyle(.iconOnly).buttonStyle(.borderless)
+                }
+                .padding(Spacing.s3)
+                .background(Color.brandSurface, in: RoundedRectangle(cornerRadius: Radius.card / 2))
+                .overlay(RoundedRectangle(cornerRadius: Radius.card / 2).strokeBorder(Color.semanticError.opacity(0.5)))
+                .padding(.horizontal, PaneEdges.box).padding(.bottom, Spacing.s2)
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("memo-error")
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.default, value: error)
         .grounded()
         .navigationTitle(inPane ? "" : (entry?.displayMerchant ?? ""))
         .modifier(InlineTitle(on: !inPane))
@@ -76,7 +98,7 @@ struct EntryDetailView: View {
                 if let e = entry, let body = e.memo?.body, !body.isEmpty {
                     // W6: one Share; a picture or a link is chosen inside it.
                     ToolbarItem(placement: .primaryAction) {
-                        Button("Share", systemImage: "square.and.arrow.up") { sharing = true }
+                        Button("Share", systemImage: "square.and.arrow.up") { shareKind = .picture; sharing = true }
                             .accessibilityIdentifier("share-memo")
                     }
                 }
@@ -95,7 +117,7 @@ struct EntryDetailView: View {
         }
         .sheet(isPresented: $sharing) {
             if let e = entry, let body = e.memo?.body ?? Self.standInMemo {
-                OneShareSheet(start: linking ? .link : .picture) {
+                OneShareSheet(kind: $shareKind) {
                     ShareMemoSheet(entry: e, memo: MemoText.plain(body), attachments: photos)
                 } page: {
                     MakeLinkSheet(entry: e, memo: MemoText.plain(body), attachments: photos)
@@ -103,6 +125,12 @@ struct EntryDetailView: View {
             }
         }
         .task { await load() }
+        .alert("Words under the photo", isPresented: Binding(get: { captioning != nil }, set: { if !$0 { captioning = nil } })) {
+            TextField("In your words", text: $captionText)
+                .accessibilityIdentifier("photo-caption-field")
+            Button("Cancel", role: .cancel) { captioning = nil }
+            Button("Done") { if let a = captioning { Task { await recaption(a, captionText) } }; captioning = nil }
+        }
         #if os(iOS)
         .sheet(item: $inking) { edit in
             InkSheet(load: { await edit.attachment.asyncMap { try? await APIClient.shared.inkDrawing($0) } ?? nil },
@@ -224,6 +252,28 @@ struct EntryDetailView: View {
                 Text("Drawing")
             }
         }
+        // W8: photos stand in the memo, each in its style, after the words and the ink.
+        Section {
+            MemoPhotos(photos: photos.filter { $0.kind == "photo" },
+                       restyle: { a, style in Task { await restyle(a, style) } },
+                       caption: { a in captionText = a.caption ?? ""; captioning = a },
+                       more: { a in AnyView(Group {
+                           if let path = a.storagePath {
+                               Button("Remove the copy in CentMemo", systemImage: "minus.circle") { Task { await dropCopy(a, path) } }
+                           } else {
+                               Button("Keep a copy in CentMemo", systemImage: "square.and.arrow.up") { Task { await keepCopy(a) } }
+                           }
+                           Button("Remove from this memo", systemImage: "trash", role: .destructive) { Task { await remove(a) } }
+                       }) })
+            Button { Task { await openPicker() } } label: {
+                Label("Add a photo", systemImage: "photo.badge.plus")
+            }
+            .accessibilityIdentifier("add-photo")
+        } header: {
+            Text("Photos")
+        } footer: {
+            if photos.contains(where: { $0.kind == "photo" }) { Text("Touch and hold a photo to choose its style or add words under it.") }
+        }
     }
 
     /// What belongs to the memo: themes, photos, files, the place, the bank's facts.
@@ -246,36 +296,6 @@ struct EntryDetailView: View {
                 Button("Add") { Task { await addValue() } }.disabled(newValue.trimmingCharacters(in: .whitespaces).isEmpty)
             }
         }
-        Section("Photos") {
-            if photos.contains(where: { $0.kind == "photo" }) {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: 8)], spacing: 8) {
-                    ForEach(photos.filter { $0.kind == "photo" }) { a in
-                        AttachedPhoto(ref: a.deviceRef ?? "")
-                            .overlay(alignment: .bottomTrailing) {
-                                if a.storagePath != nil {
-                                    Image(systemName: "checkmark.circle.fill").symbolRenderingMode(.palette)
-                                        .foregroundStyle(Color.white, Color.brandPrimary).padding(4)
-                                        .accessibilityLabel("A copy is kept in CentMemo")
-                                }
-                            }
-                            .contextMenu {
-                                if let path = a.storagePath {
-                                    Button("Remove the copy in CentMemo", systemImage: "minus.circle") { Task { await dropCopy(a, path) } }
-                                } else {
-                                    Button("Keep a copy in CentMemo", systemImage: "square.and.arrow.up") { Task { await keepCopy(a) } }
-                                }
-                                Button("Remove from this memo", role: .destructive) { Task { await remove(a) } }
-                            }
-                            .accessibilityIdentifier("attached-photo")
-                    }
-                }
-                .accessibilityIdentifier("attached-photos")
-            }
-            Button { Task { await openPicker() } } label: {
-                Label("Add a photo", systemImage: "photo.badge.plus")
-            }
-            .accessibilityIdentifier("add-photo")
-        }
         // Item 10: files (a receipt, a ticket), kept as private copies.
         Section {
             ForEach(photos.filter { $0.kind == "file" }) { a in
@@ -297,7 +317,6 @@ struct EntryDetailView: View {
         .fileImporter(isPresented: $choosingFile, allowedContentTypes: [.pdf, .image]) { result in
             if case .success(let url) = result { Task { await addFile(url) } }
         }
-        if let error { Section { Text(error).foregroundStyle(Color.semanticError) } }
         // D15: where it happened, under the memo (D6: the memo leads).
         if #available(iOS 26.0, *), let place {
             Section {
@@ -355,9 +374,22 @@ struct EntryDetailView: View {
             #if DEBUG
             // DEBUG door APP_START_SHARE=1: the share studio, for captures where nothing can tap (iPad, Duo).
             if ProcessInfo.processInfo.environment["APP_START_SHARE"] == "1", entry?.memo != nil || Self.standInMemo != nil { sharing = true }
-            if ProcessInfo.processInfo.environment["APP_START_SHARE"] == "link", entry?.memo != nil || Self.standInMemo != nil { linking = true; sharing = true }
+            if ProcessInfo.processInfo.environment["APP_START_SHARE"] == "link", entry?.memo != nil || Self.standInMemo != nil { shareKind = .link; sharing = true }
             #endif
             #if DEBUG && os(iOS)
+            // DEBUG door APP_ATTACH_SAMPLE_PHOTO=1: a photo kept in CentMemo (the bench declines
+            // Photos access), so styles can be seen on a device (W8).
+            if ProcessInfo.processInfo.environment["APP_ATTACH_SAMPLE_PHOTO"] == "1", !photos.contains(where: { $0.kind == "photo" }) {
+                let jpeg = UIGraphicsImageRenderer(size: CGSize(width: 1200, height: 800)).jpegData(withCompressionQuality: 0.8) { ctx in
+                    UIColor(red: 0.42, green: 0.58, blue: 0.72, alpha: 1).setFill(); ctx.fill(CGRect(x: 0, y: 0, width: 1200, height: 520))
+                    UIColor(red: 0.30, green: 0.45, blue: 0.28, alpha: 1).setFill(); ctx.fill(CGRect(x: 0, y: 520, width: 1200, height: 280))
+                    UIColor(red: 0.98, green: 0.85, blue: 0.45, alpha: 1).setFill(); ctx.cgContext.fillEllipse(in: CGRect(x: 880, y: 90, width: 180, height: 180))
+                }
+                if let a = try? await APIClient.shared.attachPhoto(transactionID: entryID, deviceRef: "sample-photo"),
+                   let path = try? await APIClient.shared.keepCopy(attachmentID: a.id, jpeg: jpeg) {
+                    var kept = a; kept.storagePath = path; kept.style = "plate"; photos.append(kept)
+                }
+            }
             if ProcessInfo.processInfo.environment["APP_ATTACH_SAMPLE_FILE"] == "1", !photos.contains(where: { $0.kind == "file" }) {
                 let pdf = UIGraphicsPDFRenderer(bounds: CGRect(x: 0, y: 0, width: 300, height: 200)).pdfData { ctx in
                     ctx.beginPage()
@@ -503,6 +535,24 @@ struct EntryDetailView: View {
         } catch { self.error = session.handle(error); Haptic.error(); return false }
     }
     #endif
+
+    private func restyle(_ a: APIClient.Attachment, _ style: PhotoStyle) async {
+        guard let i = photos.firstIndex(where: { $0.id == a.id }) else { return }
+        let was = photos[i].style
+        photos[i].style = style.rawValue
+        Haptic.selection()
+        do { try await APIClient.shared.setPhoto(a.id, style: style.rawValue) }
+        catch { photos[i].style = was; self.error = session.handle(error) }
+    }
+
+    private func recaption(_ a: APIClient.Attachment, _ text: String) async {
+        let words = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let i = photos.firstIndex(where: { $0.id == a.id }) else { return }
+        let was = photos[i].caption
+        photos[i].caption = words
+        do { try await APIClient.shared.setPhoto(a.id, caption: words) }
+        catch { photos[i].caption = was; self.error = session.handle(error) }
+    }
 
     private func removeInk(_ a: APIClient.Attachment) async {
         do { try await APIClient.shared.removeInk(a); photos.removeAll { $0.id == a.id } }

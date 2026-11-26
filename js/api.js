@@ -165,7 +165,7 @@ const API = (() => {
   }
   async function transaction(id) {
     const rows = must(await client().from('transactions')
-      .select(TXN + ', accounts(display_name), memos(body, updated_at, memo_values(value_id, life_values(name))), attachments(id, kind, storage_path, caption)').eq('id', id).limit(1));
+      .select(TXN + ', accounts(display_name), memos(body, updated_at, memo_values(value_id, life_values(name))), attachments(id, kind, storage_path, caption, style)').eq('id', id).limit(1));
     return rows[0] || null;
   }
   async function stories({ ym, valueId }) {
@@ -305,6 +305,8 @@ const API = (() => {
       if (data && data.length) await client().storage.from('shared').remove(data.map((f) => code + '/' + f.name));
     }
   }
+  // W8: how a photo stands in the memo, and the words under it.
+  async function setPhoto(id, fields) { must(await client().from('attachments').update(fields).eq('id', id).select('id')); }
   async function turnOffShare(code) {
     await dropSharedPictures([code]);
     must(await client().from('shares').delete().eq('code', code).select('code'));
@@ -322,7 +324,7 @@ const API = (() => {
   }
 
   return {
-    makeShare, shares, turnOffShare, walletIds, getShare, SHARED_PICTURES,
+    makeShare, shares, turnOffShare, walletIds, getShare, SHARED_PICTURES, setPhoto,
     MCP_URL, client, session, onAuthChange, signInWithApple, finishAppleRedirect, signOut, deleteAccount,
     unexamined, suggestions, themeCounts, transactionCount, month, latestMonth, atSetting, transaction, stories,
     values, addValue, settingPlaces, copyUrls, setSkipped, renameValue, deleteValue, settingNames, renameSetting, saveMemo, importAppleCard, importExport, GROUNDS, ground, setGround,
