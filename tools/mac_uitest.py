@@ -131,8 +131,9 @@ def memo_round_trip(open_app):
             raise Failed("a Save button is still there (W3: the memo saves itself)")
         saved = True
         app.wait("share-memo", seconds=40)
-        app.wait("link-memo", seconds=40)
-        print("PASS the memo sends itself after a pause; Share and Make a link appear")
+        if app.ax("get", "link-memo")[0] == 0:
+            raise Failed("a separate Make a link is still there (W6: one Share)")
+        print("PASS the memo sends itself after a pause; the one Share appears")
         macapp.capture(app.pid, str(SHOTS / "memo-saved.png"))
         app.quit()
         app = open_app()
@@ -241,8 +242,7 @@ def read_one_theme(open_app):
         app.do("press", "theme-Great meals")
         app.shows("penguins", gone=True)
         app.shows("Anniversary")
-        for i in ("share-theme", "link-theme"):
-            app.wait(i)
+        app.wait("share-theme")
         app.do("press", "every-memo")
         app.shows("penguins")
         print("PASS one theme is read alone, and Every memo leads back")

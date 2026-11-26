@@ -61,7 +61,7 @@ PARITY.md updated; TestFlight when devices need it):
 - ✅ **W5 Handwriting with Apple Pencil** (2026-11-26; real Pencil unseen): iPad and the Duo. Scribble into the
   text (stays searchable), and ink kept as ink (PencilKit drawing as a memo
   part). The ink stays the person's; recognized text only when they choose.
-- **W6 One Share**: Share and Make a link become one Share with a choice
+- ✅ **W6 One Share** (2026-11-26): Share and Make a link become one Share with a choice
   (a picture you send, or a page you can turn off). Answer Ben's why in W0.
 - **W7 Photos and files in the share**: the person picks which photos and
   files go into the card or the page; a page needs a shared copy (removed when
@@ -2663,3 +2663,16 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   dark). test_all rc=0. **Not seen:** a real Apple Pencil (iPad needs its passcode for
   XCTest; Ben's Duo has no test account), "Add as words", the Mac's drawing display.
 - **Next:** W6 one Share.
+
+### 2026-11-26 — W6: one Share — 1.0.39 (40)
+- **Ben:** "Why are "share" and "make a link" different things?"
+- **Answer given:** they grew apart: one sends a picture (nothing kept online), the other
+  keeps a page you can turn off. Now one Share holds both.
+- **Done:** `OneShareSheet` + `ShareKindChrome` (iOS, iPad, Mac): Share in the bar, a
+  Picture | Link switch in the sheet's title, a one-line fact under it; memo and theme.
+  Web: `oneShare` wraps the two panels under one disclosure with the same switch and fact.
+- **Verified:** iPhone 12 build 39 debug: ShareUITests 5/5 (picture then link in the same
+  sheet; link opened directly; theme link parts) and MemoUITests write/remove; frames read
+  (`share-page`, `share-as-link`). Mac tap tier memo and theme parts pass. Web: 3 new checks.
+  test_all rc=0.
+- **Next:** W7 photos and files in the share.

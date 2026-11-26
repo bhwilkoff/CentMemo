@@ -99,8 +99,8 @@ if (process.argv[2] === '--widths') {
   for (const [name, hash] of Object.entries(SCREENS)) {
       await evaluate(`location.hash = ${JSON.stringify(hash)}; true`);
       await sleep(1800);
-      if (name.endsWith('link')) { await evaluate(`(() => { const p = document.querySelector('section:not([hidden]) .link-panel'); p.open = true; p.scrollIntoView(); return true; })()`); await sleep(1800); }
-      if (name === 'share') { await evaluate('document.querySelector(".share-panel").open = true; document.querySelector(".share-panel").scrollIntoView(); true'); await sleep(600); }
+      if (name.endsWith('link')) { await evaluate(`(() => { const p = document.querySelector('section:not([hidden]) .link-panel'); const o = p.closest('.one-share'); if (o) { o.open = true; o.querySelector('input[value=link]').click(); } else p.open = true; p.scrollIntoView(); return true; })()`); await sleep(1800); }
+      if (name === 'share') { await evaluate('(() => { const p = document.querySelector(".share-panel"), o = p.closest(".one-share"); if (o) o.open = true; p.open = true; p.scrollIntoView(); return true; })()'); await sleep(600); }
       await shot(`${w}-${name}`);
       const over = await evaluate('document.documentElement.scrollWidth - innerWidth');
       if (over > 0) ok(false, `${name} scrolls sideways by ${over} at ${w}`);
@@ -291,7 +291,12 @@ console.log('event page (D6): the Setting and the memo lead; the money is a foot
   const dots = await evaluate('JSON.stringify([...document.querySelectorAll("#view-txn .chips .chip")].map((c) => getComputedStyle(c, "::before").backgroundColor))');
   ok(JSON.parse(dots).length > 1 && new Set(JSON.parse(dots)).size > 1, 'theme chips wear their own colors');
   // N4: the person designs the share; nothing on it or in it is an amount.
-  await evaluate('document.querySelector("#view-txn .share-panel").open = true; true');
+  // W6: one Share, with Picture and Link inside it, and what each keeps.
+  ok(await evaluate('document.querySelectorAll("#view-txn .one-share").length === 1 && document.querySelectorAll("#view-txn .one-share .share-kinds input").length === 2'), 'one Share, with Picture and Link inside');
+  await evaluate('document.querySelector("#view-txn .one-share").open = true; document.querySelector("#view-txn .one-share").scrollIntoView(); true');
+  await sleep(500);
+  await shot('one-share');
+  ok(await evaluate('/Nothing is kept online/.test(document.querySelector("#view-txn .share-fact").textContent) && !document.querySelector("#view-txn .share-panel:not(.link-panel)").hidden && document.querySelector("#view-txn .link-panel").hidden'), 'a picture first, and it says nothing is kept online');
   ok(await waitFor('document.querySelector("#view-txn .share-canvas")?.width === 1080'), 'the share studio draws a square card');
   const inked = 'new Set(document.querySelector("#view-txn .share-canvas").getContext("2d").getImageData(0, 0, 1080, 600).data).size > 20';
   ok(await waitFor(inked), 'with the memo drawn on it');
@@ -308,7 +313,8 @@ console.log('event page (D6): the Setting and the memo lead; the money is a foot
   await evaluate('document.getElementById("share-shape-square").click(); true');
   await shot('share-card');
   // N4: a link, made and opened and turned off.
-  await evaluate('document.querySelector("#view-txn .link-panel").open = true; true');
+  await evaluate('document.querySelector("#view-txn .one-share input[value=link]").click(); true');
+  ok(await evaluate('document.querySelector("#view-txn .link-panel").open && !document.querySelector("#view-txn .link-panel").hidden && /turn it off/.test(document.querySelector("#view-txn .share-fact").textContent)'), 'Link opens the page maker in the same Share');
   ok(await waitFor('/penguins/.test(document.querySelector("#view-txn .link-panel .sp blockquote")?.textContent || "")'), 'Make a link shows the reader\'s page, live');
   ok(await waitFor('document.getElementById("link-place-0")?.value === "Denver Zoo"'), 'an imported purchase may start with its place');
   await evaluate('(() => { const b = document.querySelectorAll("#view-txn .link-panel .share-words button"); b[13].click(); document.querySelectorAll("#view-txn .link-panel .share-words button")[16].click(); document.getElementById("link-pencil-circle").click(); const p = document.getElementById("link-place-0"); p.value = "The zoo"; p.dispatchEvent(new Event("input")); return true; })()');

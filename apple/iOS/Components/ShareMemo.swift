@@ -97,6 +97,7 @@ struct ShareStudio<Card: View, Choices: View, Send: View>: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Done") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) { send() }
             }
+            .modifier(ShareKindChrome())
         }
         .studioSize()
     }

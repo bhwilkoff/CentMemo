@@ -27,20 +27,10 @@ final class MemoUITests: DeviceTestCase {
         editor.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.6)).tap()
         editor.typeText(note)
         shot(app, "memo-written")
-        // After a pause the memo is on the server: Share and Make a link appear, on this page.
-        let more = app.navigationBars.buttons.matching(NSPredicate(format: "label == 'More' OR identifier == 'more'")).firstMatch
-        XCTAssertTrue(more.waitForExistence(timeout: 10), "the ⋯ menu")
-        let deadline = Date().addingTimeInterval(20)
-        var shown = false
-        while Date() < deadline, !shown {
-            more.tap()
-            shown = app.buttons["Make a link"].firstMatch.waitForExistence(timeout: 2)
-            if !shown { app.tap(); sleep(1) }
-        }
-        XCTAssertTrue(shown, "Make a link, once the memo has sent itself")
-        XCTAssertTrue(app.buttons["Share"].firstMatch.exists, "Share too")
+        // After a pause the memo is on the server: Share appears, on this page.
+        XCTAssertTrue(app.buttons["share-memo"].waitForExistence(timeout: 20), "Share, once the memo has sent itself")
         XCTAssertFalse(app.staticTexts["memo-unsent"].exists, "no warning when it was sent")
-        shot(app, "memo-sent-more")
+        shot(app, "memo-sent")
 
         // Relaunch: the memo is read back from the server, not the screen's memory.
         app.terminate()

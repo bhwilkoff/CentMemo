@@ -74,13 +74,10 @@ struct EntryDetailView: View {
             if entry != nil {
                 // D12: share a written memo as a card (private by default).
                 if let e = entry, let body = e.memo?.body, !body.isEmpty {
-                    ToolbarItem(placement: .secondaryAction) {
+                    // W6: one Share; a picture or a link is chosen inside it.
+                    ToolbarItem(placement: .primaryAction) {
                         Button("Share", systemImage: "square.and.arrow.up") { sharing = true }
                             .accessibilityIdentifier("share-memo")
-                    }
-                    ToolbarItem(placement: .secondaryAction) {
-                        Button("Make a link", systemImage: "link") { linking = true }
-                            .accessibilityIdentifier("link-memo")
                     }
                 }
                 // Skip (Decision 065), also reachable without the list's swipe.
@@ -98,12 +95,11 @@ struct EntryDetailView: View {
         }
         .sheet(isPresented: $sharing) {
             if let e = entry, let body = e.memo?.body ?? Self.standInMemo {
-                ShareMemoSheet(entry: e, memo: MemoText.plain(body))
-            }
-        }
-        .sheet(isPresented: $linking) {
-            if let e = entry, let body = e.memo?.body ?? Self.standInMemo {
-                MakeLinkSheet(entry: e, memo: MemoText.plain(body))
+                OneShareSheet(start: linking ? .link : .picture) {
+                    ShareMemoSheet(entry: e, memo: MemoText.plain(body))
+                } page: {
+                    MakeLinkSheet(entry: e, memo: MemoText.plain(body))
+                }
             }
         }
         .task { await load() }
@@ -359,7 +355,7 @@ struct EntryDetailView: View {
             #if DEBUG
             // DEBUG door APP_START_SHARE=1: the share studio, for captures where nothing can tap (iPad, Duo).
             if ProcessInfo.processInfo.environment["APP_START_SHARE"] == "1", entry?.memo != nil || Self.standInMemo != nil { sharing = true }
-            if ProcessInfo.processInfo.environment["APP_START_SHARE"] == "link", entry?.memo != nil || Self.standInMemo != nil { linking = true }
+            if ProcessInfo.processInfo.environment["APP_START_SHARE"] == "link", entry?.memo != nil || Self.standInMemo != nil { linking = true; sharing = true }
             #endif
             #if DEBUG && os(iOS)
             if ProcessInfo.processInfo.environment["APP_ATTACH_SAMPLE_FILE"] == "1", !photos.contains(where: { $0.kind == "file" }) {

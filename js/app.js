@@ -544,7 +544,7 @@
         const m = row.memos && (Array.isArray(row.memos) ? row.memos[0] : row.memos);
         if (!m || !m.body) return fill(share);
         const first = (m.memo_values || [])[0];
-        fill(share, sharePanel(row, m), linkPanel('memo', [row], first && first.life_values ? { name: first.life_values.name, id: first.value_id || first.life_values.id } : null));
+        fill(share, oneShare('Share this memo', sharePanel(row, m), linkPanel('memo', [row], first && first.life_values ? { name: first.life_values.name, id: first.value_id || first.life_values.id } : null)));
       };
       drawShare(t);
 
@@ -680,6 +680,26 @@
     return send;
   }
   const shareFonts = () => (document.fonts ? Promise.all([document.fonts.load('400 40px Newsreader'), document.fonts.load('600 40px Newsreader')]) : Promise.resolve()).catch(() => {});
+  // W6 (Decision 069): one Share. Inside it, a picture you send (nothing kept online) or a
+  // page at centmemo.com you can turn off. The two studios stay whole beneath one switch.
+  function oneShare(title, picture, page) {
+    if (!page) return picture;
+    const pick = (v, label) => h('label', { class: 'kind' }, h('input', { type: 'radio', name: 'share-kind-' + title, value: v, checked: v === 'picture' }), label);
+    const fact = h('p', { class: 'caption share-fact' });
+    const kinds = h('div', { class: 'share-kinds', role: 'radiogroup', 'aria-label': 'Share as' }, pick('picture', 'Picture'), pick('link', 'Link'));
+    const outer = h('details', { class: 'one-share' }, h('summary', {}, title), kinds, fact, picture, page);
+    const show = () => {
+      const link = kinds.querySelector('input:checked').value === 'link';
+      picture.hidden = link; page.hidden = !link;
+      if (outer.open) { picture.open = !link; page.open = link; }
+      fact.textContent = link ? 'A page at centmemo.com. You can turn it off.' : 'A picture you send. Nothing is kept online.';
+    };
+    kinds.addEventListener('change', show);
+    outer.addEventListener('toggle', show);
+    show();
+    return outer;
+  }
+
   function sharePanel(t, memo) {
     const names = (memo.memo_values || []).map((v) => v.life_values && v.life_values.name).filter(Boolean);
     const data = { memo: CentMemoText.plain(memo.body), setting: merchantOf(t), initials: CentMoney.merchantInitials(merchantOf(t)), date: niceDate(t.txn_date),
@@ -897,8 +917,7 @@
         h('header', { class: 'story-head' },
           h('h2', { class: 'section-heading' }, title),
           h('p', { class: 'caption' }, rows.length + (rows.length === 1 ? ' memo' : ' memos'))),
-        valueId ? shareThemePanel(title, rows) : '',
-        valueId ? linkPanel('theme', rows, { name: title, id: valueId }) : '',
+        valueId ? oneShare('Share this theme', shareThemePanel(title, rows), linkPanel('theme', rows, { name: title, id: valueId })) : '',
         h('ol', { class: 'story' }, rows.map((t) => {
           const memo = Array.isArray(t.memos) ? t.memos[0] : t.memos;
           const names = (memo.memo_values || []).map((mv) => mv.life_values && mv.life_values.name).filter(Boolean);

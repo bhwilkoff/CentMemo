@@ -106,22 +106,27 @@ struct StoryChrome: ViewModifier {
     let model: StoryModel
     @Environment(SessionStore.self) private var session
     @State private var sharingTheme: String?
-    @State private var linkingTheme: LifeValue?
     func body(content: Content) -> some View {
         content
             .toolbar {
                 // D12: a whole theme as one card, when the Story shows one theme.
                 if let name = model.themeName, model.showsItsOwn, !model.entries.isEmpty {
+                    // W6: one Share; a picture or a link is chosen inside it.
                     Button("Share this theme", systemImage: "square.and.arrow.up") { sharingTheme = name }
                         .accessibilityIdentifier("share-theme")
-                    Button("Make a link to this theme", systemImage: "link") { linkingTheme = model.values.first { $0.id == model.themeID } }
-                        .accessibilityIdentifier("link-theme")
                 }
             }
             .sheet(item: Binding(get: { sharingTheme.map(ThemeShareItem.init) }, set: { sharingTheme = $0?.name })) { item in
-                ShareThemeSheet(theme: item.name, entries: model.entries)
+                if let value = model.values.first(where: { $0.id == model.themeID }) {
+                    OneShareSheet {
+                        ShareThemeSheet(theme: item.name, entries: model.entries)
+                    } page: {
+                        MakeLinkSheet(theme: value, entries: model.entries)
+                    }
+                } else {
+                    ShareThemeSheet(theme: item.name, entries: model.entries)
+                }
             }
-            .sheet(item: $linkingTheme) { MakeLinkSheet(theme: $0, entries: model.entries) }
             .task(id: "\(session.dataVersion)-\(String(describing: model.scope))") { await model.load(session) }
     }
 }

@@ -202,3 +202,7 @@ paper, as wide as the memo, at most 360pt tall, a hairline edge; tap to draw on 
 The canvas is a sheet: paper, the sanguine pen (the system tool picker for others), Cancel,
 Done, and "Add as words". The picture is made in the light appearance so it reads the
 same on a dark page. Handwriting in the memo itself is Scribble's, not ours.
+**E5. One Share** (W6). A memo and a theme each have one Share button (in the bar on
+iPhone and iPad, the toolbar on the Mac, one disclosure on the web). Inside, a segmented
+Picture | Link switch replaces the title, with one line of fact under it: "A picture you
+send. Nothing is kept online." or "A page at centmemo.com. You can turn it off."

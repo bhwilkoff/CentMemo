@@ -6,13 +6,14 @@ final class ShareUITests: DeviceTestCase {
     func testDesignAShare() {
         let app = launch(["APP_START_ITEM": Fixture.withMemo])
         XCTAssertTrue(text(app, matching: Fixture.withMemoTitle).waitForExistence(timeout: 25))
-        let more = app.navigationBars.buttons.matching(NSPredicate(format: "label == 'More' OR identifier == 'more'")).firstMatch
-        XCTAssertTrue(more.waitForExistence(timeout: 10), "the ⋯ menu")
-        more.tap()
-        let share = app.buttons["Share"].firstMatch  // overflow-menu items keep their label, not their identifier
-        XCTAssertTrue(share.waitForExistence(timeout: 5), "Share in the ⋯ menu")
+        // W6: one Share button, in the bar; Picture or Link is chosen inside it.
+        let share = app.buttons["share-memo"]
+        XCTAssertTrue(share.waitForExistence(timeout: 10), "Share in the bar")
+        XCTAssertFalse(app.buttons["link-memo"].exists, "no separate Make a link")
         share.tap()
-        XCTAssertTrue(app.navigationBars["Share this memo"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.segmentedControls["share-kind"].waitForExistence(timeout: 5), "Picture or Link")
+        XCTAssertTrue(app.segmentedControls["share-kind"].buttons["Picture"].isSelected, "a picture first")
+        XCTAssertTrue(text(app, matching: "Nothing is kept online").exists, "what a picture keeps")
         XCTAssertTrue(text(app, matching: "card: First cold Sunday").waitForExistence(timeout: 5), "the card holds the memo")
         shot(app, "share-page")
         let first = app.buttons["share-word-13"], last = app.buttons["share-word-16"]
@@ -32,6 +33,11 @@ final class ShareUITests: DeviceTestCase {
         XCTAssertFalse(text(app, matching: "Setting card: ").label.contains("$"), "and none is on the card")
         shot(app, "share-setting-tall")
         XCTAssertTrue(app.buttons["share-send"].exists)
+        // The same Share makes a link: the page, live, and what it keeps.
+        app.segmentedControls["share-kind"].buttons["Link"].tap()
+        XCTAssertTrue(app.webViews.staticTexts.matching(NSPredicate(format: "label CONTAINS 'penguins'")).firstMatch.waitForExistence(timeout: 15), "the reader's page, in the same sheet")
+        XCTAssertTrue(text(app, matching: "You can turn it off").exists, "what a link keeps")
+        shot(app, "share-as-link")
     }
 
     /// D12: a whole theme as one card, places off; any memo can be left out.
@@ -44,7 +50,7 @@ final class ShareUITests: DeviceTestCase {
         let share = app.buttons["share-theme"]
         XCTAssertTrue(share.waitForExistence(timeout: 15), "Share this theme, when one theme is shown")
         share.tap()
-        XCTAssertTrue(app.navigationBars["Share this theme"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.segmentedControls["share-kind"].waitForExistence(timeout: 10), "the one Share")
         XCTAssertTrue(text(app, matching: "Great meals: .*Anniversary").waitForExistence(timeout: 5), "the card holds the theme's memos")
         XCTAssertFalse(text(app, matching: "Show the amount").exists, "an amount is never offered")
         shot(app, "share-theme")
@@ -57,7 +63,8 @@ final class ShareUITests: DeviceTestCase {
     /// DESIGN S7: a link is made, listed in Settings, and turned off; no amount anywhere.
     func testMakeALinkThenTurnItOff() {
         let app = launch(["APP_START_ITEM": Fixture.withMemo, "APP_START_SHARE": "link"])
-        XCTAssertTrue(app.navigationBars["Link to this memo"].waitForExistence(timeout: 25))
+        XCTAssertTrue(app.segmentedControls["share-kind"].waitForExistence(timeout: 25), "the one Share, opened on Link")
+        XCTAssertTrue(app.segmentedControls["share-kind"].buttons["Link"].isSelected)
         XCTAssertTrue(app.webViews.staticTexts.matching(NSPredicate(format: "label CONTAINS 'penguins'")).firstMatch.waitForExistence(timeout: 15), "the reader's page, live")
         XCTAssertFalse(app.webViews.staticTexts.matching(NSPredicate(format: "label CONTAINS '$'")).firstMatch.exists, "no amount on it")
         let first = app.buttons["share-word-13"], last = app.buttons["share-word-16"]
@@ -99,10 +106,12 @@ final class ShareUITests: DeviceTestCase {
         let theme = app.buttons["theme-Great meals"]
         XCTAssertTrue(theme.waitForExistence(timeout: 25))
         theme.tap()
-        let link = app.buttons["link-theme"]
-        XCTAssertTrue(link.waitForExistence(timeout: 15), "Make a link, when one theme is shown")
-        link.tap()
-        XCTAssertTrue(app.navigationBars["Link to this theme"].waitForExistence(timeout: 10))
+        let share = app.buttons["share-theme"]
+        XCTAssertTrue(share.waitForExistence(timeout: 15), "Share, when one theme is shown")
+        share.tap()
+        let kind = app.segmentedControls["share-kind"]
+        XCTAssertTrue(kind.waitForExistence(timeout: 10))
+        kind.buttons["Link"].tap()
         XCTAssertTrue(app.webViews.staticTexts.matching(NSPredicate(format: "label CONTAINS 'Great meals'")).firstMatch.waitForExistence(timeout: 15))
         shot(app, "link-theme")
         let cover = app.switches["Cover"]

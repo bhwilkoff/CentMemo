@@ -57,6 +57,7 @@ struct MakeLinkSheet: View {
             .grounded()
             .navigationTitle(draft.kind == .theme ? "Link to this theme" : "Link to this memo")
             .inlineTitle()
+            .modifier(ShareKindChrome())
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Done") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
