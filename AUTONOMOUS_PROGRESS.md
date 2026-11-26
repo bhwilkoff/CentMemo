@@ -2725,3 +2725,5 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Left from W0-W8 (for Ben):** web pictures in shares (needs a money check there);
   theme-link pictures; link pages unstyled photos; a real Apple Pencil and "Add as
   words"; a camera photo and a receipt photo on a card; the Mac's new views pictured.
+- **1.0.42 (43)** uploaded for iOS and Mac (Upload succeeded, both). The memo writing loop
+  stopped here: W0 to W8 are done; what is left is listed above and waits on Ben.
