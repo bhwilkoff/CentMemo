@@ -98,7 +98,7 @@ struct EntryDetailView: View {
                 OneShareSheet(start: linking ? .link : .picture) {
                     ShareMemoSheet(entry: e, memo: MemoText.plain(body), attachments: photos)
                 } page: {
-                    MakeLinkSheet(entry: e, memo: MemoText.plain(body))
+                    MakeLinkSheet(entry: e, memo: MemoText.plain(body), attachments: photos)
                 }
             }
         }

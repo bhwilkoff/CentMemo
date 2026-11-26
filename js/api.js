@@ -111,6 +111,7 @@ const API = (() => {
     // Storage files outlive the database cascade: remove the person's copies first.
     const { data: { user } } = await client().auth.getUser();
     if (user) {
+      await dropSharedPictures(must(await client().from('shares').select('code')).map((l) => l.code));
       const { data: files } = await client().storage.from('attachments').list(user.id, { limit: 1000 });
       if (files && files.length) must(await client().storage.from('attachments').remove(files.map((f) => user.id + '/' + f.name)));
     }
@@ -251,6 +252,9 @@ const API = (() => {
   async function saveMemo(transactionId, body, valueIds) {
     const text = body.trim();
     if (!text) {
+      // Deleting the memo deletes its links (memos_take_their_links); their pictures first.
+      const links = must(await client().from('shares').select('code').contains('memo_ids', [transactionId]));
+      await dropSharedPictures(links.map((l) => l.code));
       must(await client().from('memos').delete().eq('transaction_id', transactionId));
       return;
     }
@@ -293,7 +297,18 @@ const API = (() => {
     return must(await client().rpc('make_share', { p_kind: kind, p_items: items, p_design: design, p_value: valueId || null, p_from: from || null }));
   }
   async function shares() { return must(await client().from('shares').select('code, kind, title, created_at').order('created_at', { ascending: false })); }
-  async function turnOffShare(code) { must(await client().from('shares').delete().eq('code', code).select('code')); }
+  // W7: a link's pictures live under its code; they go before the link does.
+  const SHARED_PICTURES = SUPABASE_URL + '/storage/v1/object/public/shared/';
+  async function dropSharedPictures(codes) {
+    for (const code of codes) {
+      const { data } = await client().storage.from('shared').list(code, { limit: 10 });
+      if (data && data.length) await client().storage.from('shared').remove(data.map((f) => code + '/' + f.name));
+    }
+  }
+  async function turnOffShare(code) {
+    await dropSharedPictures([code]);
+    must(await client().from('shares').delete().eq('code', code).select('code'));
+  }
   // Which of these came from Apple Wallet: their store and date are never prefilled.
   async function walletIds(ids) {
     return new Set(must(await client().from('transactions').select('id').eq('source', 'financekit').in('id', ids)).map((r) => r.id));
@@ -307,7 +322,7 @@ const API = (() => {
   }
 
   return {
-    makeShare, shares, turnOffShare, walletIds, getShare,
+    makeShare, shares, turnOffShare, walletIds, getShare, SHARED_PICTURES,
     MCP_URL, client, session, onAuthChange, signInWithApple, finishAppleRedirect, signOut, deleteAccount,
     unexamined, suggestions, themeCounts, transactionCount, month, latestMonth, atSetting, transaction, stories,
     values, addValue, settingPlaces, copyUrls, setSkipped, renameValue, deleteValue, settingNames, renameSetting, saveMemo, importAppleCard, importExport, GROUNDS, ground, setGround,

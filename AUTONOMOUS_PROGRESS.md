@@ -63,7 +63,7 @@ PARITY.md updated; TestFlight when devices need it):
   part). The ink stays the person's; recognized text only when they choose.
 - ✅ **W6 One Share** (2026-11-26): Share and Make a link become one Share with a choice
   (a picture you send, or a page you can turn off). Answer Ben's why in W0.
-- **W7 Photos and files in the share**: the person picks which photos and
+- ✅ **W7 Photos and files in the share** (2026-11-26; memo cards and memo links; web and theme shares ⏳; files out on purpose): the person picks which photos and
   files go into the card or the page; a page needs a shared copy (removed when
   the link is turned off). Never money: warn when a photo reads as a receipt.
 - **W8 Photos styled in the memo**: placed in the memo body, size, crop,
@@ -2691,3 +2691,20 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   money block on a real receipt photo, the Mac, the web, link pages, theme cards.
 - **Next:** W7 part 2: pictures on a link page (a shared copy, removed when the link is
   turned off), then W8.
+
+### 2026-11-26 — W7 (part 2): pictures on a memo link — 1.0.41 (42)
+- **Done:** migration 20261126020000 (applied live): public bucket `shared`, writes only by
+  the link's maker into the link's own folder, deletes only by the uploader, never the
+  connector; `set_share_pictures` records the count once within 10 minutes. The page
+  (story-page.js) shows them first; s/ builds their addresses from the code; the app's
+  preview gets data addresses (CSP img-src data:). Cleanup on turn-off, memo removal and
+  account deletion (iOS, Mac, web).
+- **Found:** a deleted picture still answered at its old public address: the CDN's copy.
+  Uploads now carry cache-control max-age=60, so a turned-off link loses its pictures within
+  a minute; the file itself goes at once (test_rls checks the uncached path). Empty alt text
+  hid the picture from accessibility (and the test); it now has one.
+- **Verified:** iPhone 12 build 41 debug: InkUITests draws, puts the drawing on a card and
+  on a link (preview image seen, frame read), makes the link, probes the public picture
+  (200), removes the memo, probes again (gone); fixture left clean (checked by script).
+  test_rls 9 new checks pass. test_all rc=0.
+- **Next:** W8 photo styles in the memo.

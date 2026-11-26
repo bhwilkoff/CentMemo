@@ -12,13 +12,13 @@
   <meta property="og:image" content="https://centmemo.com/assets/og.png">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&display=swap">
-  <link rel="stylesheet" href="../css/story-page.css?v=20261124i">
+  <link rel="stylesheet" href="../css/story-page.css?v=20261126a">
   <style>html, body { margin: 0; min-height: 100%; } body { min-height: 100dvh; display: flex; flex-direction: column; } #page { flex: 1; }</style>
 </head>
 <body>
   <main id="page" class="sp" aria-busy="true"></main>
-  <script src="../js/api.js?v=20261124h"></script>
-  <script src="../js/money/story-page.js?v=20261124i"></script>
+  <script src="../js/api.js?v=20261126a"></script>
+  <script src="../js/money/story-page.js?v=20261126a"></script>
   <script>
     // The code is after the #, so it never reaches a server log or another site.
     (async () => {
@@ -37,7 +37,8 @@
       catch (_) { return say(navigator.onLine ? 'CentMemo couldn’t reach its server.' : 'You’re offline.', true); }
       if (!data) return say('This link was turned off, or the memo was deleted.');
       document.title = data.kind === 'theme' && data.theme ? data.theme.name + ' on CentMemo' : 'A memo on CentMemo';
-      CentStory.render(page, data, { report: '../support/#report' });
+      const pictures = Array.from({ length: Math.min(3, Number(data.pictures) || 0) }, (_, i) => API.SHARED_PICTURES + code + '/' + i + '.jpg');
+      CentStory.render(page, data, { report: '../support/#report', pictures });
     })();
     addEventListener('hashchange', () => location.reload());
   </script>

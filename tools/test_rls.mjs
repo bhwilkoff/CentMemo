@@ -114,5 +114,42 @@ if (!control) {
   }
 }
 
+console.log('a link\'s pictures (storage bucket "shared", W7)');
+if (!control) {
+  const store = (token, path, init = {}) => fetch(URL_ + '/storage/v1/object/' + path, { ...init, headers: { apikey: KEY, authorization: 'Bearer ' + token, ...(init.headers || {}) } });
+  const rpc = (token, fn, body) => fetch(URL_ + '/rest/v1/rpc/' + fn, { method: 'POST', body: JSON.stringify(body), headers: { apikey: KEY, authorization: 'Bearer ' + token, 'content-type': 'application/json' } });
+  const jpeg = Buffer.from('/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AKp//2Q==', 'base64');
+  const made = await rpc(owner, 'make_share', { p_kind: 'memo', p_items: [{ txn: 'a3b8c10c-68b8-4bfe-9380-c87b7015a49d' }] });
+  const code = made.ok ? await made.json() : null;
+  ok(typeof code === 'string' && code.length === 22, 'owner makes a memo link (' + made.status + ')');
+  if (code) {
+    try {
+      const up = await store(owner, 'shared/' + code + '/0.jpg', { method: 'POST', body: jpeg, headers: { 'content-type': 'image/jpeg', 'cache-control': 'max-age=60' } });
+      ok(up.ok, 'owner adds a picture under their link (' + up.status + ')');
+      const plant = await store(stranger, 'shared/' + code + '/1.jpg', { method: 'POST', body: jpeg, headers: { 'content-type': 'image/jpeg' } });
+      ok(!plant.ok, 'a stranger cannot add a picture to the owner\'s link (' + plant.status + ')');
+      const gone = await store(stranger, 'shared', { method: 'DELETE', body: JSON.stringify({ prefixes: [code + '/0.jpg'] }), headers: { 'content-type': 'application/json' } });
+      const still = await fetch(URL_ + '/storage/v1/object/public/shared/' + code + '/0.jpg');
+      ok(still.ok, 'a stranger cannot remove it (' + gone.status + ', still ' + still.status + ')');
+      const theirs = await rpc(stranger, 'set_share_pictures', { p_code: code, p_count: 1 });
+      ok(!theirs.ok, 'a stranger cannot set its pictures (' + theirs.status + ')');
+      const set = await rpc(owner, 'set_share_pictures', { p_code: code, p_count: 1 });
+      ok(set.ok, 'the owner sets the count once (' + set.status + ')');
+      const twice = await rpc(owner, 'set_share_pictures', { p_code: code, p_count: 3 });
+      ok(!twice.ok, 'and only once (' + twice.status + ')');
+      const page = await (await rpc(stranger, 'get_share', { p_code: code })).json();
+      ok(page && page.pictures === 1 && !JSON.stringify(page).includes('$'), 'the page says one picture, and no amount');
+    } finally {
+      await store(owner, 'shared', { method: 'DELETE', body: JSON.stringify({ prefixes: [code + '/0.jpg'] }), headers: { 'content-type': 'application/json' } });
+      await fetch(URL_ + '/rest/v1/shares?code=eq.' + code, { method: 'DELETE', headers: { apikey: KEY, authorization: 'Bearer ' + owner } });
+    }
+    // The file itself is gone at once; the public copy at a fresh address is gone too. (A
+    // CDN may answer the old address for up to the 60 s the upload allows.)
+    const kept = await store(owner, 'authenticated/shared/' + code + '/0.jpg');
+    const fresh = await fetch(URL_ + '/storage/v1/object/public/shared/' + code + '/0.jpg?gone=' + Date.now());
+    ok(!kept.ok && !fresh.ok, 'turned off, the picture is gone (' + kept.status + ', ' + fresh.status + ')');
+  }
+}
+
 console.log(failures ? `FAIL: ${failures} check(s)` : 'PASS: row-level security holds on the deployed project');
 process.exit(failures ? 1 : 0);

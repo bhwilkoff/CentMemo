@@ -40,13 +40,32 @@ final class InkUITests: DeviceTestCase {
         for _ in 0..<6 where !text(app, matching: "card with a picture").exists { app.swipeDown(velocity: .slow) }
         XCTAssertTrue(text(app, matching: "card with a picture: Drew the line").waitForExistence(timeout: 5), "the card carries it")
         shot(app, "share-with-drawing")
+        // W7: the same drawing on a link page; made, then the memo's removal takes it away.
+        app.segmentedControls["share-kind"].buttons["Link"].tap()
+        let linkOffer = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'share-picture-'")).firstMatch
+        XCTAssertTrue(reach(app, linkOffer, swipes: 6), "the drawing is offered for the page")
+        XCTAssertEqual(XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: enabled, object: linkOffer)], timeout: 20), .completed)
+        linkOffer.tap()
+        XCTAssertTrue(app.webViews.images.firstMatch.waitForExistence(timeout: 10), "the page shows it, live")
+        shot(app, "link-with-drawing")
+        app.buttons["link-make"].tap()
+        XCTAssertTrue(app.buttons["link-send"].waitForExistence(timeout: 30), "the link is made with its picture")
+        let address = app.staticTexts["link-url"].label
+        let code = address.components(separatedBy: "#").last ?? ""
+        XCTAssertEqual(code.count, 22, "the link's address: \(address)")
+        XCTAssertEqual(Self.status(of: code), 200, "its picture is public under the link's code")
         app.buttons["Done"].firstMatch.tap()
         // The memo comes off again (the test leaves the account as found).
         reach(app, editor)
-        editor.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.9)).tap()
-        editor.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 40))
+        for _ in 0..<4 {
+            let left = editor.value as? String ?? ""
+            if left.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { break }
+            editor.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.9)).tap()
+            editor.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: left.count + 2))
+        }
         app.navigationBars.buttons.element(boundBy: 0).tap()
-        sleep(3)
+        sleep(4)
+        XCTAssertNotEqual(Self.status(of: code), 200, "removing the memo took the link's picture away")
 
         app.terminate()
         let again = launch(["APP_START_ITEM": Fixture.unexamined])
@@ -60,5 +79,15 @@ final class InkUITests: DeviceTestCase {
         XCTAssertTrue(remove.waitForExistence(timeout: 5), "Remove in the drawing's menu")
         remove.tap()
         XCTAssertTrue(kept.waitForNonExistence(timeout: 15), "and it comes off")
+    }
+
+    /// The public picture's status, at a fresh address so no CDN copy answers.
+    static func status(of code: String) -> Int {
+        guard let url = URL(string: "https://qucsmmazfalbyduxlavl.supabase.co/storage/v1/object/public/shared/\(code)/0.jpg?probe=\(Date().timeIntervalSince1970)") else { return 0 }
+        let done = DispatchSemaphore(value: 0)
+        var code = 0
+        URLSession.shared.dataTask(with: url) { _, r, _ in code = (r as? HTTPURLResponse)?.statusCode ?? 0; done.signal() }.resume()
+        _ = done.wait(timeout: .now() + 20)
+        return code
     }
 }

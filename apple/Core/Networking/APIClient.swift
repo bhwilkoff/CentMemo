@@ -108,6 +108,7 @@ final class APIClient {
 
     /// In-app account deletion (Decision 035): every row cascades.
     func deleteAccount() async throws {
+        if let links = try? await shares() { await dropSharedPictures(links.map(\.code)) }
         try await removeAllCopies()
         _ = try await raw("rest/v1/rpc/delete_my_account", method: "POST", body: [String: String]())
         session = nil
@@ -493,7 +494,25 @@ final class APIClient {
         try await rest("shares", [.init(name: "select", value: "code,title,created_at"), .init(name: "order", value: "created_at.desc")])
     }
     func turnOffShare(_ code: String) async throws {
+        await dropSharedPictures([code])
         try await raw("rest/v1/shares", query: [.init(name: "code", value: "eq.\(code)")], method: "DELETE")
+    }
+
+    // MARK: - A link's pictures (W7): public under the link's code, gone with the link
+
+    func addSharedPicture(code: String, index: Int, jpeg: Data) async throws {
+        // A minute at most in the CDN, so a link turned off loses its pictures within it.
+        _ = try await storage("POST", "object/shared/\(code)/\(index).jpg", body: jpeg, contentType: "image/jpeg", upsert: true, cache: "max-age=60")
+    }
+    func setSharePictures(code: String, count: Int) async throws {
+        try await raw("rest/v1/rpc/set_share_pictures", method: "POST", body: SharePictures(p_code: code, p_count: count))
+    }
+    private struct SharePictures: Encodable { let p_code: String; let p_count: Int }
+    /// Best effort: a link with no pictures has nothing here.
+    func dropSharedPictures(_ codes: [String]) async {
+        for code in codes {
+            for i in 0..<3 { _ = try? await storage("DELETE", "object/shared/\(code)/\(i).jpg") }
+        }
     }
     /// Which of these came from Apple Wallet: their store and date are never prefilled.
     func walletIDs(among ids: [String]) async throws -> Set<String> {
@@ -508,6 +527,11 @@ final class APIClient {
     func saveMemo(transactionID: String, body: String, valueIDs: [String]) async throws {
         let text = body.trimmingCharacters(in: .whitespacesAndNewlines)
         if text.isEmpty {
+            // Deleting the memo deletes its links (memos_take_their_links); their pictures first.
+            struct Code: Decodable { let code: String }
+            if let links: [Code] = try? await rest("shares", [.init(name: "select", value: "code"), .init(name: "memo_ids", value: "cs.{\(transactionID)}")]) {
+                await dropSharedPictures(links.map(\.code))
+            }
             try await raw("rest/v1/memos", query: [.init(name: "transaction_id", value: "eq.\(transactionID)")], method: "DELETE")
             return
         }
@@ -704,7 +728,7 @@ final class APIClient {
         _ = try await storage("DELETE", "object/attachments", body: try JSONEncoder().encode(["prefixes": names]), contentType: "application/json")
     }
 
-    private func storage(_ method: String, _ path: String, body: Data? = nil, contentType: String? = nil, upsert: Bool = false) async throws -> Data {
+    private func storage(_ method: String, _ path: String, body: Data? = nil, contentType: String? = nil, upsert: Bool = false, cache: String? = nil) async throws -> Data {
         try await refreshIfNeeded()
         var req = URLRequest(url: Self.projectURL.appending(path: "storage/v1/" + path))
         req.httpMethod = method
@@ -712,6 +736,7 @@ final class APIClient {
         if let token = session?.accessToken { req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
         if let contentType { req.setValue(contentType, forHTTPHeaderField: "Content-Type") }
         if upsert { req.setValue("true", forHTTPHeaderField: "x-upsert") }
+        if let cache { req.setValue(cache, forHTTPHeaderField: "cache-control") }
         req.httpBody = body
         let (data, response) = try await web.data(for: req)
         let code = (response as? HTTPURLResponse)?.statusCode ?? 0

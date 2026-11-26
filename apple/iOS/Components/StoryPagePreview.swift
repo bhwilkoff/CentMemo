@@ -13,7 +13,7 @@ struct StoryPagePreview {
         }
         return """
         <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:">
         <style>\(read("story-page", "css"))
         html, body { margin: 0; min-height: 100%; } body { display: flex; min-height: 100vh; } #page { flex: 1; min-width: 0; --sp-display: ui-serif, Georgia, serif; }</style></head>
         <body><main id="page" class="sp"></main><script>\(read("story-page", "js"))</script></body></html>
@@ -49,7 +49,7 @@ struct StoryPagePreview {
         /// and the app then cannot start there (seen on the iOS 18.5 simulator, 2026-11-25).
         private static func render(_ json: String, on web: WKWebView) {
             guard let data = try? JSONEncoder().encode(json), let literal = String(data: data, encoding: .utf8) else { return }
-            web.evaluateJavaScript("CentStory.render(document.getElementById('page'), JSON.parse(\(literal))); null", completionHandler: nil)
+            web.evaluateJavaScript("(() => { const p = JSON.parse(\(literal)); CentStory.render(document.getElementById('page'), p, { pictures: p.pictures || [] }); })(); null", completionHandler: nil)
         }
         func webView(_ web: WKWebView, didFinish navigation: WKNavigation!) {
             ready = true

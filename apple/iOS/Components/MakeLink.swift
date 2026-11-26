@@ -17,8 +17,12 @@ struct MakeLinkSheet: View {
     @Environment(\.verticalSizeClass) private var height
     @Environment(\.dismiss) private var dismiss
     @Environment(SessionStore.self) private var session
+    /// W7: the memo's photos and drawings, for a memo link only.
+    private var attachments: [APIClient.Attachment] = []
+    @State private var pictures = SharePictureChoices()
 
-    init(entry: LedgerEntry, memo: String) {
+    init(entry: LedgerEntry, memo: String, attachments: [APIClient.Attachment] = []) {
+        self.attachments = attachments
         var theme: StoryLinkDraft.Theme?
         if let id = entry.memo?.valueIDs.first, let name = entry.memo?.valueNames.first { theme = .init(id: id, name: name, color: Themes.colorKey(name)) }
         _draft = State(initialValue: StoryLinkDraft(kind: .memo, theme: theme, items: [Self.item(entry, memo)]))
@@ -79,6 +83,8 @@ struct MakeLinkSheet: View {
             }
         }
         .studioSize()
+        .task { if draft.kind == .memo { await pictures.load(attachments) } }
+        .onChange(of: pictures.chosen) { _, _ in draft.pictures = pictures.pictures.compactMap(Self.preview) }
         .task {
             // Only what is not Apple's to publish may be filled in; on failure they stay empty.
             if let wallet = try? await APIClient.shared.walletIDs(among: draft.items.map(\.id)) { draft.fill(wallet: wallet) }
@@ -149,6 +155,7 @@ struct MakeLinkSheet: View {
                 Text("For Apple Card purchases, Where and When start empty. Apple’s rules don’t let CentMemo publish the store or the date, so you write them.")
             }
         }
+        if draft.kind == .memo { SharePictureRow(choices: pictures) }
         Section("Pencil") {
             Picker("Pencil", selection: $draft.pencil) { ForEach(StoryLinkDraft.Pencil.allCases, id: \.self) { Text($0.title).tag($0) } }
                 .pickerStyle(.segmented).labelsHidden()
@@ -188,11 +195,45 @@ struct MakeLinkSheet: View {
         making = true
         let page = draft
         do {
-            made = (StoryLink.url(try await APIClient.shared.makeShare(page)), page)
+            let code = try await APIClient.shared.makeShare(page)
+            // W7: the chosen pictures, re-encoded with nothing but their pixels, then counted.
+            let chosen = pictures.pictures
+            if page.kind == .memo, !chosen.isEmpty {
+                for (i, p) in chosen.enumerated() {
+                    guard let jpeg = Self.jpeg(p) else { continue }
+                    try await APIClient.shared.addSharedPicture(code: code, index: i, jpeg: jpeg)
+                }
+                try await APIClient.shared.setSharePictures(code: code, count: chosen.count)
+            }
+            made = (StoryLink.url(code), page)
             copied = false; error = nil
             Haptic.success()
         } catch { self.error = session.handle(error); Haptic.error() }
         making = false
+    }
+}
+
+extension MakeLinkSheet {
+    /// At most 1600 pixels on the long side, encoded fresh (no location or camera data).
+    static func jpeg(_ p: SharePicture, longest: CGFloat = 1600) -> Data? {
+        let w = CGFloat(p.image.width), h = CGFloat(p.image.height), k = min(1, longest / max(w, h))
+        let size = CGSize(width: (w * k).rounded(), height: (h * k).rounded())
+        #if os(iOS)
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = 1
+        return UIGraphicsImageRenderer(size: size, format: format).image { _ in
+            UIImage(cgImage: p.image).draw(in: CGRect(origin: .zero, size: size))
+        }.jpegData(compressionQuality: 0.8)
+        #else
+        guard let ctx = CGContext(data: nil, width: Int(size.width), height: Int(size.height), bitsPerComponent: 8, bytesPerRow: 0,
+                                  space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) else { return nil }
+        ctx.draw(p.image, in: CGRect(origin: .zero, size: size))
+        guard let cg = ctx.makeImage() else { return nil }
+        return NSBitmapImageRep(cgImage: cg).representation(using: .jpeg, properties: [.compressionFactor: 0.8])
+        #endif
+    }
+    static func preview(_ p: SharePicture) -> String? {
+        jpeg(p, longest: 900).map { "data:image/jpeg;base64," + $0.base64EncodedString() }
     }
 }
 
