@@ -2623,3 +2623,9 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
 - **Note:** 1.0.35 reached TestFlight for iPhone only; its Mac archive compiled a file
   mid-edit. 1.0.36 goes to both. Lesson: no edits while an archive builds.
 - **Next:** W4 styled text.
+- **Verified on the iPhone 12, build 37 (2026-11-26 12:57):** MemoUITests 3/3 (written,
+  sent after a pause, removed on leaving; written offline, kept, warned, sent on reopening),
+  ShareUITests 5/5, ThemesUITests 1/1, ThemesStarterUITests 2/2; no crash logs. Frames read:
+  `memo-unsent` (the warning under the memo, no Save button) and `detail-with-memo` (each
+  chip in its own color; chosen ones checked and stroked). 1.0.36 (37) uploaded for iOS and
+  Mac. Not yet seen: the no-themes starter offer (every test account holds themes).
