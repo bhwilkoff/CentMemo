@@ -62,6 +62,41 @@ final class MemoUITests: DeviceTestCase {
         shot(third, "memo-removed")
     }
 
+    /// W4: styles from the format bar reach the server as Markdown, and come off again.
+    func testStyleAMemo() {
+        let app = launch(["APP_START_ITEM": Fixture.unexamined, "APP_SHOW_MARKDOWN": "1"])
+        let editor = app.textViews["memo-editor"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 25), "memo editor")
+        editor.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.6)).tap()
+        XCTAssertTrue(app.buttons["format-quote"].waitForExistence(timeout: 5) && app.buttons["format-quote"].isHittable, "the whole format bar rides the keyboard")
+        XCTAssertTrue(app.buttons["Done"].firstMatch.isHittable, "with Done in reach")
+        XCTAssertFalse(app.buttons["Underline"].exists, "no underline")
+        app.buttons["format-heading"].tap()
+        editor.typeText("Sunday\nWe went, ")
+        app.buttons["format-bold"].tap()
+        editor.typeText("all of us")
+        app.buttons["format-bold"].tap()
+        editor.typeText("\n")
+        app.buttons["format-list"].tap()
+        editor.typeText("penguins\nseals")
+        shot(app, "memo-styled")
+        let stored = app.staticTexts["memo-markdown"]
+        let want = "# Sunday\nWe went, **all of us**\n- penguins\n- seals"
+        let deadline = Date().addingTimeInterval(20)
+        while Date() < deadline, stored.label != want { sleep(1) }
+        XCTAssertEqual(stored.label, want, "the server holds the styles as Markdown")
+        // Relaunch: the styles come back from the server into the editor.
+        app.terminate()
+        let again = launch(["APP_START_ITEM": Fixture.unexamined, "APP_SHOW_MARKDOWN": "1"])
+        let e2 = again.textViews["memo-editor"]
+        XCTAssertTrue(e2.waitForExistence(timeout: 25))
+        XCTAssertTrue((e2.value as? String ?? "").contains("• penguins"), "the list is drawn with bullets")
+        shot(again, "memo-styled-reopened")
+        clear(e2, e2.value as? String ?? "")
+        again.navigationBars.buttons.element(boundBy: 0).tap()
+        sleep(3)
+    }
+
     /// W3: written with no network, the memo stays on the device, says so, and is sent
     /// when the app opens with a network again.
     func testOfflineMemoIsKeptThenSent() {

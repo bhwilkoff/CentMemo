@@ -28,6 +28,12 @@
   function fill(el, ...kids) {
     el.replaceChildren(...kids.flat().filter((k) => k != null && k !== false && k !== ''));
   }
+  // W4: a memo shown whole, its styles drawn; CentMemoText escapes every character typed.
+  function memoBlock(md) {
+    const el = h('div', { class: 'story-text memo-text' });
+    el.innerHTML = CentMemoText.html(md);
+    return el;
+  }
   // DESIGN W: two columns when there is room, one after the other when there is not.
   // `side` stands left unless the page says otherwise (the purchase desk's is right).
   function split(side, main) {
@@ -154,7 +160,7 @@
       h('span', { class: 'row-main' },
         h('span', { class: 'row-title' }, merchantOf(t)),
         h('span', { class: 'row-sub' }, [rowDate(t.txn_date), catOf(t), t.status === 'pending' ? 'Pending' : null].filter(Boolean).join(' · ')),
-        opts && opts.memo && memo ? h('span', { class: 'row-memo' }, memo.body) : null),
+        opts && opts.memo && memo ? h('span', { class: 'row-memo' }, CentMemoText.plain(memo.body)) : null),
       h('span', { class: 'row-amount' + (t.amount_minor > 0 ? ' is-credit' : '') }, money(t.amount_minor, t.currency)));
   }
 
@@ -174,7 +180,7 @@
     const prompt = s.memo_body ? null : promptFor(s);
     return h('a', { class: 'suggestion', href: '#/t/' + t.id, 'data-kind': s.kind },
       h('span', { class: 'suggestion-reason' }, REASONS[s.kind] || ''),
-      s.memo_body ? h('span', { class: 'suggestion-quote' }, '\u201C' + s.memo_body + '\u201D')
+      s.memo_body ? h('span', { class: 'suggestion-quote' }, '\u201C' + CentMemoText.plain(s.memo_body) + '\u201D')
         : prompt ? h('span', { class: 'suggestion-prompt' }, prompt) : null,
       h('span', { class: 'suggestion-place' }, tile(t), h('span', { class: 'caption' }, merchantOf(t) + ' · ' + rowDate(t.txn_date)),
         h('span', { class: 'caption suggestion-amount' }, money(t.amount_minor, t.currency))),
@@ -328,7 +334,7 @@
     return h('a', { class: 'trow is-written', href: '#/t/' + t.id, style: '--mark: ' + hue },
       h('span', { class: 'trow-mark', 'aria-hidden': 'true' }),
       h('span', { class: 'trow-body' },
-        h('span', { class: 'trow-memo' }, memo.body),
+        h('span', { class: 'trow-memo' }, CentMemoText.plain(memo.body)),
         h('span', { class: 'trow-meta' }, place ? tile(t) : null, meta, theme ? h('span', { class: 'trow-theme' }, theme.name) : null)));
   }
 
@@ -402,6 +408,47 @@
       area.value = kept ? kept.body : memo ? memo.body : '';
       if (kept) { chosen.clear(); kept.ids.forEach((v) => chosen.add(v)); }
       area.placeholder = 'What do you want to remember?';
+      // W4: the format bar writes the memo's Markdown marks around the selection, or at the
+      // start of each chosen line (Decision 069). Never underline: it is the share's mark.
+      const wrap = (mark) => {
+        const a = area.selectionStart, b = area.selectionEnd, v = area.value, sel = v.slice(a, b);
+        if (sel.startsWith(mark) && sel.endsWith(mark) && sel.length >= mark.length * 2) {
+          area.setRangeText(sel.slice(mark.length, sel.length - mark.length), a, b, 'select');
+        } else if (v.slice(a - mark.length, a) === mark && v.slice(b, b + mark.length) === mark) {
+          area.setRangeText(sel, a - mark.length, b + mark.length, 'select');
+        } else {
+          const lead = sel.match(/^\s*/)[0], trail = sel.match(/\s*$/)[0], core = sel.trim();
+          area.setRangeText(lead + mark + core + mark + trail, a, b, 'select');
+          if (!core) area.setSelectionRange(a + lead.length + mark.length, a + lead.length + mark.length);
+        }
+        area.focus(); area.dispatchEvent(new Event('input'));
+      };
+      const lineMark = (prefix) => {
+        const v = area.value, a = v.lastIndexOf('\n', area.selectionStart - 1) + 1;
+        let b = v.indexOf('\n', Math.max(area.selectionEnd, a)); if (b < 0) b = v.length;
+        const lines = v.slice(a, b).split('\n').map((l) => l.replace(/^(## |# |- |\* |> )/, (m) => (m === prefix ? '\u0000' + m : m)));
+        const all = lines.every((l) => l.startsWith('\u0000'));
+        const next = lines.map((l) => {
+          const bare = l.replace(/^\u0000?(## |# |- |\* |> )?/, '');
+          return all ? bare : prefix + bare;
+        }).join('\n');
+        area.setRangeText(next, a, b, 'end');
+        area.focus(); area.dispatchEvent(new Event('input'));
+      };
+      const fmt = (label, glyph, act, cls) => h('button', { type: 'button', class: 'fmt ' + (cls || ''), 'aria-label': label, title: label, onclick: act }, glyph);
+      const formatBar = h('div', { class: 'format-bar', role: 'toolbar', 'aria-label': 'Format', 'aria-controls': 'memo-body' },
+        fmt('Bold (Ctrl or \u2318 B)', 'B', () => wrap('**'), 'fmt-b'),
+        fmt('Italic (Ctrl or \u2318 I)', 'I', () => wrap('*'), 'fmt-i'),
+        fmt('Strikethrough', 'S', () => wrap('~~'), 'fmt-s'),
+        fmt('Heading', 'H', () => lineMark('# ')),
+        fmt('List', '\u2022', () => lineMark('- ')),
+        fmt('Quote', '\u201C', () => lineMark('> ')));
+      area.addEventListener('keydown', (e) => {
+        if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
+        if (e.key === 'b') { e.preventDefault(); wrap('**'); }
+        else if (e.key === 'i') { e.preventDefault(); wrap('*'); }
+        else if (e.key === 'u') e.preventDefault();
+      });
       const status = h('p', { class: 'caption', role: 'status' });
       const error = h('div', { class: 'banner banner-error', role: 'alert', hidden: true });
 
@@ -514,6 +561,7 @@
       fill(body, h('div', { class: 'split split-desk' }, h('div', { class: 'split-main' }, [
         head,
         h('label', { class: 'field-label', for: 'memo-body' }, 'Memo'),
+        formatBar,
         area]), h('div', { class: 'split-side' }, [
         h('p', { class: 'field-label' }, 'Themes'),
         chips,
@@ -633,7 +681,7 @@
   const shareFonts = () => (document.fonts ? Promise.all([document.fonts.load('400 40px Newsreader'), document.fonts.load('600 40px Newsreader')]) : Promise.resolve()).catch(() => {});
   function sharePanel(t, memo) {
     const names = (memo.memo_values || []).map((v) => v.life_values && v.life_values.name).filter(Boolean);
-    const data = { memo: memo.body, setting: merchantOf(t), initials: CentMoney.merchantInitials(merchantOf(t)), date: niceDate(t.txn_date),
+    const data = { memo: CentMemoText.plain(memo.body), setting: merchantOf(t), initials: CentMoney.merchantInitials(merchantOf(t)), date: niceDate(t.txn_date),
       themes: names.map(themeOf) };
     const c = { look: 'page', shape: 'square', paper: 'paper', showSetting: true, showDate: true, showThemes: true, pencil: 'underline', mark: null };
     const card = h('canvas', { class: 'share-canvas', role: 'img' }), status = h('span', { class: 'caption', role: 'status' });
@@ -653,7 +701,7 @@
   // words the person underlines in each. Never an amount.
   function shareThemePanel(themeName, rows) {
     const memoOf = (t) => (Array.isArray(t.memos) ? t.memos[0] : t.memos) || {};
-    const all = rows.map((t) => ({ memo: memoOf(t).body, setting: merchantOf(t), day: t.txn_date, date: niceDate(t.txn_date), mark: null, on: true }));
+    const all = rows.map((t) => ({ memo: CentMemoText.plain(memoOf(t).body), setting: merchantOf(t), day: t.txn_date, date: niceDate(t.txn_date), mark: null, on: true }));
     const c = { look: 'cover', shape: 'square', paper: 'paper', showSetting: true, showDate: true, pencil: 'underline' };
     const card = h('canvas', { class: 'share-canvas', role: 'img' }), status = h('span', { class: 'caption', role: 'status' });
     const draw = () => {
@@ -683,7 +731,7 @@
   /* ---- Make a link (DESIGN S7): every choice is the writer's, beside the reader's page ---- */
   function linkPanel(kind, rows, theme) {
     const memoOf = (t) => (Array.isArray(t.memos) ? t.memos[0] : t.memos) || {};
-    const all = rows.slice(0, 100).map((t) => ({ txn: t.id, memo: memoOf(t).body, shown: merchantOf(t), shownWhen: niceDate(t.txn_date), place: '', when: '', mark: null, on: true, wallet: true }));
+    const all = rows.slice(0, 100).map((t) => ({ txn: t.id, memo: CentMemoText.plain(memoOf(t).body), shown: merchantOf(t), shownWhen: niceDate(t.txn_date), place: '', when: '', mark: null, on: true, wallet: true }));
     const d = { paper: 'bold', pencil: 'underline', lead: 'memory', place: true, when: true, theme: true, cover: true, lines: true, mems: true };
     const page = h('div', { class: 'sp' }), status = h('p', { class: 'caption', role: 'status' }), made = h('div', { class: 'link-made' });
     const say = { from: '' };
@@ -846,7 +894,7 @@
           const names = (memo.memo_values || []).map((mv) => mv.life_values && mv.life_values.name).filter(Boolean);
           // D6: the memo is the headline; when, where and how much are its footnote.
           return h('li', { class: 'story-entry' },
-            h('p', { class: 'story-text' }, memo.body),
+            memoBlock(memo.body),
             names.length ? h('p', { class: 'chips chips-static' }, names.map((n) => h('span', { class: 'chip', style: '--hue: ' + themeHue(n) }, n))) : null,
             h('a', { class: 'story-meta', href: '#/t/' + t.id },
               h('span', {}, niceDate(t.txn_date) + ' · ' + merchantOf(t)),

@@ -24,7 +24,7 @@ struct MakeLinkSheet: View {
         _draft = State(initialValue: StoryLinkDraft(kind: .memo, theme: theme, items: [Self.item(entry, memo)]))
     }
     init(theme: LifeValue, entries: [LedgerEntry]) {
-        let items = entries.prefix(100).compactMap { e in e.memo.flatMap { $0.body.isEmpty ? nil : Self.item(e, $0.body) } }
+        let items = entries.prefix(100).compactMap { e in e.memo.flatMap { $0.body.isEmpty ? nil : Self.item(e, MemoText.plain($0.body)) } }
         _draft = State(initialValue: StoryLinkDraft(kind: .theme, theme: .init(id: theme.id, name: theme.name, color: Themes.colorKey(theme.name)), items: items))
     }
     private static func item(_ e: LedgerEntry, _ memo: String) -> StoryLinkDraft.Item {

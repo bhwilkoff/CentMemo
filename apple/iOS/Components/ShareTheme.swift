@@ -13,7 +13,7 @@ struct ShareThemeSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     private func memo(_ e: LedgerEntry) -> ThemeShareContent.Memo {
-        .init(id: e.id, memo: e.memo?.body ?? "", setting: e.displayMerchant, date: LedgerDate.display(e.txnDate), day: e.txnDate, mark: marks[e.id])
+        .init(id: e.id, memo: MemoText.plain(e.memo?.body ?? ""), setting: e.displayMerchant, date: LedgerDate.display(e.txnDate), day: e.txnDate, mark: marks[e.id])
     }
 
     private var content: ThemeShareContent {

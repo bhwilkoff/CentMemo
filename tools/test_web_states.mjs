@@ -226,6 +226,11 @@ console.log('a memo saves itself (W3), and can be shared in the words just writt
   try {
     await write('Apples for the pie.');
     ok(await waitFor(`/Apples/.test(${said}) && !!document.querySelector("#view-txn .link-panel")`), 'after a pause it is sent, and Share and Make a link are there');
+    // W4: the format bar marks the selection; the share shows words, never the marks.
+    await evaluate('(() => { const a = document.querySelector("#view-txn #memo-body"); a.setSelectionRange(0, 6); document.querySelector("#view-txn .format-bar .fmt-b").click(); return true; })()');
+    ok(await evaluate('document.querySelector("#view-txn #memo-body").value === "**Apples** for the pie."'), 'Bold wraps the chosen words in the memo\'s marks');
+    ok(await evaluate('!document.querySelector("#view-txn .format-bar [aria-label^=Underline]")'), 'and there is no underline');
+    ok(await waitFor(`/Apples for the pie/.test(${said}) && !/\\*/.test(${said})`), 'the share shows the words without marks');
     await write('Pears for the tart.');
     ok(await waitFor(`/Pears/.test(${said}) && !/Apples/.test(${said})`), 'after an edit, they hold the new words');
     await evaluate('location.hash = "#/unexamined"; true');

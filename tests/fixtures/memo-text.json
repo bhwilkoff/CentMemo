@@ -1,0 +1,11 @@
+{
+  "note": "W4 (Decision 069): the memo's Markdown subset. Read by tests/memo_text.test.mjs (js/money/memo-text.js) and apple/Tests/MemoTextTests.swift (MemoText.swift); both must agree.",
+  "cases": [
+    { "md": "First cold Sunday of the year.", "plain": "First cold Sunday of the year." },
+    { "md": "Two lines\nof words", "plain": "Two lines\nof words" },
+    { "md": "$12 for 3 apples, 50% off!", "plain": "$12 for 3 apples, 50% off!" },
+    { "md": "# Sunday\nWe **finally** went, *all of us*.\n- penguins\n- the ~~old~~ new carousel\n> ***Can we come back?***", "plain": "Sunday\nWe finally went, all of us.\n• penguins\n• the old new carousel\nCan we come back?" },
+    { "md": "2\\*3\\*4 and snake\\_case \\~ \\`x\\` \\[y\\]\n\\# not a heading\n\\- not a list", "plain": "2*3*4 and snake_case ~ `x` [y]\n# not a heading\n- not a list" },
+    { "md": "an **unclosed bold", "plain": "an **unclosed bold" }
+  ]
+}

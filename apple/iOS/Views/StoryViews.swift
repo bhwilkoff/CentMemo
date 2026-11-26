@@ -190,7 +190,7 @@ struct StoryCard: View {
     let entry: LedgerEntry
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.s2) {
-            Text(entry.memo?.body ?? "").font(DisplayType.memo).foregroundStyle(Color.brandText)
+            Text(MemoText.styled(entry.memo?.body ?? "")).font(DisplayType.memo).foregroundStyle(Color.brandText)
             if let names = entry.memo?.valueNames, !names.isEmpty {
                 FlowLayout(spacing: 6) {
                     ForEach(names, id: \.self) { ValueChip(name: $0, isOn: false, isStatic: true) }
@@ -238,7 +238,7 @@ struct StoryReading: View {
 
     private func page(_ e: LedgerEntry) -> some View {
         VStack(alignment: .leading, spacing: Spacing.s3) {
-            Text(e.memo?.body ?? "").font(DisplayType.memo).foregroundStyle(Color.brandText).lineSpacing(5)
+            Text(MemoText.styled(e.memo?.body ?? "")).font(DisplayType.memo).foregroundStyle(Color.brandText).lineSpacing(5)
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: Spacing.s3) {
                 StoreTile(name: e.displayMerchant, category: e.category, size: 28)

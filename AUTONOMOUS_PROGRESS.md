@@ -54,7 +54,7 @@ PARITY.md updated; TestFlight when devices need it):
 - ✅ **W3 Autosave** (2026-11-26): no Save button; saves as the person writes (debounced, on
   leaving, on backgrounding), a quiet saved state, undo kept, offline writes
   kept and sent later. Web and Mac too.
-- **W4 Styled text**: bold, italic, underline, strikethrough, headings,
+- ✅ **W4 Styled text** (2026-11-26): bold, italic, underline, strikethrough, headings,
   lists, quote; stored so the connector and the web read it (likely a Markdown
   subset in the existing memo column; decide in W0). iOS 18 floor: TextEditor
   with AttributedString is iOS 26 only.
@@ -2629,3 +2629,20 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   `memo-unsent` (the warning under the memo, no Save button) and `detail-with-memo` (each
   chip in its own color; chosen ones checked and stroked). 1.0.36 (37) uploaded for iOS and
   Mac. Not yet seen: the no-themes starter offer (every test account holds themes).
+
+### 2026-11-26 — W4: styled memo text — 1.0.37 (38)
+- **Ben:** "can we allow for fully text styling in the memo?"
+- **Done:** `MemoText` (Swift) and `CentMemoText` (web) read and write a Markdown subset;
+  one shared fixture holds both readers to the same answers (seen to fail when the writer
+  was broken). iOS/iPad: `MemoEditor` (UITextView, iOS 18 floor) with a keyboard-drawn
+  format bar; Mac: NSTextView with a Format menu; web: a format bar over the textarea.
+  Rows, share cards and links show plain words; the Story draws the styles. DESIGN E.
+- **Found on the iPhone 12:** a heading or list chosen on an empty line toggled itself
+  off; a UIToolbar folded Quote and Done into "…"; a menu for the line styles moved the
+  caret and lost the bullet; the bar was see-through without a software keyboard. All
+  fixed and seen. On the Mac, accessibility edits skipped the change notice, so an
+  emptied memo stayed; the text storage now reports every change.
+- **Verified:** iPhone 12 build 37 debug: MemoUITests 4/4 (incl. testStyleAMemo reading
+  the server's Markdown via DEBUG door APP_SHOW_MARKDOWN), ShareUITests 5/5; frames read.
+  Mac tap tier memo parts pass. Web checks pass. test_all rc=0.
+- **Next:** W5 Apple Pencil.

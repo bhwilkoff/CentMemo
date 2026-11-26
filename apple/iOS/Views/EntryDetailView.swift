@@ -20,7 +20,6 @@ struct EntryDetailView: View {
     /// W3: nil when the server has the memo; otherwise why it is only on this device.
     @State private var unsent: String?
     @Environment(\.scenePhase) private var phase
-    @FocusState private var writing: Bool
     @State private var photos: [APIClient.Attachment] = []
     @State private var picked: PhotosPickerItem?
     @State private var picking = false
@@ -90,22 +89,16 @@ struct EntryDetailView: View {
                     }
                     .accessibilityIdentifier("skip-event")
                 }
-                #if os(iOS)
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Done") { writing = false }
-                }
-                #endif
             }
         }
         .sheet(isPresented: $sharing) {
             if let e = entry, let body = e.memo?.body ?? Self.standInMemo {
-                ShareMemoSheet(entry: e, memo: body)
+                ShareMemoSheet(entry: e, memo: MemoText.plain(body))
             }
         }
         .sheet(isPresented: $linking) {
             if let e = entry, let body = e.memo?.body ?? Self.standInMemo {
-                MakeLinkSheet(entry: e, memo: body)
+                MakeLinkSheet(entry: e, memo: MemoText.plain(body))
             }
         }
         .task { await load() }
@@ -168,9 +161,8 @@ struct EntryDetailView: View {
             .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
         }
         Section {
-            TextEditor(text: $memo)
-                .scrollContentBackground(.hidden)  // the card is the page; the Mac drew a white box on it
-                .frame(minHeight: room >= Room.desk ? 320 : 160)
+            // W4: styled text, kept as Markdown (MemoText); the format bar rides the keyboard.
+            MemoEditor(markdown: $memo, minHeight: room >= Room.desk ? 320 : 160, focused: nil)
                 .overlay(alignment: .topLeading) {
                     if memo.isEmpty {
                         Text("What do you want to remember?").font(DisplayType.memo)
@@ -178,13 +170,15 @@ struct EntryDetailView: View {
                             .padding(.top, 8).padding(.leading, 5).allowsHitTesting(false)
                     }
                 }
-                .font(DisplayType.memo)
-                .accessibilityLabel("Memo")
-                .accessibilityIdentifier("memo-editor")
-                .focused($writing)
         } header: {
             Text("Memo")
         } footer: {
+            #if DEBUG
+            // DEBUG door APP_SHOW_MARKDOWN=1: the memo as the server holds it, for the tap tier (W4).
+            if ProcessInfo.processInfo.environment["APP_SHOW_MARKDOWN"] == "1" {
+                Text(entry?.memo?.body ?? "").font(.caption.monospaced()).accessibilityIdentifier("memo-markdown")
+            }
+            #endif
             // Only a failure speaks (W3): the memo is safe here, and not yet sent.
             if let unsent {
                 Label(unsent, systemImage: "icloud.slash")

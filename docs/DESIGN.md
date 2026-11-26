@@ -185,3 +185,15 @@ be able to design your 'share'."*
   (`StoryPagePreview`), with no network. Beside the choices from 640pt (the open Duo gives a
   sheet 653pt whatever is asked for); above them on a
   phone, shrinking while typing. Every filled field keeps its label.
+
+
+## E. The memo editor (W3 and W4, Decision 069, Ben 2026-11-26)
+
+**E1. No Save button.** The memo sends itself after a pause and at once on leaving.
+Nothing says "Saved"; only a failure speaks, under the memo, in ink with a cloud-slash.
+**E2. Six styles, no seventh.** Bold, italic, strikethrough, a heading (the memo's
+serif at title3, bold), a bulleted line, a quote (indented, italic, quiet ink). No
+underline in a memo: underline is the share's pencil mark (S). No colors or sizes.
+**E3. Where the styles live.** iPhone and iPad: a bar over the keyboard drawn like the
+keyboard, the six styles in sanguine, then Done; never a menu (it moved the caret).
+Mac: the Format menu and its shortcuts. Web: a bar of six buttons above the memo.

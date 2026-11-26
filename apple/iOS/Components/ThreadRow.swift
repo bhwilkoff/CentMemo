@@ -35,7 +35,7 @@ struct ThreadRow: View {
             .accessibilityHidden(true)
             if let memo = entry.memo {
                 VStack(alignment: .leading, spacing: Spacing.s1) {
-                    Text(memo.body).font(DisplayType.memo).foregroundStyle(Color.brandText).lineLimit(4)
+                    Text(MemoText.plain(memo.body)).font(DisplayType.memo).foregroundStyle(Color.brandText).lineLimit(4)
                     // The date and place stay on one line; the theme moves down when it must (W2).
                     FlowLayout(spacing: Spacing.s2) {
                         HStack(spacing: Spacing.s2) {

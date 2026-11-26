@@ -41,7 +41,10 @@ struct CentMemoApp: App {
         #if os(macOS)
         .defaultSize(width: 1180, height: 760)
         .windowResizability(.contentMinSize)
-        .commands { MacCommands(store: store, session: session) }
+        .commands {
+            MacCommands(store: store, session: session)
+            MemoFormatCommands()
+        }
         #endif
         #if os(macOS)
         Settings {

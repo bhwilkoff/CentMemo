@@ -552,3 +552,14 @@ html[data-ground="pistachio"] { --color-yours: #B4C875; }
 .link-field { margin-top: var(--space-2); }
 .link-url { overflow-wrap: anywhere; min-width: 0; flex: 1; }
 .link-made { margin-top: var(--space-2); }
+
+/* W4: the memo's format bar and its styles drawn on the Story (Decision 069). */
+.format-bar { display: flex; gap: var(--space-1); margin-bottom: var(--space-1); }
+.fmt { min-width: 2.5rem; min-height: 2.5rem; border: 1px solid var(--color-border); border-radius: var(--radius-control); background: transparent; color: var(--color-primary); font: inherit; cursor: pointer; }
+.fmt:hover, .fmt:focus-visible { border-color: var(--color-primary); }
+.fmt-b { font-weight: 700; } .fmt-i { font-style: italic; font-family: var(--font-display); } .fmt-s { text-decoration: line-through; }
+.memo-text { white-space: normal; }
+.memo-text p { margin: 0 0 .35em; white-space: pre-wrap; }
+.memo-text .memo-heading { margin-top: .5em; }
+.memo-text .memo-list { margin: 0 0 .35em; padding-left: 1.2em; }
+.memo-text .memo-quote { margin: 0 0 .35em; padding-left: .9em; border-left: 2px solid var(--color-primary); color: var(--color-text-muted, inherit); font-style: italic; }

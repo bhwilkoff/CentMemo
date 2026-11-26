@@ -18,7 +18,7 @@ struct EntryRow: View {
                 Text(entry.displayMerchant).font(TypeRamp.bodyStrong)
                 Text(subtitle).font(TypeRamp.caption).foregroundStyle(Color.brandTextMuted)
                 if showMemo, let memo = entry.memo {
-                    Text(memo.body).font(TypeRamp.caption).lineLimit(2).padding(.top, 2)
+                    Text(MemoText.plain(memo.body)).font(TypeRamp.caption).lineLimit(2).padding(.top, 2)
                 }
             }
             Spacer(minLength: Spacing.s2)
