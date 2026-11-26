@@ -26,6 +26,49 @@ The owner's requests jump the rotation.
 - DECISIONS entries are append-only (Decision 033): never edit one in place,
   even a superseded one. Supersession shows in the newer entry and the index.
 
+## Memo writing loop (Ben, 2026-11-26) — work this before "Resume here"
+
+Ben, verbatim: "The themes until you add the default ones do not show in any
+way. We need to at least suggest that they be added within an onboarding
+interface. Additionally, they are not color-coded as they should be when you
+are trying to add them. Also, I'd like to take advantage of the ability to hand
+write a memo using an Apple Pencil (both for iPad and iPhone Duo). Do we need a
+"save" button on a memo? Why not just have it autosave? Also, can we allow for
+fully text styling in the memo? Why are "share" and "make a link" different
+things? When I add images or files, shouldn't they also come into the shared
+memo? I'd like to be able to style the photos as a part of the memo. Can you
+work on improving the whole memo writing experience (through research and
+design) within an autonomous loop?"
+
+Order (each item: iOS + iPad + Duo, Mac, web, in one change set where it fits;
+PARITY.md updated; TestFlight when devices need it):
+- **W0 Research + design** (artifact Ben can look at): writing apps (Notes,
+  Day One, Bear, Craft, Journal), the iOS 18 floor for rich text and PencilKit,
+  Scribble on the Duo, how styled text stays readable to the connector, how a
+  share carries photos without money. Decisions logged before code.
+- **W1 Starter themes offered where themes are missing**: an in-place
+  suggestion (not a slide deck) on Story, the memo's Theme row, and Settings
+  when the person has no themes; the person picks which. Learn by doing.
+- **W2 Theme colors in the starter picker**: each starter shows its color mark
+  as it is being added (DESIGN C: color as a mark).
+- **W3 Autosave**: no Save button; saves as the person writes (debounced, on
+  leaving, on backgrounding), a quiet saved state, undo kept, offline writes
+  kept and sent later. Web and Mac too.
+- **W4 Styled text**: bold, italic, underline, strikethrough, headings,
+  lists, quote; stored so the connector and the web read it (likely a Markdown
+  subset in the existing memo column; decide in W0). iOS 18 floor: TextEditor
+  with AttributedString is iOS 26 only.
+- **W5 Handwriting with Apple Pencil**: iPad and the Duo. Scribble into the
+  text (stays searchable), and ink kept as ink (PencilKit drawing as a memo
+  part). The ink stays the person's; recognized text only when they choose.
+- **W6 One Share**: Share and Make a link become one Share with a choice
+  (a picture you send, or a page you can turn off). Answer Ben's why in W0.
+- **W7 Photos and files in the share**: the person picks which photos and
+  files go into the card or the page; a page needs a shared copy (removed when
+  the link is turned off). Never money: warn when a photo reads as a receipt.
+- **W8 Photos styled in the memo**: placed in the memo body, size, crop,
+  mount, caption (`artwork-presentation-design`); the share keeps the styling.
+
 ## Resume here (loop resumed by Ben, 2026-11-24 ~11am: "Can we resume the work loop for what has been documented? We need to keep building this out.")
 
 Ben's order (2026-11-23): F1/F2 FinanceKit → D14 themes → D15 place → D12
