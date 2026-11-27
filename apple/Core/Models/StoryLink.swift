@@ -38,6 +38,7 @@ nonisolated struct StoryLinkDraft: Equatable, Sendable {
     var sharedBy = ""
     /// W7: the pictures on a memo link, as data addresses for the preview (set by the studio).
     var pictures: [String] = []
+    var looks: [String] = []
     var paper = Paper.bold
     var pencil = Pencil.underline
     var lead = Lead.memory
@@ -79,6 +80,7 @@ nonisolated struct StoryLinkDraft: Equatable, Sendable {
         let kind: Kind, theme: Named?, from: String?, items: [Item], design: Design
         /// W7: the chosen pictures as data addresses, for the writer's preview only.
         let pictures: [String]
+        let looks: [String]
     }
     private static func tidy(_ s: String) -> String? {
         let t = s.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -96,7 +98,7 @@ nonisolated struct StoryLinkDraft: Equatable, Sendable {
     var preview: Preview {
         .init(kind: kind, theme: kind == .theme || showTheme ? theme.map { .init(name: $0.name) } : nil, from: Self.tidy(sharedBy),
               items: chosen.map { .init(memo: $0.memo, place: showPlace ? Self.tidy($0.place) : nil, when: showWhen ? Self.tidy($0.when) : nil, mark: Self.pair($0.mark)) },
-              design: design, pictures: kind == .memo ? pictures : [])
+              design: design, pictures: kind == .memo ? pictures : [], looks: kind == .memo ? looks : [])
     }
 }
 

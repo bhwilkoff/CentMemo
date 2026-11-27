@@ -337,6 +337,15 @@ console.log('event page (D6): the Setting and the memo lead; the money is a foot
   ok(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'and it fits a phone');
   await waitFor('document.fonts.check("600 20px Newsreader")');
   await shot('link-page');
+  // W8: a link's pictures keep their looks: a paper mat, a drawing whole, a plate.
+  ok(await evaluate(`(() => {
+    const px = 'data:image/gif;base64,R0lGODlhAQABAAAAACw=', m = document.createElement('main'); document.body.append(m);
+    CentStory.render(m, { kind: 'memo', items: [{ memo: 'A day.' }], design: {}, looks: ['mounted', 'whole', 'shiny'] }, { pictures: [px, px, px] });
+    const f = [...m.querySelectorAll('.sp-pic')], mat = getComputedStyle(f[0]);
+    const r = f.map((x) => x.className).join('|') === 'sp-pic sp-mounted|sp-pic sp-whole|sp-pic sp-plate' && parseFloat(mat.paddingTop) > 0 && mat.borderTopStyle === 'solid'
+      && getComputedStyle(f[1].querySelector('img')).objectFit === 'contain' && getComputedStyle(f[2].querySelector('img')).objectFit === 'cover';
+    m.remove(); return r;
+  })()`), 'pictures keep their looks: mounted on a mat, a drawing whole, anything else a plate');
   await openAs('owner', '#/settings');
   await evaluate('location.hash = "#/settings"; true');
   ok(await waitFor('!!document.querySelector("#view-settings .link-row button")'), 'Settings lists the link');

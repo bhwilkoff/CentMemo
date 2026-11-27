@@ -84,7 +84,10 @@ struct MakeLinkSheet: View {
         }
         .studioSize()
         .task { if draft.kind == .memo { await pictures.load(attachments) } }
-        .onChange(of: pictures.chosen) { _, _ in draft.pictures = pictures.pictures.compactMap(Self.preview) }
+        .onChange(of: pictures.chosen) { _, _ in
+            let shown = pictures.pictures.compactMap { p in Self.preview(p).map { ($0, p.look) } }
+            draft.pictures = shown.map(\.0); draft.looks = shown.map(\.1)
+        }
         .task {
             // Only what is not Apple's to publish may be filled in; on failure they stay empty.
             if let wallet = try? await APIClient.shared.walletIDs(among: draft.items.map(\.id)) { draft.fill(wallet: wallet) }
@@ -203,7 +206,7 @@ struct MakeLinkSheet: View {
                     guard let jpeg = Self.jpeg(p) else { continue }
                     try await APIClient.shared.addSharedPicture(code: code, index: i, jpeg: jpeg)
                 }
-                try await APIClient.shared.setSharePictures(code: code, count: chosen.count)
+                try await APIClient.shared.setSharePictures(code: code, looks: chosen.map(\.look))
             }
             made = (StoryLink.url(code), page)
             copied = false; error = nil

@@ -48,7 +48,7 @@
       q.prepend(svg);
     });
   }
-  /* p: { kind, theme: {name, color}?, from?, items: [{memo?, place?, when?, mark?}], design, pictures?: count }
+  /* p: { kind, theme: {name, color}?, from?, items: [{memo?, place?, when?, mark?}], design, pictures?: count, looks?: ['plate'|'mounted'|'whole'] }
      opts.pictures: the pictures' addresses (the published copies, or the writer's preview). */
   function render(page, p, opts) {
     const d = p.design || {}, [c, n] = COLORS[d.color] || COLORS.clay, name = p.theme && p.theme.name;
@@ -70,10 +70,12 @@
       const m = p.items[0], tag = name ? el('span', { class: 'sp-tag' }, el('i'), name) : null;
       // W7: the pictures the writer chose, first, each in its own shape.
       const pics = ((opts && opts.pictures) || []).slice(0, 3);
-      const band = pics.length ? el('div', { class: 'sp-pics sp-pics-' + pics.length }, pics.map((u) => el('img', { src: u, alt: 'A picture from this memo', loading: 'lazy' }))) : null;
+      // W8: each keeps its look from the memo: a paper mat, a drawing whole, or a plate.
+      const looks = p.looks || [];
+      const band = pics.length ? el('div', { class: 'sp-pics sp-pics-' + pics.length }, pics.map((u, i) => el('figure', { class: 'sp-pic sp-' + (['mounted', 'whole'].includes(looks[i]) ? looks[i] : 'plate') }, el('img', { src: u, alt: 'A picture from this memo', loading: 'lazy' })))) : null;
       const parts = d.lead === 'setting' ? [band, where(m, true), quote(m), tag] : d.lead === 'theme' ? [name ? el('p', { class: 'sp-big' }, name) : null, band, quote(m), where(m)] : [band, quote(m), where(m), tag];
       page.append(el('div', { class: 'sp-gut' }, el('article', { class: 'sp-memo' }, parts.filter(Boolean)), end));
-      page.querySelectorAll('.sp-pics img').forEach((i) => i.addEventListener('error', () => i.remove()));
+      page.querySelectorAll('.sp-pics img').forEach((i) => i.addEventListener('error', () => i.parentNode.remove()));
     }
     const again = () => ink(page, d.pencil);
     requestAnimationFrame(again);

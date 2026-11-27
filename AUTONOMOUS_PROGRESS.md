@@ -2727,3 +2727,15 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   words"; a camera photo and a receipt photo on a card; the Mac's new views pictured.
 - **1.0.42 (43)** uploaded for iOS and Mac (Upload succeeded, both). The memo writing loop
   stopped here: W0 to W8 are done; what is left is listed above and waits on Ben.
+
+### 2026-11-27 — Link pages keep each photo's look — 1.0.43 (44)
+- **Ben (2026-11-26):** "I'd like to be able to style the photos as a part of the memo."
+  Left from W8: link pages showed photos unstyled.
+- **Done:** migration 20261127010000 (applied live): `set_share_pictures` takes `p_looks`
+  beside the count and keeps only plate, mounted or whole, one per picture (builds that
+  send none get plates). story-page.js draws a mounted photo on its paper mat and a
+  drawing whole; the app sends each picture's look and its preview shows the same.
+- **Verified:** test_rls (seen to fail before the migration: 4 checks; then the look is
+  kept, `["mounted"]`); test_web_states new check (seen to fail with the old page code; then
+  158/158, rc=0, after one run lost to a network reset); the rest of test_all passed.
+  **Not yet:** a link made on the iPhone with a mounted photo, seen on centmemo.com.

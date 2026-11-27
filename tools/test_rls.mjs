@@ -133,12 +133,13 @@ if (!control) {
       ok(still.ok, 'a stranger cannot remove it (' + gone.status + ', still ' + still.status + ')');
       const theirs = await rpc(stranger, 'set_share_pictures', { p_code: code, p_count: 1 });
       ok(!theirs.ok, 'a stranger cannot set its pictures (' + theirs.status + ')');
-      const set = await rpc(owner, 'set_share_pictures', { p_code: code, p_count: 1 });
+      const set = await rpc(owner, 'set_share_pictures', { p_code: code, p_count: 1, p_looks: ['mounted', 'whole'] });
       ok(set.ok, 'the owner sets the count once (' + set.status + ')');
       const twice = await rpc(owner, 'set_share_pictures', { p_code: code, p_count: 3 });
       ok(!twice.ok, 'and only once (' + twice.status + ')');
       const page = await (await rpc(stranger, 'get_share', { p_code: code })).json();
       ok(page && page.pictures === 1 && !JSON.stringify(page).includes('$'), 'the page says one picture, and no amount');
+      ok(page && JSON.stringify(page.looks) === '["mounted"]', 'its look is kept, one per picture (' + JSON.stringify(page && page.looks) + ')');
     } finally {
       await store(owner, 'shared', { method: 'DELETE', body: JSON.stringify({ prefixes: [code + '/0.jpg'] }), headers: { 'content-type': 'application/json' } });
       await fetch(URL_ + '/rest/v1/shares?code=eq.' + code, { method: 'DELETE', headers: { apikey: KEY, authorization: 'Bearer ' + owner } });

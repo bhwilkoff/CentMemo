@@ -504,10 +504,10 @@ final class APIClient {
         // A minute at most in the CDN, so a link turned off loses its pictures within it.
         _ = try await storage("POST", "object/shared/\(code)/\(index).jpg", body: jpeg, contentType: "image/jpeg", upsert: true, cache: "max-age=60")
     }
-    func setSharePictures(code: String, count: Int) async throws {
-        try await raw("rest/v1/rpc/set_share_pictures", method: "POST", body: SharePictures(p_code: code, p_count: count))
+    func setSharePictures(code: String, looks: [String]) async throws {
+        try await raw("rest/v1/rpc/set_share_pictures", method: "POST", body: SharePictures(p_code: code, p_count: looks.count, p_looks: looks))
     }
-    private struct SharePictures: Encodable { let p_code: String; let p_count: Int }
+    private struct SharePictures: Encodable { let p_code: String; let p_count: Int; let p_looks: [String] }
     /// Best effort: a link with no pictures has nothing here.
     func dropSharedPictures(_ codes: [String]) async {
         for code in codes {

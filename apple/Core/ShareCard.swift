@@ -29,6 +29,8 @@ struct SharePicture: Identifiable, Equatable, @unchecked Sendable {
     var whole = false
     /// W8: a photo the person mounted keeps its paper mat on the card.
     var mounted = false
+    /// How a link page shows it (W8): the server's words for the three looks.
+    var look: String { mounted ? "mounted" : whole ? "whole" : "plate" }
     static func == (a: SharePicture, b: SharePicture) -> Bool { a.id == b.id }
 }
 
