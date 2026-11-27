@@ -2739,3 +2739,9 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   kept, `["mounted"]`); test_web_states new check (seen to fail with the old page code; then
   158/158, rc=0, after one run lost to a network reset); the rest of test_all passed.
   **Not yet:** a link made on the iPhone with a mounted photo, seen on centmemo.com.
+- **Shipped:** iOS 1.0.43 (44) uploaded ("uploaded 1.0.43 (44)"). iPhone 12 build 44 debug:
+  InkUITests pass (drawing on a link, preview shows it whole; frame read). **Mac 1.0.43 not
+  uploaded:** the Mac partly crashed during it (network gone, URLError). Ben: "You need to
+  be aware of the resources you are using on this computer." Archives and device builds
+  now default to `-jobs 2` (XCODE_JOBS overrides); no chained archives; check the load
+  first. Retry the Mac upload alone, niced, once the load is low.

@@ -172,6 +172,8 @@ def main():
 def xcodebuild(action, udid, a, log, extra):
     cmd = ["xcodebuild", action, "-project", str(REPO / "CentMemo.xcodeproj"),
            "-scheme", SCHEME, "-destination", f"id={udid}", "-derivedDataPath", str(DERIVED),
+           # The Mac is shared with other sessions; a full-width build starved it (2026-11-27).
+           "-jobs", os.environ.get("XCODE_JOBS", "2"),
            f"DEVELOPMENT_TEAM={TEAM}", "-allowProvisioningUpdates"] + extra
     seed = a.catalog_seed or os.environ.get("CATALOG_SEED_PATH")
     if seed:

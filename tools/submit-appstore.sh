@@ -94,7 +94,7 @@ rm -rf "$ARCH" "$EXPORT"
 
 echo "[$PLATFORM] archiving…"
 xcodebuild -project "$PROJECT" -scheme "$SCHEME" \
-  -configuration Release -destination "$DEST" -archivePath "$ARCH" archive \
+  -configuration Release -destination "$DEST" -archivePath "$ARCH" archive -jobs "${XCODE_JOBS:-2}" \
   DEVELOPMENT_TEAM="$TEAM" -allowProvisioningUpdates "${AUTH[@]}"
 
 # --- the embedded bundle ids (main app + extensions) --------------------------------------------
