@@ -2745,3 +2745,6 @@ Cadence (Ben said yes, 2026-11-23): ticks run back to back, about 60s apart. Wai
   be aware of the resources you are using on this computer." Archives and device builds
   now default to `-jobs 2` (XCODE_JOBS overrides); no chained archives; check the load
   first. Retry the Mac upload alone, niced, once the load is low.
+- **Mac 1.0.43 (44) uploaded** at 3pm ("uploaded 1.0.43 (44)"), alone, niced, `-jobs 2`,
+  after the other session's filming ended; the load went from 6 to 13 during it and
+  nothing was left running.
